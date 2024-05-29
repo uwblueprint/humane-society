@@ -67,7 +67,7 @@ docker ps
 
 ```bash
 # run a bash shell in the container
-docker exec -it humane-society_db /bin/bash
+docker exec -it humane_society_db /bin/bash
 
 # in container now
 psql -U postgres -d humane_society_dev
