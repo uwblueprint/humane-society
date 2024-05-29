@@ -53,6 +53,7 @@ cd humane-society
 
 ```bash
 docker-compose up --build
+docker exec -it humane_society_backend /bin/bash -c "node migrate up"
 ```
 
 ## Useful Commands
