@@ -30,16 +30,10 @@ export default class Pet extends Model {
 
   @ForeignKey(() => PetCareInfo)
   @Column ({ type: DataType.INTEGER })
-  pet_care_info?: number;
+  pet_care_info_id?: number;
 
   @BelongsTo(() => PetCareInfo)
   petCareInfo?: PetCareInfo;
-
-  @Column ({ type: DataType.DATE })
-  created_at!: Date;
-
-  @Column ({ type: DataType.DATE })
-  updated_at?: Date;
 
   @Column ({ type: DataType.DECIMAL })
   weight!: number;
@@ -52,4 +46,10 @@ export default class Pet extends Model {
 
   @Column({ type: DataType.STRING })
   photo!: string;
+
+  @Column ({ type: DataType.DATE })
+  created_at!: Date;
+
+  @Column ({ type: DataType.DATE })
+  updated_at?: Date;
 }
