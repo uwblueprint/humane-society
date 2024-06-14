@@ -15,10 +15,10 @@ export const up: Migration = async ({ context: sequelize }) => {
     animal_type_id: {
       type: DataType.INTEGER,
       allowNull: false,
-      references: {
-        model: "animal_type",
-        key: "animal_type_id",
-      },
+    //   references: {
+    //     model: "animal_type",
+    //     key: "animal_type_id",
+    //   },
     },
     name: {
       type: DataType.INTEGER,
@@ -39,11 +39,11 @@ export const up: Migration = async ({ context: sequelize }) => {
     pet_care_info_id: {
       type: DataType.INTEGER,
       allowNull: true,
-      references: {
-        model: "pet_care_info",
-        key: "pet_care_info_id"
-      },
-      onDelete: "SET NULL"
+    //   references: {
+    //     model: "pet_care_info",
+    //     key: "pet_care_info_id"
+    //   },
+    //   onDelete: "SET NULL"
     },
     weight: {
       type: DataType.DECIMAL,
