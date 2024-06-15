@@ -1,6 +1,6 @@
 import { Column, Model, Table, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
-// import { AnimalType } from "./AnimalType"
-// import { PetCareInfo } from "./PetCareInfo"
+import { AnimalType } from "./AnimalType"
+import { PetCareInfo } from "./PetCareInfo"
 
 import { Letters } from "../types";
 
@@ -9,12 +9,12 @@ export default class Pet extends Model {
   @Column ({ type: DataType.INTEGER })
   pet_id!: number;
 
-//   @ForeignKey(() => AnimalType)
+  @ForeignKey(() => AnimalType)
   @Column ({ type: DataType.INTEGER })
   animal_type_id!: number;
   
-//   @BelongsTo(() => AnimalType)
-//   animalType: AnimalType;   
+  @BelongsTo(() => AnimalType)
+  animalType: AnimalType;   
 
   @Column ({ type: DataType.STRING })
   name!: string;
@@ -28,12 +28,12 @@ export default class Pet extends Model {
   @Column ({ type: DataType.BOOLEAN })
   adoption_status!: boolean;
 
-//   @ForeignKey(() => PetCareInfo)
+  @ForeignKey(() => PetCareInfo)
   @Column ({ type: DataType.INTEGER })
   pet_care_info_id?: number;
 
-//   @BelongsTo(() => PetCareInfo)
-//   petCareInfo?: PetCareInfo;
+  @BelongsTo(() => PetCareInfo)
+  petCareInfo?: PetCareInfo;
 
   @Column ({ type: DataType.DECIMAL })
   weight!: number;
