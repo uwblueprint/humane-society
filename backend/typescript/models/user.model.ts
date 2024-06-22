@@ -9,7 +9,7 @@ export default class User extends Model {
   @Column({ type: DataType.STRING })
   last_name!: string;
 
-  @Column({ type: DataType.STRING  })
+  @Column({ type: DataType.STRING })
   auth_id!: string;
 
   @Column({ type: DataType.ENUM("User", "Admin") })
@@ -18,15 +18,15 @@ export default class User extends Model {
   @Column({ type: DataType.STRING })
   email!: string;
 
-  @Column({ type: DataType.INTEGER  })
+  @Column({ type: DataType.INTEGER })
   skill_level!: number;
 
-  @Column({ type: DataType.BOOLEAN  })
+  @Column({ type: DataType.BOOLEAN })
   can_see_all_logs!: boolean;
 
-  @Column({ type: DataType.BOOLEAN  })
+  @Column({ type: DataType.BOOLEAN })
   can_assign_users_to_tasks!: boolean;
 
-  @Column({ type: DataType.STRING  })
+  @Column({ type: DataType.STRING })
   phone_number!: string;
 }
