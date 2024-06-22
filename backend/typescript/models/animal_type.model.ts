@@ -1,6 +1,13 @@
-import { Column, Model, Table, DataType, HasMany, PrimaryKey, AutoIncrement } from "sequelize-typescript";
-import Pet from "./pet.model"
-@Table({ tableName: "animal_types" })
+import {
+  Column,
+  Model,
+  Table,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+} from "sequelize-typescript";
+
+@Table({ timestamps: false, tableName: "animal_types" })
 export default class Animal_Type extends Model {
   @PrimaryKey
   @AutoIncrement
@@ -11,9 +18,7 @@ export default class Animal_Type extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull:false
+    allowNull: false,
   })
   animal_type_name!: string;
-  @HasMany(() => Pet)
-  pets!: Pet[];
 }
