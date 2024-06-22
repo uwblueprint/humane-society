@@ -19,13 +19,15 @@ class BehaviourService implements IBehaviourService {
         throw new Error(`Behaviour id ${id} not found`);
       }
     } catch (error: unknown) {
-      Logger.error(`Failed to get behaviour. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to get behaviour. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
 
     return {
       id: String(behaviour.id),
-      behaviourName: behaviour.behaviour_name, 
+      behaviourName: behaviour.behaviour_name,
     };
   }
 
@@ -36,7 +38,7 @@ class BehaviourService implements IBehaviourService {
       });
       return behaviours.map((behaviour) => ({
         id: String(behaviour.id),
-        behaviourName: behaviour.behaviour_name, 
+        behaviourName: behaviour.behaviour_name,
       }));
     } catch (error: unknown) {
       Logger.error(
@@ -52,7 +54,7 @@ class BehaviourService implements IBehaviourService {
     let newBehaviour: PgBehaviour | null;
     try {
       newBehaviour = await PgBehaviour.create({
-        behaviour_name: behaviour.behaviourName, 
+        behaviour_name: behaviour.behaviourName,
       });
     } catch (error: unknown) {
       Logger.error(
@@ -62,7 +64,7 @@ class BehaviourService implements IBehaviourService {
     }
     return {
       id: String(newBehaviour.id),
-      behaviourName: newBehaviour?.behaviour_name, 
+      behaviourName: newBehaviour?.behaviour_name,
     };
   }
 
@@ -92,7 +94,7 @@ class BehaviourService implements IBehaviourService {
     }
     return {
       id: String(resultingBehaviour.id),
-      behaviourName: resultingBehaviour?.behaviour_name, 
+      behaviourName: resultingBehaviour?.behaviour_name,
     };
   }
 

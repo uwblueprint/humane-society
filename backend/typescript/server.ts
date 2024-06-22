@@ -10,7 +10,7 @@ import authRouter from "./rest/authRoutes";
 import behaviourRouter from "./rest/behaviourRoutes";
 import entityRouter from "./rest/entityRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
-import userRouter from "./rest/userRoutes"; 
+import userRouter from "./rest/userRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",

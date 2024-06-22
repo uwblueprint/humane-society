@@ -14,7 +14,9 @@ export const behaviourRequestDtoValidators = async (
 ) => {
   const { body } = req;
   if (!validatePrimitive(body.behaviourName, "string")) {
-    return res.status(400).send(getApiValidationError("behaviourName", "string"));
+    return res
+      .status(400)
+      .send(getApiValidationError("behaviourName", "string"));
   }
   return next();
 };
