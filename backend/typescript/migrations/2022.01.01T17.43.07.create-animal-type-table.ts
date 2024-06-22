@@ -14,7 +14,7 @@ export const up: Migration = async ({ context: sequelize }) => {
     animal_type_name: {
       type: DataType.STRING,
       allowNull: false,
-    }
+    },
   });
 };
 
