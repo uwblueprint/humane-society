@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {
   getApiValidationError,
-  validateArray,
   validatePrimitive,
 } from "./util";
 
