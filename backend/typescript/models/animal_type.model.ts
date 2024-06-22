@@ -1,5 +1,5 @@
 import { Column, Model, Table, DataType, HasMany, PrimaryKey, AutoIncrement } from "sequelize-typescript";
-// import {Pet} from "./Pet"
+import Pet from "./pet.model"
 @Table({ tableName: "animal_types" })
 export default class Animal_Type extends Model {
   @PrimaryKey
@@ -7,14 +7,13 @@ export default class Animal_Type extends Model {
   @Column({
     type: DataType.INTEGER,
   })
-  animal_type_id!: number;
+  id!: number;
 
   @Column({
     type: DataType.STRING,
     allowNull:false
   })
   animal_type_name!: string;
-
-  //@HasMany(() => Pet)
-  //pets!: Pet[];
+  @HasMany(() => Pet)
+  pets!: Pet[];
 }
