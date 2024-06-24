@@ -26,7 +26,7 @@ class BehaviourService implements IBehaviourService {
     }
 
     return {
-      id: String(behaviour.id),
+      id: behaviour.id,
       behaviourName: behaviour.behaviour_name,
     };
   }
@@ -37,7 +37,7 @@ class BehaviourService implements IBehaviourService {
         raw: true,
       });
       return behaviours.map((behaviour) => ({
-        id: String(behaviour.id),
+        id: behaviour.id,
         behaviourName: behaviour.behaviour_name,
       }));
     } catch (error: unknown) {
@@ -63,7 +63,7 @@ class BehaviourService implements IBehaviourService {
       throw error;
     }
     return {
-      id: String(newBehaviour.id),
+      id: newBehaviour?.id,
       behaviourName: newBehaviour?.behaviour_name,
     };
   }
@@ -93,7 +93,7 @@ class BehaviourService implements IBehaviourService {
       throw error;
     }
     return {
-      id: String(resultingBehaviour.id),
+      id: resultingBehaviour?.id,
       behaviourName: resultingBehaviour?.behaviour_name,
     };
   }

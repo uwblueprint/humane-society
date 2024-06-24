@@ -3,7 +3,7 @@ export interface BehaviourRequestDTO {
 }
 
 export interface BehaviourResponseDTO {
-  id: string;
+  id: number;
   behaviourName: string;
 }
 
