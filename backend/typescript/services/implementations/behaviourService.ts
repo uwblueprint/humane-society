@@ -4,7 +4,7 @@ import {
   BehaviourRequestDTO,
   BehaviourResponseDTO,
 } from "../interfaces/behaviourService";
-import { getErrorMessage } from "../../utilities/errorUtils";
+import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 
 const Logger = logger(__filename);
@@ -16,7 +16,7 @@ class BehaviourService implements IBehaviourService {
     try {
       behaviour = await PgBehaviour.findByPk(id, { raw: true });
       if (!behaviour) {
-        throw new Error(`Behaviour id ${id} not found`);
+        throw new NotFoundError(`Behaviour id ${id} not found`);
       }
     } catch (error: unknown) {
       Logger.error(
@@ -83,7 +83,7 @@ class BehaviourService implements IBehaviourService {
       );
 
       if (!updateResult[0]) {
-        throw new Error(`Behaviour id ${id} not found`);
+        throw new NotFoundError(`Behaviour id ${id} not found`);
       }
       [, [resultingBehaviour]] = updateResult;
     } catch (error: unknown) {
@@ -104,7 +104,7 @@ class BehaviourService implements IBehaviourService {
         where: { id },
       });
       if (!deleteResult) {
-        throw new Error(`Behaviour id ${id} not found`);
+        throw new NotFoundError(`Behaviour id ${id} not found`);
       }
       return id;
     } catch (error: unknown) {

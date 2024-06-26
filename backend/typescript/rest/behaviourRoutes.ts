@@ -5,7 +5,7 @@ import {
   BehaviourResponseDTO,
   IBehaviourService,
 } from "../services/interfaces/behaviourService";
-import { getErrorMessage } from "../utilities/errorUtils";
+import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const behaviourRouter: Router = Router();
@@ -52,7 +52,11 @@ behaviourRouter.get("/:id", async (req, res) => {
     const behaviour = await behaviourService.getBehaviour(id);
     res.status(200).json(behaviour);
   } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
   }
 });
 
@@ -66,7 +70,11 @@ behaviourRouter.put("/:id", behaviourRequestDtoValidators, async (req, res) => {
     });
     res.status(200).json(behaviour);
   } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
   }
 });
 
@@ -78,7 +86,11 @@ behaviourRouter.delete("/:id", async (req, res) => {
     const deletedId = await behaviourService.deleteBehaviour(id);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
   }
 });
 
