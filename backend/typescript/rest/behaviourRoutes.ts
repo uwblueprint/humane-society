@@ -20,7 +20,7 @@ behaviourRouter.post("/", behaviourRequestDtoValidators, async (req, res) => {
     });
     res.status(201).json(newBehaviour);
   } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
+    res.status(500).send("Internal server error occured.");
   }
 });
 
@@ -38,7 +38,7 @@ behaviourRouter.get("/", async (req, res) => {
   } catch (e: unknown) {
     await sendResponseByMimeType(res, 500, contentType, [
       {
-        error: getErrorMessage(e),
+        error: "Internal server error occured.",
       },
     ]);
   }
@@ -55,7 +55,7 @@ behaviourRouter.get("/:id", async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send(getErrorMessage(e));
+      res.status(500).send("Internal server error occured.");
     }
   }
 });
@@ -73,7 +73,7 @@ behaviourRouter.put("/:id", behaviourRequestDtoValidators, async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send(getErrorMessage(e));
+      res.status(500).send("Internal server error occured.");
     }
   }
 });
@@ -89,7 +89,7 @@ behaviourRouter.delete("/:id", async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send(getErrorMessage(e));
+      res.status(500).send("Internal server error occured.");
     }
   }
 });
