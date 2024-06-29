@@ -8,7 +8,7 @@ import {
 } from "sequelize-typescript";
 
 @Table({ timestamps: false, tableName: "animal_types" })
-export default class AnimalType extends Model {
+export default class Animal_Type extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column({
