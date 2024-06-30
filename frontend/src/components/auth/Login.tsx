@@ -1,19 +1,19 @@
 import React, { useContext, useState } from "react";
-import { Redirect } from "react-router-dom"; 
+import { Redirect } from "react-router-dom";
 
 import authAPIClient from "../../APIClients/AuthAPIClient";
 import { HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
- 
+
 const Login = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); 
+  const [password, setPassword] = useState("");
   const onLogInClick = async () => {
     const user: AuthenticatedUser = await authAPIClient.login(email, password);
     setAuthenticatedUser(user);
-  }; 
+  };
 
   if (authenticatedUser) {
     return <Redirect to={HOME_PAGE} />;
@@ -48,8 +48,7 @@ const Login = (): React.ReactElement => {
             Log In
           </button>
         </div>
-         
-      </form> 
+      </form>
     </div>
   );
 };
