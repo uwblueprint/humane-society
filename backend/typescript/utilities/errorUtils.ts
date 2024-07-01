@@ -2,3 +2,11 @@
 export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : "Unknown error occurred.";
 };
+
+// Thrown when resource is not found
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
