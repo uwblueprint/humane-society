@@ -3,7 +3,7 @@ import { snakeCase } from "lodash";
 import UserModel from "../../../models/user.model";
 import UserService from "../userService";
 
-import { UserDTO } from "../../../types";
+import { RoleId, UserDTO } from "../../../types";
 
 import { testSql } from "../../../testUtils/testDb";
 
@@ -12,13 +12,13 @@ const testUsers = [
     firstName: "Peter",
     lastName: "Pan",
     authId: "123",
-    role: "Admin",
+    roleId: RoleId.Administrator.toString(),
   },
   {
     firstName: "Wendy",
     lastName: "Darling",
     authId: "321",
-    role: "User",
+    roleId: RoleId.Staff.toString(),
   },
 ];
 
@@ -58,7 +58,7 @@ describe("pg userService", () => {
     res.forEach((user: UserDTO, i) => {
       expect(user.firstName).toEqual(testUsers[i].firstName);
       expect(user.lastName).toEqual(testUsers[i].lastName);
-      expect(user.role).toEqual(testUsers[i].role);
+      expect(user.roleId).toEqual(testUsers[i].roleId);
     });
   });
 });

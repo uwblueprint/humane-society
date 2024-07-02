@@ -25,7 +25,7 @@ def register_user(backend_url, body, access_token_field):
     assert "register" in response.json()["data"]
     data = response.json()["data"]["register"]
     assert "role" in data
-    assert data["role"] == "User"
+    assert data["role"] == "Staff"
     assert "id" in data
     assert access_token_field in data
     expected = {k: v for k, v in body.items() if k != "password"}

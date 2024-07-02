@@ -1,4 +1,15 @@
-export type Role = "User" | "Admin";
+export type Role =
+  | "Administrator"
+  | "Animal Behaviourist"
+  | "Staff"
+  | "Volunteer";
+
+export enum RoleId {
+  Administrator = 1,
+  AnimalBehaviourist = 2,
+  Staff = 3,
+  Volunteer = 4,
+}
 
 export type Token = {
   accessToken: string;
@@ -6,11 +17,15 @@ export type Token = {
 };
 
 export type UserDTO = {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
-  role: Role;
+  roleId: number;
+  skillLevel?: number | null;
+  canSeeAllLogs?: boolean | null;
+  canAssignUsersToTasks?: boolean | null;
+  phoneNumber?: string | null;
 };
 
 export type CreateUserDTO = Omit<UserDTO, "id"> & { password: string };
