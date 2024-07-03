@@ -7,7 +7,7 @@ import {
   BelongsTo,
   PrimaryKey,
 } from "sequelize-typescript";
-import Animal_Type from "./animal_type.model";
+import Animal_Type from "./animalType.model";
 // import { PetCareInfo } from "./PetCareInfo"
 
 import { Letters } from "../types";
