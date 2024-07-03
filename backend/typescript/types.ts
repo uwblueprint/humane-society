@@ -21,6 +21,8 @@ export type RegisterUserDTO = Omit<CreateUserDTO, "role">;
 
 export type AuthDTO = Token & UserDTO;
 
+export type Letters = "A" | "B" | "C" | "D"
+
 export type Sex = "M" | "F";
 
 export type PetStatus =
