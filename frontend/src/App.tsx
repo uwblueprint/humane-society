@@ -6,7 +6,7 @@ import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./components/pages/CreatePage";
-import LandingPage from "./components/pages/LandingPage";
+import PetListPage from "./components/pages/PetListPage";
 import DisplayPage from "./components/pages/DisplayPage";
 import SimpleEntityCreatePage from "./components/pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./components/pages/SimpleEntityDisplayPage";
@@ -58,7 +58,7 @@ const App = (): React.ReactElement => {
               <PrivateRoute
                 exact
                 path={Routes.HOME_PAGE}
-                component={LandingPage}
+                component={PetListPage}
               />
               <PrivateRoute
                 exact
