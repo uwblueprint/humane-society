@@ -48,13 +48,11 @@ export const createUserDtoValidator = async (
       .send(getApiValidationError("canAssignUsersToTasks", "boolean"));
   }
   if (
-    req.body.phoneinteger !== undefined &&
-    req.body.phoneinteger !== null &&
-    !validatePrimitive(req.body.phoneinteger, "string")
+    req.body.phoneNumber !== undefined &&
+    req.body.phoneNumber !== null &&
+    !validatePrimitive(req.body.phoneNumber, "string")
   ) {
-    return res
-      .status(400)
-      .send(getApiValidationError("phoneinteger", "string"));
+    return res.status(400).send(getApiValidationError("phoneNumber", "string"));
   }
 
   return next();
@@ -103,13 +101,11 @@ export const updateUserDtoValidator = async (
       .send(getApiValidationError("canAssignUsersToTasks", "boolean"));
   }
   if (
-    req.body.phoneinteger !== undefined &&
-    req.body.phoneinteger !== null &&
-    !validatePrimitive(req.body.phoneinteger, "string")
+    req.body.phoneNumber !== undefined &&
+    req.body.phoneNumber !== null &&
+    !validatePrimitive(req.body.phoneNumber, "string")
   ) {
-    return res
-      .status(400)
-      .send(getApiValidationError("phoneinteger", "string"));
+    return res.status(400).send(getApiValidationError("phoneNumber", "string"));
   }
   return next();
 };
