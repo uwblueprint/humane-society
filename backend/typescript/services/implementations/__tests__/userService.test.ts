@@ -3,7 +3,7 @@ import { snakeCase } from "lodash";
 import UserModel from "../../../models/user.model";
 import UserService from "../userService";
 
-import { RoleId, UserDTO } from "../../../types";
+import { RoleId, UserDTO, DTOTypes } from "../../../types";
 
 import { testSql } from "../../../testUtils/testDb";
 
@@ -12,13 +12,13 @@ const testUsers = [
     firstName: "Peter",
     lastName: "Pan",
     authId: "123",
-    roleId: RoleId.Administrator.toString(),
+    roleId: RoleId.Administrator,
   },
   {
     firstName: "Wendy",
     lastName: "Darling",
     authId: "321",
-    roleId: RoleId.Staff.toString(),
+    roleId: RoleId.Staff,
   },
 ];
 
@@ -44,7 +44,7 @@ describe("pg userService", () => {
 
   it("getUsers", async () => {
     const users = testUsers.map((user) => {
-      const userSnakeCase: Record<string, string> = {};
+      const userSnakeCase: DTOTypes = {};
       Object.entries(user).forEach(([key, value]) => {
         userSnakeCase[snakeCase(key)] = value;
       });

@@ -50,3 +50,5 @@ export type NodemailerConfig = {
 };
 
 export type SignUpMethod = "PASSWORD" | "GOOGLE";
+
+export type DTOTypes = Record<string, string | RoleId>;
