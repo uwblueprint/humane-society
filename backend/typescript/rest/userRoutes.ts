@@ -21,7 +21,9 @@ import {
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
-userRouter.use(isAuthorizedByRole(new Set(["Staff"])));
+userRouter.use(
+  isAuthorizedByRole(new Set(["Administrator", "Animal Behaviourist"])),
+);
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
