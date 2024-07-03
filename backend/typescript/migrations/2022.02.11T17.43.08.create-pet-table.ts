@@ -58,7 +58,7 @@ export const up: Migration = async ({ context: sequelize }) => {
       type: DataType.DECIMAL,
       allowNull: false,
     },
-    spayed: {
+    neutered: {
       type: DataType.BOOLEAN,
       allowNull: false,
     },

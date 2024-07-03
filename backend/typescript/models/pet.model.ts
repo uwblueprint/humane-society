@@ -53,7 +53,7 @@ export default class Pet extends Model {
   weight!: number;
 
   @Column({})
-  spayed!: boolean;
+  neutered!: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })
   sex!: Sex;
