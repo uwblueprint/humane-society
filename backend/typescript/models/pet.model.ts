@@ -2,39 +2,44 @@ import {
   Column,
   Model,
   Table,
-  DataType,
   ForeignKey,
   BelongsTo,
-  PrimaryKey,
+  DataType,
 } from "sequelize-typescript";
 import Animal_Type from "./animalType.model";
 // import { PetCareInfo } from "./PetCareInfo"
 
-import { Letters } from "../types";
+import { Sex, PetStatus } from "../types";
 
 @Table({ timestamps: false, tableName: "pet" })
 export default class Pet extends Model {
-  @PrimaryKey
-  @Column({ type: DataType.INTEGER })
-  id!: number;
-
   @ForeignKey(() => Animal_Type)
-  @Column({ type: DataType.INTEGER })
+  @Column({})
   animal_type_id!: number;
 
   @BelongsTo(() => Animal_Type)
   animal_type!: Animal_Type;
 
-  @Column({ type: DataType.STRING })
+  @Column({})
   name!: string;
 
-  @Column({ type: DataType.STRING })
+  @Column({
+    type: DataType.ENUM(
+      "Assigned",
+      "Active",
+      "Needs Care",
+      "Does Not Need Care",
+    ),
+  })
+  status!: PetStatus;
+
+  @Column({})
   breed!: string;
 
-  @Column({ type: DataType.INTEGER })
+  @Column({})
   age!: number;
 
-  @Column({ type: DataType.BOOLEAN })
+  @Column({})
   adoption_status!: boolean;
 
   //   @ForeignKey(() => PetCareInfo)
@@ -44,21 +49,21 @@ export default class Pet extends Model {
   //   @BelongsTo(() => PetCareInfo)
   //   petCareInfo?: PetCareInfo;
 
-  @Column({ type: DataType.DECIMAL })
+  @Column({})
   weight!: number;
 
-  @Column({ type: DataType.BOOLEAN })
+  @Column({})
   spayed!: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })
-  sex!: Letters;
+  sex!: Sex;
 
-  @Column({ type: DataType.STRING })
+  @Column({})
   photo!: string;
 
-  @Column({ type: DataType.DATE })
+  @Column({})
   created_at!: Date;
 
-  @Column({ type: DataType.DATE })
+  @Column({})
   updated_at?: Date;
 }

@@ -24,6 +24,15 @@ export const up: Migration = async ({ context: sequelize }) => {
       type: DataType.STRING,
       allowNull: false,
     },
+    status: {
+      type: DataType.ENUM(
+        "Assigned",
+        "Active",
+        "Needs Care",
+        "Does Not Need Care",
+      ),
+      allowNull: false,
+    },
     breed: {
       type: DataType.STRING,
       allowNull: false,
