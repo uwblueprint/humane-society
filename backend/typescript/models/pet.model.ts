@@ -5,6 +5,7 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  PrimaryKey,
 } from "sequelize-typescript";
 import Animal_Type from "./animal_type.model";
 // import { PetCareInfo } from "./PetCareInfo"
@@ -13,6 +14,7 @@ import { Letters } from "../types";
 
 @Table({ timestamps: false, tableName: "pet" })
 export default class Pet extends Model {
+  @PrimaryKey
   @Column({ type: DataType.INTEGER })
   id!: number;
 
