@@ -24,7 +24,7 @@ class AnimalTypeService implements IAnimalTypeService {
     }
 
     return {
-      id: Number(animalType.id),
+      id: animalType.id,
       animal_type_name: animalType.animal_type_name,
     };
   }
@@ -35,7 +35,7 @@ class AnimalTypeService implements IAnimalTypeService {
         raw: true,
       });
       return animalTypes.map((animalType) => ({
-        id: Number(animalType.id),
+        id: animalType.id,
         animal_type_name: animalType.animal_type_name,
       }));
     } catch (error: unknown) {
@@ -61,7 +61,7 @@ class AnimalTypeService implements IAnimalTypeService {
       throw error;
     }
     return {
-      id: Number(newAnimalType.id),
+      id: newAnimalType.id,
       animal_type_name: newAnimalType.animal_type_name,
     };
   }
@@ -91,7 +91,7 @@ class AnimalTypeService implements IAnimalTypeService {
       throw error;
     }
     return {
-      id: Number(resultingAnimalType.id),
+      id: resultingAnimalType.id,
       animal_type_name: resultingAnimalType.animal_type_name,
     };
   }
