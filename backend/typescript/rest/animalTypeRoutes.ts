@@ -51,7 +51,7 @@ animalTypeRouter.get("/", async (req, res) => {
 animalTypeRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const animalType = await animalTypeService.getAnimalType(String(id));
+    const animalType = await animalTypeService.getAnimalType(id);
     res.status(200).json(animalType);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
@@ -70,7 +70,7 @@ animalTypeRouter.put(
     const { id } = req.params;
     try {
       const { body } = req;
-      const entity = await animalTypeService.updateAnimalType(String(id), {
+      const entity = await animalTypeService.updateAnimalType(id, {
         animal_type_name: body.animal_type_name,
       });
       res.status(200).json(entity);
@@ -89,7 +89,7 @@ animalTypeRouter.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedId = await animalTypeService.deleteAnimalType(String(id));
+    const deletedId = await animalTypeService.deleteAnimalType(id);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
