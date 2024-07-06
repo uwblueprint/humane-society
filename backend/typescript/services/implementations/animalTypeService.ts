@@ -91,7 +91,7 @@ class AnimalTypeService implements IAnimalTypeService {
       throw error;
     }
     return {
-      id: Number(resultingAnimalType.id),
+      id: resultingAnimalType.id,
       animal_type_name: resultingAnimalType.animal_type_name,
     };
   }

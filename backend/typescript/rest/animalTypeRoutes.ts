@@ -51,7 +51,7 @@ animalTypeRouter.get("/", async (req, res) => {
 animalTypeRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const animalType = await animalTypeService.getAnimalType(String(id));
+    const animalType = await animalTypeService.getAnimalType(id);
     res.status(200).json(animalType);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
