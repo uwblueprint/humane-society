@@ -5,13 +5,14 @@ import {
   ForeignKey,
   BelongsTo,
   DataType,
+  HasOne,
 } from "sequelize-typescript";
 import Animal_Type from "./animalType.model";
-// import { PetCareInfo } from "./PetCareInfo"
+import PetCareInfo from "./petCareInfo.model"
 
 import { Sex, PetStatus } from "../types";
 
-@Table({ timestamps: false, tableName: "pet" })
+@Table({ timestamps: false, tableName: "pets" })
 export default class Pet extends Model {
   @ForeignKey(() => Animal_Type)
   @Column({})
@@ -42,12 +43,12 @@ export default class Pet extends Model {
   @Column({})
   adoption_status!: boolean;
 
-  //   @ForeignKey(() => PetCareInfo)
-  //   @Column ({ type: DataType.INTEGER })
-  //   pet_care_info_id?: number;
+  @ForeignKey(() => PetCareInfo)
+  @Column ({})
+  pet_care_info_id?: number;
 
-  //   @BelongsTo(() => PetCareInfo)
-  //   petCareInfo?: PetCareInfo;
+  @HasOne(() => PetCareInfo)
+  petCareInfo?: PetCareInfo;
 
   @Column({})
   weight!: number;
