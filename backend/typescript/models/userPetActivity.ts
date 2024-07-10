@@ -1,33 +1,40 @@
 // not started
-import { Column, Model, Table, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import {
+  Column,
+  Model,
+  Table,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from "sequelize-typescript";
 import User from "./user.model";
 import Pet from "./pet.model";
 import Activity from "./activity.model";
 
-@Table({ timestamps:false, tableName: "user_pet_activities" })
+@Table({ timestamps: false, tableName: "user_pet_activities" })
 export default class UserPetActivity extends Model {
   @Column({})
   user_pet_activity_id!: number;
 
-  @ForeignKey (()=> User) // in case of null, task has not been assigned
+  @ForeignKey(() => User) // in case of null, task has not been assigned
   @Column({})
   user_id?: number;
 
-  @BelongsTo (()=>User)
+  @BelongsTo(() => User)
   user?: User;
 
-  @ForeignKey (()=> Pet)
+  @ForeignKey(() => Pet)
   @Column({})
   pet_id!: number;
 
-  @BelongsTo (()=>Pet)
+  @BelongsTo(() => Pet)
   pet!: Pet;
 
-  @ForeignKey (()=> Activity)
+  @ForeignKey(() => Activity)
   @Column({})
   activity_id!: number;
-  
-  @BelongsTo (()=> Activity)
+
+  @BelongsTo(() => Activity)
   activity!: Activity;
 
   @Column({})
@@ -39,7 +46,7 @@ export default class UserPetActivity extends Model {
   @Column({})
   end_time?: Date;
 
-  @Column({type: DataType.TEXT})
+  @Column({ type: DataType.TEXT })
   notes?: string;
 
   @Column({})
