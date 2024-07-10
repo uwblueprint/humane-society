@@ -16,7 +16,11 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 const upload = multer({ dest: "uploads/" });
 
 const entityRouter: Router = Router();
-entityRouter.use(isAuthorizedByRole(new Set(["User", "Admin"])));
+entityRouter.use(
+  isAuthorizedByRole(
+    new Set(["Administrator", "Animal Behaviourist", "Staff", "Volunteer"]),
+  ),
+);
 
 const defaultBucket = process.env.FIREBASE_STORAGE_DEFAULT_BUCKET || "";
 const fileStorageService: IFileStorageService = new FileStorageService(
