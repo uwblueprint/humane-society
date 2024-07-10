@@ -4,7 +4,7 @@ import { Migration } from "../umzug";
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().addColumn("users", "email", {
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
   });
 
   await sequelize.getQueryInterface().addColumn("users", "skill_level", {
