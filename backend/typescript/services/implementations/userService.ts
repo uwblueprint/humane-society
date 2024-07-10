@@ -1,9 +1,10 @@
 import * as firebaseAdmin from "firebase-admin";
 import IUserService from "../interfaces/userService";
 import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
-import { getErrorMessage } from "../../utilities/errorUtils";
+import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import User from "../../models/user.model";
+import PgUser from "../../models/user.model";
+import PgRole from "../../models/role.model";
 
 const Logger = logger(__filename);
 
@@ -11,15 +12,15 @@ class UserService implements IUserService {
   /* eslint-disable class-methods-use-this */
 
   async getUserById(userId: string): Promise<UserDTO> {
-    let user: User | null;
+    let user: PgUser | null;
     let firebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
-      user = await User.findByPk(Number(userId));
-
+      user = await PgUser.findByPk(Number(userId));
       if (!user) {
-        throw new Error(`userId ${userId} not found.`);
+        throw new NotFoundError(`userId ${userId} not found in database.`);
       }
+
       firebaseUser = await firebaseAdmin.auth().getUser(user.auth_id);
     } catch (error: unknown) {
       Logger.error(`Failed to get user. Reason = ${getErrorMessage(error)}`);
@@ -27,26 +28,32 @@ class UserService implements IUserService {
     }
 
     return {
-      id: String(user.id),
+      id: user.id,
       firstName: user.first_name,
       lastName: user.last_name,
       email: firebaseUser.email ?? "",
-      role: user.role,
+      roleId: user.role_id,
+      skillLevel: user.skill_level,
+      canSeeAllLogs: user.can_see_all_logs,
+      canAssignUsersToTasks: user.can_assign_users_to_tasks,
+      phoneNumber: user.phone_number,
     };
   }
 
   async getUserByEmail(email: string): Promise<UserDTO> {
-    let user: User | null;
+    let user: PgUser | null;
     let firebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
       firebaseUser = await firebaseAdmin.auth().getUserByEmail(email);
-      user = await User.findOne({
+      user = await PgUser.findOne({
         where: { auth_id: firebaseUser.uid },
       });
 
       if (!user) {
-        throw new Error(`userId with authID ${firebaseUser.uid} not found.`);
+        throw new NotFoundError(
+          `userId with authID ${firebaseUser.uid} not found.`,
+        );
       }
     } catch (error: unknown) {
       Logger.error(`Failed to get user. Reason = ${getErrorMessage(error)}`);
@@ -54,23 +61,34 @@ class UserService implements IUserService {
     }
 
     return {
-      id: String(user.id),
+      id: user.id,
       firstName: user.first_name,
       lastName: user.last_name,
       email: firebaseUser.email ?? "",
-      role: user.role,
+      roleId: user.role_id,
+      skillLevel: user.skill_level,
+      canSeeAllLogs: user.can_see_all_logs,
+      canAssignUsersToTasks: user.can_assign_users_to_tasks,
+      phoneNumber: user.phone_number,
     };
   }
 
   async getUserRoleByAuthId(authId: string): Promise<Role> {
     try {
-      const user: User | null = await User.findOne({
+      const user: PgUser | null = await PgUser.findOne({
         where: { auth_id: authId },
+        include: [{ model: PgRole, as: "role" }],
       });
+
       if (!user) {
-        throw new Error(`userId with authId ${authId} not found.`);
+        throw new NotFoundError(`User with authId ${authId} not found.`);
       }
-      return user.role;
+
+      if (!user.role) {
+        throw new Error(`Role for user with authId ${authId} is invalid.`);
+      }
+
+      return user.role.role_name as Role;
     } catch (error: unknown) {
       Logger.error(
         `Failed to get user role. Reason = ${getErrorMessage(error)}`,
@@ -81,11 +99,11 @@ class UserService implements IUserService {
 
   async getUserIdByAuthId(authId: string): Promise<string> {
     try {
-      const user: User | null = await User.findOne({
+      const user: PgUser | null = await PgUser.findOne({
         where: { auth_id: authId },
       });
       if (!user) {
-        throw new Error(`user with authId ${authId} not found.`);
+        throw new NotFoundError(`user with authId ${authId} not found.`);
       }
       return String(user.id);
     } catch (error: unknown) {
@@ -96,9 +114,9 @@ class UserService implements IUserService {
 
   async getAuthIdById(userId: string): Promise<string> {
     try {
-      const user: User | null = await User.findByPk(Number(userId));
+      const user: PgUser | null = await PgUser.findByPk(Number(userId));
       if (!user) {
-        throw new Error(`userId ${userId} not found.`);
+        throw new NotFoundError(`userId ${userId} not found.`);
       }
       return user.auth_id;
     } catch (error: unknown) {
@@ -110,7 +128,7 @@ class UserService implements IUserService {
   async getUsers(): Promise<Array<UserDTO>> {
     let userDtos: Array<UserDTO> = [];
     try {
-      const users: Array<User> = await User.findAll();
+      const users: Array<PgUser> = await PgUser.findAll();
 
       userDtos = await Promise.all(
         users.map(async (user) => {
@@ -126,11 +144,15 @@ class UserService implements IUserService {
           }
 
           return {
-            id: String(user.id),
+            id: user.id,
             firstName: user.first_name,
             lastName: user.last_name,
             email: firebaseUser.email ?? "",
-            role: user.role,
+            roleId: user.role_id,
+            skillLevel: user.skill_level,
+            canSeeAllLogs: user.can_see_all_logs,
+            canAssignUsersToTasks: user.can_assign_users_to_tasks,
+            phoneNumber: user.phone_number,
           };
         }),
       );
@@ -147,7 +169,7 @@ class UserService implements IUserService {
     authId?: string,
     signUpMethod = "PASSWORD",
   ): Promise<UserDTO> {
-    let newUser: User;
+    let newUser: PgUser;
     let firebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
@@ -163,11 +185,16 @@ class UserService implements IUserService {
       }
 
       try {
-        newUser = await User.create({
+        newUser = await PgUser.create({
           first_name: user.firstName,
           last_name: user.lastName,
           auth_id: firebaseUser.uid,
-          role: user.role,
+          role_id: user.roleId,
+          email: firebaseUser.email ?? "",
+          skill_level: user.skillLevel,
+          can_see_all_logs: user.canSeeAllLogs,
+          can_assign_users_to_tasks: user.canAssignUsersToTasks,
+          phone_number: user.phoneNumber,
         });
       } catch (postgresError) {
         try {
@@ -190,23 +217,31 @@ class UserService implements IUserService {
     }
 
     return {
-      id: String(newUser.id),
+      id: newUser.id,
       firstName: newUser.first_name,
       lastName: newUser.last_name,
       email: firebaseUser.email ?? "",
-      role: newUser.role,
+      roleId: newUser.role_id,
+      skillLevel: newUser.skill_level,
+      canSeeAllLogs: newUser.can_see_all_logs,
+      canAssignUsersToTasks: newUser.can_assign_users_to_tasks,
+      phoneNumber: newUser.phone_number,
     };
   }
 
-  async updateUserById(userId: string, user: UpdateUserDTO): Promise<UserDTO> {
+  async updateUserById(userId: number, user: UpdateUserDTO): Promise<UserDTO> {
     let updatedFirebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
-      const updateResult = await User.update(
+      const updateResult = await PgUser.update(
         {
           first_name: user.firstName,
           last_name: user.lastName,
-          role: user.role,
+          role_id: user.roleId,
+          skill_level: user.skillLevel,
+          can_see_all_logs: user.canSeeAllLogs,
+          can_assign_users_to_tasks: user.canAssignUsersToTasks,
+          phone_number: user.phoneNumber,
         },
         {
           where: { id: userId },
@@ -222,7 +257,7 @@ class UserService implements IUserService {
       // the cast to "any" is needed due to a missing property in the Sequelize type definitions
       // https://github.com/sequelize/sequelize/issues/9978#issuecomment-426342219
       /* eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any */
-      const oldUser: User = (updateResult[1][0] as any)._previousDataValues;
+      const oldUser: PgUser = (updateResult[1][0] as any)._previousDataValues;
 
       try {
         updatedFirebaseUser = await firebaseAdmin
@@ -231,11 +266,15 @@ class UserService implements IUserService {
       } catch (error) {
         // rollback Postgres user updates
         try {
-          await User.update(
+          await PgUser.update(
             {
               first_name: oldUser.first_name,
               last_name: oldUser.last_name,
-              role: oldUser.role,
+              role_id: oldUser.role_id,
+              skill_level: oldUser.skill_level,
+              can_see_all_logs: oldUser.can_see_all_logs,
+              can_assign_users_to_tasks: oldUser.can_assign_users_to_tasks,
+              phone_number: oldUser.phone_number,
             },
             {
               where: { id: userId },
@@ -263,20 +302,24 @@ class UserService implements IUserService {
       firstName: user.firstName,
       lastName: user.lastName,
       email: updatedFirebaseUser.email ?? "",
-      role: user.role,
+      roleId: user.roleId,
+      skillLevel: user.skillLevel,
+      canSeeAllLogs: user.canSeeAllLogs,
+      canAssignUsersToTasks: user.canAssignUsersToTasks,
+      phoneNumber: user.phoneNumber,
     };
   }
 
-  async deleteUserById(userId: string): Promise<void> {
+  async deleteUserById(userId: number): Promise<void> {
     try {
       // Sequelize doesn't provide a way to atomically find, delete, and return deleted row
-      const deletedUser: User | null = await User.findByPk(Number(userId));
+      const deletedUser: PgUser | null = await PgUser.findByPk(Number(userId));
 
       if (!deletedUser) {
         throw new Error(`userid ${userId} not found.`);
       }
 
-      const numDestroyed: number = await User.destroy({
+      const numDestroyed: number = await PgUser.destroy({
         where: { id: userId },
       });
 
@@ -289,11 +332,15 @@ class UserService implements IUserService {
       } catch (error) {
         // rollback user deletion in Postgres
         try {
-          await User.create({
+          await PgUser.create({
             first_name: deletedUser.first_name,
             last_name: deletedUser.last_name,
             auth_id: deletedUser.auth_id,
-            role: deletedUser.role,
+            role_id: deletedUser.role_id,
+            skill_level: deletedUser.skill_level,
+            can_see_all_logs: deletedUser.can_see_all_logs,
+            can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
+            phone_number: deletedUser.phone_number,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [
@@ -318,7 +365,7 @@ class UserService implements IUserService {
       const firebaseUser: firebaseAdmin.auth.UserRecord = await firebaseAdmin
         .auth()
         .getUserByEmail(email);
-      const deletedUser: User | null = await User.findOne({
+      const deletedUser: PgUser | null = await PgUser.findOne({
         where: { auth_id: firebaseUser.uid },
       });
 
@@ -326,7 +373,7 @@ class UserService implements IUserService {
         throw new Error(`userid ${firebaseUser.uid} not found.`);
       }
 
-      const numDestroyed: number = await User.destroy({
+      const numDestroyed: number = await PgUser.destroy({
         where: { auth_id: firebaseUser.uid },
       });
 
@@ -341,11 +388,15 @@ class UserService implements IUserService {
       } catch (error) {
         // rollback user deletion in Postgres
         try {
-          await User.create({
+          await PgUser.create({
             first_name: deletedUser.first_name,
             last_name: deletedUser.last_name,
             auth_id: deletedUser.auth_id,
-            role: deletedUser.role,
+            role_id: deletedUser.role_id,
+            skill_level: deletedUser.skill_level,
+            can_see_all_logs: deletedUser.can_see_all_logs,
+            can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
+            phone_number: deletedUser.phone_number,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [

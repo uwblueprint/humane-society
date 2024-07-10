@@ -13,11 +13,17 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { UserDTO } from "../types";
-import { getErrorMessage } from "../utilities/errorUtils";
+import {
+  getErrorMessage,
+  NotFoundError,
+  INTERNAL_SERVER_ERROR_MESSAGE,
+} from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
-userRouter.use(isAuthorizedByRole(new Set(["Admin"])));
+userRouter.use(
+  isAuthorizedByRole(new Set(["Administrator", "Animal Behaviourist"])),
+);
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
@@ -61,7 +67,11 @@ userRouter.get("/", async (req, res) => {
         const user = await userService.getUserById(userId);
         res.status(200).json(user);
       } catch (error: unknown) {
-        res.status(500).json({ error: getErrorMessage(error) });
+        if (error instanceof NotFoundError) {
+          res.status(404).send(getErrorMessage(error));
+        } else {
+          res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
       }
     }
     return;
@@ -90,7 +100,11 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      role: req.body.role,
+      roleId: req.body.roleId,
+      skillLevel: req.body.skillLevel ?? null,
+      canSeeAllLogs: req.body.canSeeAllLogs ?? null,
+      canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
+      phoneNumber: req.body.phoneNumber ?? null,
       password: req.body.password,
     });
 
@@ -105,11 +119,20 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
 /* Update the user with the specified userId */
 userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
   try {
-    const updatedUser = await userService.updateUserById(req.params.userId, {
+    const userId = Number(req.params.userId);
+    if (Number.isNaN(userId)) {
+      res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const updatedUser = await userService.updateUserById(userId, {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      role: req.body.role,
+      roleId: req.body.roleId,
+      skillLevel: req.body.skillLevel ?? null,
+      canSeeAllLogs: req.body.canSeeAllLogs ?? null,
+      canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
+      phoneNumber: req.body.phoneNumber ?? null,
     });
     res.status(200).json(updatedUser);
   } catch (error: unknown) {
@@ -131,9 +154,11 @@ userRouter.delete("/", async (req, res) => {
       res
         .status(400)
         .json({ error: "userId query parameter must be a string." });
+    } else if (Number.isNaN(Number(userId))) {
+      res.status(400).json({ error: "Invalid user ID" });
     } else {
       try {
-        await userService.deleteUserById(userId);
+        await userService.deleteUserById(Number(userId));
         res.status(204).send();
       } catch (error: unknown) {
         res.status(500).json({ error: getErrorMessage(error) });
