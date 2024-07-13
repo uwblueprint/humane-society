@@ -18,6 +18,7 @@ export const up: Migration = async ({ context: sequelize }) => {
         model: "pets",
       },
       unique: true,
+      onDelete: "CASCADE",
       allowNull: false,
     },
     safety_info: {
