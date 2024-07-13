@@ -45,11 +45,6 @@ export const up: Migration = async ({ context: sequelize }) => {
       type: DataType.BOOLEAN,
       allowNull: false,
     },
-    pet_care_info_id: {
-      type: DataType.INTEGER,
-      allowNull: true,
-      onDelete: "SET NULL",
-    },
     weight: {
       type: DataType.DECIMAL,
       allowNull: false,

@@ -14,15 +14,16 @@ export const up: Migration = async ({ context: sequelize }) => {
     },
     pet_id: {
       type: DataType.INTEGER,
-      allowNull: false,  
       references: {
         model: "pets",
       },
+      unique: true,
+      allowNull: false,
     },
     safety_info: {
       type: DataType.STRING,
       allowNull: true,
-    }, 
+    },
     medical_info: {
       type: DataType.STRING,
       allowNull: true,
@@ -30,7 +31,7 @@ export const up: Migration = async ({ context: sequelize }) => {
     management_info: {
       type: DataType.STRING,
       allowNull: true,
-    }
+    },
   });
 };
 
