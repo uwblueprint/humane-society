@@ -8,7 +8,7 @@ import {
   HasOne,
 } from "sequelize-typescript";
 import Animal_Type from "./animalType.model";
-import PetCareInfo from "./petCareInfo.model"
+import PetCareInfo from "./petCareInfo.model";
 
 import { Sex, PetStatus } from "../types";
 
@@ -43,11 +43,7 @@ export default class Pet extends Model {
   @Column({})
   adoption_status!: boolean;
 
-  @ForeignKey(() => PetCareInfo)
-  @Column ({})
-  pet_care_info_id?: number;
-
-  @HasOne(() => PetCareInfo)
+  @HasOne(() => PetCareInfo, { foreignKey: "pet_id" })
   petCareInfo?: PetCareInfo;
 
   @Column({})
