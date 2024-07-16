@@ -5,7 +5,11 @@ import {
   ActivityResponseDTO,
   IActivityService,
 } from "../services/interfaces/activityService";
-import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
+import {
+  getErrorMessage,
+  NotFoundError,
+  INTERNAL_SERVER_ERROR_MESSAGE,
+} from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const activityRouter: Router = Router();
@@ -24,7 +28,7 @@ activityRouter.post("/", activityRequestDtoValidator, async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
@@ -43,7 +47,7 @@ activityRouter.get("/", async (req, res) => {
   } catch (e: unknown) {
     await sendResponseByMimeType(res, 500, contentType, [
       {
-        error: "Internal server error occured.",
+        error: INTERNAL_SERVER_ERROR_MESSAGE,
       },
     ]);
   }
@@ -60,7 +64,7 @@ activityRouter.get("/:id", async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
@@ -78,7 +82,7 @@ activityRouter.put("/:id", activityRequestDtoValidator, async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
@@ -94,7 +98,7 @@ activityRouter.delete("/:id", async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
