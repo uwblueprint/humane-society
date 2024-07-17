@@ -1,4 +1,4 @@
-type Type = "string" | "integer" | "boolean";
+type Type = "string" | "integer" | "boolean" | "decimal" | "enum";
 
 const allowableContentTypes = new Set([
   "text/plain",
@@ -23,10 +23,21 @@ export const validatePrimitive = (value: any, type: Type): boolean => {
     case "integer": {
       return typeof value === "number" && Number.isInteger(value);
     }
+    case "decimal": {
+      return (
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        !Number.isInteger(value)
+      );
+    }
     default: {
       return false;
     }
   }
+};
+
+export const validateEnum = (value: any, enumType: any): boolean => {
+  return Object.values(enumType).includes(value);
 };
 
 export const validateArray = (value: any, type: Type): boolean => {
