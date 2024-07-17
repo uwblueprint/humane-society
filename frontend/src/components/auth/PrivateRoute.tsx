@@ -8,20 +8,27 @@ type PrivateRouteProps = {
   component: React.FC;
   path: string;
   exact: boolean;
+  allowedRoles: Set<string>;
 };
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
   component,
   exact,
   path,
+  allowedRoles,
 }: PrivateRouteProps) => {
   const { authenticatedUser } = useContext(AuthContext);
 
-  return authenticatedUser ? (
-    <Route path={path} exact={exact} component={component} />
-  ) : (
-    <Redirect to={LOGIN_PAGE} />
-  );
+  if (!authenticatedUser) {
+    return <Redirect to={LOGIN_PAGE} />;
+  }
+  if (!allowedRoles.has(authenticatedUser.role)) {
+    // console.log(authenticatedUser.role);
+    return <Route path={path} exact={exact} component={component} />;
+    // return <Redirect to="*" />;
+  }
+
+  return <Route path={path} exact={exact} component={component} />;
 };
 
 export default PrivateRoute;
