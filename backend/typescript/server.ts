@@ -9,6 +9,7 @@ import { sequelize } from "./models";
 import authRouter from "./rest/authRoutes";
 import behaviourRouter from "./rest/behaviourRoutes";
 import entityRouter from "./rest/entityRoutes";
+import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 
@@ -35,6 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRouter);
 app.use("/behaviours", behaviourRouter);
 app.use("/entities", entityRouter);
+app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
