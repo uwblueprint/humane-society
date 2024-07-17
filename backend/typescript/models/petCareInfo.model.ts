@@ -1,6 +1,6 @@
 import { Column, Model, Table } from "sequelize-typescript";
 
-@Table({ tableName: "pet_care_info" })
+@Table({ timestamps: false, tableName: "pet_care_info" })
 export default class PetCareInfo extends Model {
   @Column
   safety_info?: string;
