@@ -11,6 +11,13 @@ export enum RoleId {
   Volunteer = 4,
 }
 
+export enum RoleEnum {
+  Administrator = "Administrator",
+  AnimalBehaviourist = "Animal Behaviourist",
+  Staff = "Staff",
+  Volunteer = "Volunteer",
+}
+
 export type Token = {
   accessToken: string;
   refreshToken: string;
