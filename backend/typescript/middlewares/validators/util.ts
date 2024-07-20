@@ -1,4 +1,4 @@
-type Type = "string" | "integer" | "boolean" | "decimal" | "enum";
+type Type = "string" | "integer" | "boolean" | "decimal";
 
 const allowableContentTypes = new Set([
   "text/plain",
