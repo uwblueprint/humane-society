@@ -6,6 +6,10 @@ const TABLE_NAME = "pet_behaviours";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
+    id: {
+      type: DataType.INTEGER,
+      allowNull:false,
+    },
     pet_id: {
       type: DataType.INTEGER,
       allowNull: false,
