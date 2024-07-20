@@ -6,7 +6,7 @@ const TABLE_NAME = "user_pet_activities";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
-    user_pet_activity_id: {
+    id: {
       type: DataType.INTEGER,
       allowNull: false,
       primaryKey: true,

@@ -8,7 +8,9 @@ export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
     id: {
       type: DataType.INTEGER,
-      allowNull:false,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
     },
     pet_id: {
       type: DataType.INTEGER,
