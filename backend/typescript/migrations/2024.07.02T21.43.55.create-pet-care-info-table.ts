@@ -22,15 +22,15 @@ export const up: Migration = async ({ context: sequelize }) => {
       allowNull: false,
     },
     safety_info: {
-      type: DataType.STRING,
+      type: DataType.TEXT,
       allowNull: true,
     },
     medical_info: {
-      type: DataType.STRING,
+      type: DataType.TEXT,
       allowNull: true,
     },
     management_info: {
-      type: DataType.STRING,
+      type: DataType.TEXT,
       allowNull: true,
     },
   });
