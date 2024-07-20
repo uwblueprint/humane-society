@@ -37,7 +37,7 @@ const loginWithGoogle = async (idToken: string): Promise<AuthenticatedUser> => {
   }
 };
 
-const logout = async (userId: string | undefined): Promise<boolean> => {
+const logout = async (userId: number | undefined): Promise<boolean> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",

@@ -12,13 +12,13 @@ const testUsers = [
     firstName: "Peter",
     lastName: "Pan",
     authId: "123",
-    roleId: RoleId.Administrator,
+    role: "Administrator",
   },
   {
     firstName: "Wendy",
     lastName: "Darling",
     authId: "321",
-    roleId: RoleId.Staff,
+    role: "Staff",
   },
 ];
 
@@ -58,7 +58,7 @@ describe("pg userService", () => {
     res.forEach((user: UserDTO, i) => {
       expect(user.firstName).toEqual(testUsers[i].firstName);
       expect(user.lastName).toEqual(testUsers[i].lastName);
-      expect(user.roleId).toEqual(testUsers[i].roleId);
+      expect(user.role).toEqual(testUsers[i].role);
     });
   });
 });

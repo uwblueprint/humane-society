@@ -23,9 +23,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
     return <Redirect to={LOGIN_PAGE} />;
   }
   if (!allowedRoles.has(authenticatedUser.role)) {
-    // console.log(authenticatedUser.role);
-    return <Route path={path} exact={exact} component={component} />;
-    // return <Redirect to="*" />;
+    return <Redirect to="*" />;
   }
 
   return <Route path={path} exact={exact} component={component} />;

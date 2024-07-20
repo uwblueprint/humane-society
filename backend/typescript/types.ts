@@ -21,7 +21,7 @@ export type UserDTO = {
   firstName: string;
   lastName: string;
   email: string;
-  roleId: number;
+  role: string;
   skillLevel?: number | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
