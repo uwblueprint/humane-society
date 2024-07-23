@@ -28,7 +28,13 @@ const theme = extendTheme({
       fontFamily: "Roboto",
       fontWeight: 400,
       fontSize: "18px",
-      letterSpacing: "1.50%",
+      lineHeight: "150%",
+    },
+    bodyMobile: {
+      fontFamily: "Roboto",
+      fontWeight: 400,
+      fontSize: "16px",
+      lineHeight: "150%",
     },
     button: {
       fontFamily: "Poppins",
