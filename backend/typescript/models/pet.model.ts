@@ -12,7 +12,12 @@ import PetCareInfo from "./petCareInfo.model";
 
 import { Sex, PetStatus } from "../types";
 
-@Table({ timestamps: false, tableName: "pets" })
+@Table({
+  tableName: "pets",
+  timestamps: true,
+  createdAt: "created_at",
+  updatedAt: "updated_at",
+})
 export default class Pet extends Model {
   @ForeignKey(() => Animal_Type)
   @Column({})

@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { petRequestDtoValidators, petFilterValidators } from "../middlewares/validators/petValidators";
-import PetService from "../services/implementations/petService";
 import {
-  PetResponseDTO,
-  IPetService,
-} from "../services/interfaces/petService";
-import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
+  petRequestDtoValidators,
+  petFilterValidators,
+} from "../middlewares/validators/petValidators";
+import PetService from "../services/implementations/petService";
+import { PetResponseDTO, IPetService } from "../services/interfaces/petService";
+import {
+  getErrorMessage,
+  INTERNAL_SERVER_ERROR_MESSAGE,
+  NotFoundError,
+} from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const petRouter: Router = Router();
@@ -27,18 +31,18 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       neutered: body.neutered,
       sex: body.sex,
       photo: body.photo,
-      careInfo: { 
-         safetyInfo: body.careInfo.safetyInfo,
-         medicalInfo: body.careInfo.medicalInfo,
-         managementInfo: body.careInfo.managementInfo, 
-        }
+      careInfo: {
+        safetyInfo: body.careInfo.safetyInfo,
+        medicalInfo: body.careInfo.medicalInfo,
+        managementInfo: body.careInfo.managementInfo,
+      },
     });
     res.status(200).json(pet);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
@@ -54,31 +58,81 @@ petRouter.delete("/:id", async (req, res) => {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
     } else {
-      res.status(500).send("Internal server error occured.");
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
   }
 });
 
-/*Get Pets by filter criteria */
+/* Get Pets by filter criteria */
 petRouter.get("/filter", petFilterValidators, async (req, res) => {
   const { query } = req;
-    const contentType = req.headers["content-type"];
-    try {
-      const pets = await petService.filterPets(query);
-      await sendResponseByMimeType<PetResponseDTO>(
-        res,
-        200,
-        contentType,
-        pets,
-      );
-    } catch (e: unknown) {
-      await sendResponseByMimeType(res, 500, contentType, [
-        {
-          error: "Internal server error occured.",
-        },
-      ]);
+  const contentType = req.headers["content-type"];
+  try {
+    const pets = await petService.filterPets(query);
+    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
+  } catch (e: unknown) {
+    await sendResponseByMimeType(res, 500, contentType, [
+      {
+        error: INTERNAL_SERVER_ERROR_MESSAGE,
+      },
+    ]);
+  }
+});
+/* Create Pet */
+petRouter.post("/", petRequestDtoValidators, async (req, res) => {
+  try {
+    const { body } = req;
+    const pet = await petService.createPet({
+      animalTypeId: body.animalTypeId,
+      name: body.name,
+      status: body.status,
+      breed: body.breed,
+      age: body.age,
+      adoptionStatus: body.adoptionStatus,
+      weight: body.weight,
+      neutered: body.neutered,
+      sex: body.sex,
+      photo: body.photo,
+      careInfo: {
+        safetyInfo: body.careInfo.safetyInfo,
+        medicalInfo: body.careInfo.medicalInfo,
+        managementInfo: body.careInfo.managementInfo,
+      },
+    });
+    res.status(200).json(pet);
+  } catch (e: unknown) {
+    res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+  }
+});
+/* Get all Behaviours */
+petRouter.get("/", async (req, res) => {
+  const contentType = req.headers["content-type"];
+  try {
+    const pets = await petService.getPets();
+    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
+  } catch (e: unknown) {
+    await sendResponseByMimeType(res, 500, contentType, [
+      {
+        error: INTERNAL_SERVER_ERROR_MESSAGE,
+      },
+    ]);
+  }
+});
+
+/* Get Behaviour by id */
+petRouter.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pet = await petService.getPet(id);
+    res.status(200).json(pet);
+  } catch (e: unknown) {
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
-  });
-  
+  }
+});
 
 export default petRouter;

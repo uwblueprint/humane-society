@@ -2,6 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { getApiValidationError, validatePrimitive, validateEnum } from "./util";
 import { PetStatus, Sex } from "../../types";
 
+const petStatusEnum: PetStatus[] = [
+  "Assigned",
+  "Active",
+  "Needs Care",
+  "Does Not Need Care",
+];
+
+const petSexEnum: Sex[] = ["M", "F"];
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
 export const petRequestDtoValidators = async (
@@ -21,12 +29,6 @@ export const petRequestDtoValidators = async (
     return res.status(400).send(getApiValidationError("name", "string"));
   }
 
-  const petStatusEnum: PetStatus[] = [
-    "Assigned",
-    "Active",
-    "Needs Care",
-    "Does Not Need Care",
-  ];
   if (!validateEnum(body.status, petStatusEnum)) {
     return res.status(400).send(getApiValidationError("status", "string"));
   }
@@ -39,10 +41,10 @@ export const petRequestDtoValidators = async (
     return res.status(400).send(getApiValidationError("age", "integer"));
   }
 
-  if (!validatePrimitive(body.adoptionStatus, "string")) {
+  if (!validatePrimitive(body.adoptionStatus, "boolean")) {
     return res
       .status(400)
-      .send(getApiValidationError("adoptionStatus", "string"));
+      .send(getApiValidationError("adoptionStatus", "boolean"));
   }
 
   if (!validatePrimitive(body.weight, "decimal")) {
@@ -53,7 +55,6 @@ export const petRequestDtoValidators = async (
     return res.status(400).send(getApiValidationError("neutered", "boolean"));
   }
 
-  const petSexEnum: Sex[] = ["M", "F"];
   if (!validateEnum(body.sex, petSexEnum)) {
     return res.status(400).send(getApiValidationError("sex", "string"));
   }
@@ -61,7 +62,6 @@ export const petRequestDtoValidators = async (
   if (!validatePrimitive(body.photo, "string")) {
     return res.status(400).send(getApiValidationError("photo", "string"));
   }
-  //Validate careInfo object?
 
   if (!validatePrimitive(body.careInfo.safetyInfo, "string")) {
     return res
@@ -107,7 +107,7 @@ export const petFilterValidators = (
   }
 
   if (query.status) {
-    if (!validatePrimitive(query.status, "string")) {
+    if (!validateEnum(query.status, petStatusEnum)) {
       return res.status(400).send(getApiValidationError("status", "string"));
     }
   }
@@ -141,8 +141,8 @@ export const petFilterValidators = (
 
   if (query.weight) {
     const weight = Number(query.weight);
-    if (!validatePrimitive(weight, "integer")) {
-      return res.status(400).send(getApiValidationError("weight", "integer"));
+    if (!validatePrimitive(weight, "decimal")) {
+      return res.status(400).send(getApiValidationError("weight", "decimal"));
     }
   }
 
@@ -159,7 +159,7 @@ export const petFilterValidators = (
   }
 
   if (query.sex) {
-    if (!validatePrimitive(query.sex, "string")) {
+    if (!validateEnum(query.sex, petSexEnum)) {
       return res.status(400).send(getApiValidationError("sex", "string"));
     }
   }
