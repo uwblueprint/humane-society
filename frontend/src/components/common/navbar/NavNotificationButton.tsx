@@ -20,9 +20,6 @@ const NavNotificationButton = (): React.ReactElement => {
         variant="unstyled"
         icon={<FaBell />}
         onClick={goToNotifications}
-        display="flex" // the svg wasn't centered in the iconbutton
-        justifyContent="center"
-        alignItems="center"
       />
     </Box>
   );
