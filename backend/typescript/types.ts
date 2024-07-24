@@ -11,6 +11,13 @@ export enum RoleId {
   Volunteer = 4,
 }
 
+export enum RoleEnum {
+  Administrator = "Administrator",
+  AnimalBehaviourist = "Animal Behaviourist",
+  Staff = "Staff",
+  Volunteer = "Volunteer",
+}
+
 export type Token = {
   accessToken: string;
   refreshToken: string;
@@ -21,7 +28,7 @@ export type UserDTO = {
   firstName: string;
   lastName: string;
   email: string;
-  roleId: number;
+  role: string;
   skillLevel?: number | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;

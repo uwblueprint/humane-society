@@ -51,7 +51,7 @@ authRouter.post("/register", registerRequestValidator, async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      roleId: req.body.roleId,
+      role: req.body.role,
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,

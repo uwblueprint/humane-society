@@ -12,15 +12,12 @@ import {
 } from "../services/interfaces/IEntityService";
 import { getErrorMessage } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { RoleEnum } from "../types";
 
 const upload = multer({ dest: "uploads/" });
 
 const entityRouter: Router = Router();
-entityRouter.use(
-  isAuthorizedByRole(
-    new Set(["Administrator", "Animal Behaviourist", "Staff", "Volunteer"]),
-  ),
-);
+entityRouter.use(isAuthorizedByRole(new Set(Object.values(RoleEnum))));
 
 const defaultBucket = process.env.FIREBASE_STORAGE_DEFAULT_BUCKET || "";
 const fileStorageService: IFileStorageService = new FileStorageService(

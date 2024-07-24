@@ -14,6 +14,7 @@ import NotFound from "./components/pages/NotFound";
 import UpdatePage from "./components/pages/UpdatePage";
 import SimpleEntityUpdatePage from "./components/pages/SimpleEntityUpdatePage";
 import * as Routes from "./constants/Routes";
+import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
@@ -59,46 +60,55 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.HOME_PAGE}
                 component={PetListPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact
                 path={Routes.CREATE_ENTITY_PAGE}
                 component={CreatePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={Routes.UPDATE_ENTITY_PAGE}
                 component={UpdatePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={Routes.DISPLAY_ENTITY_PAGE}
                 component={DisplayPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact
                 path={Routes.CREATE_SIMPLE_ENTITY_PAGE}
                 component={SimpleEntityCreatePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={Routes.UPDATE_SIMPLE_ENTITY_PAGE}
                 component={SimpleEntityUpdatePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={Routes.DISPLAY_SIMPLE_ENTITY_PAGE}
                 component={SimpleEntityDisplayPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact
                 path={Routes.EDIT_TEAM_PAGE}
                 component={EditTeamInfoPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={Routes.HOOKS_PAGE}
                 component={HooksDemo}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <Route exact path="*" component={NotFound} />
             </Switch>
