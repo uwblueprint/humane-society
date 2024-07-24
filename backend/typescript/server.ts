@@ -9,6 +9,7 @@ import { sequelize } from "./models";
 import authRouter from "./rest/authRoutes";
 import activityRouter from "./rest/activityRoutes";
 import behaviourRouter from "./rest/behaviourRoutes";
+import animalTypeRouter from "./rest/animalTypeRoutes";
 import entityRouter from "./rest/entityRoutes";
 import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
@@ -35,6 +36,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
+app.use("/activities", activityRouter);
+app.use("/animal-types", animalTypeRouter);
 app.use("/activities", activityRouter);
 app.use("/behaviours", behaviourRouter);
 app.use("/entities", entityRouter);
