@@ -5,8 +5,11 @@ import {
   Table,
   ForeignKey,
   BelongsTo,
+  BelongsToMany
 } from "sequelize-typescript";
 import Role from "./role.model";
+import AnimalType from "./animalType.model";
+import UserAnimalTypes from "./userAnimalTypes.model";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -40,4 +43,7 @@ export default class User extends Model {
 
   @Column({ type: DataType.STRING })
   phone_number?: string | null;
+
+  @BelongsToMany(() => AnimalType, { through: () => UserAnimalTypes })
+  animalTypes?: AnimalType[];
 }
