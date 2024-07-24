@@ -129,6 +129,16 @@ const App = (): React.ReactElement => {
                 path={Routes.PROFILE_PAGE}
                 component={ProfilePage}
               />
+              <PrivateRoute
+                exact
+                path={Routes.NOTIFICATIONS_PAGE}
+                component={NotificationsPage}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.PROFILE_PAGE}
+                component={ProfilePage}
+              />
               <Route exact path="*" component={NotFound} />
             </Switch>
           </Router>
