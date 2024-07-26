@@ -20,6 +20,9 @@ const NavProfileButton = (): React.ReactElement => {
         variant="unstyled"
         icon={<FaUserCircle />}
         onClick={goToProfile}
+        display="flex" // the svg wasn't centered in the iconbutton
+        justifyContent="center"
+        alignItems="center"
       />
     </Box>
   );
