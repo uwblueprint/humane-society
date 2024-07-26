@@ -18,10 +18,16 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       w="100%"
       zIndex="10"
       alignItems="flex-end"
+      backgroundColor="#ffffff"
     >
       <Logo />
-      <Box mb={{ base: "0.19rem", md: "1.62rem" }}>
-        <Text textStyle="h1">{pageName}</Text>
+      <Box>
+        <Text
+          textStyle={{ base: "h2", md: "h1" }}
+          mb={{ base: "0", md: "0.4rem" }}
+        >
+          {pageName}
+        </Text>
       </Box>
       <Spacer />
       <NavNotificationButton />
