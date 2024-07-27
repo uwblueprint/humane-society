@@ -1,3 +1,6 @@
+// DEPRECATED
+// LEAVING FOR FUTURE REFERENCE
+
 import { DataType } from "sequelize-typescript";
 
 import { Migration } from "../umzug";
