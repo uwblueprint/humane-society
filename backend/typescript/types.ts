@@ -40,6 +40,8 @@ export type PetStatus =
   | "Needs Care"
   | "Does Not Need Care";
 
+export type UserStatus = "Active" | "Inactive";
+
 export type NodemailerConfig = {
   service: "gmail";
   auth: {

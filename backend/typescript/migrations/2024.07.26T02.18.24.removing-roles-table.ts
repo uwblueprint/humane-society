@@ -42,7 +42,7 @@ export const down: Migration = async ({ context: sequelize }) => {
 
   await sequelize.getQueryInterface().addColumn("users", "role_id", {
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: "roles",
       key: "id",

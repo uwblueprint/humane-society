@@ -5,7 +5,7 @@ import {
   Table,
   AllowNull,
 } from "sequelize-typescript";
-import { Role } from "../types";
+import { Role, UserStatus } from "../types";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -36,4 +36,7 @@ export default class User extends Model {
 
   @Column({ type: DataType.STRING })
   phone_number?: string | null;
+
+  @Column({ type: DataType.ENUM("Active", "Inactive"), allowNull: false })
+  status!: UserStatus;
 }
