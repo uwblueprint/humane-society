@@ -94,7 +94,7 @@ export interface IPetService {
 
   /**
    * retrieve all Pets that match given filter criteria
-   * @param
+   * @param query Pet queries
    * @returns returns array of Pets
    * @throws Error if retrieval fails
    */

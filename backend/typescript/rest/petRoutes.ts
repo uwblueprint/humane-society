@@ -104,7 +104,7 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
     res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
   }
 });
-/* Get all Behaviours */
+/* Get all Pets */
 petRouter.get("/", async (req, res) => {
   const contentType = req.headers["content-type"];
   try {
@@ -119,7 +119,7 @@ petRouter.get("/", async (req, res) => {
   }
 });
 
-/* Get Behaviour by id */
+/* Get Pet by id */
 petRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
 

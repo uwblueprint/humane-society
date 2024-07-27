@@ -24,7 +24,7 @@ export const validatePrimitive = (value: any, type: Type): boolean => {
       return typeof value === "number" && Number.isInteger(value);
     }
     case "decimal": {
-      return typeof value === "number" && Number.isFinite(value);
+      return typeof value === "number" && !Number.isNaN(value);
     }
     default: {
       return false;

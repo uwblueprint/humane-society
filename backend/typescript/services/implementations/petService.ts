@@ -228,7 +228,6 @@ class PetService implements IPetService {
           neutered: pet.neutered,
           sex: pet.sex,
           photo: pet.photo,
-          // MAYBE CAN SIMPLIFY THIS WITH THE HASONE THING?
         },
         { where: { id }, returning: true, transaction },
       );
@@ -295,6 +294,4 @@ class PetService implements IPetService {
   }
 }
 
-// Should you name it PgPetCareInfo or PgCareInfo
-// If there's inconsistency-- error?
 export default PetService;
