@@ -1,15 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { getApiValidationError, validatePrimitive, validateEnum } from "./util";
-import { PetStatus, Sex } from "../../types";
+import { petStatusEnum, sexEnum } from "../../types";
 
-const petStatusEnum: PetStatus[] = [
-  "Assigned",
-  "Active",
-  "Needs Care",
-  "Does Not Need Care",
-];
-
-const petSexEnum: Sex[] = ["M", "F"];
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
 export const petRequestDtoValidators = async (
@@ -55,7 +47,7 @@ export const petRequestDtoValidators = async (
     return res.status(400).send(getApiValidationError("neutered", "boolean"));
   }
 
-  if (!validateEnum(body.sex, petSexEnum)) {
+  if (!validateEnum(body.sex, sexEnum)) {
     return res.status(400).send(getApiValidationError("sex", "Sex"));
   }
 
@@ -159,7 +151,7 @@ export const petFilterValidators = (
   }
 
   if (query.sex) {
-    if (!validateEnum(query.sex, petSexEnum)) {
+    if (!validateEnum(query.sex, sexEnum)) {
       return res.status(400).send(getApiValidationError("sex", "Sex"));
     }
   }

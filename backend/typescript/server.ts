@@ -38,7 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRouter);
 app.use("/activities", activityRouter);
 app.use("/animal-types", animalTypeRouter);
-app.use("/activities", activityRouter);
 app.use("/behaviours", behaviourRouter);
 app.use("/entities", entityRouter);
 app.use("/pets", petRouter);

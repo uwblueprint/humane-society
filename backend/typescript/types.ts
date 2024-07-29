@@ -38,13 +38,22 @@ export type AuthDTO = Token & UserDTO;
 
 export type Letters = "A" | "B" | "C" | "D";
 
-export type Sex = "M" | "F";
+const sexValues = ["M", "F"] as const;
 
-export type PetStatus =
-  | "Assigned"
-  | "Active"
-  | "Needs Care"
-  | "Does Not Need Care";
+export const sexEnum: Sex[] = [...sexValues];
+
+export type Sex = typeof sexValues[number];
+
+const petStatusValues = [
+  "Assigned",
+  "Active",
+  "Needs Care",
+  "Does Not Need Care",
+] as const;
+
+export const petStatusEnum: PetStatus[] = [...petStatusValues];
+
+export type PetStatus = typeof petStatusValues[number];
 
 export type NodemailerConfig = {
   service: "gmail";
