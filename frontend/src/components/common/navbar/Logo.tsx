@@ -7,7 +7,7 @@ const Logo = (): React.ReactElement => {
       <Image
         borderRadius="full"
         boxSize={{ base: "2.9rem", md: "5rem" }}
-        src="images/humanesocietylogo.png"
+        src="images/humane_society_logo.png"
         alt="Logo"
         objectFit="cover"
       />
