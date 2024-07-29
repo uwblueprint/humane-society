@@ -28,6 +28,7 @@ import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import CreatePasswordPage from "./components/pages/CreatePasswordPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -57,6 +58,11 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <Route
+                exact
+                path={Routes.CREATE_PASSWORD_PAGE}
+                component={CreatePasswordPage}
+              />
               <PrivateRoute
                 exact
                 path={Routes.HOME_PAGE}

@@ -18,6 +18,8 @@ export const CREATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/create";
 
 export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 
+export const CREATE_PASSWORD_PAGE = "/create-password";
+
 export const HOOKS_PAGE = "/hooks";
 
 export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes
