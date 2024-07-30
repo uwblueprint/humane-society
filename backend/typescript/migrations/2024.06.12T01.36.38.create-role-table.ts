@@ -1,5 +1,4 @@
-// DEPRECATED
-// LEAVING FOR FUTURE REFERENCE
+// TODO: DEPRECATED, LEAVING FOR FUTURE REFERENCE
 
 import { DataType } from "sequelize-typescript";
 
