@@ -12,7 +12,7 @@ import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { UserDTO } from "../types";
+import { Role, UserDTO } from "../types";
 import {
   getErrorMessage,
   NotFoundError,
@@ -22,7 +22,7 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
 userRouter.use(
-  isAuthorizedByRole(new Set(["Administrator", "Animal Behaviourist"])),
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])),
 );
 
 const userService: IUserService = new UserService();

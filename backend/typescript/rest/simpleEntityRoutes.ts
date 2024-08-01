@@ -8,10 +8,10 @@ import {
 } from "../services/interfaces/simpleEntityService";
 import { getErrorMessage } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { RoleEnum } from "../types";
+import { Role } from "../types";
 
 const simpleEntityRouter: Router = Router();
-simpleEntityRouter.use(isAuthorizedByRole(new Set(Object.values(RoleEnum))));
+simpleEntityRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 
 const simpleEntityService: ISimpleEntityService = new SimpleEntityService();
 
