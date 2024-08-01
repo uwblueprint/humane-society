@@ -25,6 +25,8 @@ import sampleContextReducer from "./reducers/SampleContextReducer";
 import SampleContextDispatcherContext from "./contexts/SampleContextDispatcherContext";
 import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
+import NotificationsPage from "./components/pages/NotificationsPage";
+import ProfilePage from "./components/pages/ProfilePage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 
@@ -109,6 +111,16 @@ const App = (): React.ReactElement => {
                 path={Routes.HOOKS_PAGE}
                 component={HooksDemo}
                 allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.NOTIFICATIONS_PAGE}
+                component={NotificationsPage}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.PROFILE_PAGE}
+                component={ProfilePage}
               />
               <Route exact path="*" component={NotFound} />
             </Switch>
