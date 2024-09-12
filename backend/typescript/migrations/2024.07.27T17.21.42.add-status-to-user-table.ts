@@ -3,7 +3,7 @@ import { Migration } from "../umzug";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().addColumn("users", "status", {
-    type: DataType.ENUM("Active", "Inactive"),
+    type: DataType.ENUM("Active", "Invited", "Inactive"),
     allowNull: false,
   });
 };

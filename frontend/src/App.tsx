@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useReducer } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
+import Default from "./components/pages/Default";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -108,6 +109,12 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.HOOKS_PAGE}
                 component={HooksDemo}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.DEV_UTILITY_PAGE}
+                component={Default}
                 allowedRoles={AuthConstants.ALL_ROLES}
               />
               <Route exact path="*" component={NotFound} />
