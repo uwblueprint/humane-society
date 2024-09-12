@@ -12,7 +12,7 @@ import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { UserDTO } from "../types";
+import { Role, UserDTO, UserStatus } from "../types";
 import {
   getErrorMessage,
   NotFoundError,
@@ -22,7 +22,7 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
 userRouter.use(
-  isAuthorizedByRole(new Set(["Administrator", "Animal Behaviourist"])),
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])),
 );
 
 const userService: IUserService = new UserService();
@@ -100,7 +100,8 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      role: req.body.role,
+      role: req.body.role ?? Role.VOLUNTEER,
+      status: req.body.status ?? UserStatus.ACTIVE, // TODO: make this default to inactive once user registration flow is done
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
@@ -108,7 +109,7 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       password: req.body.password,
     });
 
-    await authService.sendEmailVerificationLink(req.body.email);
+    // await authService.sendEmailVerificationLink(req.body.email); // TODO: Uncomment once email service is ready
 
     res.status(201).json(newUser);
   } catch (error: unknown) {
@@ -129,6 +130,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       lastName: req.body.lastName,
       email: req.body.email,
       role: req.body.role,
+      status: req.body.status,
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,

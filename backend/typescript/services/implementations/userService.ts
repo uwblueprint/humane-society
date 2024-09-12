@@ -4,7 +4,6 @@ import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import PgUser from "../../models/user.model";
-import PgRole from "../../models/role.model";
 
 const Logger = logger(__filename);
 
@@ -32,7 +31,8 @@ class UserService implements IUserService {
       firstName: user.first_name,
       lastName: user.last_name,
       email: firebaseUser.email ?? "",
-      role: user.role.role_name,
+      role: user.role,
+      status: user.status,
       skillLevel: user.skill_level,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
@@ -48,7 +48,6 @@ class UserService implements IUserService {
       firebaseUser = await firebaseAdmin.auth().getUserByEmail(email);
       user = await PgUser.findOne({
         where: { auth_id: firebaseUser.uid },
-        include: [{ model: PgRole, as: "role" }],
       });
 
       if (!user) {
@@ -66,7 +65,8 @@ class UserService implements IUserService {
       firstName: user.first_name,
       lastName: user.last_name,
       email: firebaseUser.email ?? "",
-      role: user.role.role_name,
+      role: user.role,
+      status: user.status,
       skillLevel: user.skill_level,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
@@ -78,7 +78,6 @@ class UserService implements IUserService {
     try {
       const user: PgUser | null = await PgUser.findOne({
         where: { auth_id: authId },
-        include: [{ model: PgRole, as: "role" }],
       });
 
       if (!user) {
@@ -89,7 +88,7 @@ class UserService implements IUserService {
         throw new Error(`Role for user with authId ${authId} is invalid.`);
       }
 
-      return user.role.role_name as Role;
+      return user.role;
     } catch (error: unknown) {
       Logger.error(
         `Failed to get user role. Reason = ${getErrorMessage(error)}`,
@@ -129,9 +128,7 @@ class UserService implements IUserService {
   async getUsers(): Promise<Array<UserDTO>> {
     let userDtos: Array<UserDTO> = [];
     try {
-      const users: Array<PgUser> = await PgUser.findAll({
-        include: [{ model: PgRole, as: "role" }],
-      });
+      const users: Array<PgUser> = await PgUser.findAll();
 
       userDtos = await Promise.all(
         users.map(async (user) => {
@@ -151,7 +148,8 @@ class UserService implements IUserService {
             firstName: user.first_name,
             lastName: user.last_name,
             email: firebaseUser.email ?? "",
-            role: user.role.role_name,
+            role: user.role,
+            status: user.status,
             skillLevel: user.skill_level,
             canSeeAllLogs: user.can_see_all_logs,
             canAssignUsersToTasks: user.can_assign_users_to_tasks,
@@ -187,37 +185,19 @@ class UserService implements IUserService {
         });
       }
 
-      let roleId;
-      if (user.role) {
-        const role = await PgRole.findOne({ where: { role_name: user.role } });
-        if (!role) {
-          Logger.error(`Role ${user.role} not found in database.`);
-          throw new Error(`Role ${user.role} not found in database.`);
-        }
-        roleId = role.id;
-      }
-
       try {
-        newUser = await PgUser.create(
-          {
-            first_name: user.firstName,
-            last_name: user.lastName,
-            auth_id: firebaseUser.uid,
-            role_id: roleId,
-            email: firebaseUser.email ?? "",
-            skill_level: user.skillLevel,
-            can_see_all_logs: user.canSeeAllLogs,
-            can_assign_users_to_tasks: user.canAssignUsersToTasks,
-            phone_number: user.phoneNumber,
-          },
-          {
-            include: [
-              {
-                include: ["role"],
-              },
-            ],
-          },
-        );
+        newUser = await PgUser.create({
+          first_name: user.firstName,
+          last_name: user.lastName,
+          auth_id: firebaseUser.uid,
+          role: user.role,
+          status: user.status,
+          email: firebaseUser.email ?? "",
+          skill_level: user.skillLevel,
+          can_see_all_logs: user.canSeeAllLogs,
+          can_assign_users_to_tasks: user.canAssignUsersToTasks,
+          phone_number: user.phoneNumber,
+        });
       } catch (postgresError) {
         try {
           await firebaseAdmin.auth().deleteUser(firebaseUser.uid);
@@ -243,7 +223,8 @@ class UserService implements IUserService {
       firstName: newUser.first_name,
       lastName: newUser.last_name,
       email: firebaseUser.email ?? "",
-      role: newUser.role.role_name,
+      role: newUser.role,
+      status: newUser.status,
       skillLevel: newUser.skill_level,
       canSeeAllLogs: newUser.can_see_all_logs,
       canAssignUsersToTasks: newUser.can_assign_users_to_tasks,
@@ -255,21 +236,12 @@ class UserService implements IUserService {
     let updatedFirebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
-      let roleId;
-      if (user.role) {
-        const role = await PgRole.findOne({ where: { role_name: user.role } });
-        if (!role) {
-          Logger.error(`Role ${user.role} not found in database.`);
-          throw new Error(`Role ${user.role} not found in database.`);
-        }
-        roleId = role.id;
-      }
-
       const updateResult = await PgUser.update(
         {
           first_name: user.firstName,
           last_name: user.lastName,
-          role_id: roleId,
+          role: user.role,
+          status: user.status,
           skill_level: user.skillLevel,
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
@@ -302,7 +274,8 @@ class UserService implements IUserService {
             {
               first_name: oldUser.first_name,
               last_name: oldUser.last_name,
-              role_id: oldUser.role_id,
+              role: oldUser.role,
+              status: oldUser.status,
               skill_level: oldUser.skill_level,
               can_see_all_logs: oldUser.can_see_all_logs,
               can_assign_users_to_tasks: oldUser.can_assign_users_to_tasks,
@@ -335,6 +308,7 @@ class UserService implements IUserService {
       lastName: user.lastName,
       email: updatedFirebaseUser.email ?? "",
       role: user.role,
+      status: user.status,
       skillLevel: user.skillLevel,
       canSeeAllLogs: user.canSeeAllLogs,
       canAssignUsersToTasks: user.canAssignUsersToTasks,
@@ -368,7 +342,8 @@ class UserService implements IUserService {
             first_name: deletedUser.first_name,
             last_name: deletedUser.last_name,
             auth_id: deletedUser.auth_id,
-            role_id: deletedUser.role_id,
+            role: deletedUser.role,
+            status: deletedUser.status,
             skill_level: deletedUser.skill_level,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
@@ -424,7 +399,8 @@ class UserService implements IUserService {
             first_name: deletedUser.first_name,
             last_name: deletedUser.last_name,
             auth_id: deletedUser.auth_id,
-            role_id: deletedUser.role_id,
+            role: deletedUser.role,
+            status: deletedUser.status,
             skill_level: deletedUser.skill_level,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,

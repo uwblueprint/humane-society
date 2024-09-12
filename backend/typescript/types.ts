@@ -1,21 +1,8 @@
-export type Role =
-  | "Administrator"
-  | "Animal Behaviourist"
-  | "Staff"
-  | "Volunteer";
-
-export enum RoleId {
-  Administrator = 1,
-  AnimalBehaviourist = 2,
-  Staff = 3,
-  Volunteer = 4,
-}
-
-export enum RoleEnum {
-  Administrator = "Administrator",
-  AnimalBehaviourist = "Animal Behaviourist",
-  Staff = "Staff",
-  Volunteer = "Volunteer",
+export enum Role {
+  ADMINISTRATOR = "Administrator",
+  ANIMAL_BEHAVIOURIST = "Animal Behaviourist",
+  STAFF = "Staff",
+  VOLUNTEER = "Volunteer",
 }
 
 export type Token = {
@@ -28,7 +15,8 @@ export type UserDTO = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: Role;
+  status: UserStatus;
   skillLevel?: number | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
@@ -62,6 +50,12 @@ export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
 export type PetStatus = typeof petStatusValues[number];
 
+export enum UserStatus {
+  ACTIVE = "Active",
+  INVITED = "Invited",
+  INACTIVE = "Inactive",
+}
+
 export type NodemailerConfig = {
   service: "gmail";
   auth: {
@@ -74,5 +68,3 @@ export type NodemailerConfig = {
 };
 
 export type SignUpMethod = "PASSWORD" | "GOOGLE";
-
-export type DTOTypes = Record<string, string | RoleId>;

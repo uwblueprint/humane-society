@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, RoleEnum, Token } from "../../types";
+import { AuthDTO, Role, Token, UserStatus } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -63,7 +63,8 @@ class AuthService implements IAuthService {
           firstName: googleUser.firstName,
           lastName: googleUser.lastName,
           email: googleUser.email,
-          role: RoleEnum.Staff,
+          role: Role.STAFF,
+          status: UserStatus.ACTIVE,
           password: "",
         },
         googleUser.localId,
@@ -179,7 +180,8 @@ class AuthService implements IAuthService {
         .auth()
         .getUser(decodedIdToken.uid);
 
-      return firebaseUser.emailVerified && roles.has(userRole);
+      // return firebaseUser.emailVerified && roles.has(userRole); // TODO: Uncomment once email service is ready
+      return roles.has(userRole);
     } catch (error) {
       return false;
     }
@@ -202,7 +204,8 @@ class AuthService implements IAuthService {
         .getUser(decodedIdToken.uid);
 
       return (
-        firebaseUser.emailVerified && String(tokenUserId) === requestedUserId
+        // firebaseUser.emailVerified && String(tokenUserId) === requestedUserId // TODO: Uncomment once email service is ready
+        String(tokenUserId) === requestedUserId
       );
     } catch (error) {
       return false;
@@ -223,7 +226,8 @@ class AuthService implements IAuthService {
         .getUser(decodedIdToken.uid);
 
       return (
-        firebaseUser.emailVerified && decodedIdToken.email === requestedEmail
+        // firebaseUser.emailVerified && decodedIdToken.email === requestedEmail // TODO: Uncomment once email service is ready
+        decodedIdToken.email === requestedEmail
       );
     } catch (error) {
       return false;

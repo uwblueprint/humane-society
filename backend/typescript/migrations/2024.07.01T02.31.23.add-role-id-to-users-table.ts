@@ -1,3 +1,5 @@
+// TODO: DEPRECATED, LEAVING FOR FUTURE REFERENCE
+
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 
@@ -16,6 +18,7 @@ export const up: Migration = async ({ context: sequelize }) => {
   });
 
   await queryInterface.removeColumn("users", "role");
+  await sequelize.query(`DROP TYPE IF EXISTS enum_users_role;`);
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
