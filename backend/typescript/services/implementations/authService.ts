@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, Token } from "../../types";
+import { AuthDTO, Role, Token, UserStatus } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -64,6 +64,7 @@ class AuthService implements IAuthService {
           lastName: googleUser.lastName,
           email: googleUser.email,
           role: Role.STAFF,
+          status: UserStatus.ACTIVE,
           password: "",
         },
         googleUser.localId,

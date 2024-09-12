@@ -16,6 +16,7 @@ export type UserDTO = {
   lastName: string;
   email: string;
   role: Role;
+  status: UserStatus;
   skillLevel?: number | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
@@ -40,7 +41,11 @@ export type PetStatus =
   | "Needs Care"
   | "Does Not Need Care";
 
-export type UserStatus = "Active" | "Inactive";
+export enum UserStatus {
+  ACTIVE = "Active",
+  INVITED = "Invited",
+  INACTIVE = "Inactive",
+}
 
 export type NodemailerConfig = {
   service: "gmail";
