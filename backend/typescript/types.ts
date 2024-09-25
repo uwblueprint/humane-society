@@ -68,3 +68,14 @@ export type NodemailerConfig = {
 };
 
 export type SignUpMethod = "PASSWORD" | "GOOGLE";
+
+export type VerifyPasswordResponse = {
+  email: string;
+  requestType: string; // should be PASSWORD_RESET
+}
+
+
+export type ConfirmPasswordResetResponse = {
+  email: string;
+  requestType: string; // should be PASSWORD_RESET
+}

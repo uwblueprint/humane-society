@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, Token, UserStatus } from "../../types";
+import { AuthDTO, Role, UserStatus, Token } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -228,6 +228,30 @@ class AuthService implements IAuthService {
       );
     } catch (error) {
       return false;
+    }
+  }
+
+  // verifies password reset code + returns email as a string
+  async verifyPasswordResetCode(
+    oobCode: string
+  ): Promise<string> { 
+    try {
+      return (await FirebaseRestClient.verifyPasswordResetCode(oobCode)).email;
+    }
+    catch(error) {
+      throw error // idk what to do here tbh!
+    }
+  }
+
+  async confirmPasswordReset( // might not wanna do boolean return ?????
+    oobCode: string,
+    newPassword: string
+  ): Promise<boolean> {
+    try {
+      await FirebaseRestClient.confirmPasswordReset(oobCode, newPassword);
+      return true
+    } catch(error) {
+      return false
     }
   }
 }
