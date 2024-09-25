@@ -120,4 +120,29 @@ authRouter.post(
   },
 );
 
+authRouter.post("/verifyPasswordCode", 
+  async (req, res) => {
+    try {
+      await authService.verifyPasswordResetCode(req.body.oobCode)
+      res.status(204)
+    } catch (error: unknown) {
+
+    }
+  }
+)
+
+authRouter.post(
+  "/firstTimePasswordChange/", 
+  async (req, res) => {
+    try {
+      await authService.firstTimePasswordChange(req.body.oobCode, req.body.newPassword )
+      res.status(204).send()
+    } catch (error: unknown) {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  }
+)
+// is this too specific to be a route
+authRouter.post("/getEmailFromOobCode")
+
 export default authRouter;
