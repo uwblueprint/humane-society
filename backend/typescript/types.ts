@@ -23,6 +23,7 @@ export type UserDTO = {
   phoneNumber?: string | null;
 };
 
+
 export type CreateUserDTO = Omit<UserDTO, "id"> & { password: string };
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
@@ -68,3 +69,14 @@ export type NodemailerConfig = {
 };
 
 export type SignUpMethod = "PASSWORD" | "GOOGLE";
+
+export type TeamRole = "PM" | "DESIGNER" | "PL" | "DEVELOPER";
+
+export type TeamMemberDTO = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  teamRole: TeamRole;
+};
+
+export type CreateTeamMemberDTO  = Omit<TeamMemberDTO, "id">;
