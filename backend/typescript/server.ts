@@ -11,6 +11,7 @@ import activityRouter from "./rest/activityRoutes";
 import behaviourRouter from "./rest/behaviourRoutes";
 import animalTypeRouter from "./rest/animalTypeRoutes";
 import entityRouter from "./rest/entityRoutes";
+import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 
@@ -39,6 +40,7 @@ app.use("/activities", activityRouter);
 app.use("/animal-types", animalTypeRouter);
 app.use("/behaviours", behaviourRouter);
 app.use("/entities", entityRouter);
+app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

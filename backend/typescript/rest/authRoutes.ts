@@ -13,6 +13,7 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { getErrorMessage } from "../utilities/errorUtils";
+import { Role, UserStatus } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -51,7 +52,8 @@ authRouter.post("/register", registerRequestValidator, async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      roleId: req.body.roleId,
+      role: req.body.role ?? Role.VOLUNTEER,
+      status: req.body.status ?? UserStatus.ACTIVE, // TODO: make this default to inactive once user registration flow is done
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
@@ -65,7 +67,7 @@ authRouter.post("/register", registerRequestValidator, async (req, res) => {
     );
     const { refreshToken, ...rest } = authDTO;
 
-    await authService.sendEmailVerificationLink(req.body.email);
+    // await authService.sendEmailVerificationLink(req.body.email); // TODO: Uncomment once email service is ready
 
     res
       .cookie("refreshToken", refreshToken, cookieOptions)

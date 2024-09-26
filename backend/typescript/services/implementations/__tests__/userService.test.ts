@@ -3,7 +3,7 @@ import { snakeCase } from "lodash";
 import UserModel from "../../../models/user.model";
 import UserService from "../userService";
 
-import { RoleId, UserDTO, DTOTypes } from "../../../types";
+import { UserDTO, Role, UserStatus } from "../../../types";
 
 import { testSql } from "../../../testUtils/testDb";
 
@@ -12,13 +12,15 @@ const testUsers = [
     firstName: "Peter",
     lastName: "Pan",
     authId: "123",
-    roleId: RoleId.Administrator,
+    role: Role.ADMINISTRATOR,
+    status: UserStatus.ACTIVE,
   },
   {
     firstName: "Wendy",
     lastName: "Darling",
     authId: "321",
-    roleId: RoleId.Staff,
+    role: Role.STAFF,
+    status: UserStatus.ACTIVE,
   },
 ];
 
@@ -44,7 +46,7 @@ describe("pg userService", () => {
 
   it("getUsers", async () => {
     const users = testUsers.map((user) => {
-      const userSnakeCase: DTOTypes = {};
+      const userSnakeCase: Record<string, string> = {};
       Object.entries(user).forEach(([key, value]) => {
         userSnakeCase[snakeCase(key)] = value;
       });
@@ -58,7 +60,7 @@ describe("pg userService", () => {
     res.forEach((user: UserDTO, i) => {
       expect(user.firstName).toEqual(testUsers[i].firstName);
       expect(user.lastName).toEqual(testUsers[i].lastName);
-      expect(user.roleId).toEqual(testUsers[i].roleId);
+      expect(user.role).toEqual(testUsers[i].role);
     });
   });
 });

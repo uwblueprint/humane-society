@@ -1,9 +1,13 @@
 export type AuthenticatedUser = {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
-  role: "Admin" | "User";
+  role: string;
+  skillLevel?: number | null;
+  canSeeAllLogs?: boolean | null;
+  canAssignUsersToTasks?: boolean | null;
+  phoneNumber?: string | null;
   accessToken: string;
 } | null;
 

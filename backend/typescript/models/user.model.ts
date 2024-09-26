@@ -3,10 +3,9 @@ import {
   DataType,
   Model,
   Table,
-  ForeignKey,
-  BelongsTo,
+  AllowNull,
 } from "sequelize-typescript";
-import Role from "./role.model";
+import { Role, UserStatus } from "../types";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -19,11 +18,8 @@ export default class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   auth_id!: string;
 
-  @ForeignKey(() => Role)
-  @Column({ type: DataType.INTEGER })
-  role_id!: number;
-
-  @BelongsTo(() => Role)
+  @AllowNull(false)
+  @Column({ type: DataType.ENUM(...Object.values(Role)), allowNull: false })
   role!: Role;
 
   @Column({ type: DataType.STRING, allowNull: false })
@@ -40,4 +36,7 @@ export default class User extends Model {
 
   @Column({ type: DataType.STRING })
   phone_number?: string | null;
+
+  @Column({ type: DataType.ENUM("Active", "Inactive"), allowNull: false })
+  status!: UserStatus;
 }
