@@ -123,26 +123,26 @@ authRouter.post(
 authRouter.post("/verifyPasswordCode", 
   async (req, res) => {
     try {
-      await authService.verifyPasswordResetCode(req.body.oobCode)
-      res.status(204)
-    } catch (error: unknown) {
-
-    }
-  }
-)
-
-authRouter.post(
-  "/firstTimePasswordChange/", 
-  async (req, res) => {
-    try {
-      await authService.firstTimePasswordChange(req.body.oobCode, req.body.newPassword )
-      res.status(204).send()
+      const email = await authService.verifyPasswordResetCode(req.body.oobCode)
+      res.status(200).json({email: email})
     } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 )
-// is this too specific to be a route
-authRouter.post("/getEmailFromOobCode")
 
+authRouter.post("/confirmPasswordRest",
+  async (req, res) => {
+    try {
+      const wasResetSuccessful = await authService.confirmPasswordReset(req.body.oobCode, req.body.newPassword)
+      if (wasResetSuccessful) {
+        res.status(204).send()
+      } else {
+        res.status(500).json({ error: "Error from Firebase while resetting password."});
+      }
+    } catch (error) {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  }
+)
 export default authRouter;
