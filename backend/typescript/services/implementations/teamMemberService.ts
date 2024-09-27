@@ -19,7 +19,7 @@ class TeamMemberService implements ITeamMemberService {
             }));
         } catch (error: unknown) {
             Logger.error(
-              `Failed to retrieve team members. Reason = ${getErrorMessage(error)}`,
+                `Failed to retrieve team members. Reason = ${getErrorMessage(error)}`,
             );
             throw error;
         }
@@ -33,12 +33,12 @@ class TeamMemberService implements ITeamMemberService {
                 lastName: teamMember.lastName,
                 teamRole: teamMember.teamRole,
             });
-        } 
+        }
         catch (error: unknown) {
             Logger.error(
                 `Failed to retrieve team members. Reason = ${getErrorMessage(error)}`,
-              );
-        throw new Error("Failed to create team member");
+            );
+            throw new Error("Failed to create team member");
         }
         return {
             id: newTeamMember.id,
