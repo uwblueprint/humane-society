@@ -23,7 +23,6 @@ export type UserDTO = {
   phoneNumber?: string | null;
 };
 
-
 export type CreateUserDTO = Omit<UserDTO, "id"> & { password: string };
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
@@ -79,4 +78,4 @@ export type TeamMemberDTO = {
   teamRole: TeamRole;
 };
 
-export type CreateTeamMemberDTO  = Omit<TeamMemberDTO, "id">;
+export type CreateTeamMemberDTO = Omit<TeamMemberDTO, "id">;
