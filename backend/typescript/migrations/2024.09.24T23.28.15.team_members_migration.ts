@@ -16,13 +16,13 @@ export const up: Migration = async ({ context: sequelize }) => {
       allowNull: false,
     },
     lastName: {
-        type: DataType.STRING,
-        allowNull: false,
-      },
-      teamRole: {
-        type: DataType.ENUM("PM", "DESIGNER", "PL", "DEVELOPER"),
-        allowNull: false,
-      }
+      type: DataType.STRING,
+      allowNull: false,
+    },
+    teamRole: {
+      type: DataType.ENUM("PM", "DESIGNER", "PL", "DEVELOPER"),
+      allowNull: false,
+    }
   });
 };
 
