@@ -2,12 +2,8 @@ import { Router } from "express";
 
 import { createTeamMemberDtoValidator } from "../middlewares/validators/teamMemberValidators";
 import TeamMemberService from "../services/implementations/teamMemberService";
-import { TeamRole, TeamMemberDTO, CreateTeamMemberDTO } from "../types";
-import {
-  getErrorMessage,
-  NotFoundError,
-  INTERNAL_SERVER_ERROR_MESSAGE,
-} from "../utilities/errorUtils";
+import { CreateTeamMemberDTO } from "../types";
+import { getErrorMessage } from "../utilities/errorUtils";
 import ITeamMemberService from "../services/interfaces/teamMemberService";
 
 const teamMemberRouter: Router = Router();
@@ -23,7 +19,7 @@ teamMemberRouter.get("/", async (req, res) => {
 });
 
 teamMemberRouter.post("/", createTeamMemberDtoValidator, async (req, res) => {
-  let data: CreateTeamMemberDTO = req.body;
+  const data: CreateTeamMemberDTO = req.body;
   try {
     const newUser = await teamMemberService.createTeamMember(data);
     res.status(201).json(newUser);

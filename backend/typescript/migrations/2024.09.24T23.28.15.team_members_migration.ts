@@ -1,5 +1,5 @@
-import { Migration } from "../umzug";
 import { DataType } from "sequelize-typescript";
+import { Migration } from "../umzug";
 
 const TABLE_NAME = "team_members";
 

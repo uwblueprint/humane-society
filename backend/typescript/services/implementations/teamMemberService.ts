@@ -8,6 +8,8 @@ const Logger = logger(__filename);
 
 class TeamMemberService implements ITeamMemberService {
   private teamMembers: TeamMemberDTO[] = [];
+
+  // eslint-disable-next-line class-methods-use-this
   async getTeamMembers(): Promise<TeamMemberDTO[]> {
     try {
       const teamMembers: Array<PgTeamMember> = await PgTeamMember.findAll();
@@ -25,6 +27,7 @@ class TeamMemberService implements ITeamMemberService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async createTeamMember(
     teamMember: CreateTeamMemberDTO,
   ): Promise<TeamMemberDTO> {
