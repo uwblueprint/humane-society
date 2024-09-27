@@ -123,11 +123,13 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.NOTIFICATIONS_PAGE}
                 component={NotificationsPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact
                 path={Routes.PROFILE_PAGE}
                 component={ProfilePage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact
