@@ -1,4 +1,4 @@
-import { Migration } from '../umzug';
+import { Migration } from "../umzug";
 import { DataType } from "sequelize-typescript";
 
 const TABLE_NAME = "team_members";
@@ -22,10 +22,9 @@ export const up: Migration = async ({ context: sequelize }) => {
     teamRole: {
       type: DataType.ENUM("PM", "DESIGNER", "PL", "DEVELOPER"),
       allowNull: false,
-    }
+    },
   });
 };
-
 
 export const down: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().dropTable(TABLE_NAME);

@@ -1,14 +1,12 @@
 import { Router } from "express";
 
-import {
-    createTeamMemberDtoValidator ,
-} from "../middlewares/validators/teamMemberValidators";
+import { createTeamMemberDtoValidator } from "../middlewares/validators/teamMemberValidators";
 import TeamMemberService from "../services/implementations/teamMemberService";
 import { TeamRole, TeamMemberDTO, CreateTeamMemberDTO } from "../types";
 import {
-    getErrorMessage,
-    NotFoundError,
-    INTERNAL_SERVER_ERROR_MESSAGE,
+  getErrorMessage,
+  NotFoundError,
+  INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import ITeamMemberService from "../services/interfaces/teamMemberService";
 
@@ -24,14 +22,14 @@ teamMemberRouter.get("/", async (req, res) => {
   }
 });
 
-teamMemberRouter.post("/", createTeamMemberDtoValidator , async (req, res) => {
-    let data: CreateTeamMemberDTO = req.body
-    try {
-        const newUser = await teamMemberService.createTeamMember(data);
-        res.status(201).json(newUser);
-    } catch (error: unknown) {
-        res.status(500).json({ error: getErrorMessage(error) });
-    }
+teamMemberRouter.post("/", createTeamMemberDtoValidator, async (req, res) => {
+  let data: CreateTeamMemberDTO = req.body;
+  try {
+    const newUser = await teamMemberService.createTeamMember(data);
+    res.status(201).json(newUser);
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
+  }
 });
 
 export default teamMemberRouter;
