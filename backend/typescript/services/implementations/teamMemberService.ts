@@ -8,15 +8,14 @@ const Logger = logger(__filename);
 
 class TeamMemberService implements ITeamMemberService {
     private teamMembers: TeamMemberDTO[] = [];
-
     async getTeamMembers(): Promise<TeamMemberDTO[]> {
         try {
             const teamMembers: Array<PgTeamMember> = await PgTeamMember.findAll();
             return teamMembers.map((teamMember) => ({
                 id: teamMember.id,
-                firstName: teamMember.first_name,
-                lastName: teamMember.last_name,
-                teamRole: teamMember.team_role,
+                firstName: teamMember.firstName,
+                lastName: teamMember.lastName,
+                teamRole: teamMember.teamRole,
             }));
         } catch (error: unknown) {
             Logger.error(
@@ -30,9 +29,9 @@ class TeamMemberService implements ITeamMemberService {
         let newTeamMember: PgTeamMember | null;
         try {
             newTeamMember = await PgTeamMember.create({
-                first_name: teamMember.firstName,
-                last_name: teamMember.lastName,
-                team_role: teamMember.teamRole,
+                firstName: teamMember.firstName,
+                lastName: teamMember.lastName,
+                teamRole: teamMember.teamRole,
             });
         } 
         catch (error: unknown) {
@@ -43,9 +42,9 @@ class TeamMemberService implements ITeamMemberService {
         }
         return {
             id: newTeamMember.id,
-            firstName: newTeamMember.first_name,
-            lastName: newTeamMember.last_name,
-            teamRole: newTeamMember.team_role,
+            firstName: newTeamMember.firstName,
+            lastName: newTeamMember.lastName,
+            teamRole: newTeamMember.teamRole,
         }
     }
 }

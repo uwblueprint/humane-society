@@ -7,16 +7,16 @@ import {
   } from "sequelize-typescript";
   import { TeamRole } from "../types";
   
-  @Table({ tableName: "team_members" })
+  @Table({ timestamps: false, tableName: "team_members" })
   export default class User extends Model {
     @Column({ type: DataType.STRING, allowNull: false })
-    first_name!: string;
+    firstName!: string;
   
     @Column({ type: DataType.STRING, allowNull: false })
-    last_name!: string;
+    lastName!: string;
   
     @AllowNull(false)
     @Column({ type: DataType.ENUM("PM", "DESIGNER", "PL", "DEVELOPER"), allowNull: false })
-    team_role!: TeamRole;
+    teamRole!: TeamRole;
   }
   

@@ -6,7 +6,7 @@ const TABLE_NAME = "team_members";
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
     id: {
-      type: DataType.STRING,
+      type: DataType.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
@@ -20,11 +20,12 @@ export const up: Migration = async ({ context: sequelize }) => {
         allowNull: false,
       },
       teamRole: {
-        type: DataType.STRING,
+        type: DataType.ENUM("PM", "DESIGNER", "PL", "DEVELOPER"),
         allowNull: false,
       }
   });
 };
+
 
 export const down: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().dropTable(TABLE_NAME);
