@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import {
-    createUserDtoValidator,
+    createTeamMemberDtoValidator ,
 } from "../middlewares/validators/teamMemberValidators";
 import TeamMemberService from "../services/implementations/teamMemberService";
 import { TeamRole, TeamMemberDTO, CreateTeamMemberDTO } from "../types";
@@ -16,22 +16,15 @@ const teamMemberRouter: Router = Router();
 const teamMemberService: ITeamMemberService = new TeamMemberService();
 
 teamMemberRouter.get("/", async (req, res) => {
-    const { userId, email } = req.query;
-    const contentType = req.headers["content-type"];
-    try {
-        const teamMemebers = await teamMemberService.getTeamMembers();
-        res.status(200).json(teamMemebers);
-    } catch (error: unknown) {
-        if (error instanceof NotFoundError) {
-            res.status(404).send(getErrorMessage(error));
-        } else {
-            res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
-        }
-    }
-}
-);
+  try {
+    const teamMembers = await teamMemberService.getTeamMembers();
+    res.status(200).json(teamMembers);
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
+  }
+});
 
-teamMemberRouter.post("/", createUserDtoValidator, async (req, res) => {
+teamMemberRouter.post("/", createTeamMemberDtoValidator , async (req, res) => {
     let data: CreateTeamMemberDTO = req.body
     try {
         const newUser = await teamMemberService.createTeamMember(data);

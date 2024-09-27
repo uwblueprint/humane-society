@@ -30,6 +30,7 @@ import NotificationsPage from "./components/pages/NotificationsPage";
 import ProfilePage from "./components/pages/ProfilePage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import TeamMembersPage from "./components/pages/TeamMembersPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -59,6 +60,7 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <Route exact path={Routes.TEAM_MEMBERS} component={TeamMembersPage} />
               <PrivateRoute
                 exact
                 path={Routes.HOME_PAGE}

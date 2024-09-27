@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { getApiValidationError, validatePrimitive } from "./util";
 
-export const createUserDtoValidator = async (
+export const createTeamMemberDtoValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
