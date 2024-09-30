@@ -14,6 +14,7 @@ import entityRouter from "./rest/entityRoutes";
 import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
+import teamMemberRouter from "./rest/teamMemberRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -62,3 +63,5 @@ app.listen({ port: process.env.PORT || 8080 }, () => {
   /* eslint-disable-next-line no-console */
   console.info(`Server is listening on port ${process.env.PORT || 8080}!`);
 });
+
+app.use("/team-member", teamMemberRouter);
