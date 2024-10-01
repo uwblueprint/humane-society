@@ -53,7 +53,6 @@ const App = (): React.ReactElement => {
         <AuthContext.Provider
           value={{ authenticatedUser, setAuthenticatedUser }}
         >
-          <Route exact path={Routes.TEAM_MEMBERS} component={TeamMembersPage} />
           <Router>
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
