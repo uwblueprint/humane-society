@@ -30,6 +30,7 @@ import NotificationsPage from "./components/pages/NotificationsPage";
 import ProfilePage from "./components/pages/ProfilePage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import UserManagementPage from "./components/pages/UserManagementPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -133,13 +134,15 @@ const App = (): React.ReactElement => {
               />
               <PrivateRoute
                 exact
-                path={Routes.NOTIFICATIONS_PAGE}
-                component={NotificationsPage}
+                path={Routes.ADMIN_PAGE}
+                component={Default}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
-                path={Routes.PROFILE_PAGE}
-                component={ProfilePage}
+                path={Routes.USER_MANAGEMENT_PAGE}
+                component={UserManagementPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <Route exact path="*" component={NotFound} />
             </Switch>
