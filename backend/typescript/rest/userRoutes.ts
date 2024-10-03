@@ -157,6 +157,21 @@ userRouter.delete("/", async (req, res) => {
     return;
   }
 
+  const accessToken = getAccessToken(req);
+  if (!accessToken) {
+    res.status(404).json({ error: "Access token not found" });
+    return;
+  }
+
+  const isAdministrator = await authService.isAuthorizedByRole(
+    accessToken,
+    new Set([Role.ADMINISTRATOR]),
+  );
+  if (!isAdministrator) {
+    res.status(403).json({ error: "Not authorized to delete user" });
+    return;
+  }
+
   if (userId) {
     if (typeof userId !== "string") {
       res
@@ -166,10 +181,22 @@ userRouter.delete("/", async (req, res) => {
       res.status(400).json({ error: "Invalid user ID" });
     } else {
       try {
+        const user: UserDTO = await userService.getUserById(userId);
+        if (user.status === "Active") {
+          res.status(400).json({
+            error:
+              "user status must be 'Inactive' or 'Invited' before deletion.",
+          });
+          return;
+        }
         await userService.deleteUserById(Number(userId));
         res.status(204).send();
       } catch (error: unknown) {
-        res.status(500).json({ error: getErrorMessage(error) });
+        if (error instanceof NotFoundError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
       }
     }
     return;
@@ -182,6 +209,13 @@ userRouter.delete("/", async (req, res) => {
         .json({ error: "email query parameter must be a string." });
     } else {
       try {
+        const user: UserDTO = await userService.getUserByEmail(email);
+        if (user.status === "Active") {
+          res.status(400).json({
+            error: "user status must be 'Inactive' or 'Invited' for deletion.",
+          });
+          return;
+        }
         await userService.deleteUserByEmail(email);
         res.status(204).send();
       } catch (error: unknown) {
