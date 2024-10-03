@@ -62,6 +62,8 @@ userRouter.get("/", async (req, res) => {
       res
         .status(400)
         .json({ error: "userId query parameter must be a string." });
+    } else if (Number.isNaN(Number(userId))) {
+      res.status(400).json({ error: "Invalid user ID" });
     } else {
       try {
         const user = await userService.getUserById(userId);
@@ -87,7 +89,11 @@ userRouter.get("/", async (req, res) => {
         const user = await userService.getUserByEmail(email);
         res.status(200).json(user);
       } catch (error: unknown) {
-        res.status(500).json({ error: getErrorMessage(error) });
+        if (error instanceof NotFoundError) {
+          res.status(404).send(getErrorMessage(error));
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
       }
     }
   }
