@@ -14,6 +14,7 @@ import entityRouter from "./rest/entityRoutes";
 import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
+import teamMemberRouter from "./rest/teamMemberRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -44,6 +45,7 @@ app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/team-member", teamMemberRouter);
 
 sequelize.authenticate();
 
