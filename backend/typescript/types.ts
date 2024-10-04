@@ -25,7 +25,7 @@ export type UserDTO = {
 
 export type CreateUserDTO = Omit<UserDTO, "id"> & { password: string };
 
-export type UpdateUserDTO = Partial<Omit<UserDTO, "id">>;
+export type UpdateUserDTO = Omit<UserDTO, "id">;
 
 export type RegisterUserDTO = Omit<CreateUserDTO, "role">;
 
