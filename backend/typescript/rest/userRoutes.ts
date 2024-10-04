@@ -107,7 +107,7 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       lastName: req.body.lastName,
       email: req.body.email,
       role: req.body.role ?? Role.VOLUNTEER,
-      status: UserStatus.INVITED, // TODO: make this default to inactive once user registration flow is done
+      status: UserStatus.INVITED,
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
