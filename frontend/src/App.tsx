@@ -28,9 +28,10 @@ import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
 import NotificationsPage from "./components/pages/NotificationsPage";
 import ProfilePage from "./components/pages/ProfilePage";
+import UserManagementPage from "./components/pages/UserManagementPage";
+import AdminPage from "./components/pages/AdminPage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
-import UserManagementPage from "./components/pages/UserManagementPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -135,7 +136,7 @@ const App = (): React.ReactElement => {
               <PrivateRoute
                 exact
                 path={Routes.ADMIN_PAGE}
-                component={Default}
+                component={AdminPage}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
