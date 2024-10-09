@@ -7,7 +7,7 @@ import YAML from "yamljs";
 
 import { sequelize } from "./models";
 import authRouter from "./rest/authRoutes";
-import activityRouter from "./rest/activityRoutes";
+import activityTypeRouter from "./rest/activityTypeRoutes";
 import behaviourRouter from "./rest/behaviourRoutes";
 import animalTypeRouter from "./rest/animalTypeRoutes";
 import entityRouter from "./rest/entityRoutes";
@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
-app.use("/activities", activityRouter);
+app.use("/activity-types", activityTypeRouter);
 app.use("/animal-types", animalTypeRouter);
 app.use("/behaviours", behaviourRouter);
 app.use("/entities", entityRouter);
