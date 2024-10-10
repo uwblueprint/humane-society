@@ -20,4 +20,6 @@ export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 
 export const HOOKS_PAGE = "/hooks";
 
+export const TEAM_MEMBERS_PAGE = "/team-members";
+
 export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes

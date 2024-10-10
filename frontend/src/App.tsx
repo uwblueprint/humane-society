@@ -28,6 +28,7 @@ import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import TeamMembersPage from "./components/pages/TeamMembersPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -115,6 +116,12 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.DEV_UTILITY_PAGE}
                 component={Default}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.TEAM_MEMBERS_PAGE}
+                component={TeamMembersPage}
                 allowedRoles={AuthConstants.ALL_ROLES}
               />
               <Route exact path="*" component={NotFound} />

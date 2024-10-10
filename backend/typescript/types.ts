@@ -23,7 +23,16 @@ export type UserDTO = {
   phoneNumber?: string | null;
 };
 
+export type TeamMemberDTO = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  teamRole: TeamRole;
+};
+
 export type CreateUserDTO = Omit<UserDTO, "id"> & { password: string };
+
+export type CreateTeamMemberDTO = Omit<TeamMemberDTO, "id">;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
@@ -32,6 +41,12 @@ export type RegisterUserDTO = Omit<CreateUserDTO, "role">;
 export type AuthDTO = Token & UserDTO;
 
 export type Letters = "A" | "B" | "C" | "D";
+
+const teamRoleValues = ["PM", "DESIGNER", "PL", "DEVELOPER"] as const;
+
+export const teamRoleEnum: TeamRole[] = [...teamRoleValues];
+
+export type TeamRole = typeof teamRoleValues[number];
 
 const sexValues = ["M", "F"] as const;
 
