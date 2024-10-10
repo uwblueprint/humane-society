@@ -10,10 +10,10 @@ import User from "./user.model";
 import Pet from "./pet.model";
 import ActivityType from "./activityType.model";
 
-@Table({ timestamps: false, tableName: "user_pet_activities" })
+@Table({ timestamps: false, tableName: "activities" })
 export default class Activity extends Model {
   @Column({})
-  user_pet_activity_id!: number;
+  activity_id!: number;
 
   @ForeignKey(() => User) // in case of null, task has not been assigned
   @Column({})

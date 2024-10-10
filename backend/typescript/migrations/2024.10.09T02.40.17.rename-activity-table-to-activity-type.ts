@@ -4,6 +4,7 @@ import { Migration } from "../umzug";
 const OLD_TABLE_NAME = "activities";
 const NEW_TABLE_NAME = "activity_types";
 const USER_PET_ACTIVITIES_TABLE = "user_pet_activities";
+const ACTIVITIES_TABLE = "activities";
 
 export const up: Migration = async ({ context: sequelize }) => {
   // Rename the activities table to activity_types
@@ -27,9 +28,19 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
     });
+
+  // Change the name of user_pet_activities to activities
+  await sequelize
+    .getQueryInterface()
+    .renameTable(USER_PET_ACTIVITIES_TABLE, ACTIVITIES_TABLE);
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
+  // Rename the activities table back to user_pet_activities
+  await sequelize
+    .getQueryInterface()
+    .renameTable(ACTIVITIES_TABLE, USER_PET_ACTIVITIES_TABLE);
+
   // Rename the activity_types table back to activities
   await sequelize
     .getQueryInterface()
