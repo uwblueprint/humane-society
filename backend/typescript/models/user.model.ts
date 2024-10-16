@@ -4,8 +4,11 @@ import {
   Model,
   Table,
   AllowNull,
+  BelongsToMany,
 } from "sequelize-typescript";
 import { Role, UserStatus } from "../types";
+import AnimalType from "./animalType.model";
+import UserAnimalType from "./userAnimalType.model";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -39,4 +42,7 @@ export default class User extends Model {
 
   @Column({ type: DataType.ENUM("Active", "Inactive"), allowNull: false })
   status!: UserStatus;
+
+  @BelongsToMany(() => AnimalType, () => UserAnimalType)
+  animalTypes!: AnimalType[];
 }
