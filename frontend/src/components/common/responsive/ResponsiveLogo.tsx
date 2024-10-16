@@ -12,7 +12,7 @@ const ResponsiveLogo = (): React.ReactElement => {
     >
       <Image
         src="/images/humane_society_logo_text.png"
-        alt="Humane Societsy Logo"
+        alt="Humane Society Logo"
         height={{ base: "6.5rem", md: "9rem" }}
         aspectRatio="27.3/14"
         objectFit="cover"
