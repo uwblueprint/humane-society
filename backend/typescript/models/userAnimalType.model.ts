@@ -16,7 +16,7 @@ import AnimalType from './animalType.model';
 export default class UserAnimalType extends Model<UserAnimalType> {
   @ForeignKey(() => User)
   @PrimaryKey
-  @Column({ type:DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   user_id!: number;
 
   @ForeignKey(() => AnimalType)

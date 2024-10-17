@@ -7,8 +7,7 @@ import {
   BelongsToMany,
 } from "sequelize-typescript";
 import { Role, UserStatus } from "../types";
-import AnimalType from "./animalType.model";
-import UserAnimalType from "./userAnimalType.model";
+import type AnimalType from "./animalType.model";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -43,6 +42,9 @@ export default class User extends Model {
   @Column({ type: DataType.ENUM("Active", "Inactive"), allowNull: false })
   status!: UserStatus;
 
-  @BelongsToMany(() => AnimalType, () => UserAnimalType)
+  @BelongsToMany(
+    () => import("./animalType.model").then((mod) => mod.default),
+    () => import("./userAnimalType.model").then((mod) => mod.default),
+  )
   animalTypes!: AnimalType[];
 }
