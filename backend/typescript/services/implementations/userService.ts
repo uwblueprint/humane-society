@@ -240,6 +240,7 @@ class UserService implements IUserService {
         {
           first_name: user.firstName,
           last_name: user.lastName,
+          email: user.email,
           role: user.role,
           status: user.status,
           skill_level: user.skillLevel,
@@ -274,6 +275,7 @@ class UserService implements IUserService {
             {
               first_name: oldUser.first_name,
               last_name: oldUser.last_name,
+              email: oldUser.email,
               role: oldUser.role,
               status: oldUser.status,
               skill_level: oldUser.skill_level,
