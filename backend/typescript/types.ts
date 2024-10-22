@@ -33,6 +33,8 @@ export type AuthDTO = Token & UserDTO;
 
 export type Letters = "A" | "B" | "C" | "D";
 
+export type BehaviourLevel = 1 | 2 | 3 | 4;
+
 const sexValues = ["M", "F"] as const;
 
 export const sexEnum: Sex[] = [...sexValues];
