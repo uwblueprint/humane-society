@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, Token, UserStatus } from "../../types";
+import { AuthDTO, Role, Token } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -58,18 +58,12 @@ class AuthService implements IAuthService {
         /* eslint-disable-next-line no-empty */
       } catch (error) {}
 
-      const user = await this.userService.createUser(
-        {
-          firstName: googleUser.firstName,
-          lastName: googleUser.lastName,
-          email: googleUser.email,
-          role: Role.STAFF,
-          status: UserStatus.ACTIVE,
-          password: "",
-        },
-        googleUser.localId,
-        "GOOGLE",
-      );
+      const user = await this.userService.createUser({
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        email: googleUser.email,
+        role: Role.STAFF,
+      });
 
       return { ...token, ...user };
     } catch (error) {
@@ -175,12 +169,11 @@ class AuthService implements IAuthService {
       const userRole = await this.userService.getUserRoleByAuthId(
         decodedIdToken.uid,
       );
+      // const firebaseUser = await firebaseAdmin
+      //   .auth()
+      //   .getUser(decodedIdToken.uid);
 
-      const firebaseUser = await firebaseAdmin
-        .auth()
-        .getUser(decodedIdToken.uid);
-
-      return firebaseUser.emailVerified && roles.has(userRole);
+      return /* firebaseUser.emailVerified && */ roles.has(userRole);
     } catch (error) {
       return false;
     }
