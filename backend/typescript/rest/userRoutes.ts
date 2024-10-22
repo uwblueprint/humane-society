@@ -12,7 +12,7 @@ import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { Role, UserDTO, UserStatus } from "../types";
+import { Role, UserDTO } from "../types";
 import {
   getErrorMessage,
   NotFoundError,
@@ -99,6 +99,7 @@ userRouter.get("/", async (req, res) => {
   }
 });
 
+// This endpoint is for testing purposes
 /* Create a user */
 userRouter.post("/", createUserDtoValidator, async (req, res) => {
   try {
@@ -106,16 +107,14 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      role: req.body.role ?? Role.VOLUNTEER,
-      status: UserStatus.INVITED,
+      role: req.body.role,
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
       phoneNumber: req.body.phoneNumber ?? null,
-      password: req.body.password,
     });
 
-    await authService.sendEmailVerificationLink(req.body.email);
+    // await authService.sendEmailVerificationLink(req.body.email);
 
     res.status(201).json(newUser);
   } catch (error: unknown) {

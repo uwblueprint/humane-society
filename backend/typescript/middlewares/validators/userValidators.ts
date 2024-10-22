@@ -19,9 +19,6 @@ export const createUserDtoValidator = async (
   if (!validatePrimitive(req.body.role, "string")) {
     return res.status(400).send(getApiValidationError("role", "string"));
   }
-  if (!validatePrimitive(req.body.password, "string")) {
-    return res.status(400).send(getApiValidationError("password", "string"));
-  }
   if (
     req.body.skillLevel !== undefined &&
     req.body.skillLevel !== null &&
