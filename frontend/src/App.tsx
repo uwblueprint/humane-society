@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Default from "./components/pages/Default";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
+import ForgotPasswordPage from "./components/pages/ForgotPassword"
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./components/pages/CreatePage";
 import PetListPage from "./components/pages/PetListPage";
@@ -59,6 +60,12 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <PrivateRoute
+                exact
+                path={Routes.FORGOT_PASSWORD_PAGE}
+                component={ForgotPasswordPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
               <PrivateRoute
                 exact
                 path={Routes.HOME_PAGE}
