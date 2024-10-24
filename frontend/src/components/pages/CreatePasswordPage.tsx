@@ -32,14 +32,22 @@ const CreatePasswordPage = (): React.ReactElement => {
     setShowModal(true);
   };
   return (
-    <Box width="100vw" height="100vh" position="relative" overflow="hidden">
-      <Center width="100%" height="100%">
+    <Flex maxWidth="100vw" height="100vh" position="relative"
+    sx={{
+      '@media (orientation: landscape)': {
+        height: 'auto',       // Adjust height in landscape
+        minHeight: '100vh',   // Ensure it is at least viewport height
+        overflowY: 'auto',    // Enable scrolling in landscape
+      }
+    }}>
+      <Center flex="1">
         <ResponsivePawprintBackground />
         <Flex
           gap="2.2rem"
           direction="column"
           justify="center"
           alignItems="center"
+          padding="1rem"
         >
           <ResponsiveLogo />
           <ResponsiveAuthContainer>
@@ -139,7 +147,7 @@ const CreatePasswordPage = (): React.ReactElement => {
           </Button>
         </ResponsiveModalWindow>
       )}
-    </Box>
+    </Flex>
   );
 };
 
