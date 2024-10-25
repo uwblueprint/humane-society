@@ -29,6 +29,8 @@ import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
 import NotificationsPage from "./components/pages/NotificationsPage";
 import ProfilePage from "./components/pages/ProfilePage";
+import UserManagementPage from "./components/pages/UserManagementPage";
+import AdminPage from "./components/pages/AdminPage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 
@@ -137,6 +139,18 @@ const App = (): React.ReactElement => {
                 path={Routes.PROFILE_PAGE}
                 component={ProfilePage}
                 allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.ADMIN_PAGE}
+                component={AdminPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.USER_MANAGEMENT_PAGE}
+                component={UserManagementPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <Route exact path="*" component={NotFound} />
             </Switch>

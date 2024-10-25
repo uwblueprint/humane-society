@@ -27,3 +27,7 @@ export const NOTIFICATIONS_PAGE = "/notifications";
 export const PROFILE_PAGE = "/profile";
 
 export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes
+
+export const USER_MANAGEMENT_PAGE = "/admin/users";
+
+export const ADMIN_PAGE = "/admin";
