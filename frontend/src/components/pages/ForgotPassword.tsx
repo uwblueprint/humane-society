@@ -28,6 +28,8 @@ const ForgotPassword = (): React.ReactElement => {
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
     } else if (sentEmails.some(item => item.email === userEmail)) {
+      setValidUser(true);
+      setSentEmail(false);
       setSentEmailToUser(true);
     } else {
       // make API call to check if user exists
@@ -46,16 +48,15 @@ const ForgotPassword = (): React.ReactElement => {
           (item: SentEmail) => item.email !== userEmail
         );
         localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
+        setSentEmailToUser(false)
       }, 60000);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (sentEmail) {
-      setSentEmail(false);
-    } else if (sentEmailToUser) {
-      setSentEmailToUser(false)
-    }
+    setValidUser(true)
+    setSentEmail(false);
+    setSentEmailToUser(false);
     setUserEmaild(e.target.value);
   };
 
@@ -172,7 +173,7 @@ const ForgotPassword = (): React.ReactElement => {
             lineHeight="120%"
             marginTop="16px"
           >
-            You have already sent an email to this user
+            You have already sent an email to this user.
           </Text>
         )}
       </Box>
