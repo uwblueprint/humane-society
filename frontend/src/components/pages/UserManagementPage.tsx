@@ -17,17 +17,19 @@ import MainPageButton from "../common/MainPageButton";
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
 
-  const fetchUsers = async () => {
+  const getUsers = async () => {
     try {
       const fetchedUsers = await UserAPIClient.get();
-      setUsers(fetchedUsers);
+      if (fetchedUsers != null) {
+        setUsers(fetchedUsers);
+      }
     } catch (error) {
       /* empty */
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    getUsers();
   }, []);
 
   return (
@@ -54,7 +56,7 @@ const UserManagementPage = (): React.ReactElement => {
             </Tbody>
           </Table>
         </TableContainer>
-        <Button onClick={fetchUsers}>Refresh</Button>
+        <Button onClick={getUsers}>Refresh</Button>
         <MainPageButton />
       </VStack>
     </div>

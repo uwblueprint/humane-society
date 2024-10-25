@@ -1,26 +1,20 @@
-import axios from "axios";
 import { User } from "../types/UserTypes";
-import { getLocalStorageObj } from "../utils/LocalStorageUtils";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-
-const baseURL = process.env.REACT_APP_BACKEND_URL;
+import baseAPIClient from "./BaseAPIClient";
+import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 
 const get = async (): Promise<User[]> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
   try {
-    const currentUser: { accessToken?: string } =
-      getLocalStorageObj(AUTHENTICATED_USER_KEY) || {};
-    const accessToken = currentUser?.accessToken;
-
-    const { data } = await axios.get(`${baseURL}/users`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      withCredentials: true,
+    const { data } = await baseAPIClient.get("/users", {
+      headers: { Authorization: bearerToken },
     });
-
     return data;
   } catch (error) {
-    throw new Error(`Failed to get users: ${error}`);
+    throw new Error(`Failed to get entity: ${error}`);
   }
 };
 
