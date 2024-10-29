@@ -24,7 +24,7 @@ const UserManagementPage = (): React.ReactElement => {
         setUsers(fetchedUsers);
       }
     } catch (error) {
-      /* empty */
+      /* TODO: error handling */
     }
   };
 
@@ -34,7 +34,7 @@ const UserManagementPage = (): React.ReactElement => {
 
   return (
     <div style={{ textAlign: "center", width: "75%", margin: "0px auto" }}>
-      <h1>Team Members Page</h1>
+      <h1>User Management Page</h1>
       <VStack spacing="24px" style={{ margin: "24px auto" }}>
         <TableContainer>
           <Table variant="simple">
