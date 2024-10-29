@@ -9,6 +9,10 @@ const Logo = (): React.ReactElement => {
         boxSize={{ base: "2.9rem", md: "5rem" }}
         src="images/humane_society_logo.png"
         alt="Logo"
+<<<<<<< HEAD
+=======
+        objectFit="cover"
+>>>>>>> 1c1f7bdd5368529f08a8a8e40e0d83abacb091af
       />
     </Box>
   );
