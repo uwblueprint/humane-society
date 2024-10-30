@@ -172,7 +172,6 @@ class AuthService implements IAuthService {
       // const firebaseUser = await firebaseAdmin
       //   .auth()
       //   .getUser(decodedIdToken.uid);
-
       return /* firebaseUser.emailVerified && */ roles.has(userRole);
     } catch (error) {
       return false;
