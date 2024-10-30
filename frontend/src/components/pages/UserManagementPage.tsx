@@ -34,7 +34,7 @@ const UserManagementPage = (): React.ReactElement => {
 
   return (
     <div style={{ textAlign: "center", width: "75%", margin: "0px auto" }}>
-      <h1>User Management Page</h1>
+      <h1>User Management</h1>
       <VStack spacing="24px" style={{ margin: "24px auto" }}>
         <TableContainer>
           <Table variant="simple">
