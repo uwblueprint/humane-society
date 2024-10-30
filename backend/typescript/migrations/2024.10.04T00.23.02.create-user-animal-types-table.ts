@@ -12,10 +12,10 @@ export const up: Migration = async ({ context: sequelize }) => {
       primaryKey: true,
       references: {
         model: "users",
-        key: "id"
+        key: "id",
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     animal_type_id: {
       type: DataType.INTEGER,
@@ -23,13 +23,13 @@ export const up: Migration = async ({ context: sequelize }) => {
       primaryKey: true,
       references: {
         model: "animal_types",
-        key: "id"
+        key: "id",
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
-    }
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
   });
-}
+};
 
 export const down: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().dropTable(TABLE_NAME);
