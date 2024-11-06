@@ -24,10 +24,12 @@ const ForgotPassword = (): React.ReactElement => {
 
   const handleUserAuth = (userEmail: string) => {
     const emailPattern = /^[^\s@]+@humanesociety\.org$/;
-    const sentEmails: SentEmail[] = JSON.parse(localStorage.getItem("sentEmails") || "[]");
+    const sentEmails: SentEmail[] = JSON.parse(
+      localStorage.getItem("sentEmails") || "[]",
+    );
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
-    } else if (sentEmails.some(item => item.email === userEmail)) {
+    } else if (sentEmails.some((item) => item.email === userEmail)) {
       setValidUser(true);
       setSentEmail(false);
       setSentEmailToUser(true);
@@ -38,23 +40,25 @@ const ForgotPassword = (): React.ReactElement => {
       // send email logic
       const newEmail: SentEmail = {
         email: userEmail,
-        timestamp: new Date().getTime()
-      }
+        timestamp: new Date().getTime(),
+      };
       sentEmails.push(newEmail);
       localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
       setTimeout(() => {
-        const updatedSentEmails: SentEmail[] = JSON.parse(localStorage.getItem("sentEmails") || "[]");
+        const updatedSentEmails: SentEmail[] = JSON.parse(
+          localStorage.getItem("sentEmails") || "[]",
+        );
         const filteredEmails = updatedSentEmails.filter(
-          (item: SentEmail) => item.email !== userEmail
+          (item: SentEmail) => item.email !== userEmail,
         );
         localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
-        setSentEmailToUser(false)
+        setSentEmailToUser(false);
       }, 60000);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValidUser(true)
+    setValidUser(true);
     setSentEmail(false);
     setSentEmailToUser(false);
     setUserEmaild(e.target.value);
@@ -62,7 +66,7 @@ const ForgotPassword = (): React.ReactElement => {
 
   return (
     <Box
-      height="100vh"
+      // height="100vh"
       backgroundImage={[
         `url(${backgroundMobile})`,
         `url(${backgroundMobile})`,
