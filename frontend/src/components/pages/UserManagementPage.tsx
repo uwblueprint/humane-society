@@ -13,9 +13,11 @@ import {
 import UserAPIClient from "../../APIClients/UserAPIClient";
 import { User } from "../../types/UserTypes";
 import MainPageButton from "../common/MainPageButton";
+import FormModal from "../crud/FormModal";
 
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getUsers = async () => {
     try {
@@ -26,6 +28,29 @@ const UserManagementPage = (): React.ReactElement => {
     } catch (error) {
       /* TODO: error handling */
     }
+  };
+
+  const addUser = async () => {
+    try {
+      setIsModalOpen(true);
+    } catch (error) {
+      /* TODO: error handling */
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSendInvite = (formData: {
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    email: string;
+    role: string;
+  }) => {
+    // eslint-disable-next-line no-console
+    console.log(`Invite sent to ${formData.email}`);
   };
 
   useEffect(() => {
@@ -56,7 +81,12 @@ const UserManagementPage = (): React.ReactElement => {
             </Tbody>
           </Table>
         </TableContainer>
-        <Button onClick={getUsers}>Refresh</Button>
+        <Button onClick={addUser}>+ Add a User</Button>
+        <FormModal
+          show={isModalOpen}
+          onClose={closeModal}
+          handleSendInvite={handleSendInvite}
+        />
         <MainPageButton />
       </VStack>
     </div>
