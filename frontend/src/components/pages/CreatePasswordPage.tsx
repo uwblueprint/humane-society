@@ -8,17 +8,22 @@ import {
   Box,
   Text,
   FormLabel,
+  FormControl,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
-import ResponsivePawprintBackground from "../common/responsive/ResponsivePawprintBackground";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
+import background from "../assets/background.png";
+import backgroundMobile from "../assets/background_mobile.png";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = React.useState("");
+  const [passwordError, setPasswordError] = React.useState("");
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
@@ -28,20 +33,51 @@ const CreatePasswordPage = (): React.ReactElement => {
   ) => {
     setConfirmPassword(event.target.value);
   };
+
+  const validatePasswords = () => {
+    setPasswordError("");
+    setConfirmPasswordError("");
+    let hasErrors: boolean = false;
+    if (password.length < 8) {
+      hasErrors = true;
+      setPasswordError("Password must be at least 8 characters long.");
+    }
+    if (confirmPassword && password !== confirmPassword) {
+      hasErrors = true;
+      setConfirmPasswordError("Passwords do not match.");
+    }
+    if (confirmPassword.length < 8) {
+      hasErrors = true;
+      setConfirmPasswordError("Password must be at least 8 characters long.");
+    }
+    return hasErrors;
+  };
+
   const handleCreateAccount = () => {
+    if (validatePasswords()) {
+      return;
+    }
     setShowModal(true);
   };
   return (
-    <Flex maxWidth="100vw" height="100vh" position="relative"
-    sx={{
-      '@media (orientation: landscape)': {
-        height: 'auto',       // Adjust height in landscape
-        minHeight: '100vh',   // Ensure it is at least viewport height
-        overflowY: 'auto',    // Enable scrolling in landscape
-      }
-    }}>
+    <Flex
+      maxWidth="100vw"
+      height="100vh"
+      position="relative"
+      backgroundRepeat = "no-repeat"
+      backgroundPosition="center"
+      backgroundSize="cover"
+      backgroundImage={`url(${backgroundMobile})`}
+      sx={{
+        "@media (orientation: landscape)": {
+          height: "auto",
+          minHeight: "100vh",
+          overflowY: "auto",
+          backgroundImage: `url(${background})`,
+        },
+      }}
+    >
       <Center flex="1">
-        <ResponsivePawprintBackground />
         <Flex
           gap="2.2rem"
           direction="column"
@@ -86,10 +122,15 @@ const CreatePasswordPage = (): React.ReactElement => {
                   >
                     Create Password:
                   </FormLabel>
-                  <ResponsivePasswordInput
-                    value={password}
-                    onChange={handlePasswordChange}
-                  />
+                  <FormControl isInvalid={!!passwordError}>
+                    <ResponsivePasswordInput
+                      value={password}
+                      onChange={handlePasswordChange}
+                    />
+                    <FormErrorMessage fontSize="12px">
+                      {passwordError}
+                    </FormErrorMessage>
+                  </FormControl>
                 </Box>
                 <Box fontSize="12px">
                   <FormLabel
@@ -99,18 +140,22 @@ const CreatePasswordPage = (): React.ReactElement => {
                   >
                     Confirm Password:
                   </FormLabel>
-                  <ResponsivePasswordInput
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                  />
+                  <FormControl isInvalid={!!confirmPasswordError}>
+                    <ResponsivePasswordInput
+                      value={confirmPassword}
+                      onChange={handleConfirmPasswordChange}
+                    />
+                    <FormErrorMessage fontSize="12px">
+                      {confirmPasswordError}
+                    </FormErrorMessage>
+                  </FormControl>
                 </Box>
               </Stack>
               <Button
+                type="submit"
                 fontSize="14px"
                 onClick={handleCreateAccount}
-                colorScheme="blue"
-                pl={{ base: "0.94rem", md: "1.875rem" }}
-                pr={{ base: "0.94rem", md: "1.875rem" }}
+                color="white"
                 h="2.4rem"
                 width="100%"
                 bg="var(--blue-700, #2C5282)"

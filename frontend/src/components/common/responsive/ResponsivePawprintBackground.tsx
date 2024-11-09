@@ -1,3 +1,5 @@
+// NOT CURRENTLY BEING USED IN PROD
+// USED IN CASE YOU NEED TO ROTATE A BACKGROUND IMAGE
 import React from "react";
 import { Box, Flex } from "@chakra-ui/react";
 
@@ -16,19 +18,25 @@ const ResponsivePawprintBackground = (): React.ReactElement => {
         position="absolute"
         top="50%"
         left="50%"
-        width={{ base: "200vw", md: "100%" }}
-        height={{ base: "200vh", md: "100%" }}
-        transform={{
-          base: "translate(-50%, -50%) rotate(-15deg)",
-          md: "translate(-50%, -50%)",
-        }}
         sx={{
-          backgroundImage: "url('/images/paw_prints_bg.svg')",
-          backgroundSize: { base: "contain", md: "130%" },
+          backgroundImage: "url('/images/pawprint_background.png')",
           backgroundRepeat: "no-repeat",
           backgroundColor: "var(--blue-700, #2C5282)",
           backgroundPosition: "center",
           zIndex: -1,
+
+          "@media (orientation: portrait)": {
+            transform: "translate(-50%, -50%) rotate(-15deg)",
+            backgroundSize: "contain",
+            width: "200vw",
+            height: "200vh",
+          },
+          "@media (orientation: landscape)": {
+            transform: "translate(-50%, -50%)",
+            backgroundSize: "130%",
+            width: "100%",
+            height: "100%",
+          },
         }}
       />
     </Flex>

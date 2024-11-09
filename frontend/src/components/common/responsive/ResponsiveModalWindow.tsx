@@ -25,6 +25,7 @@ const ResponsiveModalWindow = ({
         gap={{ base: "1rem", md: "2.8125rem" }}
         maxWidth={{ base: "21.375rem", md: "none" }}
         padding={{ base: "1.38rem 2.38rem", md: "3.6875rem 10.5rem" }}
+        borderRadius="0.375rem"
       >
         {children}
       </Flex>
