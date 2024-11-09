@@ -58,6 +58,8 @@ const CreatePasswordPage = (): React.ReactElement => {
       return;
     }
     setShowModal(true);
+
+    // RESET PASSWORD LOGIC HERE
   };
   return (
     <Flex
