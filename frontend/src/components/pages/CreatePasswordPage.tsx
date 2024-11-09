@@ -64,7 +64,7 @@ const CreatePasswordPage = (): React.ReactElement => {
       maxWidth="100vw"
       height="100vh"
       position="relative"
-      backgroundRepeat = "no-repeat"
+      backgroundRepeat="no-repeat"
       backgroundPosition="center"
       backgroundSize="cover"
       backgroundImage={`url(${backgroundMobile})`}

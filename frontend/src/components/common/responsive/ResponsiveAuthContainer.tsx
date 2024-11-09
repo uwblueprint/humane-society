@@ -13,7 +13,7 @@ const ResponsiveAuthContainer = ({
       padding={{
         base: "2.25rem",
         md: "2.5rem",
-      }} 
+      }}
       background="var(--gray-100, #EDF2F7)"
       borderRadius="0.375rem"
       justifyContent="center"
@@ -25,11 +25,11 @@ const ResponsiveAuthContainer = ({
         width={{ md: "16rem" }}
         sx={{
           "@media (orientation: portrait)": {
-            width: { 
+            width: {
               md: "16rem",
             },
           },
-          }} 
+        }}
         justifyContent="center"
       >
         {children}
