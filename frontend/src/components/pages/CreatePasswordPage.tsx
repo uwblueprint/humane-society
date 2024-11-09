@@ -40,7 +40,7 @@ const CreatePasswordPage = (): React.ReactElement => {
     let hasErrors: boolean = false;
     if (password.length < 8) {
       hasErrors = true;
-      setPasswordError("Password must be at least 8 characters long.");
+      setPasswordError("Password must be at least 8 characters.");
     }
     if (confirmPassword && password !== confirmPassword) {
       hasErrors = true;
@@ -48,7 +48,7 @@ const CreatePasswordPage = (): React.ReactElement => {
     }
     if (confirmPassword.length < 8) {
       hasErrors = true;
-      setConfirmPasswordError("Password must be at least 8 characters long.");
+      setConfirmPasswordError("Password must be at least 8 characters.");
     }
     return hasErrors;
   };

@@ -22,14 +22,7 @@ const ResponsiveAuthContainer = ({
         display="inline-flex"
         flexDirection="column"
         gap={{ base: "1.12rem", md: "1rem" }}
-        width={{ md: "16rem" }}
-        sx={{
-          "@media (orientation: portrait)": {
-            width: {
-              md: "16rem",
-            },
-          },
-        }}
+        width={{ md: "16rem" }} 
         justifyContent="center"
       >
         {children}
