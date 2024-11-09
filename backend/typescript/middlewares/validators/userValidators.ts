@@ -19,9 +19,6 @@ export const createUserDtoValidator = async (
   if (!validatePrimitive(req.body.role, "string")) {
     return res.status(400).send(getApiValidationError("role", "string"));
   }
-  if (!validatePrimitive(req.body.password, "string")) {
-    return res.status(400).send(getApiValidationError("password", "string"));
-  }
   if (
     req.body.skillLevel !== undefined &&
     req.body.skillLevel !== null &&
@@ -63,16 +60,32 @@ export const updateUserDtoValidator = async (
   res: Response,
   next: NextFunction,
 ) => {
-  if (!validatePrimitive(req.body.firstName, "string")) {
+  if (
+    req.body.firstName !== undefined &&
+    req.body.firstName !== null &&
+    !validatePrimitive(req.body.firstName, "string")
+  ) {
     return res.status(400).send(getApiValidationError("firstName", "string"));
   }
-  if (!validatePrimitive(req.body.lastName, "string")) {
+  if (
+    req.body.lastName !== undefined &&
+    req.body.lastName !== null &&
+    !validatePrimitive(req.body.lastName, "string")
+  ) {
     return res.status(400).send(getApiValidationError("lastName", "string"));
   }
-  if (!validatePrimitive(req.body.email, "string")) {
+  if (
+    req.body.email !== undefined &&
+    req.body.email !== null &&
+    !validatePrimitive(req.body.email, "string")
+  ) {
     return res.status(400).send(getApiValidationError("email", "string"));
   }
-  if (!validatePrimitive(req.body.role, "string")) {
+  if (
+    req.body.role !== undefined &&
+    req.body.role !== null &&
+    !validatePrimitive(req.body.role, "string")
+  ) {
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (

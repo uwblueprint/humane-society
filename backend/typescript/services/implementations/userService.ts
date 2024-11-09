@@ -1,6 +1,12 @@
 import * as firebaseAdmin from "firebase-admin";
 import IUserService from "../interfaces/userService";
-import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
+import {
+  CreateUserDTO,
+  Role,
+  UpdateUserDTO,
+  UserDTO,
+  UserStatus,
+} from "../../types";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import PgUser from "../../models/user.model";
@@ -165,25 +171,14 @@ class UserService implements IUserService {
     return userDtos;
   }
 
-  async createUser(
-    user: CreateUserDTO,
-    authId?: string,
-    signUpMethod = "PASSWORD",
-  ): Promise<UserDTO> {
+  async createUser(user: CreateUserDTO): Promise<UserDTO> {
     let newUser: PgUser;
     let firebaseUser: firebaseAdmin.auth.UserRecord;
 
     try {
-      if (signUpMethod === "GOOGLE") {
-        /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
-        firebaseUser = await firebaseAdmin.auth().getUser(authId!);
-      } else {
-        // signUpMethod === PASSWORD
-        firebaseUser = await firebaseAdmin.auth().createUser({
-          email: user.email,
-          password: user.password,
-        });
-      }
+      firebaseUser = await firebaseAdmin.auth().createUser({
+        email: user.email,
+      });
 
       try {
         newUser = await PgUser.create({
@@ -191,7 +186,7 @@ class UserService implements IUserService {
           last_name: user.lastName,
           auth_id: firebaseUser.uid,
           role: user.role,
-          status: user.status,
+          status: UserStatus.INVITED,
           email: firebaseUser.email ?? "",
           skill_level: user.skillLevel,
           can_see_all_logs: user.canSeeAllLogs,
@@ -240,6 +235,7 @@ class UserService implements IUserService {
         {
           first_name: user.firstName,
           last_name: user.lastName,
+          email: user.email,
           role: user.role,
           status: user.status,
           skill_level: user.skillLevel,
@@ -274,6 +270,7 @@ class UserService implements IUserService {
             {
               first_name: oldUser.first_name,
               last_name: oldUser.last_name,
+              email: oldUser.email,
               role: oldUser.role,
               status: oldUser.status,
               skill_level: oldUser.skill_level,
