@@ -1,5 +1,5 @@
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { AuthenticatedUser, PasswordResetResponse } from "../types/AuthTypes";
+import { AuthenticatedUser, PasswordSetResponse } from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
 import {
   getLocalStorageObjProperty,
@@ -111,24 +111,29 @@ const refresh = async (): Promise<boolean> => {
 };
 
 // // trinity did this VV
-const setPassword = async (email: string, newPassword: string): Promise<PasswordResetResponse> => {
+const setPassword = async (
+  email: string,
+  newPassword: string,
+): Promise<PasswordSetResponse> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
-  )}`
-  console.log(bearerToken)
+  )}`;
   try {
     const response = await baseAPIClient.post(
       `/auth/setPassword/${email}`,
-      {newPassword},
-      {headers:{Authorization:bearerToken}}
-    )
-    console.log(response)
-    return response.data
+      { newPassword },
+      { headers: { Authorization: bearerToken } },
+    );
+    const { success, userDTO, errorMessage } = response.data;
+    if (success) {
+      localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(userDTO));
+    }
+    return { success, errorMessage };
   } catch (error) {
-    return {success:false, errorMessage:"An unknown error occured."}
+    return { success: false, errorMessage: "An unknown error occured." };
   }
-}
+};
 
 export default {
   login,
@@ -137,5 +142,5 @@ export default {
   register,
   resetPassword,
   refresh,
-  setPassword
+  setPassword,
 };

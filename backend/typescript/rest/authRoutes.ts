@@ -1,4 +1,4 @@
-import { CookieOptions, Router } from "express";
+import { CookieOptions, response, Router } from "express";
 
 import { isAuthorizedByEmail, isAuthorizedByUserId } from "../middlewares/auth";
 import {
@@ -118,19 +118,21 @@ authRouter.post(
   },
 );
 
-// warnings, it doesnt generate a new access token and the old one expires when u reset your password. is that handled somewhere else?
 authRouter.post("/setPassword/:email", isAuthorizedByEmail("email"),
   async (req, res) => {
     try{
       const responseSuccess = await authService.setPassword(req.params.email, req.body.newPassword)
-      if (responseSuccess.success) { // if it was successful
+      if (responseSuccess.success) { 
         const user = await userService.getUserByEmail(req.params.email)
         if (user.status == UserStatus.INVITED) {
-          // ig i could modify the user object and send that but then i'd be sending ALL the information
-          userService.updateUserById(user.id, {firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role, status: UserStatus.ACTIVE})
+          userService.updateUserById(user.id, {...user, status: UserStatus.ACTIVE})
         }
+        // automatically log in after password reset
+        const authDTO = await authService.generateToken(req.params.email, req.body.newPassword);
+        const { refreshToken, ...rest } = authDTO;
+        const passwordSetResponse = {success:responseSuccess.success, userDTO:rest}
+        res.cookie("refreshToken", authDTO.refreshToken, cookieOptions).status(200).json(passwordSetResponse);
       }
-      res.status(200).json(responseSuccess);
     } catch(error) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
