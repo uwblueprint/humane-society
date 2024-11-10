@@ -17,6 +17,7 @@ import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
 import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
+import AuthAPIClient from "../../APIClients/AuthAPIClient";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
@@ -57,9 +58,14 @@ const CreatePasswordPage = (): React.ReactElement => {
     if (validatePasswords()) {
       return;
     }
-    setShowModal(true);
+    
+    // whoever is handling the email thing needs to pass in the email
+    AuthAPIClient.setPassword("trinityyip@uwblueprint.org", password).then((resetPasswordResponse)=> {
+      if (resetPasswordResponse.success) {
+        setShowModal(true);
+      }
+    })
 
-    // RESET PASSWORD LOGIC HERE
   };
   return (
     <Flex
