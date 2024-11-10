@@ -13,7 +13,7 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { getErrorMessage } from "../utilities/errorUtils";
-import { Role } from "../types";
+import { Role, UserStatus } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -117,5 +117,24 @@ authRouter.post(
     }
   },
 );
+
+// warnings, it doesnt generate a new access token and the old one expires when u reset your password. is that handled somewhere else?
+authRouter.post("/setPassword/:email", isAuthorizedByEmail("email"),
+  async (req, res) => {
+    try{
+      const responseSuccess = await authService.setPassword(req.params.email, req.body.newPassword)
+      if (responseSuccess.success) { // if it was successful
+        const user = await userService.getUserByEmail(req.params.email)
+        if (user.status == UserStatus.INVITED) {
+          // ig i could modify the user object and send that but then i'd be sending ALL the information
+          userService.updateUserById(user.id, {firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role, status: UserStatus.ACTIVE})
+        }
+      }
+      res.status(200).json(responseSuccess);
+    } catch(error) {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  }
+)
 
 export default authRouter;

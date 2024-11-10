@@ -1,4 +1,4 @@
-import { AuthDTO, Role, Token } from "../../types";
+import { AuthDTO, Role, Token, ResponseSuccessDTO } from "../../types";
 
 interface IAuthService {
   /**
@@ -82,6 +82,18 @@ interface IAuthService {
     accessToken: string,
     requestedEmail: string,
   ): Promise<boolean>;
+
+  /**
+   * Set password for the specified email.
+   * @param accessToken user's access token
+   * @param requestedEmail email address of requested user
+   * @returns success (boolean) and errorMessage (string)
+   */
+  setPassword(
+    email: string,
+    newPassword: string
+  ):Promise<ResponseSuccessDTO>;
+
 }
 
 export default IAuthService;

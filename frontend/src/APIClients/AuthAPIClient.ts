@@ -1,5 +1,5 @@
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { AuthenticatedUser } from "../types/AuthTypes";
+import { AuthenticatedUser, PasswordResetResponse } from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
 import {
   getLocalStorageObjProperty,
@@ -110,6 +110,26 @@ const refresh = async (): Promise<boolean> => {
   }
 };
 
+// // trinity did this VV
+const setPassword = async (email: string, newPassword: string): Promise<PasswordResetResponse> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`
+  console.log(bearerToken)
+  try {
+    const response = await baseAPIClient.post(
+      `/auth/setPassword/${email}`,
+      {newPassword},
+      {headers:{Authorization:bearerToken}}
+    )
+    console.log(response)
+    return response.data
+  } catch (error) {
+    return {success:false, errorMessage:"An unknown error occured."}
+  }
+}
+
 export default {
   login,
   logout,
@@ -117,4 +137,5 @@ export default {
   register,
   resetPassword,
   refresh,
+  setPassword
 };

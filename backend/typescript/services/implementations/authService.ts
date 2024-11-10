@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, Token } from "../../types";
+import { AuthDTO, Role, Token, ResponseSuccessDTO } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -222,6 +222,24 @@ class AuthService implements IAuthService {
       return false;
     }
   }
+  async setPassword(email: string, newPassword:string): Promise<ResponseSuccessDTO> {
+    let errorMessage = "An unknown error occured. Please try again later."
+    try {
+      const uid = await (await firebaseAdmin.auth().getUserByEmail(email)).uid
+      await firebaseAdmin.auth().updateUser(uid, {
+        password:newPassword
+      })
+      return {success: true} as ResponseSuccessDTO
+    } catch (error: any) {
+      Logger.error(`Failed to update password. Error: ${error}`);
+      if (error.code == "auth/invalid-password") {
+        errorMessage = "Invalid password. Please make sure your password is at least 6 characters!"
+      } else if (error.code === "auth/user-not-found") {
+        errorMessage = "No user found with the provided email!";
+      } 
+      return {success: false, errorMessage}
+    }
+  } 
 }
 
 export default AuthService;
