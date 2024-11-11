@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
   Box,
-  Heading,
   Input,
   Text,
   Button,
   FormControl,
   FormErrorMessage,
+  Flex,
 } from "@chakra-ui/react";
 import background from "./login_background.png";
 import backgroundMobile from "./login_background_phone.png";
@@ -14,6 +14,23 @@ import backgroundMobile from "./login_background_phone.png";
 type SentEmail = {
   email: string;
   timestamp: number;
+};
+
+const StatusMessage: React.FC<{ message: string; color?: string }> = ({
+  message,
+  color = "blue.700",
+}) => {
+  return (
+    <Text
+      color={color}
+      textAlign="center"
+      textStyle="bodyMobile"
+      lineHeight="120%"
+      marginTop="16px"
+    >
+      {message}
+    </Text>
+  );
 };
 
 const ForgotPassword = (): React.ReactElement => {
@@ -65,66 +82,52 @@ const ForgotPassword = (): React.ReactElement => {
   };
 
   return (
-    <Box
-      // height="100vh"
-      backgroundImage={[
-        `url(${backgroundMobile})`,
-        `url(${backgroundMobile})`,
-        `url(${background})`,
-        `url(${background})`,
-      ]}
+    <Flex
+      height="100vh"
+      width="100vw"
+      backgroundImage={`url(${backgroundMobile})`}
+      sx={{
+        "@media (orientation: landscape)": {
+          height: "auto",
+          minHeight: "100vh",
+          overflowY: "auto",
+          backgroundImage: `url(${background})`,
+        },
+      }}
       backgroundPosition="center"
       backgroundRepeat="no-repeat"
       backgroundSize="cover"
       backgroundColor="blue.700"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      overflowX="hidden"
+      justify="center"
+      align="center"
+      overflow="auto"
     >
       <Box
         maxWidth="100vw"
-        width={["90vw", "90vw", "90vw", "40vw", "30vw"]}
-        height={["20vw", "40px", "20vw", "28vw"]}
+        width={["90vw", "50vw", "50vw", "40vw", "30vw"]}
         padding={["36px", "36px", "36px", "60px 64px"]}
         borderRadius="6px"
         backgroundColor="var(--gray-50, #F7FAFC)"
         boxShadow="lg"
         display="flex"
         flexDirection="column"
-        minHeight="fit-content"
+        marginTop="20px"
+        marginBottom="20px"
       >
-        <Heading
+        <Text
           color="#4A5568"
+          textStyle="h2"
           textAlign="center"
-          fontFamily="Poppins"
-          fontSize="28px"
-          fontStyle="normal"
-          fontWeight="900"
           lineHeight="120%"
         >
           Forgot Password?
-        </Heading>
-        <Text
-          py="36px"
-          color="#4A5568"
-          textAlign="center"
-          fontFamily="Roboto"
-          fontSize="18px"
-          fontWeight="400"
-          lineHeight="150%"
-        >
+        </Text>
+        <Text py="36px" color="#4A5568" textStyle="body" textAlign="center">
           Please enter the email address associated with your account to reset
           your password.
         </Text>
         <Box>
-          <Text
-            color="#4A5568"
-            fontFamily="Roboto"
-            fontSize="18px"
-            fontWeight="400"
-            lineHeight="150%"
-          >
+          <Text color="#4A5568" textStyle="body">
             Email:
           </Text>
           <FormControl isInvalid={!validUser}>
@@ -136,52 +139,32 @@ const ForgotPassword = (): React.ReactElement => {
               onChange={handleInputChange}
             />
             {!validUser && (
-              <FormErrorMessage fontSize="18px">
+              <FormErrorMessage fontSize="16px">
                 Please enter a valid email.
               </FormErrorMessage>
             )}
           </FormControl>
-        </Box>
-        <Button
-          size="lg"
-          variant="solid"
-          color="white"
-          bg="blue.700"
-          marginTop="30px"
-          onClick={() => handleUserAuth(userEmailId)}
-        >
-          Send
-        </Button>
-        {sentEmail && (
-          <Text
-            color="blue.700"
-            textAlign="center"
-            fontFamily="Roboto"
-            fontSize="16px"
-            fontWeight="400"
-            fontStyle="normal"
-            lineHeight="120%"
-            marginTop="16px"
+          <Button
+            textStyle="button"
+            size="lg"
+            width="100%"
+            variant="solid"
+            color="white"
+            bg="blue.700"
+            marginTop="30px"
+            onClick={() => handleUserAuth(userEmailId)}
           >
-            A password reset link has been sent to your email!
-          </Text>
+            Send
+          </Button>
+        </Box>
+        {sentEmail && (
+          <StatusMessage message="A password reset link has been sent to your email!" />
         )}
         {sentEmailToUser && (
-          <Text
-            color="blue.700"
-            textAlign="center"
-            fontFamily="Roboto"
-            fontSize="16px"
-            fontWeight="400"
-            fontStyle="normal"
-            lineHeight="120%"
-            marginTop="16px"
-          >
-            You have already sent an email to this user.
-          </Text>
+          <StatusMessage message="You have already sent an email to this user." />
         )}
       </Box>
-    </Box>
+    </Flex>
   );
 };
 
