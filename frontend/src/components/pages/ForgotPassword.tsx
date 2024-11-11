@@ -8,29 +8,13 @@ import {
   FormErrorMessage,
   Flex,
 } from "@chakra-ui/react";
+import StatusMessage from "../common/StatusMessage";
 import background from "./login_background.png";
 import backgroundMobile from "./login_background_phone.png";
 
 type SentEmail = {
   email: string;
   timestamp: number;
-};
-
-const StatusMessage: React.FC<{ message: string; color?: string }> = ({
-  message,
-  color = "blue.700",
-}) => {
-  return (
-    <Text
-      color={color}
-      textAlign="center"
-      textStyle="bodyMobile"
-      lineHeight="120%"
-      marginTop="16px"
-    >
-      {message}
-    </Text>
-  );
 };
 
 const ForgotPassword = (): React.ReactElement => {
