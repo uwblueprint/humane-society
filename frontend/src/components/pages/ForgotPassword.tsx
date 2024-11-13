@@ -24,8 +24,7 @@ const ForgotPassword = (): React.ReactElement => {
   const [userEmailId, setUserEmaild] = useState("");
 
   const handleUserAuth = (userEmail: string) => {
-    const emailPattern =
-    /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
+    const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
       localStorage.getItem("sentEmails") || "[]",
