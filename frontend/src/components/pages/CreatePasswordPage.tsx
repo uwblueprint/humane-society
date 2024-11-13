@@ -59,17 +59,15 @@ const CreatePasswordPage = (): React.ReactElement => {
       return;
     }
 
-    AuthAPIClient.setPassword(password).then(
-      (resetPasswordResponse) => {
-        if (resetPasswordResponse.success) {
-          setShowModal(true);
-        } else if (resetPasswordResponse.errorMessage) {
-          setPasswordError(resetPasswordResponse.errorMessage);
-        } else {
-          setPasswordError("An unknown error occured. Please try again later.")
-        }
-      },
-    );
+    AuthAPIClient.setPassword(password).then((resetPasswordResponse) => {
+      if (resetPasswordResponse.success) {
+        setShowModal(true);
+      } else if (resetPasswordResponse.errorMessage) {
+        setPasswordError(resetPasswordResponse.errorMessage);
+      } else {
+        setPasswordError("An unknown error occured. Please try again later.");
+      }
+    });
   };
   return (
     <Flex

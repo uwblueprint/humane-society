@@ -119,7 +119,7 @@ const setPassword = async (
     "accessToken",
   )}`;
   try {
-    const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email")
+    const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email");
     // set password
     const response = await baseAPIClient.post(
       `/auth/setPassword/${email}`,

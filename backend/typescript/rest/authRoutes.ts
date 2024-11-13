@@ -1,4 +1,4 @@
-import { CookieOptions, response, Router } from "express";
+import { CookieOptions, Router } from "express";
 
 import { isAuthorizedByEmail, isAuthorizedByUserId } from "../middlewares/auth";
 import {
@@ -118,25 +118,42 @@ authRouter.post(
   },
 );
 
-authRouter.post("/setPassword/:email", isAuthorizedByEmail("email"),
+authRouter.post(
+  "/setPassword/:email",
+  isAuthorizedByEmail("email"),
   async (req, res) => {
-    try{
-      const responseSuccess = await authService.setPassword(req.params.email, req.body.newPassword)
-      if (responseSuccess.success) { 
-        const user = await userService.getUserByEmail(req.params.email)
-        if (user.status == UserStatus.INVITED) {
-          userService.updateUserById(user.id, {...user, status: UserStatus.ACTIVE})
+    try {
+      const responseSuccess = await authService.setPassword(
+        req.params.email,
+        req.body.newPassword,
+      );
+      if (responseSuccess.success) {
+        const user = await userService.getUserByEmail(req.params.email);
+        if (user.status === UserStatus.INVITED) {
+          userService.updateUserById(user.id, {
+            ...user,
+            status: UserStatus.ACTIVE,
+          });
         }
         // automatically log in after password reset
-        const authDTO = await authService.generateToken(req.params.email, req.body.newPassword);
+        const authDTO = await authService.generateToken(
+          req.params.email,
+          req.body.newPassword,
+        );
         const { refreshToken, ...rest } = authDTO;
-        const passwordSetResponse = {success:responseSuccess.success, userDTO:rest}
-        res.cookie("refreshToken", authDTO.refreshToken, cookieOptions).status(200).json(passwordSetResponse);
+        const passwordSetResponse = {
+          success: responseSuccess.success,
+          userDTO: rest,
+        };
+        res
+          .cookie("refreshToken", authDTO.refreshToken, cookieOptions)
+          .status(200)
+          .json(passwordSetResponse);
       }
-    } catch(error) {
+    } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
-)
+  },
+);
 
 export default authRouter;

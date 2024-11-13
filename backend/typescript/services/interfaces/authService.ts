@@ -89,11 +89,7 @@ interface IAuthService {
    * @param requestedEmail email address of requested user
    * @returns success (boolean) and errorMessage (string)
    */
-  setPassword(
-    email: string,
-    newPassword: string
-  ):Promise<ResponseSuccessDTO>;
-
+  setPassword(email: string, newPassword: string): Promise<ResponseSuccessDTO>;
 }
 
 export default IAuthService;

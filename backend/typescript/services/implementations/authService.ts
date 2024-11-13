@@ -222,24 +222,29 @@ class AuthService implements IAuthService {
       return false;
     }
   }
-  async setPassword(email: string, newPassword:string): Promise<ResponseSuccessDTO> {
-    let errorMessage = "An unknown error occured. Please try again later."
+
+  async setPassword(
+    email: string,
+    newPassword: string,
+  ): Promise<ResponseSuccessDTO> {
+    let errorMessage = "An unknown error occured. Please try again later.";
     try {
-      const uid = await (await firebaseAdmin.auth().getUserByEmail(email)).uid
+      const uid = await (await firebaseAdmin.auth().getUserByEmail(email)).uid;
       await firebaseAdmin.auth().updateUser(uid, {
-        password:newPassword
-      })
-      return {success: true} as ResponseSuccessDTO
+        password: newPassword,
+      });
+      return { success: true } as ResponseSuccessDTO;
     } catch (error: any) {
       Logger.error(`Failed to update password. Error: ${error}`);
-      if (error.code == "auth/invalid-password") {
-        errorMessage = "Invalid password. Please make sure your password is at least 6 characters!"
+      if (error.code === "auth/invalid-password") {
+        errorMessage =
+          "Invalid password. Please make sure your password is at least 6 characters!";
       } else if (error.code === "auth/user-not-found") {
         errorMessage = "No user found with the provided email!";
-      } 
-      return {success: false, errorMessage}
+      }
+      return { success: false, errorMessage };
     }
-  } 
+  }
 }
 
 export default AuthService;
