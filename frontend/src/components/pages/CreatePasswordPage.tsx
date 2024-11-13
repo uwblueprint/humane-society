@@ -58,14 +58,18 @@ const CreatePasswordPage = (): React.ReactElement => {
     if (validatePasswords()) {
       return;
     }
-    
-    // whoever is handling the email thing needs to pass in the email
-    AuthAPIClient.setPassword("trinityyip@uwblueprint.org", password).then((resetPasswordResponse)=> {
-      if (resetPasswordResponse.success) {
-        setShowModal(true);
-      }
-    })
 
+    AuthAPIClient.setPassword(password).then(
+      (resetPasswordResponse) => {
+        if (resetPasswordResponse.success) {
+          setShowModal(true);
+        } else if (resetPasswordResponse.errorMessage) {
+          setPasswordError(resetPasswordResponse.errorMessage);
+        } else {
+          setPasswordError("An unknown error occured. Please try again later.")
+        }
+      },
+    );
   };
   return (
     <Flex

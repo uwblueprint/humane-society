@@ -112,7 +112,6 @@ const refresh = async (): Promise<boolean> => {
 
 // // trinity did this VV
 const setPassword = async (
-  email: string,
   newPassword: string,
 ): Promise<PasswordSetResponse> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -120,6 +119,8 @@ const setPassword = async (
     "accessToken",
   )}`;
   try {
+    const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email")
+    // set password
     const response = await baseAPIClient.post(
       `/auth/setPassword/${email}`,
       { newPassword },
