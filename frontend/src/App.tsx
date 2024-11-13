@@ -62,11 +62,10 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
-              <PrivateRoute
+              <Route
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}
                 component={ForgotPasswordPage}
-                allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
                 exact

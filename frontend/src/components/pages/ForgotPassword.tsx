@@ -24,7 +24,9 @@ const ForgotPassword = (): React.ReactElement => {
   const [userEmailId, setUserEmaild] = useState("");
 
   const handleUserAuth = (userEmail: string) => {
-    const emailPattern = /^[^\s@]+@humanesociety\.org$/;
+    const emailPattern =
+    /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
+    // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
       localStorage.getItem("sentEmails") || "[]",
     );
@@ -124,7 +126,7 @@ const ForgotPassword = (): React.ReactElement => {
             />
             {!validUser && (
               <FormErrorMessage fontSize="16px">
-                Please enter a valid email.
+                Must be a valid humanesociety.org email
               </FormErrorMessage>
             )}
           </FormControl>
