@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Default from "./components/pages/Default";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
+import ForgotPasswordPage from "./components/pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./components/pages/CreatePage";
 import PetListPage from "./components/pages/PetListPage";
@@ -63,6 +64,11 @@ const App = (): React.ReactElement => {
               {/* Public Routes */}
               <Route exact path={AppRoutes.LOGIN_PAGE} component={Login} />
               <Route exact path={AppRoutes.SIGNUP_PAGE} component={Signup} />
+              <Route
+                exact
+                path={AppRoutes.FORGOT_PASSWORD_PAGE}
+                component={ForgotPasswordPage}
+              />
 
               {/* Protected Routes Wrapped in Layout */}
               <Layout>
