@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { JSONSchema7 } from "json-schema";
 import { Form } from "@rjsf/bootstrap-4";
 import { IChangeEvent, ISubmitEvent } from "@rjsf/core";
-import { Alert, AlertIcon } from "@chakra-ui/react"; // Updated import
 
 export interface AddUserRequest {
   firstName: string;
@@ -60,7 +59,6 @@ const validate = (formData: AddUserRequest, errors: any) => {
 const AddUserFormModal = ({
   onSubmit,
 }: AddUserFormModalProps): React.ReactElement => {
-  const [data, setData] = useState<AddUserRequest | null>(null);
   const [formFields, setFormFields] = useState<AddUserRequest | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +68,6 @@ const AddUserFormModal = ({
     setError(null);
     try {
       await onSubmit(formData);
-      setData(formData);
       setFormFields(null);
     } catch (err) {
       setError("An error occurred while sending the invite.");
@@ -78,15 +75,6 @@ const AddUserFormModal = ({
       setLoading(false);
     }
   };
-
-  if (data) {
-    return (
-      <Alert status="success">
-        <AlertIcon />
-        Invite Sent! ✔️
-      </Alert>
-    );
-  }
 
   return (
     <div>
