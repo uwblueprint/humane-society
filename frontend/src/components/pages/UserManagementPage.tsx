@@ -13,7 +13,21 @@ import {
 import UserAPIClient from "../../APIClients/UserAPIClient";
 import { User } from "../../types/UserTypes";
 import MainPageButton from "../common/MainPageButton";
-import AddUserFormModal from "../crud/AddUserFormModal";
+import AddUserFormModal, { AddUserRequest } from "../crud/AddUserFormModal";
+
+const handleUserSubmit = async (formData: AddUserRequest) => {
+  await UserAPIClient.create({
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    phoneNumber: formData.phoneNumber,
+    email: formData.email,
+    role: formData.role as
+      | "Administrator"
+      | "Animal Behaviourist"
+      | "Staff"
+      | "Volunteer",
+  });
+};
 
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
@@ -26,7 +40,7 @@ const UserManagementPage = (): React.ReactElement => {
         setUsers(fetchedUsers);
       }
     } catch (error) {
-      /* TODO: error handling */
+      throw new Error(`Failed to get users: ${error}`);
     }
   };
 
@@ -34,24 +48,17 @@ const UserManagementPage = (): React.ReactElement => {
     try {
       setIsModalOpen(true);
     } catch (error) {
-      /* TODO: error handling */
+      throw new Error(`Failed to add user: ${error}`);
     }
   };
 
-  // const closeModal = () => {
-  //   setIsModalOpen(false);
-  // };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
-  // const handleSendInvite = (formData: {
-  //   firstName: string;
-  //   lastName: string;
-  //   phoneNumber: string;
-  //   email: string;
-  //   role: string;
-  // }) => {
-  //   // eslint-disable-next-line no-console
-  //   console.log(`Invite sent to ${formData.email}`);
-  // };
+  const refreshUserManagementTable = async () => {
+    await getUsers();
+  };
 
   useEffect(() => {
     getUsers();
@@ -76,13 +83,26 @@ const UserManagementPage = (): React.ReactElement => {
                   <Td>{user.firstName}</Td>
                   <Td>{user.lastName}</Td>
                   <Td>{user.role}</Td>
+                  <Td>{user.status}</Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
         </TableContainer>
         <Button onClick={addUser}>+ Add a User</Button>
-        {isModalOpen && <AddUserFormModal />}
+        {isModalOpen && (
+          <AddUserFormModal
+            onSubmit={(formData) => {
+              const completeFormData: AddUserRequest = {
+                ...formData,
+              };
+              return handleUserSubmit(completeFormData).then(() => {
+                closeModal();
+                refreshUserManagementTable();
+              });
+            }}
+          />
+        )}
         <MainPageButton />
       </VStack>
     </div>

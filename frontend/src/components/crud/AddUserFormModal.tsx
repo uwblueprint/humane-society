@@ -1,85 +1,113 @@
 import React, { useState } from "react";
 import { JSONSchema7 } from "json-schema";
 import { Form } from "@rjsf/bootstrap-4";
-import SimpleEntityAPIClient, {
-  SimpleEntityRequest,
-  SimpleEntityResponse,
-} from "../../APIClients/SimpleEntityAPIClient";
+import { IChangeEvent, ISubmitEvent } from "@rjsf/core";
+import { Alert, AlertIcon } from "@chakra-ui/react"; // Updated import
 
-const schema: JSONSchema7 = {
-  title: "Create Simple Entity",
-  description: "A simple form to test creating a simple entity",
+export interface AddUserRequest {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+  role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
+}
+
+interface AddUserFormModalProps {
+  onSubmit: (formData: AddUserRequest) => Promise<void>;
+}
+
+const userSchema: JSONSchema7 = {
+  title: "Invite a user",
+  description: "Enter user details to send an invite",
   type: "object",
-  required: [
-    "stringField",
-    "intField",
-    "stringArrayField",
-    "enumField",
-    "boolField",
-  ],
+  required: ["firstName", "lastName", "phoneNumber", "email", "role"],
   properties: {
-    stringField: {
+    firstName: { type: "string", title: "First Name" },
+    lastName: { type: "string", title: "Last Name" },
+    phoneNumber: { type: "string", title: "Phone Number" },
+    email: { type: "string", format: "email", title: "Email" },
+    role: {
       type: "string",
-      title: "String Field",
-      default: "UW Blueprint",
-    },
-    intField: {
-      type: "integer",
-      title: "Integer Field",
-      default: 2017,
-    },
-    stringArrayField: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-      title: "String Array Field",
-      default: [],
-    },
-    enumField: {
-      type: "string",
-      enum: ["A", "B", "C", "D"],
-      title: "Enum Field",
-      default: "A",
-    },
-    boolField: {
-      type: "boolean",
-      title: "Boolean Field",
-      default: true,
+      title: "Role",
+      enum: ["Administrator", "Animal Behaviourist", "Staff", "Volunteer"],
+      default: "Staff",
     },
   },
 };
 
 const uiSchema = {
-  boolField: {
+  role: {
     "ui:widget": "select",
   },
 };
 
-const AddUserFormModal = (): React.ReactElement => {
-  const [data, setData] = useState<SimpleEntityResponse | null>(null);
-  const [formFields, setFormFields] = useState<SimpleEntityRequest | null>(
-    null,
-  );
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validate = (formData: AddUserRequest, errors: any) => {
+  const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+  const phoneRegex2 = /^\d{10}$/;
+  if (
+    !phoneRegex.test(formData.phoneNumber) &&
+    !phoneRegex2.test(formData.phoneNumber)
+  ) {
+    errors.phoneNumber.addError("Phone number must be in xxx-xxx-xxxx format.");
+  }
+  if (!formData.email.includes("@")) {
+    errors.email.addError("Email must be in address@domain format.");
+  }
+  return errors;
+};
+
+const AddUserFormModal = ({
+  onSubmit,
+}: AddUserFormModalProps): React.ReactElement => {
+  const [data, setData] = useState<AddUserRequest | null>(null);
+  const [formFields, setFormFields] = useState<AddUserRequest | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async ({ formData }: ISubmitEvent<AddUserRequest>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await onSubmit(formData);
+      setData(formData);
+      setFormFields(null);
+    } catch (err) {
+      setError("An error occurred while sending the invite.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (data) {
-    return <p>Created! ✔️</p>;
+    return (
+      <Alert status="success">
+        <AlertIcon />
+        Invite Sent! ✔️
+      </Alert>
+    );
   }
 
-  const onSubmit = async ({ formData }: { formData: SimpleEntityRequest }) => {
-    const result = await SimpleEntityAPIClient.create({ formData });
-    setData(result);
-  };
   return (
-    <Form
-      formData={formFields}
-      schema={schema}
-      uiSchema={uiSchema}
-      onChange={({ formData }: { formData: SimpleEntityRequest }) =>
-        setFormFields(formData)
-      }
-      onSubmit={onSubmit}
-    />
+    <div>
+      <Form
+        formData={formFields}
+        schema={userSchema}
+        uiSchema={uiSchema}
+        validate={validate}
+        onChange={({ formData }: IChangeEvent<AddUserRequest>) =>
+          setFormFields(formData)
+        }
+        onSubmit={handleSubmit}
+      >
+        <div style={{ textAlign: "center" }}>
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? "Sending..." : "Send Invite"}
+          </button>
+        </div>
+      </Form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </div>
   );
 };
 
