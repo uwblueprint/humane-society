@@ -50,7 +50,7 @@ interface IAuthService {
    * @throws Error if unable to generate link or send email
    */
   sendInviteEmail(email: string, role: string): Promise<void>;
-  
+
   /**
    * Generate a password reset link for the user with the given email and send
    * the link to that email address
