@@ -9,12 +9,11 @@ import {
   Text,
   FormLabel,
   FormControl,
-  FormErrorMessage,
 } from "@chakra-ui/react";
 import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
-import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
+import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
 import AuthAPIClient from "../../APIClients/AuthAPIClient";
@@ -23,8 +22,7 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
@@ -36,22 +34,22 @@ const CreatePasswordPage = (): React.ReactElement => {
   };
 
   const validatePasswords = () => {
-    setPasswordError("");
-    setConfirmPasswordError("");
-    let hasErrors: boolean = false;
+    setErrorMessage("");
     if (password.length < 8) {
-      hasErrors = true;
-      setPasswordError("Password must be at least 8 characters.");
-    }
-    if (confirmPassword && password !== confirmPassword) {
-      hasErrors = true;
-      setConfirmPasswordError("Passwords do not match.");
+      setErrorMessage("Password must be at least 8 characters.");
+      return true;
     }
     if (confirmPassword.length < 8) {
-      hasErrors = true;
-      setConfirmPasswordError("Password must be at least 8 characters.");
+      setErrorMessage("Password must be at least 8 characters.");
+      return true;
     }
-    return hasErrors;
+    if (confirmPassword && password !== confirmPassword) {
+      setErrorMessage(
+        "Your new password cannot be your previous password. Please try again.",
+      );
+      return true;
+    }
+    return false;
   };
 
   const handleCreateAccount = () => {
@@ -132,14 +130,11 @@ const CreatePasswordPage = (): React.ReactElement => {
                   >
                     Create Password:
                   </FormLabel>
-                  <FormControl isInvalid={!!passwordError}>
+                  <FormControl isInvalid={!!errorMessage}>
                     <ResponsivePasswordInput
                       value={password}
                       onChange={handlePasswordChange}
                     />
-                    <FormErrorMessage fontSize="12px">
-                      {passwordError}
-                    </FormErrorMessage>
                   </FormControl>
                 </Box>
                 <Box fontSize="12px">
@@ -150,28 +145,34 @@ const CreatePasswordPage = (): React.ReactElement => {
                   >
                     Confirm Password:
                   </FormLabel>
-                  <FormControl isInvalid={!!confirmPasswordError}>
+                  <FormControl isInvalid={!!errorMessage}>
                     <ResponsivePasswordInput
                       value={confirmPassword}
                       onChange={handleConfirmPasswordChange}
                     />
-                    <FormErrorMessage fontSize="12px">
-                      {confirmPasswordError}
-                    </FormErrorMessage>
                   </FormControl>
                 </Box>
               </Stack>
-              <Button
-                type="submit"
-                fontSize="14px"
-                onClick={handleCreateAccount}
-                color="white"
-                h="2.4rem"
-                width="100%"
-                bg="var(--blue-700, #2C5282)"
-              >
-                Create Account
-              </Button>
+              <Box>
+                <Button
+                  type="submit"
+                  fontSize="14px"
+                  onClick={handleCreateAccount}
+                  color="white"
+                  h="2.4rem"
+                  width="100%"
+                  bg="var(--blue-700, #2C5282)"
+                >
+                  Create Account
+                </Button>
+                {errorMessage && (
+                  <Box textAlign="center">
+                    <Text color="red.500" fontSize="14px" lineHeight="1" mb="0" mt="1rem">
+                      {errorMessage}
+                    </Text>
+                  </Box>
+                )}
+              </Box>
             </Stack>
           </ResponsiveAuthContainer>
         </Flex>
