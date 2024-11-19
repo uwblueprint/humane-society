@@ -117,6 +117,46 @@ class AuthService implements IAuthService {
       throw error;
     }
   }
+ 
+  async sendInviteEmail(email: string, role: string): Promise<void> {
+    if (!this.emailService) {
+      const errorMessage =
+        "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
+      Logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    try {
+      let roleString =
+        role === "Administrator" || role === "Animal Behaviourist"
+          ? "an "
+          : "a ";
+      roleString += role;
+
+      const signInLink = await this.generateSignInLink(email);
+      const emailBody = `
+      Hello,
+      <br><br>
+      You have been invited to the Oakville and Milton Humane Society as ${roleString}.
+      <br><br>
+      Please click the following link to verify your email and activate your account.
+      <strong>This link is only valid for 6 hours.</strong>
+      <br><br>
+      <a href=${signInLink}>Verify email</a>
+      <br><br>
+      To log in for the first time, use this email and the following link.</strong>`;
+      this.emailService.sendEmail(
+        email,
+        "Welcome to the Oakville and Milton Humane Society!",
+        emailBody,
+      );
+    } catch (error) {
+      Logger.error(
+        `Failed to send email invite link for user with email ${email}`,
+      );
+      throw error;
+    }
+  }
 
   async resetPassword(email: string): Promise<void> {
     if (!this.emailService) {

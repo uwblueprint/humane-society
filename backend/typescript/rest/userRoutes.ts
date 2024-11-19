@@ -110,7 +110,7 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       role: req.body.role,
       skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
-      canAssignUsersToTasks: req.body.canSeeAllUsers ?? null,
+      canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
       phoneNumber: req.body.phoneNumber ?? null,
     });
 

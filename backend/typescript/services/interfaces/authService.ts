@@ -42,6 +42,15 @@ interface IAuthService {
    * @throws Error if unable to generate link
    */
   generateSignInLink(email: string): Promise<string>;
+
+  /**
+   * Sends invite email with newly generated sign-in link
+   * @param email sends invite to this email
+   * @param role role of user with respective email
+   * @throws Error if unable to generate link or send email
+   */
+  sendInviteEmail(email: string, role: string): Promise<void>;
+  
   /**
    * Generate a password reset link for the user with the given email and send
    * the link to that email address
