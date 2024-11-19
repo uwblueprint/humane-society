@@ -117,7 +117,7 @@ class AuthService implements IAuthService {
       throw error;
     }
   }
- 
+
   async sendInviteEmail(email: string, role: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =

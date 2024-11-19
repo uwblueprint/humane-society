@@ -148,8 +148,11 @@ authRouter.post(
 authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {
     const user = await userService.getUserByEmail(req.body.email);
-    if (user.status === UserStatus.ACTIVE) {
-      res.status(400).json({ error: "User is already active." });
+    if (
+      user.status === UserStatus.ACTIVE ||
+      user.status === UserStatus.INACTIVE
+    ) {
+      res.status(400).json({ error: "User has already been invited." });
       return;
     }
     await authService.sendInviteEmail(req.body.email, String(user.role));
