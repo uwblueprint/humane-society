@@ -3,6 +3,7 @@ import { CookieOptions, Router } from "express";
 import { isAuthorizedByEmail, isAuthorizedByUserId } from "../middlewares/auth";
 import {
   loginRequestValidator,
+  loginWithSignInLinkRequestValidator,
   inviteUserDtoValidator,
 } from "../middlewares/validators/authValidators";
 import nodemailerConfig from "../nodemailer.config";
@@ -44,6 +45,31 @@ authRouter.post("/login", loginRequestValidator, async (req, res) => {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 });
+
+/* Returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
+authRouter.post(
+  "/loginWithSignInLink",
+  loginWithSignInLinkRequestValidator,
+  async (req, res) => {
+    try {
+      if (isAuthorizedByEmail(req.body.email)) {
+        const userDTO = await userService.getUserByEmail(req.body.email);
+        const rest = { ...{ accessToken: req.body.accessToken }, ...userDTO };
+
+        res
+          .cookie("refreshToken", req.body.refreshToken, cookieOptions)
+          .status(200)
+          .json(rest);
+      }
+    } catch (error: unknown) {
+      if (error instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(error));
+      } else {
+        res.status(500).json({ error: getErrorMessage(error) });
+      }
+    }
+  },
+);
 
 /* Register a user, returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
 /* authRouter.post("/register", registerRequestValidator, async (req, res) => {
