@@ -43,3 +43,15 @@ export const registerRequestValidator = async (
 
   return next();
 };
+
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+export const inviteUserDtoValidator = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (!validatePrimitive(req.body.email, "string")) {
+    return res.status(400).send(getApiValidationError("email", "string"));
+  }
+  return next();
+};
