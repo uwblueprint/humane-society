@@ -61,9 +61,9 @@ const CreatePasswordPage = (): React.ReactElement => {
       if (resetPasswordResponse.success) {
         setShowModal(true);
       } else if (resetPasswordResponse.errorMessage) {
-        setPasswordError(resetPasswordResponse.errorMessage);
+        setErrorMessage(resetPasswordResponse.errorMessage);
       } else {
-        setPasswordError("An unknown error occured. Please try again later.");
+        setErrorMessage("An unknown error occured. Please try again later.");
       }
     });
   };
