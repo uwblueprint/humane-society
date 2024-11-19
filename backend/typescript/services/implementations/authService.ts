@@ -99,6 +99,25 @@ class AuthService implements IAuthService {
     }
   }
 
+  async generateSignInLink(email: string): Promise<string> {
+    const actionCodeSettings = {
+      url: `http://localhost:3000/login/?email=${email}`,
+      handleCodeInApp: true,
+    };
+
+    try {
+      const signInLink = firebaseAdmin
+        .auth()
+        .generateSignInWithEmailLink(email, actionCodeSettings);
+      return await signInLink;
+    } catch (error) {
+      Logger.error(
+        `Failed to generate email sign-in link for user with email ${email}`,
+      );
+      throw error;
+    }
+  }
+
   async resetPassword(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
@@ -129,7 +148,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  async sendEmailVerificationLink(email: string): Promise<void> {
+  /* async sendEmailVerificationLink(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
         "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
@@ -140,23 +159,27 @@ class AuthService implements IAuthService {
     try {
       const emailVerificationLink = await firebaseAdmin
         .auth()
-        .generateEmailVerificationLink(email);
-      const emailBody = `
+        .generateEmailVerificationLink(email);        
+        const emailBody = `
       Hello,
+      <br><br>
+      You have been invited to the Oakville and Milton Humane Society as a <role>.
       <br><br>
       Please click the following link to verify your email and activate your account.
       <strong>This link is only valid for 1 hour.</strong>
       <br><br>
-      <a href=${emailVerificationLink}>Verify email</a>`;
+      <a href=${emailVerificationLink}>Verify email</a>
+      <br><br>
+      To log in for the first time, use this email and the following link.</strong>`;
 
-      this.emailService.sendEmail(email, "Verify your email", emailBody);
+      this.emailService.sendEmail(email, "Welcome to the Oakville and Milton Humane Society!", emailBody);
     } catch (error) {
       Logger.error(
         `Failed to generate email verification link for user with email ${email}`,
       );
       throw error;
     }
-  }
+  } */
 
   async isAuthorizedByRole(
     accessToken: string,
@@ -191,12 +214,13 @@ class AuthService implements IAuthService {
         decodedIdToken.uid,
       );
 
-      const firebaseUser = await firebaseAdmin
-        .auth()
-        .getUser(decodedIdToken.uid);
+      // const firebaseUser = await firebaseAdmin
+      //   .auth()
+      //   .getUser(decodedIdToken.uid);
 
       return (
-        firebaseUser.emailVerified && String(tokenUserId) === requestedUserId
+        /* firebaseUser.emailVerified && */ String(tokenUserId) ===
+        requestedUserId
       );
     } catch (error) {
       return false;
