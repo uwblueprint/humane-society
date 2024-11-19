@@ -110,6 +110,14 @@ const refresh = async (): Promise<boolean> => {
   }
 };
 
+const getEmailOfCurrentUser = async (): Promise<string> => {
+  const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email");
+  if (typeof email === "string") {
+    return email;
+  }
+  throw new Error("Email not found for the current user");
+};
+
 // // trinity did this VV
 const setPassword = async (
   newPassword: string,
@@ -119,7 +127,7 @@ const setPassword = async (
     "accessToken",
   )}`;
   try {
-    const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email");
+    const email = await getEmailOfCurrentUser();
     // set password
     const response = await baseAPIClient.post(
       `/auth/setPassword/${email}`,
@@ -144,4 +152,5 @@ export default {
   resetPassword,
   refresh,
   setPassword,
+  getEmailOfCurrentUser,
 };

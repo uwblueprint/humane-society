@@ -23,6 +23,15 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [email, setEmail] = React.useState("Email not found.");
+
+  React.useEffect(() => {
+    const getEmail = async () => {
+      const userEmail = await AuthAPIClient.getEmailOfCurrentUser();
+      setEmail(userEmail);
+    };
+    getEmail();
+  });
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
@@ -44,9 +53,7 @@ const CreatePasswordPage = (): React.ReactElement => {
       return true;
     }
     if (confirmPassword && password !== confirmPassword) {
-      setErrorMessage(
-        "Your new password cannot be your previous password. Please try again.",
-      );
+      setErrorMessage("The passwords entered do not match.");
       return true;
     }
     return false;
@@ -117,7 +124,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     textColor="var(--gray-400, #A0AEC0)"
                     fontSize="14px"
                     height="2.4rem"
-                    placeholder="admin@humanesociety.org"
+                    placeholder={email}
                     isDisabled
                     bg="var(--gray-200, #E2E8F0)"
                   />
