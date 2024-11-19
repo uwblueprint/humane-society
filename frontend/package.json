@@ -25,6 +25,7 @@
     "apollo-upload-client": "^16.0.0",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "firebase": "^11.0.1",
     "framer-motion": "^11.2.10",
     "graphql": "^15.5.0",
     "humps": "^2.0.1",
