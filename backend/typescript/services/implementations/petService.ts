@@ -41,7 +41,7 @@ class PetService implements IPetService {
       photo: pet.photo,
       careInfo: {
         id: pet.petCareInfo?.id,
-        safetyInfo: pet.petCareInfo?.safety_info ?? null,
+        safetyInfo: pet.petCareInfo?. ?? null,
         medicalInfo: pet.petCareInfo?.medical_info ?? null,
         managementInfo: pet.petCareInfo?.management_info ?? null,
       },
