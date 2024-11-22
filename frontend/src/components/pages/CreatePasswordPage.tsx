@@ -59,21 +59,23 @@ const CreatePasswordPage = (): React.ReactElement => {
     return false;
   };
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     if (validatePasswords()) {
       return;
     }
-
-    AuthAPIClient.setPassword(password).then((resetPasswordResponse) => {
-      if (resetPasswordResponse.success) {
+    try {
+      const setPasswordResponse = await AuthAPIClient.setPassword(password)
+      const loginResponse = await AuthAPIClient.login(email, password)
+      if (setPasswordResponse.success && loginResponse != null ) {
         setShowModal(true);
-      } else if (resetPasswordResponse.errorMessage) {
-        setErrorMessage(resetPasswordResponse.errorMessage);
-      } else {
-        setErrorMessage("An unknown error occured. Please try again later.");
+      } else if (setPasswordResponse.errorMessage) {
+        setErrorMessage(setPasswordResponse.errorMessage);
       }
-    });
+    } catch (error) {
+      setErrorMessage("An unknown error occurred. Please try again later." )
+    }
   };
+
   return (
     <Flex
       maxWidth="100vw"

@@ -118,7 +118,6 @@ const getEmailOfCurrentUser = async (): Promise<string> => {
   throw new Error("Email not found for the current user");
 };
 
-// // trinity did this VV
 const setPassword = async (
   newPassword: string,
 ): Promise<PasswordSetResponse> => {
@@ -134,11 +133,7 @@ const setPassword = async (
       { newPassword },
       { headers: { Authorization: bearerToken } },
     );
-    const { success, userDTO, errorMessage } = response.data;
-    if (success) {
-      localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(userDTO));
-    }
-    return { success, errorMessage };
+    return response.data;
   } catch (error) {
     return { success: false, errorMessage: "An unknown error occured." };
   }

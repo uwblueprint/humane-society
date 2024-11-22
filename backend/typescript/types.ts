@@ -34,7 +34,6 @@ export type AuthDTO = Token & UserDTO;
 export type ResponseSuccessDTO = {
   success: boolean;
   errorMessage?: string;
-  userDTO?: UserDTO;
 };
 
 export type Letters = "A" | "B" | "C" | "D";

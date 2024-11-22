@@ -118,6 +118,7 @@ authRouter.post(
   },
 );
 
+// updates user password and updates status
 authRouter.post(
   "/setPassword/:email",
   isAuthorizedByEmail("email"),
@@ -135,20 +136,7 @@ authRouter.post(
             status: UserStatus.ACTIVE,
           });
         }
-        // automatically log in after password reset
-        const authDTO = await authService.generateToken(
-          req.params.email,
-          req.body.newPassword,
-        );
-        const { refreshToken, ...rest } = authDTO;
-        const passwordSetResponse = {
-          success: responseSuccess.success,
-          userDTO: rest,
-        };
-        res
-          .cookie("refreshToken", authDTO.refreshToken, cookieOptions)
-          .status(200)
-          .json(passwordSetResponse);
+        res.status(200).json(responseSuccess);
       }
     } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });
