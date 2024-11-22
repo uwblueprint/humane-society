@@ -28,9 +28,6 @@ export default class PetBehaviour extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   skill_level!: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  level!: number;
-
-  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  @Column({ type: DataType.BOOLEAN, allowNull: true })
   is_highlighted!: boolean;
 }

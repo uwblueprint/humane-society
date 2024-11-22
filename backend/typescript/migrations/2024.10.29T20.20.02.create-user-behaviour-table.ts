@@ -5,6 +5,7 @@ import { MAX_BEHAVIOUR_LEVEL, MIN_BEHAVIOUR_LEVEL } from "../constants";
 
 const TABLE_NAME = "user_behaviours";
 const CONSTRAINT_NAME = "unique_user_behaviour_skill";
+const CONSTRAINT_NAME_2 = "max_level_interval";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
@@ -32,10 +33,6 @@ export const up: Migration = async ({ context: sequelize }) => {
     },
     max_level: {
       type: DataType.INTEGER,
-      validate: {
-        min: MIN_BEHAVIOUR_LEVEL,
-        max: MAX_BEHAVIOUR_LEVEL,
-      },
       allowNull: false,
     },
   });
@@ -45,12 +42,21 @@ export const up: Migration = async ({ context: sequelize }) => {
     type: "unique",
     name: CONSTRAINT_NAME,
   });
+
+  await sequelize.query(
+    `ALTER TABLE ${TABLE_NAME} ADD CONSTRAINT ${CONSTRAINT_NAME_2} 
+    CHECK (max_level BETWEEN ${MIN_BEHAVIOUR_LEVEL} AND ${MAX_BEHAVIOUR_LEVEL});`,
+  );
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
   await sequelize
     .getQueryInterface()
     .removeConstraint(TABLE_NAME, CONSTRAINT_NAME);
+
+  await sequelize.query(
+    `ALTER TABLE ${TABLE_NAME} DROP CONSTRAINT ${CONSTRAINT_NAME_2};`,
+  );
 
   await sequelize.getQueryInterface().dropTable(TABLE_NAME);
 };

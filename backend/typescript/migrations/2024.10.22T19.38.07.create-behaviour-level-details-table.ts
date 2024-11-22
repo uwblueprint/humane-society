@@ -23,10 +23,6 @@ export const up: Migration = async ({ context: sequelize }) => {
     },
     level: {
       type: DataType.INTEGER,
-      validate: {
-        min: 1,
-        max: 4,
-      },
       allowNull: false,
     },
     description: {
