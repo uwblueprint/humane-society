@@ -3,6 +3,12 @@ export type User = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
+  skillLevel?: number | null;
+  canSeeAllLogs?: boolean | null;
+  canAssignUsersToTasks?: boolean | null;
+  phoneNumber?: string | null;
 };
+
+export type CreateUserDTO = Omit<User, "id" | "status">;

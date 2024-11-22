@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
-import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
+import ResponsiveLogo from "../common/responsive/ResponsiveAuthPageLogo";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
 import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
@@ -46,21 +46,17 @@ const CreatePasswordPage = (): React.ReactElement => {
     setErrorMessage("");
     if (password.length < 8) {
       setErrorMessage("Password must be at least 8 characters.");
-      return true;
+      return false;
     }
-    if (confirmPassword.length < 8) {
-      setErrorMessage("Password must be at least 8 characters.");
-      return true;
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return false;
     }
-    if (confirmPassword && password !== confirmPassword) {
-      setErrorMessage("The passwords entered do not match.");
-      return true;
-    }
-    return false;
+    return true;
   };
 
-  const handleCreateAccount = async () => {
-    if (validatePasswords()) {
+  const handleSubmitForm = async () => {
+    if (!validatePasswords()) {
       return;
     }
     try {
@@ -74,6 +70,10 @@ const CreatePasswordPage = (): React.ReactElement => {
     } catch (error) {
       setErrorMessage("An unknown error occurred. Please try again later." )
     }
+  };
+    
+  const handleGetStarted = () => {
+    // TODO: Navigate to main page
   };
 
   return (
@@ -166,7 +166,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 <Button
                   type="submit"
                   fontSize="14px"
-                  onClick={handleCreateAccount}
+                  onClick={handleSubmitForm}
                   color="white"
                   h="2.4rem"
                   width="100%"
@@ -213,6 +213,7 @@ const CreatePasswordPage = (): React.ReactElement => {
             height="3rem"
             padding="0rem 1.875rem"
             textStyle="button"
+            onClick={handleGetStarted}
           >
             Get Started
           </Button>
