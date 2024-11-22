@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
-import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
+import ResponsiveLogo from "../common/responsive/ResponsiveAuthPageLogo";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
 import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
@@ -36,29 +36,30 @@ const CreatePasswordPage = (): React.ReactElement => {
     setErrorMessage("");
     if (password.length < 8) {
       setErrorMessage("Password must be at least 8 characters.");
-      return true;
+      return false;
     }
     if (confirmPassword.length < 8) {
       setErrorMessage("Password must be at least 8 characters.");
-      return true;
+      return false;
     }
     if (confirmPassword && password !== confirmPassword) {
-      setErrorMessage(
-        "Your new password cannot be your previous password. Please try again.",
-      );
-      return true;
+      setErrorMessage("Passwords do not match.");
+      return false;
     }
-    return false;
+    return true;
   };
 
-  const handleCreateAccount = () => {
-    if (validatePasswords()) {
+  const handleSubmitForm = () => {
+    if (!validatePasswords()) {
       return;
     }
     setShowModal(true);
-
-    // RESET PASSWORD LOGIC HERE
   };
+
+  const handleGetStarted = () => {
+    // TODO: Navigate to main page
+  };
+
   return (
     <Flex
       maxWidth="100vw"
@@ -149,7 +150,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 <Button
                   type="submit"
                   fontSize="14px"
-                  onClick={handleCreateAccount}
+                  onClick={handleSubmitForm}
                   color="white"
                   h="2.4rem"
                   width="100%"
@@ -159,7 +160,13 @@ const CreatePasswordPage = (): React.ReactElement => {
                 </Button>
                 {errorMessage && (
                   <Box textAlign="center">
-                    <Text color="red.500" fontSize="14px" lineHeight="1" mb="0" mt="1rem">
+                    <Text
+                      color="red.500"
+                      fontSize="14px"
+                      lineHeight="1"
+                      mb="0"
+                      mt="1rem"
+                    >
                       {errorMessage}
                     </Text>
                   </Box>
@@ -190,6 +197,7 @@ const CreatePasswordPage = (): React.ReactElement => {
             height="3rem"
             padding="0rem 1.875rem"
             textStyle="button"
+            onClick={handleGetStarted}
           >
             Get Started
           </Button>
