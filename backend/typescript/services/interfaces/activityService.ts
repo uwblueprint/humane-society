@@ -1,5 +1,4 @@
 export interface ActivityRequestDTO {
-  activityId: number;
   userId?: number;
   petId: number;
   activityTypeId: number;
@@ -12,7 +11,6 @@ export interface ActivityRequestDTO {
   
   export interface ActivityResponseDTO {
     id: number;
-    activityId: number;
     userId?: number;
     petId: number;
     activityTypeId: number;

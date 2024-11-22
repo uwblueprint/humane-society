@@ -12,9 +12,6 @@ import ActivityType from "./activityType.model";
 
 @Table({ timestamps: false, tableName: "activities" })
 export default class Activity extends Model {
-  @Column({})
-  activity_id!: number;
-
   @ForeignKey(() => User) // in case of null, task has not been assigned
   @Column({})
   user_id?: number;

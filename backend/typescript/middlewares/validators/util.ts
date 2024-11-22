@@ -1,4 +1,4 @@
-type Type = "string" | "integer" | "boolean" | "decimal" | "PetStatus" | "Sex" | "date";
+type Type = "string" | "integer" | "boolean" | "decimal" | "PetStatus" | "Sex" | "Date";
 
 const allowableContentTypes = new Set([
   "text/plain",

@@ -11,7 +11,7 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 
 const activityRouter: Router = Router();
-// activityRouter.use(isAuthorizedByRole((new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]))));
+// activityRouter.uzse(isAuthorizedByRole((new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF, Role.VOLUNTEER]))));
 const activityService: IActivityService = new ActivityService();
 
 /* Get all Activities */
@@ -48,7 +48,7 @@ activityRouter.get("/:id", async (req, res) => {
 activityRouter.post(
     "/",
     activityRequestDtoValidator,
-    isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+    // isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
     async (req, res) => {
         const accessToken = getAccessToken(req);
         if (!accessToken) {
@@ -60,7 +60,6 @@ activityRouter.post(
 
             const { body } = req;
             const newActivity = await activityService.createActivity({
-                activityId: body.activityId,
                 userId: body.userId,
                 petId: body.petId,
                 activityTypeId: body.activityTypeId,
@@ -88,7 +87,6 @@ activityRouter.put(
         try {
             const { body } = req;
             const Activity = await activityService.updateActivity(id, {
-                activityId: body.activityId,
                 userId: body.userId,
                 petId: body.petId,
                 activityTypeId: body.activityTypeId,

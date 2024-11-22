@@ -25,7 +25,6 @@ class ActivityService implements IActivityService {
 
     return {
       id: activity.id,
-      activityId: activity.activity_id,
       userId: activity.user_id,
       petId: activity.pet_id,
       activityTypeId: activity.activity_type_id,
@@ -41,7 +40,6 @@ class ActivityService implements IActivityService {
       const activities: Array<PgActivity> = await PgActivity.findAll({ raw: true });
       return activities.map((activity) => ({
         id: activity.id,
-        activityId: activity.activity_id,
         userId: activity.user_id,
         petId: activity.pet_id,
         activityTypeId: activity.activity_type_id,
@@ -64,7 +62,6 @@ class ActivityService implements IActivityService {
     let newActivity: PgActivity | null;
     try {
       newActivity = await PgActivity.create({
-        activity_id: activity.activityId,
         user_id: activity.userId,
         pet_id: activity.petId,
         activity_type_id: activity.activityTypeId,
@@ -81,7 +78,6 @@ class ActivityService implements IActivityService {
     }
     return {
       id: newActivity.id,
-      activityId: newActivity.activity_id,
       userId: newActivity.user_id,
       petId: newActivity.pet_id,
       activityTypeId: newActivity.activity_type_id,
@@ -101,7 +97,6 @@ class ActivityService implements IActivityService {
     try {
       updateResult = await PgActivity.update(
         {
-          activity_id: activity.activityId,
           user_id: activity.userId,
           pet_id: activity.petId,
           activity_type_id: activity.activityTypeId,
@@ -125,7 +120,6 @@ class ActivityService implements IActivityService {
     }
     return {
       id: resultingActivity.id,
-      activityId: resultingActivity.activity_id,
       userId: resultingActivity.user_id,
       petId: resultingActivity.pet_id,
       activityTypeId: resultingActivity.activity_type_id,
