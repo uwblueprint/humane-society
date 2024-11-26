@@ -238,7 +238,7 @@ class AuthService implements IAuthService {
       Logger.error(`Failed to update password. Error: ${error}`);
       if (error.code === "auth/invalid-password") {
         errorMessage =
-          "Password is not strong enough!";
+          "Password is too weak! Make sure it matches the password policy in Firebase.";
       } else if (error.code === "auth/user-not-found") {
         errorMessage = "No user found with the provided email!";
       }

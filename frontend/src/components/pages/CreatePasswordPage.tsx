@@ -60,18 +60,18 @@ const CreatePasswordPage = (): React.ReactElement => {
       return;
     }
     try {
-      const setPasswordResponse = await AuthAPIClient.setPassword(password)
-      const loginResponse = await AuthAPIClient.login(email, password)
-      if (setPasswordResponse.success && loginResponse != null ) {
+      const setPasswordResponse = await AuthAPIClient.setPassword(password);
+      const loginResponse = await AuthAPIClient.login(email, password);
+      if (setPasswordResponse.success && loginResponse != null) {
         setShowModal(true);
       } else if (setPasswordResponse.errorMessage) {
         setErrorMessage(setPasswordResponse.errorMessage);
       }
     } catch (error) {
-      setErrorMessage("An unknown error occurred. Please try again later." )
+      setErrorMessage("An unknown error occurred. Please try again later.");
     }
   };
-    
+
   const handleGetStarted = () => {
     // TODO: Navigate to main page
   };

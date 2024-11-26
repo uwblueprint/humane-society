@@ -137,6 +137,8 @@ authRouter.post(
           });
         }
         res.status(200).json(responseSuccess);
+      } else {
+        res.status(400).json(responseSuccess);
       }
     } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });

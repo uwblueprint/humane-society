@@ -67,8 +67,9 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}
                 component={ForgotPasswordPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
               />
-              <Route
+              <PrivateRoute
                 exact
                 path={Routes.CREATE_PASSWORD_PAGE}
                 component={CreatePasswordPage}
