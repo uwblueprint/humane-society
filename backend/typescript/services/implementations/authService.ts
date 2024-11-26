@@ -238,7 +238,7 @@ class AuthService implements IAuthService {
       Logger.error(`Failed to update password. Error: ${error}`);
       if (error.code === "auth/invalid-password") {
         errorMessage =
-          "Invalid password. Please make sure your password is at least 6 characters!";
+          "Password is not strong enough!";
       } else if (error.code === "auth/user-not-found") {
         errorMessage = "No user found with the provided email!";
       }
