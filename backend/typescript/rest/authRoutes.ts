@@ -1,6 +1,10 @@
 import { CookieOptions, Router } from "express";
 
-import { isAuthorizedByEmail, isAuthorizedByUserId } from "../middlewares/auth";
+import {
+  isAuthorizedByEmail,
+  isAuthorizedByUserId,
+  isAuthorizedByRole,
+} from "../middlewares/auth";
 import {
   loginRequestValidator,
   loginWithSignInLinkRequestValidator,
@@ -14,7 +18,7 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
-import { UserStatus } from "../types";
+import { UserStatus, Role } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -71,37 +75,6 @@ authRouter.post(
   },
 );
 
-/* Register a user, returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
-/* authRouter.post("/register", registerRequestValidator, async (req, res) => {
-  try {
-    await userService.createUser({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      role: req.body.role ?? Role.VOLUNTEER,
-      skillLevel: req.body.skillLevel ?? null,
-      canSeeAllLogs: req.body.canSeeAllLogs ?? null,
-      canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
-      phoneNumber: req.body.phoneNumber ?? null,
-    });
-
-    const authDTO = await authService.generateToken(
-      req.body.email,
-      req.body.password,
-    );
-    const { refreshToken, ...rest } = authDTO;
-
-    await authService.sendEmailVerificationLink(req.body.email);
-
-    res
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .status(200)
-      .json(rest);
-  } catch (error: unknown) {
-    res.status(500).json({ error: getErrorMessage(error) });
-  }
-}); */
-
 /* Returns access token in response body and sets refreshToken as an httpOnly cookie */
 authRouter.post("/refresh", async (req, res) => {
   try {
@@ -147,15 +120,34 @@ authRouter.post(
 /* Invite a user */
 authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {
-    const user = await userService.getUserByEmail(req.body.email);
     if (
-      user.status === UserStatus.ACTIVE ||
-      user.status === UserStatus.INACTIVE
+      !isAuthorizedByRole(
+        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+      )
     ) {
-      res.status(400).json({ error: "User has already been invited." });
+      res
+        .status(400)
+        .json({ error: "User is not authorized to invite user. " });
       return;
     }
+
+    const user = await userService.getUserByEmail(req.body.email);
+    if (user.status === UserStatus.ACTIVE) {
+      res.status(400).json({ error: "User has already claimed account." });
+      return;
+    }
+
     await authService.sendInviteEmail(req.body.email, String(user.role));
+    if (user.status === UserStatus.INVITED) {
+      res
+        .status(204)
+        .send("Success. Previous invitation has been invalidated.");
+      return;
+    }
+    const invitedUser = user;
+    invitedUser.status = UserStatus.INVITED;
+    await userService.updateUserById(user.id, invitedUser);
+
     res.status(204).send();
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
