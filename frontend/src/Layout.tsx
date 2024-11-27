@@ -1,7 +1,8 @@
-import React, { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import NavBar from './components/common/navbar/NavBar';
-import PAGE_NAMES from './constants/PageNames';
+import React, { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
+import NavBar from "./components/common/navbar/NavBar";
+import * as ROUTES from "./constants/Routes";
+import "./Layout.css";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,49 +13,47 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const getPageName = () => {
     switch (location.pathname) {
-      case '/':
-        return PAGE_NAMES.HOME;
-      case '/login':
-        return PAGE_NAMES.LOGIN;
-      case '/signup':
-        return PAGE_NAMES.SIGNUP;
-      case '/edit-team':
-        return PAGE_NAMES.EDIT_TEAM;
-      case '/entity':
-        return PAGE_NAMES.DISPLAY_ENTITY;
-      case '/entity/create':
-        return PAGE_NAMES.CREATE_ENTITY;
-      case '/entity/update':
-        return PAGE_NAMES.UPDATE_ENTITY;
-      case '/simpleEntity':
-        return PAGE_NAMES.DISPLAY_SIMPLE_ENTITY;
-      case '/simpleEntity/create':
-        return PAGE_NAMES.CREATE_SIMPLE_ENTITY;
-      case '/simpleEntity/update':
-        return PAGE_NAMES.UPDATE_SIMPLE_ENTITY;
-      case '/hooks':
-        return PAGE_NAMES.HOOKS;
-      case '/notifications':
-        return PAGE_NAMES.NOTIFICATIONS;
-      case '/profile':
-        return PAGE_NAMES.PROFILE;
-      case '/dev-utility':
-        return PAGE_NAMES.DEV_UTILITY;
-      case '/admin/users':
-        return PAGE_NAMES.USER_MANAGEMENT;
-      case '/admin':
-        return PAGE_NAMES.ADMIN;
+      case ROUTES.HOME_PAGE:
+        return "Home";
+      case ROUTES.LOGIN_PAGE:
+        return "Login";
+      case ROUTES.SIGNUP_PAGE:
+        return "Sign Up";
+      case ROUTES.EDIT_TEAM_PAGE:
+        return "Edit Team";
+      case ROUTES.DISPLAY_ENTITY_PAGE:
+        return "Entity Details";
+      case ROUTES.CREATE_ENTITY_PAGE:
+        return "Create Entity";
+      case ROUTES.UPDATE_ENTITY_PAGE:
+        return "Update Entity";
+      case ROUTES.DISPLAY_SIMPLE_ENTITY_PAGE:
+        return "Simple Entity Details";
+      case ROUTES.CREATE_SIMPLE_ENTITY_PAGE:
+        return "Create Simple Entity";
+      case ROUTES.UPDATE_SIMPLE_ENTITY_PAGE:
+        return "Update Simple Entity";
+      case ROUTES.HOOKS_PAGE:
+        return "Hooks";
+      case ROUTES.NOTIFICATIONS_PAGE:
+        return "Notifications";
+      case ROUTES.PROFILE_PAGE:
+        return "Profile";
+      case ROUTES.DEV_UTILITY_PAGE:
+        return "Developer Utility";
+      case ROUTES.USER_MANAGEMENT_PAGE:
+        return "User Management";
+      case ROUTES.ADMIN_PAGE:
+        return "Admin Dashboard";
       default:
-        return 'Page';
+        return "Page";
     }
   };
 
   return (
-    <div>
+    <div className="layout-container">
       <NavBar pageName={getPageName()} />
-      <main>
-        {children}
-      </main>
+      <main className="content-container">{children}</main>
     </div>
   );
 };
