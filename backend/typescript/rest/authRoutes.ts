@@ -126,7 +126,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
       )
     ) {
       res
-        .status(400)
+        .status(401)
         .json({ error: "User is not authorized to invite user. " });
       return;
     }
