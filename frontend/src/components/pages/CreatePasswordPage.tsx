@@ -159,7 +159,13 @@ const CreatePasswordPage = (): React.ReactElement => {
                 </Button>
                 {errorMessage && (
                   <Box textAlign="center">
-                    <Text color="red.500" fontSize="14px" lineHeight="1" mb="0" mt="1rem">
+                    <Text
+                      color="red.500"
+                      fontSize="14px"
+                      lineHeight="1"
+                      mb="0"
+                      mt="1rem"
+                    >
                       {errorMessage}
                     </Text>
                   </Box>
