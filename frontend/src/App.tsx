@@ -31,6 +31,7 @@ import NotificationsPage from "./components/pages/NotificationsPage";
 import ProfilePage from "./components/pages/ProfilePage";
 import UserManagementPage from "./components/pages/UserManagementPage";
 import AdminPage from "./components/pages/AdminPage";
+import AccountPage from "./components/pages/AccountPage";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 
@@ -137,6 +138,12 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.PROFILE_PAGE}
                 component={ProfilePage}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.ACCOUNT_PAGE}
+                component={AccountPage}
                 allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
