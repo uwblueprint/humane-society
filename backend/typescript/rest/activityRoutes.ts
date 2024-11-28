@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getAccessToken, isAuthorizedByRole } from "../middlewares/auth";
-import { activityRequestDtoValidator } from "../middlewares/validators/activityValidators";
+import { activityRequestDtoValidator, activityUpdateDtoValidator } from "../middlewares/validators/activityValidators";
 import ActivityService from "../services/implementations/activityService";
 import {
     ActivityResponseDTO,
@@ -11,7 +11,9 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 
 const activityRouter: Router = Router();
-// activityRouter.uzse(isAuthorizedByRole((new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF, Role.VOLUNTEER]))));
+activityRouter.use(
+    isAuthorizedByRole(new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF, Role.VOLUNTEER])),
+  );
 const activityService: IActivityService = new ActivityService();
 
 /* Get all Activities */
@@ -47,8 +49,8 @@ activityRouter.get("/:id", async (req, res) => {
 /* Create Activity */
 activityRouter.post(
     "/",
+    isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
     activityRequestDtoValidator,
-    // isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
     async (req, res) => {
         const accessToken = getAccessToken(req);
         if (!accessToken) {
@@ -78,10 +80,10 @@ activityRouter.post(
 
 
 /* Update Activity by id */
-activityRouter.put(
+activityRouter.patch(
     "/:id",
     isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
-    activityRequestDtoValidator,
+    activityUpdateDtoValidator,
     async (req, res) => {
         const { id } = req.params;
         try {
@@ -107,6 +109,7 @@ activityRouter.delete(
     "/:id",
     isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
     async (req, res) => {
+        console.log("Request body:", req.body); // Log incoming request body
         const { id } = req.params;
 
         try {
