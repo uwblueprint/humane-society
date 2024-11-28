@@ -36,6 +36,22 @@ interface IAuthService {
   renewToken(refreshToken: string): Promise<Token>;
 
   /**
+   * Generate new sign-in link for provided email
+   * @param email signs in user with this email
+   * @returns sign-in link
+   * @throws Error if unable to generate link
+   */
+  generateSignInLink(email: string): Promise<string>;
+
+  /**
+   * Sends invite email with newly generated sign-in link
+   * @param email sends invite to this email
+   * @param role role of user with respective email
+   * @throws Error if unable to generate link or send email
+   */
+  sendInviteEmail(email: string, role: string): Promise<void>;
+
+  /**
    * Generate a password reset link for the user with the given email and send
    * the link to that email address
    * @param email email of user requesting password reset
@@ -49,7 +65,7 @@ interface IAuthService {
    * @param email email of user that needs to be verified
    * @throws Error if unable to generate link or send email
    */
-  sendEmailVerificationLink(email: string): Promise<void>;
+  // sendEmailVerificationLink(email: string): Promise<void>;
 
   /**
    * Determine if the provided access token is valid and authorized for at least
