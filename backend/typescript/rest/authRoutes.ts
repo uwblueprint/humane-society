@@ -117,6 +117,34 @@ authRouter.post(
   },
 );
 
+// updates user password and updates status
+authRouter.post(
+  "/setPassword/:email",
+  isAuthorizedByEmail("email"),
+  async (req, res) => {
+    try {
+      const responseSuccess = await authService.setPassword(
+        req.params.email,
+        req.body.newPassword,
+      );
+      if (responseSuccess.success) {
+        const user = await userService.getUserByEmail(req.params.email);
+        if (user.status === UserStatus.INVITED) {
+          userService.updateUserById(user.id, {
+            ...user,
+            status: UserStatus.ACTIVE,
+          });
+        }
+        res.status(200).json(responseSuccess);
+      } else {
+        res.status(400).json(responseSuccess);
+      }
+    } catch (error) {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  },
+);
+
 /* Invite a user */
 authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {

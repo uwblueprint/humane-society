@@ -31,6 +31,11 @@ export type RegisterUserDTO = Omit<CreateUserDTO, "role">;
 
 export type AuthDTO = Token & UserDTO;
 
+export type ResponseSuccessDTO = {
+  success: boolean;
+  errorMessage?: string;
+};
+
 export type Letters = "A" | "B" | "C" | "D";
 
 const sexValues = ["M", "F"] as const;
