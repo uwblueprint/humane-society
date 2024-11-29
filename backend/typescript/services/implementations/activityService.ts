@@ -19,7 +19,9 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
     } catch (error: unknown) {
-      Logger.error(`Failed to get activity. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to get activity. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
 
@@ -37,7 +39,9 @@ class ActivityService implements IActivityService {
 
   async getActivities(): Promise<ActivityResponseDTO[]> {
     try {
-      const activities: Array<PgActivity> = await PgActivity.findAll({ raw: true });
+      const activities: Array<PgActivity> = await PgActivity.findAll({
+        raw: true,
+      });
       return activities.map((activity) => ({
         id: activity.id,
         userId: activity.user_id,

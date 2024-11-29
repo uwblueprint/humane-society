@@ -1,4 +1,11 @@
-type Type = "string" | "integer" | "boolean" | "decimal" | "PetStatus" | "Sex" | "Date";
+type Type =
+  | "string"
+  | "integer"
+  | "boolean"
+  | "decimal"
+  | "PetStatus"
+  | "Sex"
+  | "Date";
 
 const allowableContentTypes = new Set([
   "text/plain",
@@ -51,7 +58,7 @@ export const validateFileType = (mimetype: string): boolean => {
 };
 
 export const validateDate = (value: any): boolean => {
-  return value instanceof Date && !isNaN(value.getTime());
+  return !Number.isNaN(Date.parse(value));
 };
 
 export const getApiValidationError = (

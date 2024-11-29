@@ -10,9 +10,9 @@ import User from "./user.model";
 import Pet from "./pet.model";
 import ActivityType from "./activityType.model";
 
-@Table({ 
+@Table({
   tableName: "activities",
-  timestamps: true, 
+  timestamps: true,
   createdAt: "created_at",
   updatedAt: "updated_at",
 })

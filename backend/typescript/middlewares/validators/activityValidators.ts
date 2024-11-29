@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getApiValidationError, validateDate, validatePrimitive, } from "./util";
+import { getApiValidationError, validateDate, validatePrimitive } from "./util";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
@@ -9,11 +9,12 @@ export const activityRequestDtoValidator = async (
   next: NextFunction,
 ) => {
   const { body } = req;
-  console.log(body)
 
-  if (body.userId !== undefined &&
+  if (
+    body.userId !== undefined &&
     body.userId !== null &&
-    !validatePrimitive(body.userId, "integer")) {
+    !validatePrimitive(body.userId, "integer")
+  ) {
     return res.status(400).send(getApiValidationError("userId", "integer"));
   }
 
@@ -22,30 +23,42 @@ export const activityRequestDtoValidator = async (
   }
 
   if (!validatePrimitive(body.activityTypeId, "integer")) {
-    return res.status(400).send(getApiValidationError("activityTypeId", "integer"));
+    return res
+      .status(400)
+      .send(getApiValidationError("activityTypeId", "integer"));
   }
 
-  if (body.scheduledStartTime !== undefined &&
+  if (
+    body.scheduledStartTime !== undefined &&
     body.scheduledStartTime !== null &&
-    !validateDate(body.scheduledStartTime)) {
-    return res.status(400).send(getApiValidationError("scheduledStartTime", "Date"));
+    !validateDate(body.scheduledStartTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledStartTime", "Date"));
   }
 
-  if (body.startTime !== undefined &&
+  if (
+    body.startTime !== undefined &&
     body.startTime !== null &&
-    !validateDate(body.startTime)) {
+    !validateDate(body.startTime)
+  ) {
     return res.status(400).send(getApiValidationError("startTime", "Date"));
   }
 
-  if (body.endTime !== undefined &&
+  if (
+    body.endTime !== undefined &&
     body.endTime !== null &&
-    !validateDate(body.endTime)) {
+    !validateDate(body.endTime)
+  ) {
     return res.status(400).send(getApiValidationError("endTime", "Date"));
   }
 
-  if (body.notes !== undefined &&
+  if (
+    body.notes !== undefined &&
     body.notes !== null &&
-    !validatePrimitive(body.notes, "string")) {
+    !validatePrimitive(body.notes, "string")
+  ) {
     return res.status(400).send(getApiValidationError("notes", "string"));
   }
 
@@ -58,47 +71,64 @@ export const activityUpdateDtoValidator = async (
   next: NextFunction,
 ) => {
   const { body } = req;
-  console.log(body)
 
-  if (body.userId !== undefined &&
+  if (
+    body.userId !== undefined &&
     body.userId !== null &&
-    !validatePrimitive(body.userId, "integer")) {
+    !validatePrimitive(body.userId, "integer")
+  ) {
     return res.status(400).send(getApiValidationError("userId", "integer"));
   }
 
-  if (body.petId !== undefined &&
+  if (
+    body.petId !== undefined &&
     body.petId !== null &&
-    !validatePrimitive(body.petId, "integer")) {
+    !validatePrimitive(body.petId, "integer")
+  ) {
     return res.status(400).send(getApiValidationError("petId", "integer"));
   }
 
-  if (body.activityTypeId !== undefined &&
+  if (
+    body.activityTypeId !== undefined &&
     body.activityTypeId !== null &&
-    !validatePrimitive(body.activityTypeId, "integer")) {
-    return res.status(400).send(getApiValidationError("activityTypeId", "integer"));
+    !validatePrimitive(body.activityTypeId, "integer")
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("activityTypeId", "integer"));
   }
 
-  if (body.scheduledStartTime !== undefined &&
+  if (
+    body.scheduledStartTime !== undefined &&
     body.scheduledStartTime !== null &&
-    !validateDate(body.scheduledStartTime)) {
-    return res.status(400).send(getApiValidationError("scheduledStartTime", "Date"));
+    !validateDate(body.scheduledStartTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledStartTime", "Date"));
   }
 
-  if (body.startTime !== undefined &&
+  if (
+    body.startTime !== undefined &&
     body.startTime !== null &&
-    !validateDate(body.startTime)) {
+    !validateDate(body.startTime)
+  ) {
     return res.status(400).send(getApiValidationError("startTime", "Date"));
   }
 
-  if (body.endTime !== undefined &&
+  if (
+    body.endTime !== undefined &&
     body.endTime !== null &&
-    !validateDate(body.endTime)) {
+    !validateDate(body.endTime)
+  ) {
     return res.status(400).send(getApiValidationError("endTime", "Date"));
   }
 
-  if (body.notes !== undefined &&
+  if (
+    body.notes !== undefined &&
     body.notes !== null &&
-    !validatePrimitive(body.notes, "string")) {
+    !validatePrimitive(body.notes, "string")
+  ) {
     return res.status(400).send(getApiValidationError("notes", "string"));
   }
 

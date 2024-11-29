@@ -16,7 +16,6 @@ import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 import activtyRouter from "./rest/activityRoutes";
 
-
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
   "https://uw-blueprint-starter-code.firebaseapp.com",
