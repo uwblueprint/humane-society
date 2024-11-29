@@ -14,6 +14,11 @@ const theme = extendTheme({
       fontWeight: 600,
       fontSize: "28px",
     },
+    h2Mobile: {
+      fontFamily: "Poppins",
+      fontWeight: 600,
+      fontSize: "24px",
+    },
     h3: {
       fontFamily: "Poppins",
       fontWeight: 500,

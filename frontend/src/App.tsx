@@ -15,6 +15,7 @@ import SimpleEntityDisplayPage from "./components/pages/SimpleEntityDisplayPage"
 import NotFound from "./components/pages/NotFound";
 import UpdatePage from "./components/pages/UpdatePage";
 import SimpleEntityUpdatePage from "./components/pages/SimpleEntityUpdatePage";
+import CreatePasswordPage from "./components/pages/CreatePasswordPage";
 import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
@@ -62,6 +63,12 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={Login} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <PrivateRoute
+                exact
+                path={Routes.CREATE_PASSWORD_PAGE}
+                component={CreatePasswordPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
               <Route
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}

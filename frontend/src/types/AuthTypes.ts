@@ -15,3 +15,8 @@ export type DecodedJWT =
   | string
   | null
   | { [key: string]: unknown; exp: number };
+
+export type PasswordSetResponse = {
+  success: boolean;
+  errorMessage?: string;
+};
