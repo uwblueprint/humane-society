@@ -32,6 +32,7 @@ const handleUserSubmit = async (formData: AddUserRequest) => {
         | "Staff"
         | "Volunteer",
     });
+    await UserAPIClient.invite(formData.email);
   } catch (error) {
     throw error;
   }
@@ -50,7 +51,7 @@ const UserManagementPage = (): React.ReactElement => {
         setUsers(fetchedUsers);
       }
     } catch (error) {
-      setErrorMessage(`Failed to get users: ${error}`);
+      setErrorMessage(`${error}`);
     }
   };
 
