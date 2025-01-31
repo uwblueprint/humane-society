@@ -14,7 +14,11 @@ const get = async (): Promise<User[]> => {
     });
     return data;
   } catch (error) {
-    throw new Error(`Failed to get users. ${error instanceof Error ? error.message : "Unknown error occured."}`);
+    throw new Error(
+      `Failed to get users. ${
+        error instanceof Error ? error.message : "Unknown error occured."
+      }`,
+    );
   }
 };
 
@@ -39,12 +43,16 @@ const invite = async (email: string): Promise<void> => {
     "accessToken",
   )}`;
   try {
-    await baseAPIClient.post("/auth/invite-user", { email }, {
-      headers: { Authorization: bearerToken },
-    });
+    await baseAPIClient.post(
+      "/auth/invite-user",
+      { email },
+      {
+        headers: { Authorization: bearerToken },
+      },
+    );
   } catch (error) {
-    throw new Error(`Failed to invite user with email '${email}'`)
+    throw new Error(`Failed to invite user with email '${email}'`);
   }
-}
+};
 
 export default { get, create, invite };

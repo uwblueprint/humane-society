@@ -58,12 +58,15 @@ authRouter.post(
     try {
       if (isAuthorizedByEmail(req.body.email)) {
         const user = await userService.getUserByEmail(req.body.email);
-    
+
         const activatedUser = user;
         activatedUser.status = UserStatus.ACTIVE;
         await userService.updateUserById(user.id, activatedUser);
 
-        const rest = { ...{ accessToken: req.body.accessToken }, ...activatedUser };
+        const rest = {
+          ...{ accessToken: req.body.accessToken },
+          ...activatedUser,
+        };
         res
           .cookie("refreshToken", req.body.refreshToken, cookieOptions)
           .status(200)
