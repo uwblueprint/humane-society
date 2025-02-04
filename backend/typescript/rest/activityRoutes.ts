@@ -14,16 +14,7 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 
 const activityRouter: Router = Router();
-activityRouter.use(
-  isAuthorizedByRole(
-    new Set([
-      Role.ADMINISTRATOR,
-      Role.ANIMAL_BEHAVIOURIST,
-      Role.STAFF,
-      Role.VOLUNTEER,
-    ]),
-  ),
-);
+activityRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 const activityService: IActivityService = new ActivityService();
 
 /* Get all Activities */
