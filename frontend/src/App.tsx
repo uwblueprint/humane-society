@@ -15,7 +15,8 @@ import SimpleEntityDisplayPage from "./components/pages/SimpleEntityDisplayPage"
 import NotFound from "./components/pages/NotFound";
 import UpdatePage from "./components/pages/UpdatePage";
 import SimpleEntityUpdatePage from "./components/pages/SimpleEntityUpdatePage";
-import * as AppRoutes from "./constants/Routes";
+import CreatePasswordPage from "./components/pages/CreatePasswordPage";
+import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
@@ -61,12 +62,17 @@ const App = (): React.ReactElement => {
         >
           <Router>
             <Switch>
-              {/* Public Routes */}
-              <Route exact path={AppRoutes.LOGIN_PAGE} component={Login} />
-              <Route exact path={AppRoutes.SIGNUP_PAGE} component={Signup} />
+              <Route exact path={Routes.LOGIN_PAGE} component={Login} />
+              <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <PrivateRoute
+                exact
+                path={Routes.CREATE_PASSWORD_PAGE}
+                component={CreatePasswordPage}
+                allowedRoles={AuthConstants.ALL_ROLES}
+              />
               <Route
                 exact
-                path={AppRoutes.FORGOT_PASSWORD_PAGE}
+                path={Routes.FORGOT_PASSWORD_PAGE}
                 component={ForgotPasswordPage}
               />
 
@@ -74,85 +80,85 @@ const App = (): React.ReactElement => {
               <Layout>
                 <PrivateRoute
                   exact
-                  path={AppRoutes.HOME_PAGE}
+                  path={Routes.HOME_PAGE}
                   component={PetListPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.CREATE_ENTITY_PAGE}
+                  path={Routes.CREATE_ENTITY_PAGE}
                   component={CreatePage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.UPDATE_ENTITY_PAGE}
+                  path={Routes.UPDATE_ENTITY_PAGE}
                   component={UpdatePage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.DISPLAY_ENTITY_PAGE}
+                  path={Routes.DISPLAY_ENTITY_PAGE}
                   component={DisplayPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.CREATE_SIMPLE_ENTITY_PAGE}
+                  path={Routes.CREATE_SIMPLE_ENTITY_PAGE}
                   component={SimpleEntityCreatePage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.UPDATE_SIMPLE_ENTITY_PAGE}
+                  path={Routes.UPDATE_SIMPLE_ENTITY_PAGE}
                   component={SimpleEntityUpdatePage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.DISPLAY_SIMPLE_ENTITY_PAGE}
+                  path={Routes.DISPLAY_SIMPLE_ENTITY_PAGE}
                   component={SimpleEntityDisplayPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.EDIT_TEAM_PAGE}
+                  path={Routes.EDIT_TEAM_PAGE}
                   component={EditTeamInfoPage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.HOOKS_PAGE}
+                  path={Routes.HOOKS_PAGE}
                   component={HooksDemo}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.DEV_UTILITY_PAGE}
+                  path={Routes.DEV_UTILITY_PAGE}
                   component={Default}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.NOTIFICATIONS_PAGE}
+                  path={Routes.NOTIFICATIONS_PAGE}
                   component={NotificationsPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.PROFILE_PAGE}
+                  path={Routes.PROFILE_PAGE}
                   component={ProfilePage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.ADMIN_PAGE}
+                  path={Routes.ADMIN_PAGE}
                   component={AdminPage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />
                 <PrivateRoute
                   exact
-                  path={AppRoutes.USER_MANAGEMENT_PAGE}
+                  path={Routes.USER_MANAGEMENT_PAGE}
                   component={UserManagementPage}
                   allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                 />

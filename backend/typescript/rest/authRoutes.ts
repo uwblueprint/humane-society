@@ -1,9 +1,14 @@
 import { CookieOptions, Router } from "express";
 
-import { isAuthorizedByEmail, isAuthorizedByUserId } from "../middlewares/auth";
+import {
+  isAuthorizedByEmail,
+  isAuthorizedByUserId,
+  isAuthorizedByRole,
+} from "../middlewares/auth";
 import {
   loginRequestValidator,
-  registerRequestValidator,
+  loginWithSignInLinkRequestValidator,
+  inviteUserDtoValidator,
 } from "../middlewares/validators/authValidators";
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
@@ -12,8 +17,8 @@ import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { getErrorMessage } from "../utilities/errorUtils";
-import { Role } from "../types";
+import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
+import { UserStatus, Role } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -45,36 +50,37 @@ authRouter.post("/login", loginRequestValidator, async (req, res) => {
   }
 });
 
-/* Register a user, returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
-authRouter.post("/register", registerRequestValidator, async (req, res) => {
-  try {
-    await userService.createUser({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      role: req.body.role ?? Role.VOLUNTEER,
-      skillLevel: req.body.skillLevel ?? null,
-      canSeeAllLogs: req.body.canSeeAllLogs ?? null,
-      canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
-      phoneNumber: req.body.phoneNumber ?? null,
-    });
+/* Returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
+authRouter.post(
+  "/loginWithSignInLink",
+  loginWithSignInLinkRequestValidator,
+  async (req, res) => {
+    try {
+      if (isAuthorizedByEmail(req.body.email)) {
+        const user = await userService.getUserByEmail(req.body.email);
 
-    const authDTO = await authService.generateToken(
-      req.body.email,
-      req.body.password,
-    );
-    const { refreshToken, ...rest } = authDTO;
+        const activatedUser = user;
+        activatedUser.status = UserStatus.ACTIVE;
+        await userService.updateUserById(user.id, activatedUser);
 
-    await authService.sendEmailVerificationLink(req.body.email);
-
-    res
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .status(200)
-      .json(rest);
-  } catch (error: unknown) {
-    res.status(500).json({ error: getErrorMessage(error) });
-  }
-});
+        const rest = {
+          ...{ accessToken: req.body.accessToken },
+          ...activatedUser,
+        };
+        res
+          .cookie("refreshToken", req.body.refreshToken, cookieOptions)
+          .status(200)
+          .json(rest);
+      }
+    } catch (error: unknown) {
+      if (error instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(error));
+      } else {
+        res.status(500).json({ error: getErrorMessage(error) });
+      }
+    }
+  },
+);
 
 /* Returns access token in response body and sets refreshToken as an httpOnly cookie */
 authRouter.post("/refresh", async (req, res) => {
@@ -117,5 +123,74 @@ authRouter.post(
     }
   },
 );
+
+// updates user password and updates status
+authRouter.post(
+  "/setPassword/:email",
+  isAuthorizedByEmail("email"),
+  async (req, res) => {
+    try {
+      const responseSuccess = await authService.setPassword(
+        req.params.email,
+        req.body.newPassword,
+      );
+      if (responseSuccess.success) {
+        const user = await userService.getUserByEmail(req.params.email);
+        if (user.status === UserStatus.INVITED) {
+          userService.updateUserById(user.id, {
+            ...user,
+            status: UserStatus.ACTIVE,
+          });
+        }
+        res.status(200).json(responseSuccess);
+      } else {
+        res.status(400).json(responseSuccess);
+      }
+    } catch (error) {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  },
+);
+
+/* Invite a user */
+authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
+  try {
+    if (
+      !isAuthorizedByRole(
+        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+      )
+    ) {
+      res
+        .status(401)
+        .json({ error: "User is not authorized to invite user. " });
+      return;
+    }
+
+    const user = await userService.getUserByEmail(req.body.email);
+    if (user.status === UserStatus.ACTIVE) {
+      res.status(400).json({ error: "User has already claimed account." });
+      return;
+    }
+
+    await authService.sendInviteEmail(req.body.email, String(user.role));
+    if (user.status === UserStatus.INVITED) {
+      res
+        .status(204)
+        .send("Success. Previous invitation has been invalidated.");
+      return;
+    }
+    const invitedUser = user;
+    invitedUser.status = UserStatus.INVITED;
+    await userService.updateUserById(user.id, invitedUser);
+
+    res.status(204).send();
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(error));
+    } else {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  }
+});
 
 export default authRouter;
