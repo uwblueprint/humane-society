@@ -19,7 +19,6 @@ type PasswordSignInResponse = {
   registered: boolean;
 };
 
-
 type RefreshTokenResponse = {
   expires_in: string;
   token_type: string;

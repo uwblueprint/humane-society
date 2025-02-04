@@ -162,7 +162,7 @@ const setPassword = async (
 export default {
   login,
   loginWithSignInLink,
-  logout, 
+  logout,
   register,
   resetPassword,
   refresh,

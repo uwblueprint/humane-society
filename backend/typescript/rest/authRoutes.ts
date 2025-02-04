@@ -43,7 +43,7 @@ authRouter.post("/login", loginRequestValidator, async (req, res) => {
       .cookie("refreshToken", refreshToken, cookieOptions)
       .status(200)
       .json(rest);
-  } catch (error) {
+  } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 });
@@ -63,14 +63,14 @@ authRouter.post(
           .status(200)
           .json(rest);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof NotFoundError) {
         res.status(404).send(getErrorMessage(error));
       } else {
         res.status(500).json({ error: getErrorMessage(error) });
       }
     }
-  }
+  },
 );
 
 /* Returns access token in response body and sets refreshToken as an httpOnly cookie */
@@ -82,7 +82,7 @@ authRouter.post("/refresh", async (req, res) => {
       .cookie("refreshToken", token.refreshToken, cookieOptions)
       .status(200)
       .json({ accessToken: token.accessToken });
-  } catch (error) {
+  } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 });
@@ -95,10 +95,10 @@ authRouter.post(
     try {
       await authService.revokeTokens(req.params.userId);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 /* Emails a password reset link to the user with the specified email */
@@ -109,10 +109,10 @@ authRouter.post(
     try {
       await authService.resetPassword(req.params.email);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 // updates user password and updates status
@@ -123,7 +123,7 @@ authRouter.post(
     try {
       const responseSuccess = await authService.setPassword(
         req.params.email,
-        req.body.newPassword
+        req.body.newPassword,
       );
       if (responseSuccess.success) {
         const user = await userService.getUserByEmail(req.params.email);
@@ -137,10 +137,10 @@ authRouter.post(
       } else {
         res.status(400).json(responseSuccess);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 /* Invite a user */
@@ -148,7 +148,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {
     if (
       !isAuthorizedByRole(
-        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])
+        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
       )
     ) {
       res
@@ -175,7 +175,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
     await userService.updateUserById(user.id, invitedUser);
 
     res.status(204).send();
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(error));
     } else {
