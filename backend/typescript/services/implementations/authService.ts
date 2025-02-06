@@ -6,6 +6,7 @@ import IUserService from "../interfaces/userService";
 import { AuthDTO, Role, Token, ResponseSuccessDTO } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
+import fs from "fs";
 import logger from "../../utilities/logger";
 
 const Logger = logger(__filename);
@@ -118,7 +119,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  async sendInviteEmail(email: string, role: string): Promise<void> {
+  async sendInviteEmail(name: string, email: string, role: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
         "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
@@ -134,21 +135,15 @@ class AuthService implements IAuthService {
       roleString += role;
 
       const signInLink = await this.generateSignInLink(email);
-      const emailBody = `
-      Hello,
-      <br><br>
-      You have been invited to the Oakville and Milton Humane Society as ${roleString}.
-      <br><br>
-      Please click the following link to verify your email and activate your account.
-      <strong>This link is only valid for 6 hours.</strong>
-      <br><br>
-      <a href=${signInLink}>Verify email</a>
-      <br><br>
-      To log in for the first time, use this email and the following link.</strong>`;
+      let emailTemplate = fs.readFileSync(__dirname + "/../../html-templates/email.html", "utf8");
+      const renderedEmailTemplate =  emailTemplate.replace('{{ name }}', name)
+                                                  .replace('{{ roleString }}', roleString)
+                                                  .replace('{{ signInLink }}', signInLink)
+                                                  .replace('{{ signInLink }}', signInLink);  // necessary for second occurrence
       this.emailService.sendEmail(
         email,
         "Welcome to the Oakville and Milton Humane Society!",
-        emailBody,
+        renderedEmailTemplate,
       );
     } catch (error) {
       Logger.error(
