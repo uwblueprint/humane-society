@@ -1,12 +1,12 @@
 import * as firebaseAdmin from "firebase-admin";
 
+import fs from "fs";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
 import { AuthDTO, Role, Token, ResponseSuccessDTO } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
-import fs from "fs";
 import logger from "../../utilities/logger";
 
 const Logger = logger(__filename);
@@ -119,7 +119,11 @@ class AuthService implements IAuthService {
     }
   }
 
-  async sendInviteEmail(name: string, email: string, role: string): Promise<void> {
+  async sendInviteEmail(
+    name: string,
+    email: string,
+    role: string,
+  ): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
         "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
@@ -135,11 +139,15 @@ class AuthService implements IAuthService {
       roleString += role;
 
       const signInLink = await this.generateSignInLink(email);
-      let emailTemplate = fs.readFileSync(__dirname + "/../../html-templates/email.html", "utf8");
-      const renderedEmailTemplate =  emailTemplate.replace('{{ name }}', name)
-                                                  .replace('{{ roleString }}', roleString)
-                                                  .replace('{{ signInLink }}', signInLink)
-                                                  .replace('{{ signInLink }}', signInLink);  // necessary for second occurrence
+      const emailTemplate = fs.readFileSync(
+        `${__dirname}/../../html-templates/email.html`,
+        "utf8",
+      );
+      const renderedEmailTemplate = emailTemplate
+        .replace("{{ name }}", name)
+        .replace("{{ roleString }}", roleString)
+        .replace("{{ signInLink }}", signInLink)
+        .replace("{{ signInLink }}", signInLink); // necessary for second occurrence
       this.emailService.sendEmail(
         email,
         "Welcome to the Oakville and Milton Humane Society!",
