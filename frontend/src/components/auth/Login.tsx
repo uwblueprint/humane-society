@@ -10,15 +10,19 @@ import {
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
+import { isSignInWithEmailLink } from "firebase/auth";
 import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
 import ResponsiveEmailInput from "../common/responsive/ResponsiveEmailInput";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
 import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
+import auth from "../../firebase/firebase";
 import authAPIClient from "../../APIClients/AuthAPIClient";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
+
+let didInit = false;
 
 const Login = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -52,9 +56,30 @@ const Login = (): React.ReactElement => {
       setErrorMessage("Invalid login credentials.");
     }
   };
+  const checkIfSignInLink = async () => {
+    if (!authenticatedUser) {
+      const url = window.location.href;
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const signInEmail = urlSearchParams.get("email"); // passed in from actionCode
+      const isSignInLink = isSignInWithEmailLink(auth, url);
+      if (signInEmail && isSignInLink) {
+        const user: AuthenticatedUser = await authAPIClient.loginWithSignInLink(
+          url,
+          signInEmail,
+        );
+        setAuthenticatedUser(user);
+      }
+    }
+    // alert: user is already logged in, please log out before trying again
+  };
 
   if (authenticatedUser) {
-    return <Redirect to="/pets" />;
+    return <Redirect to="/" />;
+  }
+
+  if (!didInit) {
+    didInit = true;
+    checkIfSignInLink();
   }
 
   return (

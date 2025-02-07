@@ -186,7 +186,7 @@ class UserService implements IUserService {
           last_name: user.lastName,
           auth_id: firebaseUser.uid,
           role: user.role,
-          status: UserStatus.INVITED,
+          status: UserStatus.INACTIVE,
           email: firebaseUser.email ?? "",
           skill_level: user.skillLevel,
           can_see_all_logs: user.canSeeAllLogs,

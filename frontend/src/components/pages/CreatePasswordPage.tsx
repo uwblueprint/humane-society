@@ -10,18 +10,28 @@ import {
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
-import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
+import ResponsiveLogo from "../common/responsive/ResponsiveAuthPageLogo";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
 import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
+import AuthAPIClient from "../../APIClients/AuthAPIClient";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [email, setEmail] = React.useState("Email not found.");
+
+  React.useEffect(() => {
+    const getEmail = async () => {
+      const userEmail = await AuthAPIClient.getEmailOfCurrentUser();
+      setEmail(userEmail);
+    };
+    getEmail();
+  });
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
@@ -36,29 +46,36 @@ const CreatePasswordPage = (): React.ReactElement => {
     setErrorMessage("");
     if (password.length < 8) {
       setErrorMessage("Password must be at least 8 characters.");
-      return true;
+      return false;
     }
-    if (confirmPassword.length < 8) {
-      setErrorMessage("Password must be at least 8 characters.");
-      return true;
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return false;
     }
-    if (confirmPassword && password !== confirmPassword) {
-      setErrorMessage(
-        "Your new password cannot be your previous password. Please try again.",
-      );
-      return true;
-    }
-    return false;
+    return true;
   };
 
-  const handleCreateAccount = () => {
-    if (validatePasswords()) {
+  const handleSubmitForm = async () => {
+    if (!validatePasswords()) {
       return;
     }
-    setShowModal(true);
-
-    // RESET PASSWORD LOGIC HERE
+    try {
+      const setPasswordResponse = await AuthAPIClient.setPassword(password);
+      const loginResponse = await AuthAPIClient.login(email, password);
+      if (setPasswordResponse.success && loginResponse != null) {
+        setShowModal(true);
+      } else if (setPasswordResponse.errorMessage) {
+        setErrorMessage(setPasswordResponse.errorMessage);
+      }
+    } catch (error) {
+      setErrorMessage("An unknown error occurred. Please try again later.");
+    }
   };
+
+  const handleGetStarted = () => {
+    // TODO: Navigate to main page
+  };
+
   return (
     <Flex
       maxWidth="100vw"
@@ -93,7 +110,7 @@ const CreatePasswordPage = (): React.ReactElement => {
               mb="0"
               textAlign="center"
             >
-              Welcome Back!
+              Welcome!
             </Text>
             <Stack spacing="2.25rem">
               <Stack spacing={{ base: "1rem", md: "1.5rem" }} width="100%">
@@ -109,7 +126,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     textColor="var(--gray-400, #A0AEC0)"
                     fontSize="14px"
                     height="2.4rem"
-                    placeholder="admin@humanesociety.org"
+                    placeholder={email}
                     isDisabled
                     bg="var(--gray-200, #E2E8F0)"
                   />
@@ -149,7 +166,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 <Button
                   type="submit"
                   fontSize="14px"
-                  onClick={handleCreateAccount}
+                  onClick={handleSubmitForm}
                   color="white"
                   h="2.4rem"
                   width="100%"
@@ -196,6 +213,7 @@ const CreatePasswordPage = (): React.ReactElement => {
             height="3rem"
             padding="0rem 1.875rem"
             textStyle="button"
+            onClick={handleGetStarted}
           >
             Get Started
           </Button>
