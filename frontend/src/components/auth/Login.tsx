@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import {
   Button,
@@ -19,10 +19,10 @@ import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
 import auth from "../../firebase/firebase";
 import authAPIClient from "../../APIClients/AuthAPIClient";
+import { CREATE_PASSWORD_PAGE, HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
-
-let didInit = false;
+import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 
 const Login = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -56,143 +56,215 @@ const Login = (): React.ReactElement => {
       setErrorMessage("Invalid login credentials.");
     }
   };
-  const checkIfSignInLink = async () => {
-    if (!authenticatedUser) {
+
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [status, setStatus] = useState<"loading" | "error" | "default">(
+    "default",
+  );
+
+  useEffect(() => {
+    setStatus("loading");
+    const checkIfSignInLink = async () => {
       const url = window.location.href;
       const urlSearchParams = new URLSearchParams(window.location.search);
       const signInEmail = urlSearchParams.get("email"); // passed in from actionCode
       const isSignInLink = isSignInWithEmailLink(auth, url);
+
       if (signInEmail && isSignInLink) {
         const user: AuthenticatedUser = await authAPIClient.loginWithSignInLink(
           url,
           signInEmail,
         );
-        setAuthenticatedUser(user);
+        if (user) {
+          setAuthenticatedUser(user);
+          setRedirectTo(CREATE_PASSWORD_PAGE);
+        } else {
+          setStatus("error");
+        }
+      } else {
+        setStatus("default");
       }
+    };
+
+    if (authenticatedUser) {
+      setRedirectTo(HOME_PAGE);
+    } else {
+      checkIfSignInLink();
     }
-    // alert: user is already logged in, please log out before trying again
-  };
+  }, [authenticatedUser, setAuthenticatedUser]);
+
+  if (redirectTo) {
+    return <Redirect to={redirectTo} />;
+  }
 
   if (authenticatedUser) {
     return <Redirect to="/" />;
   }
 
-  if (!didInit) {
-    didInit = true;
-    checkIfSignInLink();
-  }
-
   return (
-    <Flex
-      maxWidth="100vw"
-      height="100vh"
-      position="relative"
-      backgroundRepeat="no-repeat"
-      backgroundPosition="center"
-      backgroundSize="cover"
-      backgroundImage={`url(${backgroundMobile})`}
-      sx={{
-        "@media (orientation: landscape)": {
-          height: "auto",
-          minHeight: "100vh",
-          overflowY: "auto",
-          backgroundImage: `url(${background})`,
-        },
-      }}
-    >
-      <Center flex="1">
+    <>
+      {status === "loading" && (
         <Flex
-          gap="2.2rem"
-          direction="column"
-          justify="center"
-          alignItems="center"
-          padding="1rem"
+          maxWidth="100vw"
+          height="100vh"
+          position="relative"
+          backgroundRepeat="no-repeat"
+          backgroundPosition="center"
+          backgroundSize="cover"
+          sx={{
+            "@media (orientation: landscape)": {
+              height: "auto",
+              minHeight: "100vh",
+              overflowY: "auto",
+            },
+          }}
         >
-          <ResponsiveLogo />
-          <ResponsiveAuthContainer>
-            <Text
-              color="#4A5568"
-              textStyle={{ base: "h2Mobile", md: "h2" }}
-              mb="0"
-              textAlign="center"
-            >
-              Welcome Back!
+          <ResponsiveModalWindow>
+            <Text color="#2C5282" textAlign="center">
+              Loading, please wait...
             </Text>
-            <Stack>
-              <Stack spacing={{ base: "1rem", md: "1.5rem" }} width="100%">
-                <Box>
-                  <FormLabel
-                    fontSize="14px"
-                    textColor="var(--gray-600, #4A5568)"
-                    lineHeight="8px"
-                  >
-                    Email:
-                  </FormLabel>
-                  <FormControl isInvalid={!!errorMessage}>
-                    <ResponsiveEmailInput
-                      value={email}
-                      onChange={handleEmailChange}
-                    />
-                  </FormControl>
-                </Box>
-                <Box>
-                  <FormLabel
-                    textColor="var(--gray-600, #4A5568)"
-                    fontSize="14px"
-                    lineHeight="8px"
-                  >
-                    Password:
-                  </FormLabel>
-                  <FormControl isInvalid={!!errorMessage}>
-                    <ResponsivePasswordInput
-                      value={password}
-                      onChange={handlePasswordChange}
-                    />
-                  </FormControl>
-                </Box>
-                <Text
-                  cursor="pointer"
-                  fontSize="14px"
-                  onClick={handleForgotPassword}
-                  color="#494B42"
-                  textAlign="center"
-                  _hover={{ textDecoration: "underline" }}
-                >
-                  Forgot Password?
-                </Text>
-              </Stack>
-
-              <Box>
-                <Button
-                  type="submit"
-                  fontSize="14px"
-                  onClick={handleLogin}
-                  color="white"
-                  h="2.4rem"
-                  width="100%"
-                  bg="var(--blue-700, #2C5282)"
-                >
-                  Login
-                </Button>
-                {errorMessage && (
-                  <Box textAlign="center">
-                    <Text
-                      color="red.500"
-                      fontSize="14px"
-                      lineHeight="1"
-                      mb="0"
-                      mt="1rem"
-                    >
-                      {errorMessage}
-                    </Text>
-                  </Box>
-                )}
-              </Box>
-            </Stack>
-          </ResponsiveAuthContainer>
+          </ResponsiveModalWindow>
         </Flex>
-      </Center>
-    </Flex>
+      )}
+
+      {status === "error" && (
+        <Flex
+          maxWidth="100vw"
+          height="100vh"
+          position="relative"
+          backgroundRepeat="no-repeat"
+          backgroundPosition="center"
+          backgroundSize="cover"
+          sx={{
+            "@media (orientation: landscape)": {
+              height: "auto",
+              minHeight: "100vh",
+              overflowY: "auto",
+            },
+          }}
+        >
+          <ResponsiveModalWindow>
+            <Text color="red.500" textAlign="center">
+              An error occurred. If your link is expired, ask an adminstrator
+              for assistance.
+            </Text>
+          </ResponsiveModalWindow>
+        </Flex>
+      )}
+
+      {status === "default" && !redirectTo && (
+        <Flex
+          maxWidth="100vw"
+          height="100vh"
+          position="relative"
+          backgroundRepeat="no-repeat"
+          backgroundPosition="center"
+          backgroundSize="cover"
+          backgroundImage={`url(${backgroundMobile})`}
+          sx={{
+            "@media (orientation: landscape)": {
+              height: "auto",
+              minHeight: "100vh",
+              overflowY: "auto",
+              backgroundImage: `url(${background})`,
+            },
+          }}
+        >
+          <Center flex="1">
+            <Flex
+              gap="2.2rem"
+              direction="column"
+              justify="center"
+              alignItems="center"
+              padding="1rem"
+            >
+              <ResponsiveLogo />
+              <ResponsiveAuthContainer>
+                <Text
+                  color="#4A5568"
+                  textStyle={{ base: "h2Mobile", md: "h2" }}
+                  mb="0"
+                  textAlign="center"
+                >
+                  Welcome Back!
+                </Text>
+                <Stack>
+                  <Stack spacing={{ base: "1rem", md: "1.5rem" }} width="100%">
+                    <Box>
+                      <FormLabel
+                        fontSize="14px"
+                        textColor="var(--gray-600, #4A5568)"
+                        lineHeight="8px"
+                      >
+                        Email:
+                      </FormLabel>
+                      <FormControl isInvalid={!!errorMessage}>
+                        <ResponsiveEmailInput
+                          value={email}
+                          onChange={handleEmailChange}
+                        />
+                      </FormControl>
+                    </Box>
+                    <Box>
+                      <FormLabel
+                        textColor="var(--gray-600, #4A5568)"
+                        fontSize="14px"
+                        lineHeight="8px"
+                      >
+                        Password:
+                      </FormLabel>
+                      <FormControl isInvalid={!!errorMessage}>
+                        <ResponsivePasswordInput
+                          value={password}
+                          onChange={handlePasswordChange}
+                        />
+                      </FormControl>
+                    </Box>
+                    <Text
+                      cursor="pointer"
+                      fontSize="14px"
+                      onClick={handleForgotPassword}
+                      color="#494B42"
+                      textAlign="center"
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      Forgot Password?
+                    </Text>
+                  </Stack>
+
+                  <Box>
+                    <Button
+                      type="submit"
+                      fontSize="14px"
+                      onClick={handleLogin}
+                      color="white"
+                      h="2.4rem"
+                      width="100%"
+                      bg="var(--blue-700, #2C5282)"
+                    >
+                      Login
+                    </Button>
+                    {errorMessage && (
+                      <Box textAlign="center">
+                        <Text
+                          color="red.500"
+                          fontSize="14px"
+                          lineHeight="1"
+                          mb="0"
+                          mt="1rem"
+                        >
+                          {errorMessage}
+                        </Text>
+                      </Box>
+                    )}
+                  </Box>
+                </Stack>
+              </ResponsiveAuthContainer>
+            </Flex>
+          </Center>
+        </Flex>
+      )}
+    </>
   );
 };
 
