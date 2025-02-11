@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { isAuthorizedByRole } from "../middlewares/auth";
 import {
+  activityEndTimePatchValidator,
+  activityNotesPatchValidator,
   activityRequestDtoValidator,
+  activityScheduledTimePatchValidator,
+  activityStartTimePatchValidator,
   activityUpdateDtoValidator,
+  activityUserPatchValidator,
 } from "../middlewares/validators/activityValidators";
 import ActivityService from "../services/implementations/activityService";
 import {
@@ -41,6 +46,36 @@ activityRouter.get("/:id", async (req, res) => {
   try {
     const activity = await activityService.getActivity(id);
     res.status(200).json(activity);
+  } catch (e: unknown) {
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
+  }
+});
+
+/* Get Activities for specific Pet by Pet id */
+activityRouter.get("/pet/:petId", async (req, res) => {
+  const { petId } = req.params;
+  try {
+    const activitiesByPet = await activityService.getPetActivities(petId);
+    res.status(200).json(activitiesByPet);
+  } catch (e: unknown) {
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
+  }
+});
+
+/* Get Activities for specific User by User id */
+activityRouter.get("/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const activitiesByUser = await activityService.getUserActivities(userId);
+    res.status(200).json(activitiesByUser);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
@@ -95,6 +130,98 @@ activityRouter.patch(
         startTime: body.startTime,
         endTime: body.endTime,
         notes: body.notes,
+      });
+      res.status(200).json(Activity);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
+/* Updates/Sets User assigned to an Activity */
+activityRouter.patch(
+  "/:id/assign-user",
+  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  activityUserPatchValidator,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { body } = req;
+      const Activity = await activityService.assignUser(id, {
+        userId: body.userId,
+      });
+      res.status(200).json(Activity);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
+/* Updates/Sets a scheduled start time to an Activity */
+activityRouter.patch(
+  "/:id/schedule",
+  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  activityScheduledTimePatchValidator,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { body } = req;
+      const Activity = await activityService.scheduleActivity(id, {
+        time: body.scheduledStartTime
+      });
+      res.status(200).json(Activity);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
+/* Adds a start time to an Activity */
+activityRouter.patch(
+  "/:id/start",
+  activityStartTimePatchValidator,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { body } = req;
+      const Activity = await activityService.startActivity(id, {
+        time: body.startTime
+      });
+      res.status(200).json(Activity);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
+/* Adds an end time to an Activity */
+activityRouter.patch(
+  "/:id/end",
+  activityEndTimePatchValidator,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { body } = req;
+      const Activity = await activityService.endActivity(id, {
+        time: body.endTime
+      });
+      res.status(200).json(Activity);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
+/* Updates/Adds notes to an Activity */
+activityRouter.patch(
+  "/:id/notes",
+  activityNotesPatchValidator,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { body } = req;
+      const Activity = await activityService.updateActivityNotes(id, {
+        notes: body.notes
       });
       res.status(200).json(Activity);
     } catch (e: unknown) {

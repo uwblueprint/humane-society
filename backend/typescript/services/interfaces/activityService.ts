@@ -103,7 +103,7 @@ export interface IActivityService {
    * @returns the updated Activity
    * @throws Error if update fails
    */
-    scheduleActivity(
+  scheduleActivity(
       id: string,
       schedule: ActivityTimePatchDTO
     ): Promise<ActivityResponseDTO | null>;
