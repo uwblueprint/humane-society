@@ -1,5 +1,7 @@
 import { Migration } from "../umzug";
-import { MAX_BEHAVIOUR_LEVEL, MIN_BEHAVIOUR_LEVEL } from "../constants";
+
+const MIN_BEHAVIOUR_LEVEL = 1;
+const MAX_BEHAVIOUR_LEVEL = 4;
 
 const TABLE_NAME = "behaviour_level_details";
 const CONSTRAINT_NAME = "level_interval";
