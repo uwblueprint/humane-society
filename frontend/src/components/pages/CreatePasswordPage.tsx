@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 import ResponsiveLogo from "../common/responsive/ResponsiveAuthPageLogo";
 import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
@@ -17,6 +18,7 @@ import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
 import background from "../assets/background.png";
 import backgroundMobile from "../assets/background_mobile.png";
 import AuthAPIClient from "../../APIClients/AuthAPIClient";
+import { HOME_PAGE } from "../../constants/Routes";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
@@ -24,6 +26,8 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const [email, setEmail] = React.useState("Email not found.");
+
+  const history = useHistory();
 
   React.useEffect(() => {
     const getEmail = async () => {
@@ -73,7 +77,7 @@ const CreatePasswordPage = (): React.ReactElement => {
   };
 
   const handleGetStarted = () => {
-    // TODO: Navigate to main page
+    history.push(HOME_PAGE);
   };
 
   return (
