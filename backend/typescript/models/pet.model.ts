@@ -55,6 +55,9 @@ export default class Pet extends Model {
   weight!: number;
 
   @Column({})
+  skill_level!: number;
+
+  @Column({})
   neutered!: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })

@@ -1,2 +1,2 @@
-export const MIN_BEHAVIOUR_LEVEL = 1;
-export const MAX_BEHAVIOUR_LEVEL = 4;
+export const MIN_SKILL_LEVEL = 1;
+export const MAX_SKILL_LEVEL = 5;
