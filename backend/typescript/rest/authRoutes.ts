@@ -76,7 +76,7 @@ authRouter.post(
         res.status(500).json({ error: getErrorMessage(error) });
       }
     }
-  }
+  },
 );
 
 /* Returns access token in response body and sets refreshToken as an httpOnly cookie */
@@ -104,7 +104,7 @@ authRouter.post(
     } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 /* Emails a password reset link to the user with the specified email */
@@ -118,7 +118,7 @@ authRouter.post(
     } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 // updates user password and updates status
@@ -129,7 +129,7 @@ authRouter.post(
     try {
       const responseSuccess = await authService.setPassword(
         req.params.email,
-        req.body.newPassword
+        req.body.newPassword,
       );
       if (responseSuccess.success) {
         const user = await userService.getUserByEmail(req.params.email);
@@ -146,7 +146,7 @@ authRouter.post(
     } catch (error) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  }
+  },
 );
 
 /* Invite a user */
@@ -154,7 +154,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {
     if (
       !isAuthorizedByRole(
-        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])
+        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
       )
     ) {
       res
