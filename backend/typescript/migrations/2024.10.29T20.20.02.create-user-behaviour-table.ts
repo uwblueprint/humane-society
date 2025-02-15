@@ -1,9 +1,7 @@
 import { DataType } from "sequelize-typescript";
-import { Migration } from "../umzug";
 
-// hard coded so that we can remove the constants from the constants.ts file
-const MIN_BEHAVIOUR_LEVEL = 1;
-const MAX_BEHAVIOUR_LEVEL = 4;
+import { Migration } from "../umzug";
+import { MIN_BEHAVIOUR_LEVEL, MAX_BEHAVIOUR_LEVEL } from "../constants";
 
 const TABLE_NAME = "user_behaviours";
 const CONSTRAINT_NAME = "unique_user_behaviour_skill";

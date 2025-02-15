@@ -1,5 +1,5 @@
 import { DataType } from "sequelize-typescript";
-import { MIN_SKILL_LEVEL, MAX_SKILL_LEVEL } from "../constants";
+import { MIN_COLOR_LEVEL, MAX_COLOR_LEVEL } from "../constants";
 import { Migration } from "../umzug";
 
 const TABLE_NAME = "pets";
@@ -13,7 +13,7 @@ export const up: Migration = async ({ context: sequelize }) => {
   });
   await sequelize.query(
     `ALTER TABLE ${TABLE_NAME} ADD CONSTRAINT ${SKILL_LEVEL_INTERVAL} 
-    CHECK (skill_level BETWEEN ${MIN_SKILL_LEVEL} AND ${MAX_SKILL_LEVEL});`,
+    CHECK (skill_level BETWEEN ${MIN_COLOR_LEVEL} AND ${MAX_COLOR_LEVEL});`,
   );
 };
 

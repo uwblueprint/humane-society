@@ -1,8 +1,6 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
-
-const MIN_BEHAVIOUR_LEVEL = 1;
-const MAX_BEHAVIOUR_LEVEL = 4;
+import { MIN_BEHAVIOUR_LEVEL, MAX_BEHAVIOUR_LEVEL } from "../constants";
 
 const TABLE_NAME = "pet_behaviours";
 const CONSTRAINT_NAME = "unique_pet_behaviour";
