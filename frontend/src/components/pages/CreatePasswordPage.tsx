@@ -105,7 +105,7 @@ const CreatePasswordPage = (): React.ReactElement => {
           <ResponsiveLogo />
           <ResponsiveAuthContainer>
             <Text
-              color="#4A5568"
+              color="gray.600"
               textStyle={{ base: "h2Mobile", md: "h2" }}
               mb="0"
               textAlign="center"
@@ -117,23 +117,23 @@ const CreatePasswordPage = (): React.ReactElement => {
                 <Box>
                   <FormLabel
                     fontSize="14px"
-                    textColor="var(--gray-600, #4A5568)"
+                    textColor="gray.600"
                     lineHeight="8px"
                   >
                     Email Address:
                   </FormLabel>
                   <Input
-                    textColor="var(--gray-400, #A0AEC0)"
+                    textColor="gray.400"
                     fontSize="14px"
                     height="2.4rem"
                     placeholder={email}
                     isDisabled
-                    bg="var(--gray-200, #E2E8F0)"
+                    bg="gray.200"
                   />
                 </Box>
                 <Box fontSize="12px">
                   <FormLabel
-                    textColor="var(--gray-600, #4A5568)"
+                    textColor="gray.600"
                     fontSize="14px"
                     lineHeight="8px"
                   >
@@ -148,7 +148,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 </Box>
                 <Box fontSize="12px">
                   <FormLabel
-                    textColor="var(--gray-600, #4A5568)"
+                    textColor="gray.600"
                     fontSize="14px"
                     lineHeight="8px"
                   >
@@ -170,7 +170,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                   color="white"
                   h="2.4rem"
                   width="100%"
-                  bg="var(--blue-700, #2C5282)"
+                  bg="blue.700"
                 >
                   Create Account
                 </Button>
@@ -195,7 +195,7 @@ const CreatePasswordPage = (): React.ReactElement => {
       {showModal && (
         <ResponsiveModalWindow>
           <Text
-            color="#2C5282"
+            color="blue.700"
             textAlign="center"
             textStyle={{ base: "h2", md: "h1" }}
           >
@@ -208,8 +208,8 @@ const CreatePasswordPage = (): React.ReactElement => {
             Welcome to the Oakville & Milton Humane Society
           </Text>
           <Button
-            color="var(--gray-100, #EDF2F7)"
-            bg="var(--blue-700, #2C5282)"
+            color="gray.100"
+            bg="blue.700"
             height="3rem"
             padding="0rem 1.875rem"
             textStyle="button"
