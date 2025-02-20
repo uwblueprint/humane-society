@@ -20,7 +20,7 @@ const Signup = (): React.ReactElement => {
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
     // For the mock example, just log the current filters
-    console.log("Current filters:", selectedFilters);
+    // console.log("Current filters:", selectedFilters);
   };
 
   const onSignupClick = async () => {
@@ -28,7 +28,7 @@ const Signup = (): React.ReactElement => {
       firstName,
       lastName,
       email,
-      password
+      password,
     );
     setAuthenticatedUser(user);
   };
