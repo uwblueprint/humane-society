@@ -1,5 +1,13 @@
 {
   "dependencies": {
-    "firebase": "^11.0.2"
+    "@types/cors": "^2.8.17",
+    "cors": "^2.8.5",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.1.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/node": "^22.13.4",
+    "@types/swagger-ui-express": "^4.1.7"
   }
 }

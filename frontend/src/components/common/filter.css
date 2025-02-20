@@ -1,0 +1,10 @@
+.filter {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.filter-label {
+    display: flex;
+    gap: .25rem;
+}

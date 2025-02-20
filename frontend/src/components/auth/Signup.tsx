@@ -5,6 +5,7 @@ import authAPIClient from "../../APIClients/AuthAPIClient";
 import { HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
+import FilterProvider from "../common/Filter";
 
 const Signup = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -13,12 +14,21 @@ const Signup = (): React.ReactElement => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Example state to store filter selections
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
+
+  const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
+    setFilters(selectedFilters);
+    // For the mock example, just log the current filters
+    console.log("Current filters:", selectedFilters);
+  };
+
   const onSignupClick = async () => {
     const user: AuthenticatedUser = await authAPIClient.register(
       firstName,
       lastName,
       email,
-      password,
+      password
     );
     setAuthenticatedUser(user);
   };
@@ -29,6 +39,12 @@ const Signup = (): React.ReactElement => {
 
   return (
     <div style={{ textAlign: "center" }}>
+      {/* Using FilterProvider as an example with petList filters */}
+      <FilterProvider
+        type="petList"
+        onFilterChange={handleFilterChange}
+        selected={filters}
+      />
       <h1>Signup</h1>
       <form>
         <div>
