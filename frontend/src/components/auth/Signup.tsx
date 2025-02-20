@@ -5,7 +5,7 @@ import authAPIClient from "../../APIClients/AuthAPIClient";
 import { HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
-import FilterProvider from "../common/Filter";
+import Filter from "../common/Filter";
 
 const Signup = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -40,7 +40,7 @@ const Signup = (): React.ReactElement => {
   return (
     <div style={{ textAlign: "center" }}>
       {/* Using FilterProvider as an example with petList filters */}
-      <FilterProvider
+      <Filter
         type="petList"
         onFilterChange={handleFilterChange}
         selected={filters}
