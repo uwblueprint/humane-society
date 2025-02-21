@@ -20,7 +20,7 @@ const textStyles = {
   h3: {
     fontFamily: "Poppins",
     fontWeight: 500,
-    fontSize: "24px",
+    fontSize: "20px",
   },
   subheading: {
     fontFamily: "Poppins",
@@ -30,6 +30,12 @@ const textStyles = {
   body: {
     fontFamily: "Roboto",
     fontWeight: 400,
+    fontSize: "18px",
+    lineHeight: "150%",
+  },
+  bodyBold: {
+    fontFamily: "Roboto",
+    fontWeight: 700,
     fontSize: "18px",
     lineHeight: "150%",
   },
@@ -43,6 +49,11 @@ const textStyles = {
     fontFamily: "Poppins",
     fontWeight: 500,
     fontSize: "18px",
+  },
+  caption: {
+    fontFamily: "Poppins",
+    fontWeight: 400,
+    fontSize: "12px",
   },
 };
 
