@@ -145,7 +145,7 @@ export const activityUserPatchValidator = async (
   if (!validatePrimitive(body.userId, "integer")) {
     return res.status(400).send(getApiValidationError("userId", "integer"));
   }
-  
+
   return next();
 };
 
@@ -157,9 +157,11 @@ export const activityScheduledTimePatchValidator = async (
   const { body } = req;
 
   if (!validateDate(body.scheduledStartTime)) {
-    return res.status(400).send(getApiValidationError("scheduledStartTime", "Date"));
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledStartTime", "Date"));
   }
-  
+
   return next();
 };
 
@@ -173,7 +175,7 @@ export const activityStartTimePatchValidator = async (
   if (!validateDate(body.startTime)) {
     return res.status(400).send(getApiValidationError("startTime", "Date"));
   }
-  
+
   return next();
 };
 
@@ -187,7 +189,7 @@ export const activityEndTimePatchValidator = async (
   if (!validateDate(body.endTime)) {
     return res.status(400).send(getApiValidationError("endTime", "Date"));
   }
-  
+
   return next();
 };
 
@@ -197,9 +199,7 @@ export const activityNotesPatchValidator = async (
   next: NextFunction,
 ) => {
   const { body } = req;
-  if (
-    !validatePrimitive(body.notes, "string")
-  ) {
+  if (!validatePrimitive(body.notes, "string")) {
     return res.status(400).send(getApiValidationError("notes", "string"));
   }
 

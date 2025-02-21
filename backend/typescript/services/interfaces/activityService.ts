@@ -56,7 +56,7 @@ export interface IActivityService {
    */
   getPetActivities(pet_id: string): Promise<Array<ActivityResponseDTO>>;
 
-   /**
+  /**
    * retrieve all Activities for a specific user
    * @param user_id user id
    * @returns returns array of Activities
@@ -93,7 +93,7 @@ export interface IActivityService {
    */
   assignUser(
     id: string,
-    user: ActivityUserPatchDTO
+    user: ActivityUserPatchDTO,
   ): Promise<ActivityResponseDTO | null>;
 
   /**
@@ -104,9 +104,9 @@ export interface IActivityService {
    * @throws Error if update fails
    */
   scheduleActivity(
-      id: string,
-      schedule: ActivityTimePatchDTO
-    ): Promise<ActivityResponseDTO | null>;
+    id: string,
+    schedule: ActivityTimePatchDTO,
+  ): Promise<ActivityResponseDTO | null>;
 
   /**
    * starts an activity by adding a start time
@@ -117,7 +117,7 @@ export interface IActivityService {
    */
   startActivity(
     id: string,
-    startTime: ActivityTimePatchDTO
+    startTime: ActivityTimePatchDTO,
   ): Promise<ActivityResponseDTO | null>;
 
   /**
@@ -129,7 +129,7 @@ export interface IActivityService {
    */
   endActivity(
     id: string,
-    endTime: ActivityTimePatchDTO
+    endTime: ActivityTimePatchDTO,
   ): Promise<ActivityResponseDTO | null>;
 
   /**
@@ -141,7 +141,7 @@ export interface IActivityService {
    */
   updateActivityNotes(
     id: string,
-    notes: ActivityNotesPatchDTO
+    notes: ActivityNotesPatchDTO,
   ): Promise<ActivityResponseDTO | null>;
 
   /**

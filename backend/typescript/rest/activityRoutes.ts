@@ -167,7 +167,7 @@ activityRouter.patch(
     try {
       const { body } = req;
       const Activity = await activityService.scheduleActivity(id, {
-        time: body.scheduledStartTime
+        time: body.scheduledStartTime,
       });
       res.status(200).json(Activity);
     } catch (e: unknown) {
@@ -185,7 +185,7 @@ activityRouter.patch(
     try {
       const { body } = req;
       const Activity = await activityService.startActivity(id, {
-        time: body.startTime
+        time: body.startTime,
       });
       res.status(200).json(Activity);
     } catch (e: unknown) {
@@ -203,7 +203,7 @@ activityRouter.patch(
     try {
       const { body } = req;
       const Activity = await activityService.endActivity(id, {
-        time: body.endTime
+        time: body.endTime,
       });
       res.status(200).json(Activity);
     } catch (e: unknown) {
@@ -221,7 +221,7 @@ activityRouter.patch(
     try {
       const { body } = req;
       const Activity = await activityService.updateActivityNotes(id, {
-        notes: body.notes
+        notes: body.notes,
       });
       res.status(200).json(Activity);
     } catch (e: unknown) {
