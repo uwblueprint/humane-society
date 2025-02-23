@@ -61,6 +61,15 @@ export enum UserStatus {
   INACTIVE = "Inactive",
 }
 
+export enum Category {
+  GAMES = "Games",
+  HUSBANDRY = "Husbandry",
+  PEN_TIME = "Pen time",
+  TRAINING = "Training",
+  WALK = "Walk",
+  MISC = "Misc.",
+}
+
 export type NodemailerConfig = {
   service: "gmail";
   auth: {
