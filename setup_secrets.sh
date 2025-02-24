@@ -28,7 +28,7 @@ fi
 
 # Iterate over each secret key and fetch the secret value
 for key in $SECRET_KEYS; do
-    SECRET_VALUE=$(hcp vault-secrets secrets open $key | grep "Value:" | sed -E 's/Value:\s*(.*)/\1/; s/^[ \t]+|[ \t]+$//g' 2>/dev/null)
+    SECRET_VALUE=$(hcp vault-secrets secrets open $key | grep "Value:" | sed -E 's/Value:\s*(.*)/\1/; s/^[[:space:]]+|[[:space:]]+$//g' 2>/dev/null)
 
     if [ $? -ne 0 ] || [ -z "$SECRET_VALUE" ]; then
         echo "Failed to retrieve secret for key $key. Skipping."
@@ -42,7 +42,7 @@ done
 echo ".env file has been created/updated successfully."
 
 ### Repeat process for /frontend/.env file
-FRONTEND_ENV_FILE="/frontend/.env"
+FRONTEND_ENV_FILE="./frontend/.env"
 
 if [ -f "$FRONTEND_ENV_FILE" ]; then
     rm "$FRONTEND_ENV_FILE"
@@ -56,7 +56,7 @@ if [ $? -ne 0 ] || [ -z "$SECRET_KEYS_FRONTEND" ]; then
 fi
 
 for key in $SECRET_KEYS_FRONTEND; do
-    SECRET_VALUE=$(hcp vault-secrets secrets open $key | grep "Value:" | sed -E 's/Value:\s*(.*)/\1/; s/^[ \t]+|[ \t]+$//g' 2>/dev/null)
+    SECRET_VALUE=$(hcp vault-secrets secrets open $key --app=humane-society-frontend | grep "Value:" | sed -E 's/Value:\s*(.*)/\1/; s/^[[:space:]]+|[[:space:]]+$//g' 2>/dev/null)
 
     if [ $? -ne 0 ] || [ -z "$SECRET_VALUE" ]; then
         echo "Failed to retrieve secret for key $key. Skipping."
