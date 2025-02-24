@@ -19,7 +19,7 @@ if [ -f "$ROOT_ENV_FILE" ]; then
 fi
 
 # Fetch all secret keys (in application "humane-society") from Vault
-SECRET_KEYS=$(hcp vault-secrets secrets list -app=humane-society --format=json | grep -Eo '"([^"]*)"\s*:\s*"([^"]*)"' | sed -E 's/"([^"]+)": "([^"]+)"/\1=\2/g' | grep "^name=" | grep -v "@" | sed 's/^name=//')
+SECRET_KEYS=$(hcp vault-secrets secrets list --app=humane-society --format=json | grep -Eo '"([^"]*)"\s*:\s*"([^"]*)"' | sed -E 's/"([^"]+)": "([^"]+)"/\1=\2/g' | grep "^name=" | grep -v "@" | sed 's/^name=//')
 
 if [ $? -ne 0 ] || [ -z "$SECRET_KEYS" ]; then
     echo "Failed to retrieve secret keys from Vault."
@@ -48,7 +48,7 @@ if [ -f "$FRONTEND_ENV_FILE" ]; then
     rm "$FRONTEND_ENV_FILE"
 fi
 
-SECRET_KEYS_FRONTEND=$(hcp vault-secrets secrets list -app=humane-society-frontend --format=json | grep -Eo '"([^"]*)"\s*:\s*"([^"]*)"' | sed -E 's/"([^"]+)": "([^"]+)"/\1=\2/g' | grep "^name=" | grep -v "@" | sed 's/^name=//')
+SECRET_KEYS_FRONTEND=$(hcp vault-secrets secrets list --app=humane-society-frontend --format=json | grep -Eo '"([^"]*)"\s*:\s*"([^"]*)"' | sed -E 's/"([^"]+)": "([^"]+)"/\1=\2/g' | grep "^name=" | grep -v "@" | sed 's/^name=//')
 
 if [ $? -ne 0 ] || [ -z "$SECRET_KEYS_FRONTEND" ]; then
     echo "Failed to retrieve secret keys from Vault."

@@ -92,12 +92,23 @@ Use the arrow keys to navigate: ↓ ↑ → ←
 ./setup_secrets.sh
 ```
 
+  -  (Give execution permissions if first time)
+```bash
+chmod +x ./setup_secrets.sh
+```
+
 ### Sending all local secrets to the vault (warning: this overwrites all secrets)
 
 - Push secrets from `.env` and `/frontend/.env` file to HashiCorp Vault
 
 ```bash
 ./push_secrets.sh
+```
+
+  - Give execution permissions if first time
+
+```bash
+chmod +x ./push_secrets.sh
 ```
 
 ## Useful Commands
