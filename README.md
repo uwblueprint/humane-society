@@ -43,11 +43,10 @@ The Oakville and Milton Humane Society is a non-profit organization dedicated to
 git clone https://github.com/uwblueprint/humane-society.git
 cd humane-society
 ```
-2. Confirm that you have the following files added to your repository, with the correct environment variables set:
+2. Follow steps in the Secrets section (below) to ensure that you have the following files added to your repository, with the correct environment variables set:
 
 - `.env`
 - `frontend/.env`
-- `e2e-tests/.env`
 
 3. Run the application
 
