@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Define input file
+ROOT_ENV_FILE=".env"
+
 # Login to Vault
 echo "Logging into Vault..."
 hcp auth login
@@ -38,6 +41,8 @@ done < "$ROOT_ENV_FILE"
 echo "Secrets from $ROOT_ENV_FILE have been sent to Vault."
 
 ### Repeat process for /frontend/.env file
+FRONTEND_ENV_FILE="/frontend/.env"
+
 if [ ! -f "$FRONTEND_ENV_FILE" ]; then
     echo "Error: $FRONTEND_ENV_FILE not found."
     exit 1

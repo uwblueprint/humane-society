@@ -10,6 +10,9 @@ fi
 
 hcp profile init
 
+# Define input file
+ROOT_ENV_FILE=".env"
+
 # Check if .env file exists and delete it if it does
 if [ -f "$ROOT_ENV_FILE" ]; then
     rm "$ROOT_ENV_FILE"
@@ -39,6 +42,8 @@ done
 echo ".env file has been created/updated successfully."
 
 ### Repeat process for /frontend/.env file
+FRONTEND_ENV_FILE="/frontend/.env"
+
 if [ -f "$FRONTEND_ENV_FILE" ]; then
     rm "$FRONTEND_ENV_FILE"
 fi
