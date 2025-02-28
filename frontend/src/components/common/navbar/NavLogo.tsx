@@ -3,7 +3,7 @@ import { Box, Image } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import { HOME_PAGE } from "../../../constants/Routes";
 
-const Logo = (): React.ReactElement => {
+const NavLogo = (): React.ReactElement => {
   const history = useHistory();
   const goToHome = () => {
     history.push(HOME_PAGE);
@@ -22,4 +22,4 @@ const Logo = (): React.ReactElement => {
   );
 };
 
-export default Logo;
+export default NavLogo;

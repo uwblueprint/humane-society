@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Flex, Text, Spacer } from "@chakra-ui/react";
 import NavNotificationButton from "./NavNotificationButton";
 import NavProfileButton from "./NavProfileButton";
-import Logo from "./Logo";
+import NavLogo from "./NavLogo";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   return (
@@ -20,7 +20,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       alignItems="flex-end"
       backgroundColor="#ffffff"
     >
-      <Logo />
+      <NavLogo />
       <Box>
         <Text
           textStyle={{ base: "h2", md: "h1" }}

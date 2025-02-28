@@ -1,4 +1,4 @@
-export const HOME_PAGE = "/";
+export const HOME_PAGE = "/";  // home is Pet List
 
 export const LOGIN_PAGE = "/login";
 
@@ -22,7 +22,7 @@ export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 
 export const HOOKS_PAGE = "/hooks";
 
-export const NOTIFICATIONS_PAGE = "/notifications";
+export const INTERACTION_LOG_PAGE = "/interation-log";
 
 export const PROFILE_PAGE = "/profile";
 

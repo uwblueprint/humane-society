@@ -2,12 +2,12 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { Box, IconButton } from "@chakra-ui/react";
 import { FaBell } from "react-icons/fa";
-import { NOTIFICATIONS_PAGE } from "../../../constants/Routes";
+import { INTERACTION_LOG_PAGE } from "../../../constants/Routes";
 
 const NavNotificationButton = (): React.ReactElement => {
   const history = useHistory();
   const goToNotifications = () => {
-    history.push(NOTIFICATIONS_PAGE);
+    history.push(INTERACTION_LOG_PAGE);
   };
   return (
     <Box
