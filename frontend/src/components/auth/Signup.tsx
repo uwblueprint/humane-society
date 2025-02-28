@@ -6,6 +6,7 @@ import { HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
 import Filter from "../common/Filter";
+import Search from "../common/Search";
 
 const Signup = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -16,11 +17,14 @@ const Signup = (): React.ReactElement => {
 
   // Example state to store filter selections
   const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [search, setSearch] = useState<string>("");
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
-    // For the mock example, just log the current filters
-    // console.log("Current filters:", selectedFilters);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
   };
 
   const onSignupClick = async () => {
@@ -28,7 +32,7 @@ const Signup = (): React.ReactElement => {
       firstName,
       lastName,
       email,
-      password,
+      password
     );
     setAuthenticatedUser(user);
   };
@@ -40,11 +44,11 @@ const Signup = (): React.ReactElement => {
   return (
     <div style={{ textAlign: "center" }}>
       {/* Using FilterProvider as an example with petList filters */}
-      <Filter
-        type="petList"
-        onFilterChange={handleFilterChange}
-        selected={filters}
-      />
+      {JSON.stringify(filters)}
+      {search}
+      <Filter type="petList" onChange={handleFilterChange} selected={filters} />
+      <Search placeholder="Search for a pet..." onChange={handleSearchChange} search={search} />
+
       <h1>Signup</h1>
       <form>
         <div>
