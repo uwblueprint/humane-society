@@ -64,7 +64,7 @@ export enum UserStatus {
 export enum Category {
   GAMES = "Games",
   HUSBANDRY = "Husbandry",
-  PEN_TIME = "Pen time",
+  PEN_TIME = "Pen Time",
   TRAINING = "Training",
   WALK = "Walk",
   MISC = "Misc.",
