@@ -5,7 +5,7 @@ import NavBar from "../common/navbar/NavBar";
 const InteractionLog = (): React.ReactElement => {
   return (
     <div style={{ textAlign: "center" }}>
-      <NavBar pageName="Notifications" />
+      <NavBar pageName="Interaction Log" />
       <Text textStyle="h3" mt={{ base: "6.375rem", md: "9.375rem" }}>
         Interaction Log Page 🫨
       </Text>

@@ -4,7 +4,7 @@ export const LOGIN_PAGE = "/login";
 
 export const FORGOT_PASSWORD_PAGE = "/forgot-password";
 
-export const INTERACTION_LOG_PAGE = "/interation-log";
+export const INTERACTION_LOG_PAGE = "/interaction-log";
 
 export const PROFILE_PAGE = "/profile";
 

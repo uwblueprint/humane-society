@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Flex, Text, Spacer } from "@chakra-ui/react";
-import NavNotificationButton from "./NavNotificationButton";
+import NavInteractionLogButton from "./NavInterationLogButton";
 import NavProfileButton from "./NavProfileButton";
 import NavLogo from "./NavLogo";
 
@@ -11,7 +11,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       pr={{ base: "1.125rem", md: "1.125rem" }}
       pb={{ base: "0.9375rem", md: "1.125rem" }}
       pl={{ base: "1.125rem", md: "1.125rem" }}
-      height={{ base: "6.375rem", md: "9.375rem" }}
+      height={{ base: "4.375rem", md: "8.375rem" }}
       position="fixed"
       top="0"
       left="0"
@@ -30,7 +30,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
         </Text>
       </Box>
       <Spacer />
-      <NavNotificationButton />
+      <NavInteractionLogButton />
       <NavProfileButton />
     </Flex>
   );

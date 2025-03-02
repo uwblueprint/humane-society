@@ -4,7 +4,7 @@ import { Box, IconButton } from "@chakra-ui/react";
 import { FaBell } from "react-icons/fa";
 import { INTERACTION_LOG_PAGE } from "../../../constants/Routes";
 
-const NavNotificationButton = (): React.ReactElement => {
+const NavInteractionLogButton = (): React.ReactElement => {
   const history = useHistory();
   const goToNotifications = () => {
     history.push(INTERACTION_LOG_PAGE);
@@ -28,4 +28,4 @@ const NavNotificationButton = (): React.ReactElement => {
   );
 };
 
-export default NavNotificationButton;
+export default NavInteractionLogButton;
