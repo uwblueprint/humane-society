@@ -4,9 +4,9 @@ import { Box, IconButton } from "@chakra-ui/react";
 import { FaBell } from "react-icons/fa";
 import { INTERACTION_LOG_PAGE } from "../../../constants/Routes";
 
-const NavInteractionLogButton = (): React.ReactElement => {
+const NavNotificationButton = (): React.ReactElement => {
   const history = useHistory();
-  const goToInteractionLog = () => {
+  const goToNotifications = () => {
     history.push(INTERACTION_LOG_PAGE);
   };
   return (
@@ -15,11 +15,11 @@ const NavInteractionLogButton = (): React.ReactElement => {
       mb={{ base: "0.19rem", md: "0.87rem" }}
     >
       <IconButton
-        aria-label="InteractionLogs"
+        aria-label="Notifications"
         fontSize={{ base: "2rem", md: "2.6875rem" }}
         variant="unstyled"
         icon={<FaBell />}
-        onClick={goToInteractionLog}
+        onClick={goToNotifications}
         display="flex" // the svg wasn't centered in the iconbutton
         justifyContent="center"
         alignItems="center"
@@ -28,4 +28,4 @@ const NavInteractionLogButton = (): React.ReactElement => {
   );
 };
 
-export default NavInteractionLogButton;
+export default NavNotificationButton;

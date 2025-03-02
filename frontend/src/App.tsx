@@ -28,7 +28,7 @@ import sampleContextReducer from "./reducers/SampleContextReducer";
 import SampleContextDispatcherContext from "./contexts/SampleContextDispatcherContext";
 import EditTeamInfoPage from "./components/pages/EditTeamPage";
 import HooksDemo from "./components/pages/HooksDemo";
-import NotificationsPage from "./components/pages/NotificationsPage";
+import InteractionLogPage from "./components/pages/InteractionLogPage";
 import ProfilePage from "./components/pages/ProfilePage";
 import UserManagementPage from "./components/pages/UserManagementPage";
 import AdminPage from "./components/pages/AdminPage";
@@ -140,8 +140,8 @@ const App = (): React.ReactElement => {
                 />
                 <PrivateRoute
                   exact
-                  path={Routes.NOTIFICATIONS_PAGE}
-                  component={NotificationsPage}
+                  path={Routes.INTERACTION_LOG_PAGE}
+                  component={InteractionLogPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
