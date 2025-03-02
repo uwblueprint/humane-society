@@ -7,7 +7,7 @@ const InteractionLogPage = (): React.ReactElement => {
     <div style={{ textAlign: "center" }}>
       <NavBar pageName="Interaction Log" />
       <Text textStyle="h3" mt={{ base: "6.375rem", md: "9.375rem" }}>
-       Interaction Log Page 🫨
+        Interaction Log Page 🫨
       </Text>
       <Text>
         Lorem ipsum odor amet, consectetuer adipiscing elit. Viverra efficitur

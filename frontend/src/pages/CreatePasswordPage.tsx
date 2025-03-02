@@ -15,7 +15,7 @@ import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
 import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
 import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
-import background from "../assets/images/background.png"
+import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
 import { HOME_PAGE } from "../constants/Routes";

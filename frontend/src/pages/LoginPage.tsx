@@ -15,7 +15,7 @@ import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
 import ResponsiveEmailInput from "../components/common/responsive/ResponsiveEmailInput";
 import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
-import background from "../assets/images/background.png"
+import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
 import authAPIClient from "../APIClients/AuthAPIClient";

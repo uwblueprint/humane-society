@@ -16,7 +16,9 @@ import {
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
 import MainPageButton from "../components/common/MainPageButton";
-import AddUserFormModal, { AddUserRequest } from "../components/crud/AddUserFormModal";
+import AddUserFormModal, {
+  AddUserRequest,
+} from "../components/crud/AddUserFormModal";
 
 const handleUserSubmit = async (formData: AddUserRequest) => {
   // eslint-disable-next-line no-useless-catch
