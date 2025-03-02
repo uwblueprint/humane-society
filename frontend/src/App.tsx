@@ -2,20 +2,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useReducer } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-import Default from "./components/pages/Default";
-import Login from "./components/auth/Login";
+import Default from "./pages/Default";
+import LoginPage from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
-import ForgotPasswordPage from "./components/pages/ForgotPassword";
+import ForgotPasswordPage from "./pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import CreatePage from "./components/pages/CreatePage";
-import PetListPage from "./components/pages/PetListPage";
-import DisplayPage from "./components/pages/DisplayPage";
-import SimpleEntityCreatePage from "./components/pages/SimpleEntityCreatePage";
-import SimpleEntityDisplayPage from "./components/pages/SimpleEntityDisplayPage";
-import NotFound from "./components/pages/NotFound";
-import UpdatePage from "./components/pages/UpdatePage";
-import SimpleEntityUpdatePage from "./components/pages/SimpleEntityUpdatePage";
-import CreatePasswordPage from "./components/pages/CreatePasswordPage";
+import CreatePage from "./pages/CreatePage";
+import PetListPage from "./pages/PetListPage";
+import DisplayPage from "./pages/DisplayPage";
+import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
+import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
+import NotFound from "./pages/NotFound";
+import UpdatePage from "./pages/UpdatePage";
+import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
+import CreatePasswordPage from "./pages/CreatePasswordPage";
 import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
@@ -26,12 +26,12 @@ import SampleContext, {
 } from "./contexts/SampleContext";
 import sampleContextReducer from "./reducers/SampleContextReducer";
 import SampleContextDispatcherContext from "./contexts/SampleContextDispatcherContext";
-import EditTeamInfoPage from "./components/pages/EditTeamPage";
-import HooksDemo from "./components/pages/HooksDemo";
-import InteractionLogPage from "./components/pages/InteractionLogPage";
-import ProfilePage from "./components/pages/ProfilePage";
-import UserManagementPage from "./components/pages/UserManagementPage";
-import AdminPage from "./components/pages/AdminPage";
+import EditTeamInfoPage from "./pages/EditTeamPage";
+import HooksDemo from "./pages/HooksDemo";
+import InteractionLogPage from "./pages/InteractionLogPage";
+import ProfilePage from "./pages/ProfilePage";
+import UserManagementPage from "./pages/UserManagementPage";
+import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
@@ -62,7 +62,7 @@ const App = (): React.ReactElement => {
         >
           <Router>
             <Switch>
-              <Route exact path={Routes.LOGIN_PAGE} component={Login} />
+              <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
               <PrivateRoute
                 exact

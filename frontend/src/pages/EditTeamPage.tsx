@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import SampleContext from "../../contexts/SampleContext";
-import MainPageButton from "../common/MainPageButton";
-import SampleContextDispatcherContext from "../../contexts/SampleContextDispatcherContext";
+import SampleContext from "../contexts/SampleContext";
+import MainPageButton from "../components/common/MainPageButton";
+import SampleContextDispatcherContext from "../contexts/SampleContextDispatcherContext";
 
 type DeleteButtonProps = { index: number; onClick: (index: number) => void };
 

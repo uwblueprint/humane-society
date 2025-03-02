@@ -1,6 +1,6 @@
 import React from "react";
-import UpdateForm from "../crud/UpdateForm";
-import MainPageButton from "../common/MainPageButton";
+import UpdateForm from "../components/crud/UpdateForm";
+import MainPageButton from "../components/common/MainPageButton";
 
 const UpdatePage = (): React.ReactElement => {
   return (

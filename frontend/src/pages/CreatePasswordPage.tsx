@@ -11,14 +11,14 @@ import {
   FormControl,
 } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
-import ResponsiveLogo from "../common/responsive/ResponsiveAuthPageLogo";
-import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
-import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
-import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
-import background from "../assets/background.png";
+import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
+import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
+import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
+import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
+import background from "../assets/background.png"
 import backgroundMobile from "../assets/background_mobile.png";
-import AuthAPIClient from "../../APIClients/AuthAPIClient";
-import { HOME_PAGE } from "../../constants/Routes";
+import AuthAPIClient from "../APIClients/AuthAPIClient";
+import { HOME_PAGE } from "../constants/Routes";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);

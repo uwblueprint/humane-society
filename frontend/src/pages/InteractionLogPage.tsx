@@ -1,6 +1,6 @@
 import React from "react";
 import { Text } from "@chakra-ui/react";
-import NavBar from "../common/navbar/NavBar";
+import NavBar from "../components/common/navbar/NavBar";
 
 const InteractionLogPage = (): React.ReactElement => {
   return (

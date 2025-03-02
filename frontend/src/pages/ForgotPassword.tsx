@@ -8,7 +8,7 @@ import {
   FormErrorMessage,
   Flex,
 } from "@chakra-ui/react";
-import StatusMessage from "../common/StatusMessage";
+import StatusMessage from "../components/common/StatusMessage";
 import background from "./login_background.png";
 import backgroundMobile from "./login_background_phone.png";
 
