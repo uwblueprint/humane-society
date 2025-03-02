@@ -9,8 +9,8 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import StatusMessage from "../components/common/StatusMessage";
-import background from "./login_background.png";
-import backgroundMobile from "./login_background_phone.png";
+import background from "../assets/images/background.png"
+import backgroundMobile from "../assets/images/login_background_phone.png";
 
 type SentEmail = {
   email: string;

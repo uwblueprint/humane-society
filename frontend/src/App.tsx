@@ -3,7 +3,7 @@ import React, { useState, useReducer } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import Default from "./pages/Default";
-import LoginPage from "./components/auth/Login";
+import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
