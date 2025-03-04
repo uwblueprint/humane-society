@@ -34,10 +34,8 @@ const cookieOptions: CookieOptions = {
 /* Returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
 authRouter.post("/login", loginRequestValidator, async (req, res) => {
   try {
-    const authDTO = req.body.idToken
-      ? // OAuth
-        await authService.generateTokenOAuth(req.body.idToken)
-      : await authService.generateToken(req.body.email, req.body.password);
+    const authDTO = req.body.idToken;
+    await authService.generateToken(req.body.email, req.body.password);
 
     const { refreshToken, ...rest } = authDTO;
 
@@ -58,7 +56,6 @@ authRouter.post(
     try {
       if (isAuthorizedByEmail(req.body.email)) {
         const user = await userService.getUserByEmail(req.body.email);
-
         const activatedUser = user;
         activatedUser.status = UserStatus.ACTIVE;
         await userService.updateUserById(user.id, activatedUser);
@@ -146,7 +143,7 @@ authRouter.post(
       } else {
         res.status(400).json(responseSuccess);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
     }
   },
