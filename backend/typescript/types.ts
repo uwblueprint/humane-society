@@ -45,8 +45,8 @@ export const sexEnum: Sex[] = [...sexValues];
 export type Sex = typeof sexValues[number];
 
 const petStatusValues = [
-  "Assigned",
-  "Active",
+  "Assigned", // Assigned to me
+  "Active", // Occupied
   "Needs Care",
   "Does Not Need Care",
 ] as const;

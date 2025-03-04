@@ -35,8 +35,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Update Simple Entity";
       case ROUTES.HOOKS_PAGE:
         return "Hooks";
-      case ROUTES.NOTIFICATIONS_PAGE:
-        return "Notifications";
+      case ROUTES.INTERACTION_LOG_PAGE:
+        return "Interaction Log";
       case ROUTES.PROFILE_PAGE:
         return "Profile";
       case ROUTES.DEV_UTILITY_PAGE:

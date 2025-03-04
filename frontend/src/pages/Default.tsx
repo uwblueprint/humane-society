@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import * as Routes from "../../constants/Routes";
-import SampleContext from "../../contexts/SampleContext";
+import * as Routes from "../constants/Routes";
+import SampleContext from "../contexts/SampleContext";
 
-import Logout from "../auth/Logout";
-import RefreshCredentials from "../auth/RefreshCredentials";
-import ResetPassword from "../auth/ResetPassword";
+import Logout from "../components/auth/Logout";
+import RefreshCredentials from "../components/auth/RefreshCredentials";
+import ResetPassword from "../components/auth/ResetPassword";
 
 type ButtonProps = { text: string; path: string };
 

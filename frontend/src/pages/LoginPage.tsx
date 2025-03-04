@@ -11,20 +11,20 @@ import {
   FormControl,
 } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
-import ResponsiveLogo from "../common/responsive/ResponsiveLogo";
-import ResponsiveEmailInput from "../common/responsive/ResponsiveEmailInput";
-import ResponsivePasswordInput from "../common/responsive/ResponsivePasswordInput";
-import ResponsiveAuthContainer from "../common/responsive/ResponsiveAuthContainer";
-import background from "../assets/background.png";
-import backgroundMobile from "../assets/background_mobile.png";
-import auth from "../../firebase/firebase";
-import authAPIClient from "../../APIClients/AuthAPIClient";
-import { CREATE_PASSWORD_PAGE, HOME_PAGE } from "../../constants/Routes";
-import AuthContext from "../../contexts/AuthContext";
-import { AuthenticatedUser } from "../../types/AuthTypes";
-import ResponsiveModalWindow from "../common/responsive/ResponsiveModalWindow";
+import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
+import ResponsiveEmailInput from "../components/common/responsive/ResponsiveEmailInput";
+import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
+import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
+import background from "../assets/images/background.png";
+import backgroundMobile from "../assets/images/background_mobile.png";
+import auth from "../firebase/firebase";
+import authAPIClient from "../APIClients/AuthAPIClient";
+import { CREATE_PASSWORD_PAGE, HOME_PAGE } from "../constants/Routes";
+import AuthContext from "../contexts/AuthContext";
+import { AuthenticatedUser } from "../types/AuthTypes";
+import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
 
-const Login = (): React.ReactElement => {
+const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -268,4 +268,4 @@ const Login = (): React.ReactElement => {
   );
 };
 
-export default Login;
+export default LoginPage;
