@@ -146,8 +146,7 @@ class AuthService implements IAuthService {
       const renderedEmailTemplate = emailTemplate
         .replace("{{ name }}", name)
         .replace("{{ roleString }}", roleString)
-        .replace("{{ signInLink }}", signInLink)
-        .replace("{{ signInLink }}", signInLink); // necessary for second occurrence
+        .replace(/{{ signInLink }}/g, signInLink);
       this.emailService.sendEmail(
         email,
         "Welcome to the Oakville and Milton Humane Society!",
