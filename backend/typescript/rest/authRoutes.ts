@@ -172,7 +172,11 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
       return;
     }
 
-    await authService.sendInviteEmail(req.body.email, String(user.role));
+    await authService.sendInviteEmail(
+      `${user.firstName} ${user.lastName}`,
+      req.body.email,
+      String(user.role),
+    );
     if (user.status === UserStatus.INVITED) {
       res
         .status(204)

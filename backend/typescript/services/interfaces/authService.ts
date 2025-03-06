@@ -49,7 +49,7 @@ interface IAuthService {
    * @param role role of user with respective email
    * @throws Error if unable to generate link or send email
    */
-  sendInviteEmail(email: string, role: string): Promise<void>;
+  sendInviteEmail(name: string, email: string, role: string): Promise<void>;
 
   /**
    * Generate a password reset link for the user with the given email and send
