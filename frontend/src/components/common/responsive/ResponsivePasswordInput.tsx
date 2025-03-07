@@ -28,9 +28,10 @@ const ResponsivePasswordInput = ({
         type={showPassword ? "text" : "password"}
         bg="#FFFFFF"
         value={value}
+        placeholder="••••••••••"
         onChange={onChange}
       />
-      <InputRightElement width="2rem">
+      <InputRightElement width="2rem" top="50%" transform="translateY(-50%)">
         {showPassword ? (
           <IconButton
             variant="unstyled"
@@ -38,7 +39,9 @@ const ResponsivePasswordInput = ({
             bg="transparent"
             onClick={handlePasswordClick}
             aria-label="view"
-            icon={<ViewIcon />}
+            icon={<ViewIcon/>}
+            color="gray.400" 
+
           />
         ) : (
           <IconButton
@@ -48,6 +51,7 @@ const ResponsivePasswordInput = ({
             onClick={handlePasswordClick}
             aria-label="hide"
             icon={<ViewOffIcon />}
+            color="gray.400" 
           />
         )}
       </InputRightElement>
