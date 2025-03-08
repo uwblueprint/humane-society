@@ -10,7 +10,7 @@ type SearchProps = {
 
 const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
   return (
-    <Box width="100%" maxW="400px">
+    <Box width="100%" maxW="400px" flexShrink={0}>
       <InputGroup>
         <Input
           type="text"
@@ -18,7 +18,7 @@ const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
           value={search}
           onChange={(e) => onChange(e.target.value)}
           focusBorderColor="blue.500"
-          fontStyle="italic" 
+          _placeholder={{ fontStyle: "italic" }}
         />
         <InputRightElement>
           <SearchIcon color="gray.400" />
