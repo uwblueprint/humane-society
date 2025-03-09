@@ -33,3 +33,5 @@ export const USER_MANAGEMENT_PAGE = "/admin/users";
 export const ADMIN_PAGE = "/admin";
 
 export const CREATE_PASSWORD_PAGE = "/create-password";
+
+export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
