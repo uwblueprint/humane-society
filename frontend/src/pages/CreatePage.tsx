@@ -1,6 +1,6 @@
 import React from "react";
-import CreateForm from "../crud/CreateForm";
-import MainPageButton from "../common/MainPageButton";
+import CreateForm from "../components/crud/CreateForm";
+import MainPageButton from "../components/common/MainPageButton";
 
 const CreatePage = (): React.ReactElement => {
   return (

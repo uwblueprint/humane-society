@@ -1,5 +1,5 @@
 import React from "react";
-import MainPageButton from "../common/MainPageButton";
+import MainPageButton from "../components/common/MainPageButton";
 
 const AdminPage = (): React.ReactElement => {
   return (

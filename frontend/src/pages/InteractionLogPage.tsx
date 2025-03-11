@@ -1,13 +1,13 @@
 import React from "react";
 import { Text } from "@chakra-ui/react";
-import NavBar from "../common/navbar/NavBar";
+import NavBar from "../components/common/navbar/NavBar";
 
-const NotificationsPage = (): React.ReactElement => {
+const InteractionLogPage = (): React.ReactElement => {
   return (
     <div style={{ textAlign: "center" }}>
-      <NavBar pageName="Notifications" />
+      <NavBar pageName="Interaction Log" />
       <Text textStyle="h3" mt={{ base: "6.375rem", md: "9.375rem" }}>
-        Notifications Page 🫨
+        Interaction Log Page 🫨
       </Text>
       <Text>
         Lorem ipsum odor amet, consectetuer adipiscing elit. Viverra efficitur
@@ -45,4 +45,4 @@ const NotificationsPage = (): React.ReactElement => {
   );
 };
 
-export default NotificationsPage;
+export default InteractionLogPage;
