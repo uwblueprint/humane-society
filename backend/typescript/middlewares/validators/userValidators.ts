@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getApiValidationError, validatePrimitive } from "./util";
+import { getApiValidationError, validatePrimitive, validateEnum, validateArray } from "./util";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -94,6 +94,20 @@ export const updateUserDtoValidator = async (
     !validatePrimitive(req.body.skillLevel, "integer")
   ) {
     return res.status(400).send(getApiValidationError("skillLevel", "integer"));
+  }
+  if (
+    req.body.animalTags !== undefined &&
+    req.body.animalTags !== null &&
+    !validateArray(req.body.animalTags, "AnimalTagEnum", true)
+  ) {
+    return res.status(400).send(getApiValidationError("animalTags", "AnimalTagEnum", true));
+  }
+  if (
+    req.body.profilePhoto !== undefined &&
+    req.body.profilePhoto !== null &&
+    !validatePrimitive(req.body.profilePhoto, "string")
+  ) {
+    return res.status(400).send(getApiValidationError("profilePhoto", "string"));
   }
   if (
     req.body.canSeeAllLogs !== undefined &&

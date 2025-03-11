@@ -40,9 +40,11 @@ class UserService implements IUserService {
       role: user.role,
       status: user.status,
       skillLevel: user.skill_level,
+      animalTags: user.animal_tags,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
       phoneNumber: user.phone_number,
+      profilePhoto: user.profile_photo,
     };
   }
 
@@ -74,9 +76,11 @@ class UserService implements IUserService {
       role: user.role,
       status: user.status,
       skillLevel: user.skill_level,
+      animalTags: user.animal_tags,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
       phoneNumber: user.phone_number,
+      profilePhoto: user.profile_photo,
     };
   }
 
@@ -157,9 +161,11 @@ class UserService implements IUserService {
             role: user.role,
             status: user.status,
             skillLevel: user.skill_level,
+            animalTags: user.animal_tags,
             canSeeAllLogs: user.can_see_all_logs,
             canAssignUsersToTasks: user.can_assign_users_to_tasks,
             phoneNumber: user.phone_number,
+            profilePhoto: user.profile_photo,
           };
         }),
       );
@@ -189,9 +195,11 @@ class UserService implements IUserService {
           status: UserStatus.INACTIVE,
           email: firebaseUser.email ?? "",
           skill_level: user.skillLevel,
+          animal_tags: null,
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
           phone_number: user.phoneNumber,
+          profile_photo: "",
         });
       } catch (postgresError) {
         try {
@@ -221,9 +229,11 @@ class UserService implements IUserService {
       role: newUser.role,
       status: newUser.status,
       skillLevel: newUser.skill_level,
+      animalTags: newUser.animal_tags,
       canSeeAllLogs: newUser.can_see_all_logs,
       canAssignUsersToTasks: newUser.can_assign_users_to_tasks,
       phoneNumber: newUser.phone_number,
+      profilePhoto: newUser.profile_photo,
     };
   }
 
@@ -239,9 +249,11 @@ class UserService implements IUserService {
           role: user.role,
           status: user.status,
           skill_level: user.skillLevel,
+          animal_tags: user.animalTags,
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
           phone_number: user.phoneNumber,
+          profile_photo: user.profilePhoto,
         },
         {
           where: { id: userId },
@@ -274,9 +286,11 @@ class UserService implements IUserService {
               role: oldUser.role,
               status: oldUser.status,
               skill_level: oldUser.skill_level,
+              animal_tags: oldUser.animal_tags,
               can_see_all_logs: oldUser.can_see_all_logs,
               can_assign_users_to_tasks: oldUser.can_assign_users_to_tasks,
               phone_number: oldUser.phone_number,
+              profile_photo: oldUser.profile_photo,
             },
             {
               where: { id: userId },
@@ -307,9 +321,11 @@ class UserService implements IUserService {
       role: user.role,
       status: user.status,
       skillLevel: user.skillLevel,
+      animalTags: user.animalTags,
       canSeeAllLogs: user.canSeeAllLogs,
       canAssignUsersToTasks: user.canAssignUsersToTasks,
       phoneNumber: user.phoneNumber,
+      profilePhoto: user.profilePhoto,
     };
   }
 
@@ -342,9 +358,11 @@ class UserService implements IUserService {
             role: deletedUser.role,
             status: deletedUser.status,
             skill_level: deletedUser.skill_level,
+            animal_tags: deletedUser.animal_tags,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
             phone_number: deletedUser.phone_number,
+            profile_photo: deletedUser.profile_photo,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [
@@ -399,9 +417,11 @@ class UserService implements IUserService {
             role: deletedUser.role,
             status: deletedUser.status,
             skill_level: deletedUser.skill_level,
+            animal_tags: deletedUser.animal_tags,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
             phone_number: deletedUser.phone_number,
+            profile_photo: deletedUser.profile_photo,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [

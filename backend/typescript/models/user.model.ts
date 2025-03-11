@@ -5,7 +5,7 @@ import {
   Table,
   AllowNull,
 } from "sequelize-typescript";
-import { Role, UserStatus } from "../types";
+import { Role, UserStatus, AnimalTagEnum } from "../types";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -28,6 +28,9 @@ export default class User extends Model {
   @Column({ type: DataType.INTEGER })
   skill_level?: number | null;
 
+  @Column({ type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Hamster") })
+  animal_tags?: [AnimalTagEnum] | null;
+
   @Column({ type: DataType.BOOLEAN })
   can_see_all_logs?: boolean | null;
 
@@ -36,6 +39,9 @@ export default class User extends Model {
 
   @Column({ type: DataType.STRING })
   phone_number?: string | null;
+
+  @Column({ type: DataType.STRING })
+  profile_photo?: string | null;
 
   @Column({ type: DataType.ENUM("Active", "Inactive"), allowNull: false })
   status!: UserStatus;

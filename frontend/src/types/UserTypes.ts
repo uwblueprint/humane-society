@@ -6,9 +6,11 @@ export type User = {
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
   skillLevel?: number | null;
+  animalTags?: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string;
 };
 
 export type CreateUserDTO = Omit<User, "id" | "status">;
