@@ -5,9 +5,11 @@ export type AuthenticatedUser = {
   email: string;
   role: string;
   skillLevel?: number | null;
+  animalTags?: [string] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string;
   accessToken: string;
 } | null;
 

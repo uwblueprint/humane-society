@@ -171,10 +171,12 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       role: req.body.role ?? user.role,
       status: req.body.status ?? user.status,
       skillLevel: req.body.skillLevel ?? user.skillLevel,
+      animalTags: req.body.animalTags ?? user.animalTags, 
       canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
       canAssignUsersToTasks:
         req.body.canAssignUsersToTasks ?? user.canAssignUsersToTasks,
       phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
+      profilePhoto: req.body.profilePhoto ?? user.profilePhoto,
     });
     res.status(200).json(updatedUser);
   } catch (error: unknown) {

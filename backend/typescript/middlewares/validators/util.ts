@@ -5,6 +5,7 @@ type Type =
   | "decimal"
   | "PetStatus"
   | "Sex"
+  | "AnimalTagEnum"
   | "Date";
 
 const allowableContentTypes = new Set([
@@ -43,13 +44,13 @@ export const validateEnum = (value: any, enumType: any): boolean => {
   return Object.values(enumType).includes(value);
 };
 
-export const validateArray = (value: any, type: Type): boolean => {
+export const validateArray = (value: any, type: Type, isEnum = false): boolean => {
   return (
     value !== undefined &&
     value !== null &&
     typeof value === "object" &&
     Array.isArray(value) &&
-    value.every((item) => validatePrimitive(item, type))
+    !isEnum ? value.every((item) => validatePrimitive(item, type)) : value.every((item : any) => validateEnum(item, type))
   );
 };
 

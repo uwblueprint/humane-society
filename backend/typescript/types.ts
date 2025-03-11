@@ -18,12 +18,14 @@ export type UserDTO = {
   role: Role;
   status: UserStatus;
   skillLevel?: number | null;
+  animalTags?: [AnimalTagEnum] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string | null;
 };
 
-export type CreateUserDTO = Omit<UserDTO, "id" | "status">;
+export type CreateUserDTO = Omit<UserDTO, "id" | "status" | "animalTags" | "profilePhoto">;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
@@ -54,6 +56,14 @@ const petStatusValues = [
 export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
 export type PetStatus = typeof petStatusValues[number];
+
+export enum AnimalTagEnum {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat", 
+  DOG = "Dog",
+  SMALL = "Small Animal",
+}
 
 export enum UserStatus {
   ACTIVE = "Active",
