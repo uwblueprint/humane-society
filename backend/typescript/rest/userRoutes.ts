@@ -108,7 +108,7 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       lastName: req.body.lastName,
       email: req.body.email,
       role: req.body.role,
-      skillLevel: req.body.skillLevel ?? null,
+      colorLevel: req.body.colorLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
       phoneNumber: req.body.phoneNumber ?? null,
@@ -141,7 +141,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       accessToken,
       new Set([Role.ANIMAL_BEHAVIOURIST]),
     );
-    const behaviouristUpdatableSet = new Set(["skillLevel"]);
+    const behaviouristUpdatableSet = new Set(["colorLevel"]);
     if (isBehaviourist) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
         return !behaviouristUpdatableSet.has(field);
@@ -170,7 +170,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       email: req.body.email ?? user.email,
       role: req.body.role ?? user.role,
       status: req.body.status ?? user.status,
-      skillLevel: req.body.skillLevel ?? user.skillLevel,
+      colorLevel: req.body.colorLevel ?? user.colorLevel,
       animalTags: req.body.animalTags ?? user.animalTags, 
       canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
       canAssignUsersToTasks:

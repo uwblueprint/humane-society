@@ -5,7 +5,7 @@ import {
   Table,
   AllowNull,
 } from "sequelize-typescript";
-import { Role, UserStatus, AnimalTagEnum } from "../types";
+import { Role, UserStatus, AnimalTagEnum, ColorLevel } from "../types";
 
 @Table({ tableName: "users" })
 export default class User extends Model {
@@ -25,8 +25,8 @@ export default class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   email!: string;
 
-  @Column({ type: DataType.INTEGER })
-  skill_level?: number | null;
+  @Column({ type: DataType.ENUM("Red", "Yellow", "Orange", "Green", "Blue") })
+  color_level!: ColorLevel;
 
   @Column({ type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Hamster") })
   animal_tags?: [AnimalTagEnum] | null;

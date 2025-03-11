@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getApiValidationError, validatePrimitive, validateEnum, validateArray } from "./util";
+import { ColorLevel } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -20,11 +21,11 @@ export const createUserDtoValidator = async (
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (
-    req.body.skillLevel !== undefined &&
-    req.body.skillLevel !== null &&
-    !validatePrimitive(req.body.skillLevel, "integer")
+    req.body.colorLevel !== undefined &&
+    req.body.colorLevel !== null &&
+    !validateEnum(req.body.colorLevel, ColorLevel)
   ) {
-    return res.status(400).send(getApiValidationError("skillLevel", "integer"));
+    return res.status(400).send(getApiValidationError("colorLevel", "ColorLevel"));
   }
   if (
     req.body.canSeeAllLogs !== undefined &&
@@ -89,11 +90,11 @@ export const updateUserDtoValidator = async (
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (
-    req.body.skillLevel !== undefined &&
-    req.body.skillLevel !== null &&
-    !validatePrimitive(req.body.skillLevel, "integer")
+    req.body.colorLevel !== undefined &&
+    req.body.colorLevel !== null &&
+    !validateEnum(req.body.colorLevel, ColorLevel)
   ) {
-    return res.status(400).send(getApiValidationError("skillLevel", "integer"));
+    return res.status(400).send(getApiValidationError("colorLevel", "ColorLevel"));
   }
   if (
     req.body.animalTags !== undefined &&
