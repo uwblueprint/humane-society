@@ -4,7 +4,7 @@ export type AuthenticatedUser = {
   lastName: string;
   email: string;
   role: string;
-  skillLevel?: number | null;
+  colorLevel: string;
   animalTags?: [string] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;

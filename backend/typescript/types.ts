@@ -17,7 +17,7 @@ export type UserDTO = {
   email: string;
   role: Role;
   status: UserStatus;
-  skillLevel?: number | null;
+  colorLevel?: ColorLevel | null;
   animalTags?: [AnimalTagEnum] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
@@ -63,6 +63,14 @@ export enum AnimalTagEnum {
   CAT = "Cat", 
   DOG = "Dog",
   SMALL = "Small Animal",
+}
+
+export enum ColorLevel {
+  RED = "Red",
+  YELLOW = "Yellow",
+  ORANGE = "Orange",
+  GREEN = "Green",
+  BLUE = "Blue",
 }
 
 export enum UserStatus {
