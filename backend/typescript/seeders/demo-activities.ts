@@ -1,21 +1,24 @@
-import { QueryInterface, QueryTypes } from 'sequelize';
+import { QueryInterface, QueryTypes, Op } from 'sequelize';
 import { faker } from '@faker-js/faker';
 
 export = {
   up: async (queryInterface: QueryInterface) => {
-    // get seeded users
+    // Get seeded users
     const users: Array<{ id: number }> = await queryInterface.sequelize.query(
       'SELECT id FROM users WHERE email LIKE \'%@seeded.com\'',
       { type: QueryTypes.SELECT }
     );
 
-    // get seeded pets
+    // If no seeded users exist, we'll create activities without user_id
+    const userIds = users.length > 0 ? users.map(user => user.id) : [null];
+
+    // Get seeded pets
     const pets: Array<{ id: number }> = await queryInterface.sequelize.query(
       'SELECT id FROM pets WHERE name LIKE \'%Seeded%\'',
       { type: QueryTypes.SELECT }
     );
 
-    // get activity types
+    // Get activity types
     const activityTypes: Array<{ id: number }> = await queryInterface.sequelize.query(
       'SELECT id FROM activity_types',
       { type: QueryTypes.SELECT }
@@ -23,17 +26,17 @@ export = {
 
     const activities = [];
 
-    // make some random activities
+    // Create some random activities
     for (const pet of pets) {
-      // make 3 activities for each pet
+      // Create 3 activities for each pet
       for (let i = 0; i < 3; i++) {
         activities.push({
-          user_id: faker.helpers.arrayElement(users).id,
+          user_id: userIds.length ? faker.helpers.arrayElement(userIds) : null,
           pet_id: pet.id,
-          activity_type_id: faker.helpers.arrayElement(activityTypes).id,
-          scheduled_start_time: faker.date.future(),
-          start_time: null,
-          end_time: null,
+          activity_type_id: activityTypes.length ? faker.helpers.arrayElement(activityTypes).id : 1,
+          scheduled_start_time: faker.date.recent(),
+          start_time: faker.date.recent(),
+          end_time: faker.date.recent(),
           notes: faker.lorem.sentence(),
           created_at: new Date(),
           updated_at: new Date()
@@ -45,6 +48,6 @@ export = {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('activities', {});
+    return queryInterface.bulkDelete('activities', {}, {});
   }
 }; 
