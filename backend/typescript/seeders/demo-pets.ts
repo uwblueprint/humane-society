@@ -1,21 +1,23 @@
-import { QueryInterface, QueryTypes, Op } from 'sequelize';
-import { faker } from '@faker-js/faker';
+import { QueryInterface, QueryTypes, Op } from "sequelize";
+import { faker } from "@faker-js/faker";
 
 export = {
-  up: async (queryInterface: QueryInterface) => {
-    // query all animal types
-    const animalTypes: Array<{ id: number; animal_type_name: string }> =
-      await queryInterface.sequelize.query(
-        'SELECT id, animal_type_name FROM animal_types',
-        { type: QueryTypes.SELECT }
-      );
+  up: async (queryInterface: QueryInterface): Promise<unknown> => {
+    // query animal types
+    const animalTypes: Array<{
+      id: number;
+      animal_type_name: string;
+    }> = await queryInterface.sequelize.query(
+      "SELECT id, animal_type_name FROM animal_types",
+      { type: QueryTypes.SELECT },
+    );
 
     const statuses = ["Assigned", "Active", "Needs Care", "Does Not Need Care"];
     const pets = [];
 
-    // make 5 pets under each animal type
+    // make 5 pets for each animal type with faker
     for (const animalType of animalTypes) {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 5; i += 1) {
         pets.push({
           animal_type_id: animalType.id,
           name: `${animalType.animal_type_name} Seeded ${i}`,
@@ -34,12 +36,16 @@ export = {
       }
     }
 
-    return queryInterface.bulkInsert('pets', pets, {});
+    return queryInterface.bulkInsert("pets", pets, {});
   },
 
-  down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('pets', {
-      name: { [Op.like]: '%Seeded%' }
-    }, {});
-  }
-}; 
+  down: async (queryInterface: QueryInterface): Promise<unknown> => {
+    return queryInterface.bulkDelete(
+      "pets",
+      {
+        name: { [Op.like]: "%Seeded%" },
+      },
+      {},
+    );
+  },
+};
