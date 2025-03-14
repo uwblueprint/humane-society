@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const getPageName = () => {
     switch (location.pathname) {
       case ROUTES.HOME_PAGE:
-        return "Home";
+        return "Pet List";
       case ROUTES.LOGIN_PAGE:
         return "Login";
       case ROUTES.SIGNUP_PAGE:
