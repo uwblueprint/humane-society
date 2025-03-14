@@ -1,29 +1,47 @@
 [
   {
+    "id": 2,
+    "name": "Lillie",
+    "skill": "GREEN",
+    "image": "/images/cat.png",
+    "taskCategories": ["WALK", "PEN_TIME", "TRAINING", "GAMES", "HUSBANDRY"],
+    "status": "ASSIGNED",
+    "lastCaredFor": "Occupied"
+  },
+  {
+    "id": 3,
+    "name": "Pillie",
+    "skill": "YELLOW",
+    "image": "/images/dog1.png",
+    "taskCategories": ["TRAINING", "GAMES", "HUSBANDRY", "MISC"],
+    "status": "ASSIGNED",
+    "lastCaredFor": "10:33 am"
+  },
+  {
     "id": 4,
     "name": "Millie",
     "skill": "BLUE",
-    "image": "https://bit.ly/naruto-sage",
+    "image": "/images/dog2.png",
     "taskCategories": ["WALK", "PEN_TIME"],
     "status": "NEEDS_CARE",
-    "lastCaredFor": "2025-02-20T10:00:00Z"
+    "lastCaredFor": "One or more days ago"
   },
   {
     "id": 5,
     "name": "Billie",
     "skill": "GREEN",
-    "image": "https://bit.ly/naruto-sage",
-    "taskCategories": ["WALK", "HUSBANDRY", "TRAINING", "GAMES"],
+    "image": "/images/dog1.png",
+    "taskCategories": ["GAMES"],
     "status": "DOES_NOT_NEED_CARE",
-    "lastCaredFor": "2025-02-15T15:30:00Z"
+    "lastCaredFor": "10:33 am"
   },
   {
     "id": 6,
     "name": "Sillie",
     "skill": "YELLOW",
-    "image": "https://bit.ly/naruto-sage",
+    "image": "/images/dog1.png",
     "taskCategories": ["WALK", "PEN_TIME", "TRAINING", "GAMES", "HUSBANDRY", "MISC"],
     "status": "ASSIGNED",
-    "lastCaredFor": "2025-02-18T09:45:00Z"
+    "lastCaredFor": "10:33 am"
   }
 ]
