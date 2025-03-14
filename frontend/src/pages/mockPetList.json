@@ -1,0 +1,29 @@
+[
+  {
+    "id": 4,
+    "name": "Millie",
+    "skill": "BLUE",
+    "image": "https://bit.ly/naruto-sage",
+    "taskCategories": ["WALK", "PEN_TIME"],
+    "status": "NEEDS_CARE",
+    "lastCaredFor": "2025-02-20T10:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "Billie",
+    "skill": "GREEN",
+    "image": "https://bit.ly/naruto-sage",
+    "taskCategories": ["WALK", "HUSBANDRY", "TRAINING", "GAMES"],
+    "status": "DOES_NOT_NEED_CARE",
+    "lastCaredFor": "2025-02-15T15:30:00Z"
+  },
+  {
+    "id": 6,
+    "name": "Sillie",
+    "skill": "YELLOW",
+    "image": "https://bit.ly/naruto-sage",
+    "taskCategories": ["WALK", "PEN_TIME", "TRAINING", "GAMES", "HUSBANDRY", "MISC"],
+    "status": "ASSIGNED",
+    "lastCaredFor": "2025-02-18T09:45:00Z"
+  }
+]
