@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { getApiValidationError, validatePrimitive, validateEnum, validateArray } from "./util";
-import { ColorLevel } from "../../types";
+import { getApiValidationError, validatePrimitive, validateEnum, validateEnumArray } from "./util";
+import { AnimalTagEnum, ColorLevel } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -99,7 +99,7 @@ export const updateUserDtoValidator = async (
   if (
     req.body.animalTags !== undefined &&
     req.body.animalTags !== null &&
-    !validateArray(req.body.animalTags, "AnimalTagEnum", true)
+    !validateEnumArray(req.body.animalTags, AnimalTagEnum)
   ) {
     return res.status(400).send(getApiValidationError("animalTags", "AnimalTagEnum", true));
   }
