@@ -5,7 +5,7 @@ export type User = {
   email: string;
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
-  colorLevel: "Red" | "Yellow" | "Orange" | "Green" | "Blue";
+  colorLevel?: "Red" | "Yellow" | "Orange" | "Green" | "Blue" | null;
   animalTags?: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"] | null;
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
@@ -13,4 +13,4 @@ export type User = {
   profilePhoto?: string;
 };
 
-export type CreateUserDTO = Omit<User, "id" | "status">;
+export type CreateUserDTO = Omit<User, "id" | "status" | "animalTags" | "profilePhoto">;
