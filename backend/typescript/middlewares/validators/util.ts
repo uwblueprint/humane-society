@@ -45,15 +45,26 @@ export const validateEnum = (value: any, enumType: any): boolean => {
   return Object.values(enumType).includes(value);
 };
 
-export const validateArray = (value: any, type: Type, isEnum = false): boolean => {
+export const validateArray = (value: any, type: Type): boolean => {
   return (
     value !== undefined &&
     value !== null &&
     typeof value === "object" &&
     Array.isArray(value) &&
-    !isEnum ? value.every((item) => validatePrimitive(item, type)) : value.every((item : any) => validateEnum(item, type))
+    value.every((item) => validatePrimitive(item, type))
   );
 };
+
+export const validateEnumArray = (value: any, enumType: any): boolean => {
+  return (
+    value !== undefined &&
+    value !== null &&
+    typeof value === "object" &&
+    Array.isArray(value) &&
+    value.every((item, index) => value.indexOf(item) === index) &&
+    value.every((item) => validateEnum(item, enumType))
+  );
+}
 
 export const validateFileType = (mimetype: string): boolean => {
   return allowableContentTypes.has(mimetype);
