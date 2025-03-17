@@ -25,7 +25,10 @@ export type UserDTO = {
   profilePhoto?: string | null;
 };
 
-export type CreateUserDTO = Omit<UserDTO, "id" | "status" | "animalTags" | "profilePhoto">;
+export type CreateUserDTO = Omit<
+  UserDTO,
+  "id" | "status" | "animalTags" | "profilePhoto"
+>;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
@@ -60,7 +63,7 @@ export type PetStatus = typeof petStatusValues[number];
 export enum AnimalTagEnum {
   BIRD = "Bird",
   BUNNY = "Bunny",
-  CAT = "Cat", 
+  CAT = "Cat",
   DOG = "Dog",
   SMALL = "Small Animal",
 }

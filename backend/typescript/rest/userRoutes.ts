@@ -171,7 +171,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       role: req.body.role ?? user.role,
       status: req.body.status ?? user.status,
       colorLevel: req.body.colorLevel ?? user.colorLevel,
-      animalTags: req.body.animalTags ?? user.animalTags, 
+      animalTags: req.body.animalTags ?? user.animalTags,
       canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
       canAssignUsersToTasks:
         req.body.canAssignUsersToTasks ?? user.canAssignUsersToTasks,
