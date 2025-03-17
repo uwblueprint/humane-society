@@ -1,7 +1,7 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 
-const TABLE_NAME = "users";
+const TABLE_NAME = "pets";
 const OLD_COLUMN_NAME = "skill_level";
 const NEW_COLUMN_NAME = "color_level";
 const SKILL_LEVEL_INTERVAL = "skill_level_interval";
@@ -34,7 +34,7 @@ export const down: Migration = async ({ context: sequelize }) => {
     });
     await sequelize.query(
         `ALTER TABLE ${TABLE_NAME} ADD CONSTRAINT ${SKILL_LEVEL_INTERVAL} 
-        CHECK (skill_level BETWEEN ${MIN_COLOR_INT} AND ${MAX_COLOR_INT});`,
+       CHECK (skill_level BETWEEN ${MIN_COLOR_INT} AND ${MAX_COLOR_INT});`,
     );
-    await sequelize.query('DROP TYPE IF EXISTS "enum_users_color_level";');
+    await sequelize.query('DROP TYPE IF EXISTS "enum_pets_color_level";');
 };
