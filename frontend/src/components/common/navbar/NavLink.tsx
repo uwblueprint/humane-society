@@ -1,9 +1,9 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { Flex, IconButton, Text } from "@chakra-ui/react";
+import { Flex, IconButton, Text, Image } from "@chakra-ui/react";
 
 interface NavLinkProps {
-  icon: React.ReactElement;
+  icon: string;
   ariaLabel: string;
   route: string;
   text: string;
@@ -32,7 +32,7 @@ const NavLink = ({
         aria-label={ariaLabel}
         fontSize={{ base: "1.25rem", md: "1.5rem" }}
         variant="unstyled"
-        icon={icon}
+        icon={<Image src={icon} alt={ariaLabel} boxSize="1.75rem" />}
         display="flex"
         justifyContent="center"
         alignItems="center"

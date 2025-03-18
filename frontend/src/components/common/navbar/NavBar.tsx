@@ -1,6 +1,6 @@
 import React from "react";
 import { Flex, Text, Spacer } from "@chakra-ui/react";
-import { FaRegFileAlt, FaUserCircle, FaUserCog, FaTasks } from "react-icons/fa";
+
 import Logo from "./Logo";
 import {
   INTERACTION_LOG_PAGE,
@@ -9,16 +9,16 @@ import {
   ADMIN_PAGE,
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
-import { getLocalStorageObj } from "../../../utils/LocalStorageUtils";
-import { AuthenticatedUser } from "../../../types/AuthTypes";
-import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
+import getCurrentUserRole from "../../../utils/CommonUtils";
+import {
+  LogIcon,
+  ProfileIcon,
+  TaskIcon,
+  UserManagementIcon,
+} from "../../../assets/icons";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
-  const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
-    AUTHENTICATED_USER_KEY
-  );
-
-  const isAdmin = currentUser?.role === "Administrator";
+  const isAdmin = getCurrentUserRole() === "Administrator";
 
   return (
     <Flex
@@ -41,19 +41,19 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
           <>
             <NavLink
               text="Users"
-              icon={<FaUserCog />}
+              icon={UserManagementIcon}
               ariaLabel="Users"
               route={USER_MANAGEMENT_PAGE}
             />
             <NavLink
               text="Tasks"
-              icon={<FaTasks />}
+              icon={TaskIcon}
               ariaLabel="Tasks"
-              route={ADMIN_PAGE} // Update with the appropriate route for Tasks
+              route={ADMIN_PAGE} // TODO: Update with the appropriate route for Tasks
             />
             <NavLink
               text="Logs"
-              icon={<FaRegFileAlt />}
+              icon={LogIcon}
               ariaLabel="InteractionLogs"
               route={INTERACTION_LOG_PAGE}
             />
@@ -61,7 +61,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
         )}
         <NavLink
           text="Profile"
-          icon={<FaUserCircle />}
+          icon={ProfileIcon}
           ariaLabel="Profile"
           route={PROFILE_PAGE}
         />
