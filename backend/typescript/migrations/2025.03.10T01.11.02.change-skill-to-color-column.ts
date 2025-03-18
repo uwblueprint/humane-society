@@ -6,15 +6,15 @@ const OLD_COLUMN_NAME = "skill_level";
 const NEW_COLUMN_NAME = "color_level";
 const SKILL_LEVEL_INTERVAL = "skill_level_interval";
 const COLOR_LEVEL_INTERVAL = "color_level_interval";
-const MIN_COLOR_LEVEL = "'Red'";
-const MAX_COLOR_LEVEL = "'Blue'";
+const MIN_COLOR_LEVEL = "'Blue'";
+const MAX_COLOR_LEVEL = "'Green'";
 const MIN_COLOR_INT = 1;
 const MAX_COLOR_INT = 5;
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().removeColumn(TABLE_NAME, OLD_COLUMN_NAME);
   await sequelize.getQueryInterface().addColumn(TABLE_NAME, NEW_COLUMN_NAME, {
-    type: DataType.ENUM("Red", "Yellow", "Orange", "Green", "Blue"),
+    type: DataType.ENUM("Blue", "Red", "Orange", "Yellow", "Green"),
     allowNull: false,
     defaultValue: "Blue",
   });

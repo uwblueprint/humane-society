@@ -54,7 +54,7 @@ export default class Pet extends Model {
   @Column({})
   weight!: number;
 
-  @Column({ type: DataType.ENUM("Red", "Yellow", "Orange", "Green", "Blue") })
+  @Column({ type: DataType.ENUM("Blue", "Red", "Orange", "Yellow", "Green") })
   color_level!: ColorLevel;
 
   @Column({})

@@ -69,11 +69,11 @@ export enum AnimalTagEnum {
 }
 
 export enum ColorLevel {
-  RED = "Red",
-  YELLOW = "Yellow",
-  ORANGE = "Orange",
-  GREEN = "Green",
   BLUE = "Blue",
+  RED = "Red",
+  ORANGE = "Orange",
+  YELLOW = "Yellow",
+  GREEN = "Green",
 }
 
 export enum UserStatus {
