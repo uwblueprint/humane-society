@@ -11,7 +11,7 @@ import {
   Box,
   PopoverArrow,
 } from "@chakra-ui/react";
-import FilterOpenIcon from "../assets/filter-open.svg";
+import FilterOpenIcon from "../../assets/icons/filter-open.svg";
 import { filterConfigs } from "../../constants/filterConfig";
 
 export type FilterType = "petList" | "userManagement";
