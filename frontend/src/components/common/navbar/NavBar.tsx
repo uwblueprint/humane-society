@@ -1,37 +1,71 @@
 import React from "react";
-import { Box, Flex, Text, Spacer } from "@chakra-ui/react";
-import NavNotificationButton from "./NavNotificationButton";
-import NavProfileButton from "./NavProfileButton";
+import { Flex, Text, Spacer } from "@chakra-ui/react";
+
 import Logo from "./Logo";
+import {
+  INTERACTION_LOG_PAGE,
+  PROFILE_PAGE,
+  USER_MANAGEMENT_PAGE,
+  ADMIN_PAGE,
+} from "../../../constants/Routes";
+import NavLink from "./NavLink";
+import getCurrentUserRole from "../../../utils/CommonUtils";
+import {
+  LogIcon,
+  ProfileIcon,
+  TaskIcon,
+  UserManagementIcon,
+} from "../../../assets/icons";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
+  const isAdmin = getCurrentUserRole() === "Administrator";
+
   return (
     <Flex
-      pt={{ base: "0.625rem", md: "0.625rem" }}
-      pr={{ base: "1.125rem", md: "1.125rem" }}
-      pb={{ base: "0.9375rem", md: "1.125rem" }}
-      pl={{ base: "1.125rem", md: "1.125rem" }}
-      height={{ base: "6.375rem", md: "9.375rem" }}
+      p={{ base: "1.5rem" }}
       position="fixed"
       top="0"
       left="0"
       w="100%"
       zIndex="10"
-      alignItems="flex-end"
+      alignItems="center"
       backgroundColor="#ffffff"
     >
       <Logo />
-      <Box>
-        <Text
-          textStyle={{ base: "h2", md: "h1" }}
-          mb={{ base: "0", md: "0.4rem" }}
-        >
-          {pageName}
-        </Text>
-      </Box>
+      <Text margin="0" textStyle={{ base: "h3", md: "h2" }}>
+        {pageName}
+      </Text>
       <Spacer />
-      <NavNotificationButton />
-      <NavProfileButton />
+      <Flex gap="1.25rem">
+        {isAdmin && (
+          <>
+            <NavLink
+              text="Users"
+              icon={UserManagementIcon}
+              ariaLabel="Users"
+              route={USER_MANAGEMENT_PAGE}
+            />
+            <NavLink
+              text="Tasks"
+              icon={TaskIcon}
+              ariaLabel="Tasks"
+              route={ADMIN_PAGE} // TODO: Update with the appropriate route for Tasks
+            />
+            <NavLink
+              text="Logs"
+              icon={LogIcon}
+              ariaLabel="InteractionLogs"
+              route={INTERACTION_LOG_PAGE}
+            />
+          </>
+        )}
+        <NavLink
+          text="Profile"
+          icon={ProfileIcon}
+          ariaLabel="Profile"
+          route={PROFILE_PAGE}
+        />
+      </Flex>
     </Flex>
   );
 };
