@@ -39,9 +39,8 @@ const ResponsivePasswordInput = ({
             bg="transparent"
             onClick={handlePasswordClick}
             aria-label="view"
-            icon={<ViewIcon/>}
-            color="gray.400" 
-
+            icon={<ViewIcon />}
+            color="gray.400"
           />
         ) : (
           <IconButton
@@ -51,7 +50,7 @@ const ResponsivePasswordInput = ({
             onClick={handlePasswordClick}
             aria-label="hide"
             icon={<ViewOffIcon />}
-            color="gray.400" 
+            color="gray.400"
           />
         )}
       </InputRightElement>
