@@ -35,6 +35,7 @@ import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import DevFileStorageUpload from "./pages/DevFileStorageUpload";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -136,6 +137,12 @@ const App = (): React.ReactElement => {
                   exact
                   path={Routes.DEV_UTILITY_PAGE}
                   component={Default}
+                  allowedRoles={AuthConstants.ALL_ROLES}
+                />
+                <PrivateRoute
+                  exact
+                  path={Routes.DEV_FILE_STORAGE_UPLOAD_PAGE}
+                  component={DevFileStorageUpload}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute
