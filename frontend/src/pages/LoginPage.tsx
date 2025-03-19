@@ -222,16 +222,16 @@ const LoginPage = (): React.ReactElement => {
                     </Box>
                   </Stack>
                   <Text
-                      cursor="pointer"
-                      fontSize="14px"
-                      onClick={handleForgotPassword}
-                      color="gray.600"
-                      textAlign="center"
-                      _hover={{ textDecoration: "underline" }}
-                      pt="0.5rem"
-                    >
-                      Forgot Password?
-                    </Text>
+                    cursor="pointer"
+                    fontSize="14px"
+                    onClick={handleForgotPassword}
+                    color="gray.600"
+                    textAlign="center"
+                    _hover={{ textDecoration: "underline" }}
+                    pt="0.5rem"
+                  >
+                    Forgot Password?
+                  </Text>
                   <Box>
                     <Button
                       type="submit"
