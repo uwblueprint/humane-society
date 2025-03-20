@@ -12,7 +12,7 @@ import {
   PopoverArrow,
 } from "@chakra-ui/react";
 import FilterOpenIcon from "../../assets/icons/filter-open.svg";
-import { filterConfigs } from "../../constants/filterConfig";
+import filterConstants from "../../config/filterConfig";
 
 export type FilterType = "petList" | "userManagement";
 
@@ -23,7 +23,7 @@ type FilterProps = {
 };
 
 const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
-  const filters = filterConfigs[type];
+  const filters = filterConstants[type];
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >(selected || {});
@@ -32,6 +32,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [initialScrollLeft, setInitialScrollLeft] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
 
   const checkScrollPosition = () => {
     if (containerRef.current) {
@@ -54,6 +55,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
     if (!containerRef.current) return;
 
     setIsDragging(true);
+    setHasMoved(false);
     setStartX(e.pageX - containerRef.current.offsetLeft);
     setInitialScrollLeft(containerRef.current.scrollLeft);
 
@@ -75,7 +77,12 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
 
     e.preventDefault();
     const x = e.pageX - containerRef.current.offsetLeft;
-    const walk = (x - startX); 
+    const walk = x - startX;
+
+    if (Math.abs(walk) > 3) {
+      setHasMoved(true);
+    }
+
     containerRef.current.scrollLeft = initialScrollLeft - walk;
 
     checkScrollPosition();
@@ -152,8 +159,11 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                     position="relative"
                     paddingLeft="2rem"
                     onClick={(e) => {
-                      // Prevent popover from opening when we're dragging
-                      if (isDragging) e.preventDefault();
+                      // logic to prevent popover toggling when dragging
+                      if (isDragging || hasMoved) {
+                        e.preventDefault();
+                        setHasMoved(false);
+                      }
                     }}
                   >
                     <Flex gap="0.75rem" align="center">
@@ -204,10 +214,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                 </PopoverTrigger>
                 <PopoverArrow />
                 <PopoverContent bg="gray.50" border="none">
-                  <PopoverBody
-                    borderRadius="0.5rem"
-                    boxShadow="0px 4px 4px rgba(0, 0, 0, 0.25)"
-                  >
+                  <PopoverBody borderRadius="0.5rem" boxShadow="sm">
                     <Flex
                       alignItems="start"
                       padding="0.75rem 1rem"
