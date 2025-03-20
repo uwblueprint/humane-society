@@ -213,8 +213,8 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                   </Button>
                 </PopoverTrigger>
                 <PopoverArrow />
-                <PopoverContent bg="gray.50" border="none">
-                  <PopoverBody borderRadius="0.5rem" boxShadow="sm">
+                <PopoverContent bg="gray.50" border="none" boxShadow="sm">
+                  <PopoverBody borderRadius="0.5rem">
                     <Flex
                       alignItems="start"
                       padding="0.75rem 1rem"
