@@ -9,7 +9,7 @@ export const up: Migration = async ({ context: sequelize }) => {
     type: DataType.ARRAY(
       DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
     ),
-    allowNull: true,
+    allowNull: false,
   });
 };
 

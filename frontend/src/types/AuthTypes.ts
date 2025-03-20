@@ -5,7 +5,7 @@ export type AuthenticatedUser = {
   email: string;
   role: string;
   colorLevel: string;
-  animalTags?: [string] | null;
+  animalTags: [string];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;

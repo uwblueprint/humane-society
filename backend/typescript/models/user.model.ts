@@ -31,7 +31,7 @@ export default class User extends Model {
   @Column({
     type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
   })
-  animal_tags?: [AnimalTagEnum] | null;
+  animal_tags!: [AnimalTagEnum];
 
   @Column({ type: DataType.BOOLEAN })
   can_see_all_logs?: boolean | null;

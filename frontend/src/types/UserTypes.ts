@@ -6,7 +6,7 @@ export type User = {
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
   colorLevel?: "Blue" | "Red" | "Orange" | "Yellow" | "Green" | null;
-  animalTags?: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"] | null;
+  animalTags: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;

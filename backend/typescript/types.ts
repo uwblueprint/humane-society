@@ -18,7 +18,7 @@ export type UserDTO = {
   role: Role;
   status: UserStatus;
   colorLevel?: ColorLevel | null;
-  animalTags?: [AnimalTagEnum] | null;
+  animalTags: [AnimalTagEnum];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;

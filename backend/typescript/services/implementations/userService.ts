@@ -194,7 +194,7 @@ class UserService implements IUserService {
           role: user.role,
           status: UserStatus.INACTIVE,
           email: firebaseUser.email ?? "",
-          animal_tags: null,
+          animal_tags: [],
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
           phone_number: user.phoneNumber,
