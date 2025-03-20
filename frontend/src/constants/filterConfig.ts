@@ -17,7 +17,7 @@ export const filterConfigs: Record<string, FilterSection[]> = {
         { label: "Bunny", value: "bunny" },
         { label: "Cat", value: "cat" },
         { label: "Dog", value: "dog" },
-        { label: "Hamster", value: "hamster" },
+        { label: "Small Animal", value: "hamster" },
       ],
     },
     {
