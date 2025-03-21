@@ -27,6 +27,7 @@ export interface PetInfo {
   taskCategories: TaskCategory[];
   status: TaskStatus;
   lastCaredFor: string;
+  allTasksAssigned: boolean;
 }
 
 interface PetListTableSectionProps {

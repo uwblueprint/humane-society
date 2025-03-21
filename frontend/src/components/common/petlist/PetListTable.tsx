@@ -2,19 +2,30 @@ import React from "react";
 import { Text } from "@chakra-ui/react";
 import { TaskStatus } from "../../../types/TaskTypes";
 import { PetListTableSection, PetInfo } from "./PetListTableSection";
+import getCurrentUserRole from "../../../utils/CommonUtils";
 
 export interface PetListTableProps {
   pets: PetInfo[];
 }
 
-export const filterByStatus = (
-  pets: PetInfo[],
-  status: TaskStatus,
-): PetInfo[] => {
+const filterByStatus = (pets: PetInfo[], status: TaskStatus): PetInfo[] => {
   return pets.filter((pet) => pet.status === status);
 };
 
+const filterByAllTasksAssigned = (
+  pets: PetInfo[],
+  allTasksAssigned: boolean,
+) => {
+  return pets.filter(
+    (pet) =>
+      pet.allTasksAssigned === allTasksAssigned &&
+      pet.status !== TaskStatus.DOES_NOT_NEED_CARE,
+  );
+};
+
 const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
+  const isAdmin = getCurrentUserRole() === "Administrator";
+
   return (
     <table
       style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}
@@ -39,18 +50,33 @@ const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
         </tr>
       </thead>
 
-      <PetListTableSection
-        pets={filterByStatus(pets, TaskStatus.NEEDS_CARE)}
-        sectionTitle="Unassigned Tasks"
-      />
-      <PetListTableSection
-        pets={filterByStatus(pets, TaskStatus.ASSIGNED)}
-        sectionTitle="Assigned Tasks"
-      />
-      <PetListTableSection
-        pets={filterByStatus(pets, TaskStatus.DOES_NOT_NEED_CARE)}
-        sectionTitle="No Tasks"
-      />
+      {!isAdmin && (
+        <>
+          <PetListTableSection
+            pets={filterByStatus(pets, TaskStatus.ASSIGNED)}
+          />
+          <PetListTableSection
+            pets={filterByStatus(pets, TaskStatus.NEEDS_CARE)}
+          />
+        </>
+      )}
+
+      {isAdmin && (
+        <>
+          <PetListTableSection
+            pets={filterByAllTasksAssigned(pets, false)}
+            sectionTitle="Unassigned Tasks"
+          />
+          <PetListTableSection
+            pets={filterByAllTasksAssigned(pets, true)}
+            sectionTitle="Assigned Tasks"
+          />
+          <PetListTableSection
+            pets={filterByStatus(pets, TaskStatus.DOES_NOT_NEED_CARE)}
+            sectionTitle="No Tasks"
+          />
+        </>
+      )}
     </table>
   );
 };

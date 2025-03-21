@@ -6,7 +6,8 @@
     "image": "/images/cat.png",
     "taskCategories": ["WALK", "PEN_TIME", "TRAINING", "GAMES", "HUSBANDRY"],
     "status": "ASSIGNED",
-    "lastCaredFor": "Occupied"
+    "lastCaredFor": "Occupied",
+    "allTasksAssigned": true
   },
   {
     "id": 3,
@@ -15,7 +16,8 @@
     "image": "/images/dog1.png",
     "taskCategories": ["TRAINING", "GAMES", "HUSBANDRY", "MISC"],
     "status": "ASSIGNED",
-    "lastCaredFor": "10:33 am"
+    "lastCaredFor": "10:33 am",
+    "allTasksAssigned": false
   },
   {
     "id": 4,
@@ -24,7 +26,8 @@
     "image": "/images/dog2.png",
     "taskCategories": ["WALK", "PEN_TIME"],
     "status": "NEEDS_CARE",
-    "lastCaredFor": "One or more days ago"
+    "lastCaredFor": "One or more days ago",
+    "allTasksAssigned": true
   },
   {
     "id": 5,
@@ -33,7 +36,8 @@
     "image": "/images/dog1.png",
     "taskCategories": ["GAMES"],
     "status": "DOES_NOT_NEED_CARE",
-    "lastCaredFor": "10:33 am"
+    "lastCaredFor": "10:33 am",
+    "allTasksAssigned": true
   },
   {
     "id": 6,
@@ -42,6 +46,7 @@
     "image": "/images/dog1.png",
     "taskCategories": ["WALK", "PEN_TIME", "TRAINING", "GAMES", "HUSBANDRY", "MISC"],
     "status": "ASSIGNED",
-    "lastCaredFor": "10:33 am"
+    "lastCaredFor": "10:33 am",
+    "allTasksAssigned": false
   }
 ]

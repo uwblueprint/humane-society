@@ -1,5 +1,5 @@
 import React from "react";
-import rawData from "./mockPetList.json";
+import rawData from "../temp/mock/petlist/mockPetList.json";
 import { SkillLevel, TaskCategory, TaskStatus } from "../types/TaskTypes";
 import PetListTable from "../components/common/petlist/PetListTable";
 import { PetInfo } from "../components/common/petlist/PetListTableSection";
@@ -14,13 +14,7 @@ const mockData: PetInfo[] = rawData.map((pet) => ({
 }));
 
 const GetPage = (): React.ReactElement => {
-  return (
-    <div style={{ textAlign: "center" }}>
-      <h1>Pets</h1>
-
-      <PetListTable pets={mockData} />
-    </div>
-  );
+  return <PetListTable pets={mockData} />;
 };
 
 export default GetPage;
