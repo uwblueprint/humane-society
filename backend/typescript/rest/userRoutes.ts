@@ -22,7 +22,9 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
 userRouter.use(
-  isAuthorizedByRole(new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])),
+  isAuthorizedByRole(
+    new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
+  ),
 );
 
 const userService: IUserService = new UserService();
@@ -99,10 +101,23 @@ userRouter.get("/", async (req, res) => {
   }
 });
 
-// This endpoint is for testing purposes
 /* Create a user */
 userRouter.post("/", createUserDtoValidator, async (req, res) => {
   try {
+    const accessToken = getAccessToken(req);
+    if (!accessToken) {
+      res.status(404).json({ error: "Access token not found" });
+      return;
+    }
+    const canCreateUser = await authService.isAuthorizedByRole(
+      accessToken,
+      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+    );
+    if (!canCreateUser) {
+      res.status(403).json({ error: "Not authorized to create user" });
+      return;
+    }
+
     const newUser = await userService.createUser({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -136,11 +151,20 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
   }
 
   try {
+    const canUpdateUser = await authService.isAuthorizedByRole(
+      accessToken,
+      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+    );
+    if (!canUpdateUser) {
+      res.status(403).json({ error: "Not authorized to update user" });
+      return;
+    }
+
     const isBehaviourist = await authService.isAuthorizedByRole(
       accessToken,
       new Set([Role.ANIMAL_BEHAVIOURIST]),
     );
-    const behaviouristUpdatableSet = new Set(["colorLevel"]);
+    const behaviouristUpdatableSet = new Set(["colorLevel", "animalTags"]);
     if (isBehaviourist) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
         return !behaviouristUpdatableSet.has(field);
