@@ -20,3 +20,18 @@ export enum TaskStatus {
   DOES_NOT_NEED_CARE = "Does Not Need Care",
   ASSIGNED = "Assigned to You",
 }
+
+export enum AnimalTag {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat",
+  DOG = "Dog",
+  SMALL_ANIMAL = "Small Animal",
+}
+
+export enum TaskType {
+  ADMIN = "One Time",
+  STAFF = "Recurring",
+  VOLUNTEER = "Recurring",
+  
+}

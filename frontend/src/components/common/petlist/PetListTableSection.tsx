@@ -17,7 +17,7 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
-import { SkillLevel, TaskCategory, TaskStatus } from "../../../types/TaskTypes";
+import { PetTag, SkillLevel, TaskCategory, TaskStatus } from "../../../types/TaskTypes";
 
 export interface PetInfo {
   id: number;
@@ -28,6 +28,7 @@ export interface PetInfo {
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
+  petTag: PetTag;
 }
 
 interface PetListTableSectionProps {

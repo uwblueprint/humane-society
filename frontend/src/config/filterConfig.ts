@@ -1,66 +1,74 @@
-import { FilterSection } from "../constants/FilterConstants";
-
+import { FilterSection } from "../types/FilterTypes";
+import { AnimalTag, TaskCategory, SkillLevel } from "../types/TaskTypes";
 const filterConstants: Record<string, FilterSection[]> = {
-  petList: [
+  petListAdmin: [
     {
-      name: "Species",
-      options: [
-        { value: "dog", label: "Dogs" },
-        { value: "cat", label: "Cats" },
-        { value: "bird", label: "Birds" },
-        { value: "small_animal", label: "Small Animals" },
-      ],
+      name: "Animal Tag",
+      value: "petTag",
+      options: Object.values(AnimalTag),
     },
     {
-      name: "Age",
-      options: [
-        { value: "baby", label: "Baby" },
-        { value: "young", label: "Young" },
-        { value: "adult", label: "Adult" },
-        { value: "senior", label: "Senior" },
-      ],
-    },
-    {
-      name: "Size",
-      options: [
-        { value: "small", label: "Small" },
-        { value: "medium", label: "Medium" },
-        { value: "large", label: "Large" },
-        { value: "xlarge", label: "Extra Large" },
-      ],
-    },
-    {
-      name: "Gender",
-      options: [
-        { value: "male", label: "Male" },
-        { value: "female", label: "Female" },
-      ],
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory),
     },
     {
       name: "Status",
+      value: "status",
+      // TODO: how to handle dynamically
+      options: ["Needs Care", "Does Not Need Care"], 
+    },
+    {
+      name: "Colour Level",
+      value: "skill",
+      options: Object.values(SkillLevel),
+    },
+  ],
+  petListVolunteer: [
+    {
+      name: "Animal Tag",
+      value: "petTag",
+      options: Object.values(AnimalTag),
+    },
+    {
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory)
+    },
+    {
+      name: "Status",
+      value: "status",
+      // TODO: how to handle dynamically
       options: [
-        { value: "adoptable", label: "Adoptable" },
-        { value: "adopted", label: "Adopted" },
-        { value: "pending", label: "Pending Adoption" },
-        { value: "foster", label: "In Foster" },
+        "Needs Care",
+        "Assigned to You",
       ],
+    },
+    {
+      name: "Colour Level",
+      value: "skill",
+      options: Object.values(SkillLevel),
     },
   ],
   userManagement: [
     {
       name: "Role",
+      value: "role",
+      // TODO: create enums for these
       options: [
-        { value: "admin", label: "Admin" },
-        { value: "staff", label: "Staff" },
-        { value: "volunteer", label: "Volunteer" },
+        "Admin",
+        "Staff",
+        "Volunteer",
       ],
     },
     {
       name: "Status",
+      value: "status",
+      // TODO: create enums for these
       options: [
-        { value: "active", label: "Active" },
-        { value: "inactive", label: "Inactive" },
-        { value: "pending", label: "Pending Approval" },
+        "Active",
+        "Inactive",
+        "Pending Approval",
       ],
     },
   ],

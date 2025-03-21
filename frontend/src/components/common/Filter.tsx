@@ -14,7 +14,7 @@ import {
 import FilterOpenIcon from "../../assets/icons/filter-open.svg";
 import filterConstants from "../../config/filterConfig";
 
-export type FilterType = "petList" | "userManagement";
+export type FilterType = "petListVolunteer" | "petListAdmin" | "userManagement";
 
 type FilterProps = {
   type: FilterType;
