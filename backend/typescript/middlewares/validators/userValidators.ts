@@ -5,7 +5,7 @@ import {
   validateEnum,
   validateEnumArray,
 } from "./util";
-import { AnimalTagEnum, ColorLevel } from "../../types";
+import { AnimalTagEnum } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -28,11 +28,9 @@ export const createUserDtoValidator = async (
   if (
     req.body.colorLevel !== undefined &&
     req.body.colorLevel !== null &&
-    !validateEnum(req.body.colorLevel, ColorLevel)
+    !validatePrimitive(req.body.colorLevel, "integer")
   ) {
-    return res
-      .status(400)
-      .send(getApiValidationError("colorLevel", "ColorLevel"));
+    return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
   if (
     req.body.canSeeAllLogs !== undefined &&
@@ -99,11 +97,9 @@ export const updateUserDtoValidator = async (
   if (
     req.body.colorLevel !== undefined &&
     req.body.colorLevel !== null &&
-    !validateEnum(req.body.colorLevel, ColorLevel)
+    !validatePrimitive(req.body.colorLevel, "integer")
   ) {
-    return res
-      .status(400)
-      .send(getApiValidationError("colorLevel", "ColorLevel"));
+    return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
   if (
     req.body.animalTags !== undefined &&

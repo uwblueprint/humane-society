@@ -5,7 +5,6 @@ type Type =
   | "decimal"
   | "PetStatus"
   | "Sex"
-  | "ColorLevel"
   | "AnimalTagEnum"
   | "Date";
 

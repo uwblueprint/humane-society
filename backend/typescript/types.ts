@@ -17,7 +17,7 @@ export type UserDTO = {
   email: string;
   role: Role;
   status: UserStatus;
-  colorLevel?: ColorLevel | null;
+  colorLevel?: number;
   animalTags: [AnimalTagEnum];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
@@ -27,7 +27,7 @@ export type UserDTO = {
 
 export type CreateUserDTO = Omit<
   UserDTO,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
+  "id" | "status" | "animalTags" | "profilePhoto"
 >;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;

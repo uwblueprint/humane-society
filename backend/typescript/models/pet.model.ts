@@ -10,7 +10,7 @@ import {
 import Animal_Type from "./animalType.model";
 import PetCareInfo from "./petCareInfo.model";
 
-import { Sex, PetStatus, ColorLevel } from "../types";
+import { Sex, PetStatus } from "../types";
 
 @Table({
   tableName: "pets",
@@ -54,8 +54,8 @@ export default class Pet extends Model {
   @Column({})
   weight!: number;
 
-  @Column({ type: DataType.ENUM("Blue", "Red", "Orange", "Yellow", "Green") })
-  color_level!: ColorLevel;
+  @Column({ type: DataType.INTEGER })
+  color_level!: number;
 
   @Column({})
   neutered!: boolean;
