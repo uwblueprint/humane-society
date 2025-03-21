@@ -1,4 +1,4 @@
-import { FilterSection } from "../types/FilterConstants";
+import { FilterSection } from "../constants/FilterConstants";
 
 const filterConstants: Record<string, FilterSection[]> = {
   petList: [
