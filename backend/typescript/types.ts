@@ -68,12 +68,13 @@ export enum AnimalTagEnum {
   SMALL = "Small Animal",
 }
 
+// Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
-  BLUE = "Blue",
-  RED = "Red",
-  ORANGE = "Orange",
-  YELLOW = "Yellow",
-  GREEN = "Green",
+  BLUE = "Blue", // 5
+  RED = "Red", // 4
+  ORANGE = "Orange", // 3
+  YELLOW = "Yellow", // 2
+  GREEN = "Green", // 1
 }
 
 export enum UserStatus {
