@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { getApiValidationError, validatePrimitive } from "./util";
+import {
+  getApiValidationError,
+  validatePrimitive,
+  validateEnum,
+  validateEnumArray,
+} from "./util";
+import { AnimalTagEnum, ColorLevel } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -20,11 +26,13 @@ export const createUserDtoValidator = async (
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (
-    req.body.skillLevel !== undefined &&
-    req.body.skillLevel !== null &&
-    !validatePrimitive(req.body.skillLevel, "integer")
+    req.body.colorLevel !== undefined &&
+    req.body.colorLevel !== null &&
+    !validateEnum(req.body.colorLevel, ColorLevel)
   ) {
-    return res.status(400).send(getApiValidationError("skillLevel", "integer"));
+    return res
+      .status(400)
+      .send(getApiValidationError("colorLevel", "ColorLevel"));
   }
   if (
     req.body.canSeeAllLogs !== undefined &&
@@ -89,11 +97,31 @@ export const updateUserDtoValidator = async (
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (
-    req.body.skillLevel !== undefined &&
-    req.body.skillLevel !== null &&
-    !validatePrimitive(req.body.skillLevel, "integer")
+    req.body.colorLevel !== undefined &&
+    req.body.colorLevel !== null &&
+    !validateEnum(req.body.colorLevel, ColorLevel)
   ) {
-    return res.status(400).send(getApiValidationError("skillLevel", "integer"));
+    return res
+      .status(400)
+      .send(getApiValidationError("colorLevel", "ColorLevel"));
+  }
+  if (
+    req.body.animalTags !== undefined &&
+    req.body.animalTags !== null &&
+    !validateEnumArray(req.body.animalTags, AnimalTagEnum)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("animalTags", "AnimalTagEnum", true));
+  }
+  if (
+    req.body.profilePhoto !== undefined &&
+    req.body.profilePhoto !== null &&
+    !validatePrimitive(req.body.profilePhoto, "string")
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("profilePhoto", "string"));
   }
   if (
     req.body.canSeeAllLogs !== undefined &&
