@@ -21,7 +21,7 @@ export enum TaskStatus {
   ASSIGNED = "Assigned to You",
 }
 
-export enum AnimalTag {
+export enum PetTag {
   BIRD = "Bird",
   BUNNY = "Bunny",
   CAT = "Cat",
@@ -30,8 +30,8 @@ export enum AnimalTag {
 }
 
 export enum TaskType {
-  ADMIN = "One Time",
-  STAFF = "Recurring",
-  VOLUNTEER = "Recurring",
-  
+  ADMIN = "Admin",
+  STAFF = "Staff",
+  VOLUNTEER = "Volunteer",
+  // ANIMAL_BEHAVIOURIST = "Animal Behaviourist",
 }

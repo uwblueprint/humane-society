@@ -12,7 +12,7 @@ import {
   PopoverArrow,
 } from "@chakra-ui/react";
 import FilterOpenIcon from "../../assets/icons/filter-open.svg";
-import filterConstants from "../../config/filterConfig";
+import filterConstants from "../../constants/FilterConstants";
 
 export type FilterType = "petListVolunteer" | "petListAdmin" | "userManagement";
 
@@ -22,11 +22,11 @@ type FilterProps = {
   selected?: Record<string, string[]>;
 };
 
-const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
+const Filter: React.FC<FilterProps> = ({ type, onChange, selected = {} }) => {
   const filters = filterConstants[type];
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
-  >(selected || {});
+  >(selected);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showGradient, setShowGradient] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -116,7 +116,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   return (
-    <Box position="relative" width="100%">
+    <Box position="relative" minWidth="0">
       <Box
         ref={containerRef}
         overflowX="auto"
@@ -136,10 +136,9 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
       >
         <Flex gap="1rem" flexShrink={0} userSelect="none">
           {filters.map((filter) => {
-            const selectedValues = selectedFilters[filter.name] || [];
+            const selectedValues = selectedFilters[filter.value] || [];
             const selectedLabels = filter.options
-              .filter((option) => selectedValues.includes(option.value))
-              .map((option) => option.label)
+              .filter((option) => selectedValues.includes(option))
               .join(", ");
             return (
               <Popover
@@ -229,7 +228,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             direction="row"
                             gap="0.75rem"
                             alignItems="center"
-                            key={option.value}
+                            key={option}
                           >
                             <Checkbox
                               m="0"
@@ -237,9 +236,9 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                               cursor="pointer"
                               borderRadius="1rem"
                               colorScheme="blue"
-                              isChecked={selectedValues.includes(option.value)}
+                              isChecked={selectedValues.includes(option)}
                               onChange={() =>
-                                handleOptionChange(filter.name, option.value)
+                                handleOptionChange(filter.value, option)
                               }
                             />
                             <Text
@@ -247,7 +246,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                               textStyle={{ base: "body" }}
                               color="gray.700"
                             >
-                              {option.label}
+                              {option}
                             </Text>
                           </Flex>
                         ))}
@@ -272,7 +271,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
           pointerEvents="none"
           zIndex={2}
           backgroundColor="transparent"
-          backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 70%)"
+          backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
         />
       )}
     </Box>

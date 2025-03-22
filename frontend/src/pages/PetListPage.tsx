@@ -1,51 +1,48 @@
 import { Flex } from "@chakra-ui/react";
-import React, { useState, useEffect } from "react";
-import rawData from "../temp/mock/petlist/mockPetList.json";
-import { PetTag, SkillLevel, TaskCategory, TaskStatus } from "../types/TaskTypes";
+import React, { useMemo, useState } from "react";
+import mockData from "../temp/mock/petlist/mockPetList.json";
 import PetListTable from "../components/common/petlist/PetListTable";
 import { PetInfo } from "../components/common/petlist/PetListTableSection";
 import Search from "../components/common/Search";
 import Filter from "../components/common/Filter";
-
-
-
-const mockData: PetInfo[] = rawData.map((pet) => ({
-  ...pet,
-  skill: SkillLevel[pet.skill as keyof typeof SkillLevel],
-  taskCategories: pet.taskCategories.map(
-    (category) => TaskCategory[category as keyof typeof TaskCategory],
-  ),
-  status: TaskStatus[pet.status as keyof typeof TaskStatus],
-  petTag: PetTag[pet.petTag as keyof typeof PetTag]
-}));
+import { TaskCategory } from "../types/TaskTypes";
 
 const GetPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
 
-  useEffect(() => {
-    
-
-  }, [filters, search])
-
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
-    console.log("Selected filters:", selectedFilters);
   };
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
-    console.log("Search query:", value);
+    setSearch(value); 
   };
 
+  const filteredPets = useMemo(() => {
+    return mockData.filter((prev) => {
+      return Object.keys(filters).every((key) => {
+        if (filters[key].length === 0) return true;
+        if (Array.isArray(prev[key as keyof PetInfo])) {
+          return filters[key].some((filter) =>
+            (prev[key as keyof PetInfo] as (string | TaskCategory)[]).includes(
+              filter,
+            )
+          );
+        }
+        return filters[key].includes(prev[key as keyof PetInfo] as string);
+      });
+    });
+  }, [filters]);
+
   return (
-    <Flex direction="column" gap="1rem">
+    <Flex direction="column" gap="2rem">
       <Flex
-      padding="1rem"
+        padding="0 1rem"
         maxWidth="100vw"
+        justifyContent="space-between"
+        gap="1rem"
       >
-        {JSON.stringify(mockData)}
-        {JSON.stringify(filters)}
         <Filter
           type="petListAdmin"
           onChange={handleFilterChange}
@@ -57,7 +54,7 @@ const GetPage = (): React.ReactElement => {
           search={search}
         />
       </Flex>
-      <PetListTable pets={mockData} />
+      <PetListTable pets={filteredPets as PetInfo[]} />
     </Flex>
   );
 };

@@ -10,7 +10,7 @@ type SearchProps = {
 
 const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
   return (
-    <Box width="100%" maxW="400px" flexShrink={0}>
+    <Box width="100%" maxWidth="300px" flexShrink="0">
       <InputGroup>
         <Input
           type="text"
