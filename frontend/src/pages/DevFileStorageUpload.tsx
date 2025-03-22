@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Button,
@@ -13,15 +13,14 @@ import {
   useToast,
   VStack,
   Icon,
-} from '@chakra-ui/react';
-import { HiUpload, HiRefresh } from 'react-icons/hi';
-import EntityAPIClient, { EntityResponse } from '../APIClients/EntityAPIClient';
-
+} from "@chakra-ui/react";
+import { HiUpload, HiRefresh } from "react-icons/hi";
+import EntityAPIClient, { EntityResponse } from "../APIClients/EntityAPIClient";
 
 interface FileStatus {
   id: string;
   name: string;
-  status: 'uploaded' | 'error';
+  status: "uploaded" | "error";
   url?: string;
 }
 
@@ -35,14 +34,14 @@ const DevFileStorageUpload: React.FC = () => {
     try {
       const fileUrl = await EntityAPIClient.getFile(fileName);
       if (fileUrl) {
-        setUploadedFiles((prevFiles: FileStatus[]) => 
-          prevFiles.map((file: FileStatus) => 
-            file.name === fileName ? { ...file, url: fileUrl } : file
-          )
+        setUploadedFiles((prevFiles: FileStatus[]) =>
+          prevFiles.map((file: FileStatus) =>
+            file.name === fileName ? { ...file, url: fileUrl } : file,
+          ),
         );
       }
     } catch (err) {
-      console.error('Failed to fetch file URL:', err);
+      console.error("Failed to fetch file URL:", err);
     }
   }, []);
 
@@ -50,27 +49,30 @@ const DevFileStorageUpload: React.FC = () => {
     try {
       // Clear existing files before fetching
       setUploadedFiles([]);
-      
+
       const entities = await EntityAPIClient.get();
 
       // If entities is null, undefined, or an error occurred, clear the files and return
       if (!entities || !Array.isArray(entities)) {
         setUploadedFiles([]);
-        setError('No files available or error occurred');
+        setError("No files available or error occurred");
         return;
       }
 
       const files: FileStatus[] = entities
-        .filter((entity: EntityResponse): entity is EntityResponse & { fileName: string } => 
-          // [Optional] Additional validation to ensure the entity has required properties
-          entity && 
-          typeof entity.fileName === 'string' && 
-          typeof entity.id !== 'undefined'
+        .filter(
+          (
+            entity: EntityResponse,
+          ): entity is EntityResponse & { fileName: string } =>
+            // [Optional] Additional validation to ensure the entity has required properties
+            entity &&
+            typeof entity.fileName === "string" &&
+            typeof entity.id !== "undefined",
         )
         .map((entity) => ({
           id: entity.id.toString(),
           name: entity.fileName,
-          status: 'uploaded'
+          status: "uploaded",
         }));
 
       // Set the initial files first
@@ -81,7 +83,7 @@ const DevFileStorageUpload: React.FC = () => {
         try {
           const fileUrl = await EntityAPIClient.getFile(file.name);
           if (!fileUrl) {
-            throw new Error('File URL does not exist');
+            throw new Error("File URL does not exist");
           }
           return { name: file.name, url: fileUrl };
         } catch (err) {
@@ -94,16 +96,15 @@ const DevFileStorageUpload: React.FC = () => {
       const results = await Promise.all(urlPromises);
 
       // Update state once with all URLs
-      setUploadedFiles(prevFiles => 
-        prevFiles.map(prevFile => {
-          const result = results.find(r => r?.name === prevFile.name);
+      setUploadedFiles((prevFiles) =>
+        prevFiles.map((prevFile) => {
+          const result = results.find((r) => r?.name === prevFile.name);
           return result?.url ? { ...prevFile, url: result.url } : prevFile;
-        })
+        }),
       );
-
     } catch (err) {
-      console.error('Failed to fetch files:', err);
-      setError('Failed to load existing files');
+      console.error("Failed to fetch files:", err);
+      setError("Failed to load existing files");
       setUploadedFiles([]);
     }
   }, []);
@@ -119,16 +120,16 @@ const DevFileStorageUpload: React.FC = () => {
 
   const handleUpload = async (files: FileList | null) => {
     if (!files?.length) return;
-    
+
     const file = files[0];
     // Check file size - 25MB in bytes
     const MAX_FILE_SIZE = 25 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size exceeds 25MB limit');
+      setError("File size exceeds 25MB limit");
       toast({
-        title: 'File too large',
-        description: 'Maximum file size is 25MB',
-        status: 'error',
+        title: "File too large",
+        description: "Maximum file size is 25MB",
+        status: "error",
         duration: 3000,
       });
       return;
@@ -143,42 +144,42 @@ const DevFileStorageUpload: React.FC = () => {
         intField: 0,
         enumField: "A",
         stringArrayField: [],
-        boolField: true
+        boolField: true,
       };
 
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('body', JSON.stringify(entityData));
+      formData.append("file", file);
+      formData.append("body", JSON.stringify(entityData));
 
       const response = await EntityAPIClient.create({ formData });
       if (!response || !response.fileName) {
-        throw new Error('Upload failed - no response or fileName');
+        throw new Error("Upload failed - no response or fileName");
       }
 
       // Get the URL for the newly uploaded file
       const fileUrl = await EntityAPIClient.getFile(response.fileName);
-      
+
       // Add only the new file to state
       const newFile: FileStatus = {
         id: response.id.toString(),
         name: response.fileName,
-        status: 'uploaded',
-        url: fileUrl || undefined
+        status: "uploaded",
+        url: fileUrl || undefined,
       };
-      
-      setUploadedFiles(prev => [...prev, newFile]);
-      
+
+      setUploadedFiles((prev) => [...prev, newFile]);
+
       toast({
-        title: 'File uploaded successfully',
-        status: 'success',
+        title: "File uploaded successfully",
+        status: "success",
         duration: 3000,
       });
     } catch (err) {
-      console.error('Upload failed:', err);
-      setError('Failed to upload file');
+      console.error("Upload failed:", err);
+      setError("Failed to upload file");
       toast({
-        title: 'Upload failed',
-        status: 'error',
+        title: "Upload failed",
+        status: "error",
         duration: 3000,
       });
     } finally {
@@ -193,17 +194,17 @@ const DevFileStorageUpload: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await EntityAPIClient.deleteEntity(id);
-      setUploadedFiles(prev => prev.filter(file => file.id !== id));
+      setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
       toast({
-        title: 'File deleted successfully',
-        status: 'success',
+        title: "File deleted successfully",
+        status: "success",
         duration: 3000,
       });
     } catch (err) {
-      console.error('Delete failed:', err);
+      console.error("Delete failed:", err);
       toast({
-        title: 'Failed to delete file',
-        status: 'error',
+        title: "Failed to delete file",
+        status: "error",
         duration: 3000,
       });
     }
@@ -222,11 +223,11 @@ const DevFileStorageUpload: React.FC = () => {
         </Button>
       </Flex>
       <SimpleGrid columns={[1, 2, 3]} spacing={4}>
-        {files.map(file => (
-          <Box 
-            key={file.id} 
-            borderWidth="1px" 
-            borderRadius="lg" 
+        {files.map((file) => (
+          <Box
+            key={file.id}
+            borderWidth="1px"
+            borderRadius="lg"
             overflow="hidden"
             p={4}
           >
@@ -239,12 +240,12 @@ const DevFileStorageUpload: React.FC = () => {
                   maxH="200px"
                   objectFit="contain"
                   fallback={
-                    <Box 
-                      height="200px" 
-                      width="100%" 
-                      bg="gray.100" 
-                      display="flex" 
-                      alignItems="center" 
+                    <Box
+                      height="200px"
+                      width="100%"
+                      bg="gray.100"
+                      display="flex"
+                      alignItems="center"
                       justifyContent="center"
                     >
                       <Text color="gray.500">Image not available</Text>
@@ -252,12 +253,12 @@ const DevFileStorageUpload: React.FC = () => {
                   }
                 />
               ) : (
-                <Box 
-                  height="200px" 
-                  width="100%" 
-                  bg="gray.100" 
-                  display="flex" 
-                  alignItems="center" 
+                <Box
+                  height="200px"
+                  width="100%"
+                  bg="gray.100"
+                  display="flex"
+                  alignItems="center"
                   justifyContent="center"
                 >
                   <Text color="gray.500">Image not available</Text>
@@ -270,7 +271,7 @@ const DevFileStorageUpload: React.FC = () => {
                   onClick={() => fetchFileUrl(file.name)}
                   flex={1}
                 >
-                  {file.url ? 'Reload' : 'Load Image'}
+                  {file.url ? "Reload" : "Load Image"}
                 </Button>
                 <Button
                   size="sm"
@@ -317,9 +318,15 @@ const DevFileStorageUpload: React.FC = () => {
           <VStack spacing={2}>
             <HiUpload size={24} />
             <Text>Drag and drop here to upload</Text>
-            <Text fontSize="sm" color="gray.700">Accepted formats: .png, .jpg, .jpeg, .gif, .pdf</Text>
-            <Text fontSize="sm" color="gray.500">or click to select</Text>
-            <Text fontSize="sm" color="gray.500">(Max file size: 25 MB)</Text>
+            <Text fontSize="sm" color="gray.700">
+              Accepted formats: .png, .jpg, .jpeg, .gif, .pdf
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              or click to select
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              (Max file size: 25 MB)
+            </Text>
             <Button
               colorScheme="blue"
               isLoading={isUploading}

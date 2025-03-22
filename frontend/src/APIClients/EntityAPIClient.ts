@@ -118,7 +118,9 @@ const update = async (
   }
 };
 
-const deleteEntity = async (uuid: number | string): Promise<EntityResponse[] | null> => {
+const deleteEntity = async (
+  uuid: number | string,
+): Promise<EntityResponse[] | null> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",

@@ -8,5 +8,5 @@ const getCurrentUserRole = (): string | null => {
   );
   return currentUser?.role || null;
 };
- 
-export default getCurrentUserRole; 
+
+export default getCurrentUserRole;
