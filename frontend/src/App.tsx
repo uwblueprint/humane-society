@@ -12,6 +12,7 @@ import PetListPage from "./pages/PetListPage";
 import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
+import TaskManagementPage from "./pages/TaskManagementPage";
 import NotFound from "./pages/NotFound";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
@@ -142,7 +143,7 @@ const App = (): React.ReactElement => {
                   exact
                   path={Routes.INTERACTION_LOG_PAGE}
                   component={InteractionLogPage}
-                  allowedRoles={AuthConstants.ALL_ROLES}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                 />
                 <PrivateRoute
                   exact
@@ -160,7 +161,13 @@ const App = (): React.ReactElement => {
                   exact
                   path={Routes.USER_MANAGEMENT_PAGE}
                   component={UserManagementPage}
-                  allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                />
+                <PrivateRoute
+                  exact
+                  path={Routes.TASK_MANAGEMENT_PAGE}
+                  component={TaskManagementPage}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                 />
               </Layout>
 
