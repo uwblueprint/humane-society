@@ -49,7 +49,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
               text="Tasks"
               icon={TaskIcon}
               ariaLabel="Tasks"
-              route={TASK_MANAGEMENT_PAGE} // TODO: Update with the appropriate route for Tasks
+              route={TASK_MANAGEMENT_PAGE}
             />
             <NavLink
               text="Logs"
