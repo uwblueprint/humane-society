@@ -13,9 +13,9 @@ const ProfilePhoto = ({
   image,
 }: ProfilePhotoProps): React.ReactElement => (
   <Flex
-    padding="0.25rem"
-    height="9.125rem"
-    width="9.125rem"
+    padding="0.19rem"
+    height="8.69rem"
+    width="8.69rem"
     justify="center"
     align="center"
     borderRadius="full"

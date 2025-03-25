@@ -1,11 +1,12 @@
 import React from "react";
-import { Text } from "@chakra-ui/react";
+import { Text, Flex } from "@chakra-ui/react";
 import { TaskStatus } from "../../../types/TaskTypes";
 import { PetListTableSection, PetInfo } from "./PetListTableSection";
 import getCurrentUserRole from "../../../utils/CommonUtils";
 
 export interface PetListTableProps {
   pets: PetInfo[];
+  clearFilters: () => void;
 }
 
 const filterByStatus = (pets: PetInfo[], status: TaskStatus): PetInfo[] => {
@@ -23,14 +24,17 @@ const filterByAllTasksAssigned = (
   );
 };
 
-const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
+const PetListTable = ({
+  pets,
+  clearFilters,
+}: PetListTableProps): React.ReactElement => {
   const isAdmin = getCurrentUserRole() === "Administrator";
 
   return (
     <table
       style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}
     >
-      <thead>
+      <thead style={{ borderBottom: "1px solid #E2E8F0" }}>
         <tr style={{ borderTop: "1px solid var(--gray-200, #E2E8F0)" }}>
           <th style={{ width: "39.29%", padding: "0.8rem 0rem 0.8rem 2.5rem" }}>
             <Text textStyle="subheading" m={0}>
@@ -50,7 +54,36 @@ const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
         </tr>
       </thead>
 
-      {!isAdmin && (
+      {!pets.length ? (
+        <tbody>
+          <tr>
+            <td colSpan={3}>
+              <Flex
+                direction="column"
+                alignItems="center"
+                marginTop="13rem"
+                height="100%"
+                gap="1rem"
+              >
+                <Text margin="0" textStyle="subheading">
+                  No pets currently match.
+                </Text>
+                <Text
+                  margin="0"
+                  textStyle="h3"
+                  color="blue.500"
+                  cursor="pointer"
+                  onClick={() => clearFilters()}
+                >
+                  Clear all
+                </Text>
+              </Flex>
+            </td>
+          </tr>
+        </tbody>
+      ) : null}
+
+      {!isAdmin && pets.length ? (
         <>
           <PetListTableSection
             pets={filterByStatus(pets, TaskStatus.ASSIGNED)}
@@ -59,9 +92,9 @@ const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
             pets={filterByStatus(pets, TaskStatus.NEEDS_CARE)}
           />
         </>
-      )}
+      ) : null}
 
-      {isAdmin && (
+      {isAdmin && pets.length ? (
         <>
           <PetListTableSection
             pets={filterByAllTasksAssigned(pets, false)}
@@ -76,7 +109,7 @@ const PetListTable = ({ pets }: PetListTableProps): React.ReactElement => {
             sectionTitle="No Tasks"
           />
         </>
-      )}
+      ) : null}
     </table>
   );
 };

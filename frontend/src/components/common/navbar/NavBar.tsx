@@ -22,7 +22,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
 
   return (
     <Flex
-      p={{ base: "1.5rem" }}
+      padding="2rem 2.5rem"
       position="fixed"
       top="0"
       left="0"
@@ -30,6 +30,9 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       zIndex="10"
       alignItems="center"
       backgroundColor="#ffffff"
+      style={{
+        borderBottom: "1px solid var(--gray-200, #E2E8F0)",
+      }}
     >
       <Logo />
       <Text margin="0" textStyle={{ base: "h3", md: "h2" }}>

@@ -21,7 +21,7 @@ export enum TaskStatus {
   ASSIGNED = "Assigned to You",
 }
 
-export enum PetTag {
+export enum AnimalTag {
   BIRD = "Bird",
   BUNNY = "Bunny",
   CAT = "Cat",
