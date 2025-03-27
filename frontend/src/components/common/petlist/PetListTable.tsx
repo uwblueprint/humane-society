@@ -73,6 +73,7 @@ const PetListTable = ({
                   textStyle="h3"
                   color="blue.500"
                   cursor="pointer"
+                  textDecoration="underline"
                   onClick={() => clearFilters()}
                 >
                   Clear all
