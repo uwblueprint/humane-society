@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import {
   getApiValidationError,
   validatePrimitive,
-  validateEnum,
   validateEnumArray,
 } from "./util";
 import { AnimalTagEnum } from "../../types";
@@ -25,11 +24,7 @@ export const createUserDtoValidator = async (
   if (!validatePrimitive(req.body.role, "string")) {
     return res.status(400).send(getApiValidationError("role", "string"));
   }
-  if (
-    req.body.colorLevel !== undefined &&
-    req.body.colorLevel !== null &&
-    !validatePrimitive(req.body.colorLevel, "integer")
-  ) {
+  if (!validatePrimitive(req.body.colorLevel, "integer")) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
   if (

@@ -25,12 +25,12 @@ export default class User extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   email!: string;
 
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   color_level!: number;
 
   @Column({
     type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
-    allowNull: false
+    allowNull: false,
   })
   animal_tags!: [AnimalTagEnum];
 

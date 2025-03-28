@@ -5,7 +5,7 @@ export type User = {
   email: string;
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
-  colorLevel?: number | null;
+  colorLevel: number;
   animalTags: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
