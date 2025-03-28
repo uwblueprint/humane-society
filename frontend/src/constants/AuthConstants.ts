@@ -13,3 +13,9 @@ export const ADMIN_AND_BEHAVIOURISTS = new Set<string>([
   "Administrator",
   "Animal Behaviourist",
 ]);
+
+export const STAFF_BEHAVIOURISTS_ADMIN = new Set<string>([
+  "Staff",
+  "Administrator",
+  "Animal Behaviourist",
+]);

@@ -43,6 +43,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Developer Utility";
       case ROUTES.USER_MANAGEMENT_PAGE:
         return "User Management";
+      case ROUTES.TASK_MANAGEMENT_PAGE:
+        return "Task Management";
       case ROUTES.ADMIN_PAGE:
         return "Admin Dashboard";
       default:

@@ -12,6 +12,8 @@ export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for d
 
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
+export const TASK_MANAGEMENT_PAGE = "/admin/tasks";
+
 export const ADMIN_PAGE = "/admin";
 
 export const CREATE_PASSWORD_PAGE = "/create-password";
