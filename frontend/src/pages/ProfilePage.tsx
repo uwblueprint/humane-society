@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { Text } from "@chakra-ui/react";
 import NavBar from "../components/common/navbar/NavBar";
 import Logout from "../components/auth/Logout";
@@ -10,21 +10,25 @@ const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
   const userId = Number(params.id);
   const [userData, setUserData] = useState<User | null>(null);
+  const history = useHistory();
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!userId) console.error(`Invalid userid ${params.id}`)
-      else {
+      if (!userId) {
+        console.error(`Invalid userid ${params.id}`);
+        history.push("/not-found");
+      } else {
         try {
           const data = await UserAPIClient.get(Number(userId));
           setUserData(data);
         } catch (error) {
-          console.error(`Failed to fetch user ${userId}:`, error)
+          console.error(`Failed to fetch user ${userId}:`, error);
+          history.push("/not-found");
         }
       }
     };
     fetchUser();
-  }, [userId]);
+  }, [userId, history, params]);
 
   return (
     <div style={{ textAlign: "center" }}>

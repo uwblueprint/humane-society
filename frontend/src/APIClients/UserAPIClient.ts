@@ -26,7 +26,7 @@ async function get(userId?: number): Promise<User | User[]> {
       }`,
     );
   }
-};
+}
 
 const create = async (formData: CreateUserDTO): Promise<CreateUserDTO> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
