@@ -154,7 +154,7 @@ const App = (): React.ReactElement => {
                 />
                 <PrivateRoute
                   exact
-                  path={Routes.PROFILE_PAGE}
+                  path={`${Routes.PROFILE_PAGE}/:id`}
                   component={ProfilePage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
