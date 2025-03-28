@@ -6,7 +6,7 @@ import {
   INTERACTION_LOG_PAGE,
   PROFILE_PAGE,
   USER_MANAGEMENT_PAGE,
-  ADMIN_PAGE,
+  TASK_MANAGEMENT_PAGE,
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
 import getCurrentUserRole from "../../../utils/CommonUtils";
@@ -52,7 +52,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
               text="Tasks"
               icon={TaskIcon}
               ariaLabel="Tasks"
-              route={ADMIN_PAGE} // TODO: Update with the appropriate route for Tasks
+              route={TASK_MANAGEMENT_PAGE}
             />
             <NavLink
               text="Logs"

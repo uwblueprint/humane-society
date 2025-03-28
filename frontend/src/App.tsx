@@ -12,6 +12,7 @@ import PetListPage from "./pages/PetListPage";
 import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
+import TaskManagementPage from "./pages/TaskManagementPage";
 import NotFound from "./pages/NotFound";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
@@ -35,6 +36,7 @@ import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
+import DevFileStorageUpload from "./pages/DevFileStorageUpload";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -140,9 +142,15 @@ const App = (): React.ReactElement => {
                 />
                 <PrivateRoute
                   exact
+                  path={Routes.DEV_FILE_STORAGE_UPLOAD_PAGE}
+                  component={DevFileStorageUpload}
+                  allowedRoles={AuthConstants.ALL_ROLES}
+                />
+                <PrivateRoute
+                  exact
                   path={Routes.INTERACTION_LOG_PAGE}
                   component={InteractionLogPage}
-                  allowedRoles={AuthConstants.ALL_ROLES}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                 />
                 <PrivateRoute
                   exact
@@ -160,7 +168,13 @@ const App = (): React.ReactElement => {
                   exact
                   path={Routes.USER_MANAGEMENT_PAGE}
                   component={UserManagementPage}
-                  allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                />
+                <PrivateRoute
+                  exact
+                  path={Routes.TASK_MANAGEMENT_PAGE}
+                  component={TaskManagementPage}
+                  allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                 />
               </Layout>
 
