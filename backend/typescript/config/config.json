@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "humane_society_dev",
+    "host": "humane_society_db",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "humane_society_test",
+    "host": "humane_society_db",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "humane_society_dev",
+    "host": "humane_society_db",
+    "dialect": "postgres"
+  }
+} 
