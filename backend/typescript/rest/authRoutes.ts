@@ -154,11 +154,11 @@ authRouter.post(
 );
 
 /* Get own user info */
-authRouter.get("/:email", isAuthorizedByEmail("email"), async (req, res) => {
-  const { email } = req.params;
-  if (email) {
+authRouter.get("/:userId", isAuthorizedByUserId("userId"), async (req, res) => {
+  const { userId } = req.params;
+  if (userId) {
     try {
-      const user = await userService.getUserByEmail(email);
+      const user = await userService.getUserById(userId);
       res.status(200).json(user);
     } catch (error: unknown) {
       if (error instanceof NotFoundError) {
@@ -171,15 +171,16 @@ authRouter.get("/:email", isAuthorizedByEmail("email"), async (req, res) => {
 });
 
 /* Update own user fields: firstName, lastName, phoneNumber */
-authRouter.put("/:email", updateOwnUserDtoValidator, async (req, res) => {
-  if (!isAuthorizedByEmail(req.params.email)) {
+authRouter.put("/:userId", updateOwnUserDtoValidator, async (req, res) => {
+  const { userId } = req.params;
+  if (!isAuthorizedByEmail(userId)) {
     res.status(401).json({ error: "User is not authorized to update fields." });
     return;
   }
 
   try {
-    const user: UserDTO = await userService.getUserByEmail(req.params.email);
-    const updatedUser = await userService.updateUserById(user.id, {
+    const user: UserDTO = await userService.getUserById(userId);
+    const updatedUser = await userService.updateUserById(Number(userId), {
       firstName: req.body.firstName ?? user.firstName,
       lastName: req.body.lastName ?? user.lastName,
       email: user.email,
