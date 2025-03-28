@@ -13,6 +13,7 @@ const GetPage = (): React.ReactElement => {
 
   const handleClearFilters = () => {
     setFilters({});
+    setSearch("");
   };
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
@@ -52,7 +53,7 @@ const GetPage = (): React.ReactElement => {
         gap="1rem"
       >
         <Filter
-          type="petListAdmin"
+          type="userManagement"
           onChange={handleFilterChange}
           selected={filters}
         />

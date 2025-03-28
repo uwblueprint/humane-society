@@ -12,7 +12,7 @@ import {
   PopoverArrow,
   Image,
 } from "@chakra-ui/react";
-import filterConstants from "../../constants/FilterConstants";
+import filterConfig from "../../config/filterConfig";
 import { CloseIcon, FilterOpenIcon } from "../../assets/icons";
 
 export type FilterType = "petListVolunteer" | "petListAdmin" | "userManagement";
@@ -24,7 +24,7 @@ type FilterProps = {
 };
 
 const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
-  const filters = filterConstants[type];
+  const filters = filterConfig[type];
   const containerRef = useRef<HTMLDivElement>(null);
   const [showGradient, setShowGradient] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,18 +56,14 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
     setHasMoved(false);
     setStartX(e.pageX - containerRef.current.offsetLeft);
     setInitialScrollLeft(containerRef.current.scrollLeft);
-
-    document.body.style.cursor = "grabbing";
   };
 
   const handleMouseLeave = () => {
     setIsDragging(false);
-    document.body.style.cursor = "default";
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    document.body.style.cursor = "default";
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -112,14 +108,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
       <Box
         ref={containerRef}
         overflowX="auto"
-        css={{
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          cursor: isDragging ? "grabbing" : "grab",
-        }}
+        className="no-scrollbar"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
@@ -213,7 +202,11 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent bg="gray.50" border="none" boxShadow="sm">
-                      <PopoverArrow bg="gray.50" border="1px solid #F7FAFC" />
+                      <PopoverArrow
+                        bg="gray.50"
+                        border="1px solid"
+                        borderColor="gray.50"
+                      />
                       <PopoverBody borderRadius="0.5rem">
                         <Flex
                           alignItems="start"

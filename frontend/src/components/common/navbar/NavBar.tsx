@@ -30,9 +30,8 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       zIndex="10"
       alignItems="center"
       backgroundColor="#ffffff"
-      style={{
-        borderBottom: "1px solid var(--gray-200, #E2E8F0)",
-      }}
+      borderBottom="1px solid"
+      borderColor="gray.200"
     >
       <Logo />
       <Text margin="0" textStyle={{ base: "h3", md: "h2" }}>

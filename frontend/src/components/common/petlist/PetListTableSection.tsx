@@ -7,6 +7,9 @@ import {
   HStack,
   VStack,
   Icon,
+  Tbody,
+  Tr,
+  Td,
 } from "@chakra-ui/react";
 import useOpenController from "./useOpenController";
 import ProfilePhoto from "../ProfilePhoto";
@@ -76,69 +79,55 @@ export const PetListTableSection = ({
     taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
 
   return (
-    <tbody>
+    <Tbody>
       {/* Section Title */}
       {sectionTitle && (
-        <tr>
-          <td
-            colSpan={3}
-            style={{
-              padding: "0.8125rem 2.62rem 0.625rem 2.62rem",
-              backgroundColor: "#EDF2F7",
-            }}
-          >
+        <Tr>
+          <Td colSpan={3} px="2.62rem" py="0.625rem" bgColor="gray.100">
             <Flex justify="space-between">
               <Text textStyle="subheading" m={0}>
                 {sectionTitle}
               </Text>
-              <button
+              <Box
+                as="button"
                 type="button"
                 aria-label="expand or close section"
                 onClick={toggle}
               >
-                <ExpandIcon
-                  style={{
-                    transform: `rotate(${isOpen ? 180 : 0}deg)`,
-                    transition: "all 0.25s",
-                  }}
+                <Icon
+                  boxSize="1.5rem"
+                  as={ExpandIcon}
+                  transform={`rotate(${isOpen ? 180 : 0}deg)`}
+                  transition="all 0.25s"
                 />
-              </button>
+              </Box>
             </Flex>
-          </td>
-        </tr>
+          </Td>
+        </Tr>
       )}
       {isOpen &&
         pets.map((pet) => (
-          <tr
+          <Tr
             key={pet.id}
-            style={{
-              borderTop: "1px solid var(--gray-200, #E2E8F0)",
-              borderBottom: "1px solid var(--gray-200, #E2E8F0)",
-              height: "10.3125rem",
-            }}
+            borderTop="1px solid"
+            borderBottom="1px solid"
+            borderColor="gray.200"
           >
-            <td style={{ padding: "0.625rem 0rem 0.625rem 2.625rem" }}>
+            <Td pl="2.625rem" pr="2rem" py="1rem">
               {/* Pet & Status */}
-              <HStack gap="3.19rem">
+              <HStack gap="3rem" minWidth="max-content">
                 <ProfilePhoto
                   name={pet.name}
                   color={borderColor[pet.skill]}
                   image={pet.image}
                 />
-                <VStack
-                  height="5.0625rem"
-                  minWidth="12.125rem"
-                  align="flex-start"
-                  gap="0"
-                >
-                  <Flex height="2.94rem" align="center">
-                    <Text textStyle="h3" m={0}>
-                      {pet.name}
-                    </Text>
-                  </Flex>
-                  <Flex align="center" gap="0.56rem">
+                <VStack align="flex-start" gap="0.5rem">
+                  <Text textStyle="h3" m={0}>
+                    {pet.name}
+                  </Text>
+                  <Flex align="center" gap="0.5rem">
                     <Box
-                      boxSize="0.93rem"
+                      boxSize="1rem"
                       bg={statusColor[pet.status]}
                       borderRadius="full"
                     />
@@ -148,16 +137,11 @@ export const PetListTableSection = ({
                   </Flex>
                 </VStack>
               </HStack>
-            </td>
-            <td>
+            </Td>
+            <Td padding="0" pr="2rem">
               {/* Task Categories */}
-              <HStack gap={0}>
-                <SimpleGrid
-                  columns={2}
-                  rowGap="1.125rem"
-                  columnGap="0.4375rem"
-                  width="20.18rem"
-                >
+              <HStack gap="2rem" minWidth="max-content">
+                <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
                     (category, index) => {
                       return (
@@ -171,7 +155,7 @@ export const PetListTableSection = ({
                           </Text>
                         </HStack>
                       );
-                    },
+                    }
                   )}
                 </SimpleGrid>
                 {getExtraTasks(pet.taskCategories) && (
@@ -188,15 +172,15 @@ export const PetListTableSection = ({
                   </Flex>
                 )}
               </HStack>
-            </td>
-            <td>
+            </Td>
+            <Td padding="0">
               {/* Last Cared For */}
               <Text textStyle="body" color="gray.700" m={0}>
                 {pet.lastCaredFor}
               </Text>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-    </tbody>
+    </Tbody>
   );
 };

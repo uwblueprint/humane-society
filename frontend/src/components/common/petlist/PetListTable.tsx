@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Flex } from "@chakra-ui/react";
+import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
 import { TaskStatus } from "../../../types/TaskTypes";
 import { PetListTableSection, PetInfo } from "./PetListTableSection";
 import getCurrentUserRole from "../../../utils/CommonUtils";
@@ -15,12 +15,12 @@ const filterByStatus = (pets: PetInfo[], status: TaskStatus): PetInfo[] => {
 
 const filterByAllTasksAssigned = (
   pets: PetInfo[],
-  allTasksAssigned: boolean,
+  allTasksAssigned: boolean
 ) => {
   return pets.filter(
     (pet) =>
       pet.allTasksAssigned === allTasksAssigned &&
-      pet.status !== TaskStatus.DOES_NOT_NEED_CARE,
+      pet.status !== TaskStatus.DOES_NOT_NEED_CARE
   );
 };
 
@@ -31,45 +31,42 @@ const PetListTable = ({
   const isAdmin = getCurrentUserRole() === "Administrator";
 
   return (
-    <table
-      style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}
-    >
-      <thead style={{ borderBottom: "1px solid #E2E8F0" }}>
-        <tr style={{ borderTop: "1px solid var(--gray-200, #E2E8F0)" }}>
-          <th style={{ width: "39.29%", padding: "0.8rem 0rem 0.8rem 2.5rem" }}>
-            <Text textStyle="subheading" m={0}>
+    <Table w="100%" textAlign="left">
+      <Thead borderBottom="1px solid" borderColor="gray.200">
+        <Tr borderTop="1px solid" borderColor="gray.200">
+          <Th py="1rem" px="2.5rem">
+            <Text color="gray.800" textStyle="subheading" m={0}>
               PET & STATUS
             </Text>
-          </th>
-          <th style={{ width: "42.44%", padding: "0.8rem 0rem" }}>
-            <Text textStyle="subheading" m={0}>
+          </Th>
+          <Th py="0.8rem" px="0">
+            <Text color="gray.800" textStyle="subheading" m={0}>
               TASKS
             </Text>
-          </th>
-          <th style={{ width: "18.27%", padding: "0.8rem 0rem" }}>
-            <Text textStyle="subheading" m={0}>
+          </Th>
+          <Th py="0.8rem" pr="2.5rem" pl="0">
+            <Text
+              whiteSpace="nowrap"
+              color="gray.800"
+              textStyle="subheading"
+              m={0}
+            >
               LAST CARED FOR
             </Text>
-          </th>
-        </tr>
-      </thead>
+          </Th>
+        </Tr>
+      </Thead>
 
       {!pets.length ? (
-        <tbody>
-          <tr>
-            <td colSpan={3}>
-              <Flex
-                direction="column"
-                alignItems="center"
-                marginTop="13rem"
-                height="100%"
-                gap="1rem"
-              >
-                <Text margin="0" textStyle="subheading">
+        <Tbody>
+          <Tr>
+            <Td colSpan={3}>
+              <Flex direction="column" alignItems="center" gap="1rem" my="5rem">
+                <Text m="0" textStyle="subheading">
                   No pets currently match.
                 </Text>
                 <Text
-                  margin="0"
+                  m="0"
                   textStyle="h3"
                   color="blue.500"
                   cursor="pointer"
@@ -79,9 +76,9 @@ const PetListTable = ({
                   Clear all
                 </Text>
               </Flex>
-            </td>
-          </tr>
-        </tbody>
+            </Td>
+          </Tr>
+        </Tbody>
       ) : null}
 
       {!isAdmin && pets.length ? (
@@ -111,7 +108,7 @@ const PetListTable = ({
           />
         </>
       ) : null}
-    </table>
+    </Table>
   );
 };
 

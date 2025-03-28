@@ -28,10 +28,3 @@ export enum AnimalTag {
   DOG = "Dog",
   SMALL_ANIMAL = "Small Animal",
 }
-
-export enum TaskType {
-  ADMIN = "Admin",
-  STAFF = "Staff",
-  VOLUNTEER = "Volunteer",
-  // ANIMAL_BEHAVIOURIST = "Animal Behaviourist",
-}

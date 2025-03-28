@@ -1,7 +1,8 @@
+import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
 import { FilterSection } from "../types/FilterTypes";
 import { AnimalTag, TaskCategory, SkillLevel } from "../types/TaskTypes";
 
-const filterConstants: Record<string, FilterSection[]> = {
+const filterConfig: Record<string, FilterSection[]> = {
   petListAdmin: [
     {
       name: "Animal Tag",
@@ -51,17 +52,15 @@ const filterConstants: Record<string, FilterSection[]> = {
   userManagement: [
     {
       name: "Role",
-      value: "role",
-      // TODO: create enums for these
-      options: ["Admin", "Staff", "Volunteer"],
+      value: "role", 
+      options: Array.from(ALL_ROLES),
     },
     {
       name: "Status",
       value: "status",
-      // TODO: create enums for these
-      options: ["Active", "Inactive", "Pending Approval"],
+      options: Array.from(STATUS),
     },
   ],
 };
 
-export default filterConstants;
+export default filterConfig;
