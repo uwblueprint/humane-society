@@ -9,6 +9,7 @@ import {
   loginRequestValidator,
   loginWithSignInLinkRequestValidator,
   inviteUserDtoValidator,
+  updateOwnUserDtoValidator,
 } from "../middlewares/validators/authValidators";
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
@@ -18,7 +19,7 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
-import { UserStatus, Role } from "../types";
+import { UserStatus, Role, UserDTO } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -154,7 +155,7 @@ authRouter.post(
 
 /* Get own user info */
 authRouter.get("/:email", isAuthorizedByEmail("email"), async (req, res) => {
-  const email = req.params.email;
+  const { email } = req.params;
   if (email) {
     try {
       const user = await userService.getUserByEmail(email);
@@ -165,6 +166,36 @@ authRouter.get("/:email", isAuthorizedByEmail("email"), async (req, res) => {
       } else {
         res.status(500).json({ error: getErrorMessage(error) });
       }
+    }
+  }
+});
+
+/* Update own user fields: firstName, lastName, phoneNumber */
+authRouter.put("/:email", updateOwnUserDtoValidator, async (req, res) => {
+  if (!isAuthorizedByEmail(req.params.email)) {
+    res.status(401).json({ error: "User is not authorized to update fields." });
+    return;
+  }
+
+  try {
+    const user: UserDTO = await userService.getUserByEmail(req.params.email);
+    const updatedUser = await userService.updateUserById(user.id, {
+      firstName: req.body.firstName ?? user.firstName,
+      lastName: req.body.lastName ?? user.lastName,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      skillLevel: user.skillLevel,
+      canSeeAllLogs: user.canSeeAllLogs,
+      canAssignUsersToTasks: user.canAssignUsersToTasks,
+      phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
+    });
+    res.status(200).json(updatedUser);
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      res.status(400).json({ error: getErrorMessage(error) });
+    } else {
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 });
