@@ -30,6 +30,7 @@ export default class User extends Model {
 
   @Column({
     type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
+    allowNull: false
   })
   animal_tags!: [AnimalTagEnum];
 
