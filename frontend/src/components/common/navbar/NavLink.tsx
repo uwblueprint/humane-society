@@ -30,14 +30,14 @@ const NavLink = ({
     >
       <IconButton
         aria-label={ariaLabel}
-        fontSize={{ base: "1.25rem", md: "1.5rem" }}
+        fontSize={{ base: "2rem", md: "2rem" }}
         variant="unstyled"
         icon={<Image src={icon} alt={ariaLabel} boxSize="1.75rem" />}
         display="flex"
         justifyContent="center"
         alignItems="center"
       />
-      <Text margin="0" textStyle={{ base: "h4", md: "h5" }}>
+      <Text margin="0" textStyle={{ base: "subheading", md: "subheading" }}>
         {text}
       </Text>
     </Flex>

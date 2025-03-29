@@ -33,6 +33,13 @@ const textStyles = {
     fontSize: "18px",
     lineHeight: "150%",
   },
+  bodyItalic: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontSize: "18px",
+    fontStyle: "italic",
+    lineHeight: "150%",
+  },
   bodyBold: {
     fontFamily: "Roboto",
     fontWeight: 700,
