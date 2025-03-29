@@ -23,7 +23,7 @@ export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().changeColumn(TABLE_ONE, NEW_COLUMN_NAME, {
     type: DataType.INTEGER,
     allowNull: false,
-    defaultValue: 5,
+    defaultValue: 1,
   });
   await sequelize.query(`
     ALTER TABLE ${TABLE_ONE} ADD CONSTRAINT ${COLOR_LEVEL_INTERVAL} 

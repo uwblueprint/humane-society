@@ -27,7 +27,7 @@ export type UserDTO = {
 
 export type CreateUserDTO = Omit<
   UserDTO,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
+  "id" | "status" | "animalTags" | "profilePhoto"
 >;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
