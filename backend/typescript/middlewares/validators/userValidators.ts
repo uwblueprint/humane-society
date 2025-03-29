@@ -90,8 +90,6 @@ export const updateUserDtoValidator = async (
     return res.status(400).send(getApiValidationError("role", "string"));
   }
   if (
-    req.body.colorLevel !== undefined &&
-    req.body.colorLevel !== null &&
     !validatePrimitive(req.body.colorLevel, "integer")
   ) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
