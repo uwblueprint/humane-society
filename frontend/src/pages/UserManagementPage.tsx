@@ -28,6 +28,7 @@ const handleUserSubmit = async (formData: AddUserRequest) => {
       lastName: formData.lastName,
       phoneNumber: formData.phoneNumber,
       email: formData.email,
+      colorLevel: formData.colorLevel, // Add this line
       role: formData.role as
         | "Administrator"
         | "Animal Behaviourist"
