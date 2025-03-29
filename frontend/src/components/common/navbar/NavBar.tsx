@@ -16,9 +16,13 @@ import {
   TaskIcon,
   UserManagementIcon,
 } from "../../../assets/icons";
+import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
+import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   const isAdmin = getCurrentUserRole() === "Administrator";
+
+  const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
 
   return (
     <Flex
@@ -65,7 +69,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
           text="Profile"
           icon={ProfileIcon}
           ariaLabel="Profile"
-          route={PROFILE_PAGE}
+          route={`${PROFILE_PAGE}/${userId}`}
         />
       </Flex>
     </Flex>

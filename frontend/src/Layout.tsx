@@ -54,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="layout-container">
-      <NavBar pageName={getPageName()} />
+      {getPageName() === "Page" ? null : <NavBar pageName={getPageName()} />}
       <main className="content-container">{children}</main>
     </div>
   );
