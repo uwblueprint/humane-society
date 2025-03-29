@@ -54,8 +54,8 @@ export default class Pet extends Model {
   @Column({})
   weight!: number;
 
-  @Column({})
-  skill_level!: number;
+  @Column({ type: DataType.INTEGER })
+  color_level!: number;
 
   @Column({})
   neutered!: boolean;
