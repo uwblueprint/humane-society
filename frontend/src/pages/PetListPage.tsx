@@ -6,8 +6,10 @@ import { PetInfo } from "../components/common/petlist/PetListTableSection";
 import Search from "../components/common/Search";
 import Filter from "../components/common/Filter";
 import { TaskCategory } from "../types/TaskTypes";
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants"
+import getCurrentUserRole from "../utils/CommonUtils"
 
-const GetPage = (): React.ReactElement => {
+const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
 
@@ -44,6 +46,9 @@ const GetPage = (): React.ReactElement => {
       });
   }, [filters, search]);
 
+  const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(getCurrentUserRole() as string);
+  const petListFilterType = isVolunteer ?  "petListVolunteer" : "petListAdmin"
+
   return (
     <Flex direction="column" gap="2rem">
       <Flex
@@ -53,7 +58,7 @@ const GetPage = (): React.ReactElement => {
         gap="1rem"
       >
         <Filter
-          type="userManagement"
+          type={petListFilterType}
           onChange={handleFilterChange}
           selected={filters}
         />
@@ -71,4 +76,4 @@ const GetPage = (): React.ReactElement => {
   );
 };
 
-export default GetPage;
+export default PetListPage;
