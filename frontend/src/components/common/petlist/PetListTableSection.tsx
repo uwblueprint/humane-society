@@ -155,7 +155,7 @@ export const PetListTableSection = ({
                           </Text>
                         </HStack>
                       );
-                    }
+                    },
                   )}
                 </SimpleGrid>
                 {getExtraTasks(pet.taskCategories) && (

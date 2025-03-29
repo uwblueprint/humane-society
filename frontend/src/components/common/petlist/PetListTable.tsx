@@ -15,12 +15,12 @@ const filterByStatus = (pets: PetInfo[], status: TaskStatus): PetInfo[] => {
 
 const filterByAllTasksAssigned = (
   pets: PetInfo[],
-  allTasksAssigned: boolean
+  allTasksAssigned: boolean,
 ) => {
   return pets.filter(
     (pet) =>
       pet.allTasksAssigned === allTasksAssigned &&
-      pet.status !== TaskStatus.DOES_NOT_NEED_CARE
+      pet.status !== TaskStatus.DOES_NOT_NEED_CARE,
   );
 };
 

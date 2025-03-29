@@ -52,7 +52,7 @@ const filterConfig: Record<string, FilterSection[]> = {
   userManagement: [
     {
       name: "Role",
-      value: "role", 
+      value: "role",
       options: Array.from(ALL_ROLES),
     },
     {

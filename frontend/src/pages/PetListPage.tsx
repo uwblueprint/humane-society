@@ -6,8 +6,8 @@ import { PetInfo } from "../components/common/petlist/PetListTableSection";
 import Search from "../components/common/Search";
 import Filter from "../components/common/Filter";
 import { TaskCategory } from "../types/TaskTypes";
-import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants"
-import getCurrentUserRole from "../utils/CommonUtils"
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants";
+import getCurrentUserRole from "../utils/CommonUtils";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
@@ -46,8 +46,10 @@ const PetListPage = (): React.ReactElement => {
       });
   }, [filters, search]);
 
-  const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(getCurrentUserRole() as string);
-  const petListFilterType = isVolunteer ?  "petListVolunteer" : "petListAdmin"
+  const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(
+    getCurrentUserRole() as string,
+  );
+  const petListFilterType = isVolunteer ? "petListVolunteer" : "petListAdmin";
 
   return (
     <Flex direction="column" gap="2rem">
