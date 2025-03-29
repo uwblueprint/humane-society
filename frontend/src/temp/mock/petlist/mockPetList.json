@@ -13,7 +13,7 @@
   {
     "id": 3,
     "name": "Pillie",
-    "skill": "Yellow",
+    "skill": "Red",
     "image": "/images/dog1.png",
     "taskCategories": ["Training", "Games", "Husbandry", "Misc."],
     "status": "Assigned to You",
@@ -35,7 +35,7 @@
   {
     "id": 5,
     "name": "Billie",
-    "skill": "GREEN",
+    "skill": "Orange",
     "image": "/images/dog1.png",
     "taskCategories": ["Games"],
     "status": "Does Not Need Care",
