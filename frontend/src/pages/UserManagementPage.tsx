@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
+  // Table,
+  // Thead,
+  // Tbody,
+  // Tr,
+  // Th,
+  // Td,
+  // TableContainer,
   VStack,
   Button,
   Alert,
@@ -15,35 +15,35 @@ import {
 } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
-import MainPageButton from "../components/common/MainPageButton";
-import AddUserFormModal, {
-  AddUserRequest,
-} from "../components/crud/AddUserFormModal";
+// import AddUserFormModal, {
+//   AddUserRequest,
+// } from "../components/crud/AddUserFormModal";
+import UserManagementTable from "../components/common/user-management/UserManagementTable";
 
-const handleUserSubmit = async (formData: AddUserRequest) => {
-  // eslint-disable-next-line no-useless-catch
-  try {
-    await UserAPIClient.create({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phoneNumber: formData.phoneNumber,
-      email: formData.email,
-      colorLevel: formData.colorLevel,
-      role: formData.role as
-        | "Administrator"
-        | "Animal Behaviourist"
-        | "Staff"
-        | "Volunteer",
-    });
-    await UserAPIClient.invite(formData.email);
-  } catch (error) {
-    throw error;
-  }
-};
+// const handleUserSubmit = async (formData: AddUserRequest) => {
+// eslint-disable-next-line no-useless-catch
+// try {
+//   await UserAPIClient.create({
+//     firstName: formData.firstName,
+//     lastName: formData.lastName,
+//     phoneNumber: formData.phoneNumber,
+//     email: formData.email,
+//     colorLevel: formData.colorLevel as unknown as string,
+//     role: formData.role as
+//       | "Administrator"
+//       | "Animal Behaviourist"
+//       | "Staff"
+//       | "Volunteer",
+//   });
+//   await UserAPIClient.invite(formData.email);
+// } catch (error) {
+//   throw error;
+// }
+// };
 
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -58,25 +58,30 @@ const UserManagementPage = (): React.ReactElement => {
     }
   };
 
-  const addUser = () => {
-    setIsModalOpen(true);
-  };
+  // const addUser = () => {
+  //   setIsModalOpen(true);
+  // };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  // const closeModal = () => {
+  //   setIsModalOpen(false);
+  // };
 
-  const refreshUserManagementTable = async () => {
-    await getUsers();
-  };
+  // const refreshUserManagementTable = async () => {
+  //   await getUsers();
+  // };
 
   useEffect(() => {
     getUsers();
   }, []);
 
   return (
-    <div style={{ textAlign: "center", width: "75%", margin: "0px auto" }}>
-      <h1>User Management</h1>
+    <div>
+      <UserManagementTable
+        users={users}
+        clearFilters={() => {
+          return null;
+        }}
+      />
       <VStack spacing="24px" style={{ margin: "24px auto" }}>
         {successMessage && (
           <Alert status="success" mb={4}>
@@ -102,7 +107,7 @@ const UserManagementPage = (): React.ReactElement => {
             />
           </Alert>
         )}
-        <TableContainer>
+        {/* <TableContainer>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -121,13 +126,20 @@ const UserManagementPage = (): React.ReactElement => {
                   <Td>{user.email}</Td>
                   <Td>{user.role}</Td>
                   <Td>{user.status}</Td>
+                  <Td>{user.colorLevel}</Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
-        </TableContainer>
-        <Button onClick={addUser}>+ Add a User</Button>
-        {isModalOpen && (
+        </TableContainer> */}
+        <Button
+          onClick={() => {
+            return null;
+          }}
+        >
+          + Add a User
+        </Button>
+        {/* {isModalOpen && (
           <AddUserFormModal
             onSubmit={async (formData) => {
               // Clear previous messages
@@ -155,8 +167,7 @@ const UserManagementPage = (): React.ReactElement => {
               }
             }}
           />
-        )}
-        <MainPageButton />
+        )} */}
       </VStack>
     </div>
   );

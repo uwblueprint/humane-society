@@ -1,34 +1,57 @@
 import React from "react";
-import { Flex, Image } from "@chakra-ui/react";
+import { Flex, Image, Box } from "@chakra-ui/react";
+import { SkillLevel } from "../../types/TaskTypes";
 
 export interface ProfilePhotoProps {
-  name: string;
-  color: string;
-  image: string;
+  // name: string;
+  color: SkillLevel;
+  image?: string;
+  size: "small" | "large";
 }
 
-const ProfilePhoto = ({
-  name,
+const borderColor: Record<SkillLevel, string> = {
+  [SkillLevel.GREEN]: "green.300",
+  [SkillLevel.YELLOW]: "yellow.400",
+  [SkillLevel.ORANGE]: "orange.400",
+  [SkillLevel.BLUE]: "blue.500",
+  [SkillLevel.RED]: "red.600",
+};
+
+const ProfilePhoto = ({  
+  // name,
   color,
   image,
-}: ProfilePhotoProps): React.ReactElement => (
-  <Flex
-    padding="0.19rem"
-    height="8.69rem"
-    width="8.69rem"
-    justify="center"
-    align="center"
-    borderRadius="full"
-    backgroundColor={color}
-  >
-    <Image
-      src={image}
-      alt={name}
-      fit="cover"
+  size = "large",
+}: ProfilePhotoProps): React.ReactElement => {
+  const isSmall = size === "small";
+  const containerSize = isSmall ? "2.625rem" : "8.69rem";
+  const imageSize = isSmall ? "2.25rem" : "8.06rem";
+
+  return (
+    <Flex
+      padding="0.19rem"
+      boxSize={containerSize}
+      justify="center"
+      align="center"
       borderRadius="full"
-      boxSize="8.06rem"
-    />
-  </Flex>
-);
+      backgroundColor={borderColor[color]}
+    >
+      {image ? (
+        <Image
+          src={image}
+          fit="cover"
+          borderRadius="full"
+          boxSize={imageSize}
+        />
+      ) : (
+        <Box
+          backgroundColor="gray.200"
+          borderRadius="full"
+          boxSize={imageSize}
+        />
+      )}
+    </Flex>
+  );
+};
 
 export default ProfilePhoto;
