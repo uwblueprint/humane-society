@@ -26,6 +26,7 @@ const userSchema: JSONSchema7 = {
     lastName: { type: "string", title: "Last Name" },
     phoneNumber: { type: "string", title: "Phone Number" },
     email: { type: "string", format: "email", title: "Email" },
+    colorLevel: { type: "number", format: "string", title: "Color Level" },
     role: {
       type: "string",
       title: "Role",

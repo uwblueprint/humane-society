@@ -157,6 +157,7 @@ class UserService implements IUserService {
             id: user.id,
             firstName: user.first_name,
             lastName: user.last_name,
+            name: user.first_name + " " + user.last_name,
             email: firebaseUser.email ?? "",
             role: user.role,
             status: user.status,
