@@ -17,13 +17,13 @@ export const up: Migration = async ({ context: sequelize }) => {
   // handle prior null values
   await sequelize.query(`
     UPDATE "${TABLE_ONE}" 
-    SET "${NEW_COLUMN_NAME}" = 5
+    SET "${NEW_COLUMN_NAME}" = 1
     WHERE "${NEW_COLUMN_NAME}" IS NULL;
   `);
   await sequelize.getQueryInterface().changeColumn(TABLE_ONE, NEW_COLUMN_NAME, {
     type: DataType.INTEGER,
     allowNull: false,
-    defaultValue: 5,
+    defaultValue: 1,
   });
   await sequelize.query(`
     ALTER TABLE ${TABLE_ONE} ADD CONSTRAINT ${COLOR_LEVEL_INTERVAL} 
