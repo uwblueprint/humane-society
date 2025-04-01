@@ -5,7 +5,8 @@ type Type =
   | "decimal"
   | "PetStatus"
   | "Sex"
-  | "Date";
+  | "Date"
+  | "AnimalTag";
 
 const allowableContentTypes = new Set([
   "text/plain",

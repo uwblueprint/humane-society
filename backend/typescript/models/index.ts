@@ -1,9 +1,7 @@
 import * as path from "path";
 import { Sequelize } from "sequelize-typescript";
 import User from "./user.model";
-import AnimalType from "./animalType.model";
-import UserAnimalType from "./userAnimalType.model";
-import defineRelationships from "./modelRelationships";
+// import defineRelationships from "./modelRelationships";
 
 const DATABASE_URL =
   process.env.NODE_ENV === "production"
@@ -16,8 +14,8 @@ const sequelize = new Sequelize(DATABASE_URL, {
   models: [path.join(__dirname, "/*.model.ts")],
 });
 
-sequelize.addModels([User, AnimalType, UserAnimalType]);
+sequelize.addModels([User]);
 
-defineRelationships();
+// defineRelationships();
 
-export { sequelize, User, AnimalType, UserAnimalType };
+export { sequelize, User };

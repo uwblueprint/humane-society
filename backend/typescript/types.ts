@@ -70,6 +70,14 @@ export enum Category {
   MISC = "Misc.",
 }
 
+export enum AnimalTag {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat",
+  DOG = "Dog",
+  SMALL_ANIMAL = "Small Animal",
+}
+
 export type NodemailerConfig = {
   service: "gmail";
   auth: {

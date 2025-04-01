@@ -1,3 +1,6 @@
+// ! CALCULATE AGE 
+
+
 import { Op, Transaction, WhereOptions } from "sequelize";
 import PgPet from "../../models/pet.model";
 import PgPetCareInfo from "../../models/petCareInfo.model";
@@ -15,6 +18,14 @@ const Logger = logger(__filename);
 
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
+  getAgeFromBirthday(birthday: Date): number {
+    const currentDate = new Date();
+    const ageInMs = currentDate.valueOf() - birthday.valueOf();
+    const msInYear = 1000 * 60 * 60 * 24 * 365.25;
+    const age = Math.floor(ageInMs / msInYear);
+    return age;
+  }
+
   async getPet(id: string): Promise<PetResponseDTO> {
     let pet: PgPet | null;
     try {
@@ -29,16 +40,16 @@ class PetService implements IPetService {
 
     return {
       id: pet.id,
-      animalTypeId: pet.animal_type_id,
+      animalTag: pet.animal_tag,
       name: pet.name,
+      colorLevel: pet.color_level,
       status: pet.status,
-      breed: pet.breed,
-      age: pet.age,
-      adoptionStatus: pet.adoption_status,
-      weight: pet.weight,
-      neutered: pet.neutered,
-      sex: pet.sex,
-      photo: pet.photo,
+      breed: pet.breed ?? null,
+      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : null,
+      weight: pet.weight ?? null,
+      neutered: pet.neutered ?? null,
+      sex: pet.sex ?? null,
+      photo: pet.photo ?? null,
       careInfo: {
         id: pet.petCareInfo?.id,
         safetyInfo: pet.petCareInfo?.safety_info ?? null,
@@ -65,16 +76,16 @@ class PetService implements IPetService {
 
     return pets.map((pet) => ({
       id: pet.id,
-      animalTypeId: pet.animal_type_id,
       name: pet.name,
+      animalTag: pet.animal_tag,
+      colorLevel: pet.color_level,
       status: pet.status,
-      breed: pet.breed,
-      age: pet.age,
-      adoptionStatus: pet.adoption_status,
-      weight: pet.weight,
-      neutered: pet.neutered,
-      sex: pet.sex,
-      photo: pet.photo,
+      breed: pet.breed ?? null,
+      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : null,
+      weight: pet.weight ?? null,
+      neutered: pet.neutered ?? null,
+      sex: pet.sex ?? null,
+      photo: pet.photo ?? null,
       careInfo: {
         id: pet.petCareInfo?.id,
         safetyInfo: pet.petCareInfo?.safety_info ?? null,
@@ -93,12 +104,12 @@ class PetService implements IPetService {
     try {
       newPet = await PgPet.create(
         {
-          animal_type_id: pet.animalTypeId,
+          animalTag: pet.animalTag,
           name: pet.name,
           status: pet.status,
+          colorLevel: pet.colorLevel,
           breed: pet.breed,
-          age: pet.age,
-          adoption_status: pet.adoptionStatus,
+          birthday: pet.birthday,
           weight: pet.weight,
           neutered: pet.neutered,
           sex: pet.sex,
@@ -125,17 +136,17 @@ class PetService implements IPetService {
     }
 
     return {
-      id: newPet?.id,
-      animalTypeId: newPet?.animal_type_id,
-      name: newPet?.name,
-      status: newPet?.status,
-      breed: newPet?.breed,
-      age: newPet?.age,
-      adoptionStatus: newPet?.adoption_status,
-      weight: newPet?.weight,
-      neutered: newPet?.neutered,
-      sex: newPet?.sex,
-      photo: newPet?.photo,
+      id: newPet.id,
+      name: newPet.name,
+      animalTag: newPet.animal_tag,
+      colorLevel: newPet.color_level,
+      status: newPet.status,
+      breed: newPet.breed ?? null,
+      age: newPet.birthday ? this.getAgeFromBirthday(newPet.birthday) : null,
+      weight: newPet.weight ?? null,
+      neutered: newPet.neutered ?? null,
+      sex: newPet.sex ?? null,
+      photo: newPet.photo ?? null,
       careInfo: {
         id: newPetCareInfo?.id,
         safetyInfo: newPetCareInfo?.safety_info ?? null,
@@ -145,65 +156,67 @@ class PetService implements IPetService {
     };
   }
 
-  async filterPets(query: PetQuery): Promise<PetResponseDTO[]> {
-    try {
-      const {
-        animalTypeId,
-        name,
-        status,
-        breed,
-        age,
-        adoptionStatus,
-        weight,
-        neutered,
-        sex,
-      } = query;
-      const filters: WhereOptions = {};
+  // FILTER IS NOW IMPLEMENTED IN FRONT END
+  // async filterPets(query: PetQuery): Promise<PetResponseDTO[]> {
+  //   try {
+  //     const {
+  //       animalTypeId,
+  //       name,
+  //       status,
+  //       breed,
+  //       age,
+  //       adoptionStatus,
+  //       weight,
+  //       neutered,
+  //       sex,
+  //     } = query;
+  //     const filters: WhereOptions = {};
 
-      if (animalTypeId) filters.animal_type_id = Number(animalTypeId);
-      if (name) filters.name = { [Op.iLike]: `%${name}%` }; // case-insensitive partial match
-      if (status) filters.status = String(status);
-      if (breed) filters.breed = { [Op.iLike]: `%${breed}%` }; // case-insensitive partial match
-      if (age) filters.age = Number(age);
-      if (adoptionStatus) filters.adoption_status = adoptionStatus === "true";
-      if (weight) filters.weight = Number(weight);
-      if (neutered) filters.neutered = neutered === "true";
-      if (sex) filters.sex = String(sex);
+  //     if (animalTypeId) filters.animal_type_id = Number(animalTypeId);
+  //     if (name) filters.name = { [Op.iLike]: `%${name}%` }; // case-insensitive partial match
+  //     if (status) filters.status = String(status);
+  //     if (breed) filters.breed = { [Op.iLike]: `%${breed}%` }; // case-insensitive partial match
+  //     if (age) filters.age = Number(age);
+  //     if (adoptionStatus) filters.adoption_status = adoptionStatus === "true";
+  //     if (weight) filters.weight = Number(weight);
+  //     if (neutered) filters.neutered = neutered === "true";
+  //     if (sex) filters.sex = String(sex);
 
-      const pets: Array<PgPet> = await PgPet.findAll({
-        where: filters,
-      });
-      const petResponseDTOs: PetResponseDTO[] = await Promise.all(
-        pets.map(async (pet) => {
-          return {
-            id: pet.id,
-            animalTypeId: pet.animal_type_id,
-            name: pet.name,
-            status: pet.status,
-            breed: pet.breed,
-            age: pet.age,
-            adoptionStatus: pet.adoption_status,
-            weight: pet.weight,
-            neutered: pet.neutered,
-            sex: pet.sex,
-            photo: pet.photo,
-            careInfo: {
-              id: pet?.petCareInfo?.id ?? null,
-              safetyInfo: pet?.petCareInfo?.safety_info ?? null,
-              medicalInfo: pet?.petCareInfo?.medical_info ?? null,
-              managementInfo: pet?.petCareInfo?.management_info ?? null,
-            },
-          };
-        }),
-      );
+  //     const pets: Array<PgPet> = await PgPet.findAll({
+  //       where: filters,
+  //     });
+  //     const petResponseDTOs: PetResponseDTO[] = await Promise.all(
+  //       pets.map(async (pet) => {
+  //         return {
+  //           id: pet.id,
+  //           animalTypeId: pet.animal_type_id,
+  //           name: pet.name,
+  //           status: pet.status,
+  //           breed: pet.breed,
+  //           age: pet.age,
+  //           adoptionStatus: pet.adoption_status,
+  //           weight: pet.weight,
+  //           neutered: pet.neutered,
+  //           sex: pet.sex,
+  //           photo: pet.photo,
+  //           careInfo: {
+  //             id: pet?.petCareInfo?.id ?? null,
+  //             safetyInfo: pet?.petCareInfo?.safety_info ?? null,
+  //             medicalInfo: pet?.petCareInfo?.medical_info ?? null,
+  //             managementInfo: pet?.petCareInfo?.management_info ?? null,
+  //           },
+  //         };
+  //       }),
+  //     );
 
-      return petResponseDTOs;
-    } catch (error: unknown) {
-      Logger.error(`Failed to get pets. Reason = ${getErrorMessage(error)}`);
-      throw error;
-    }
-  }
+  //     return petResponseDTOs;
+  //   } catch (error: unknown) {
+  //     Logger.error(`Failed to get pets. Reason = ${getErrorMessage(error)}`);
+  //     throw error;
+  //   }
+  // }
 
+  // ! check this is updated for optional fields
   async updatePet(
     id: string,
     pet: PetRequestDTO,
@@ -218,12 +231,12 @@ class PetService implements IPetService {
     try {
       petUpdateResult = await PgPet.update(
         {
-          animal_type_id: pet.animalTypeId,
+          animalTag: pet.animalTag,
           name: pet.name,
+          colorLevel: pet.colorLevel,
           status: pet.status,
           breed: pet.breed,
-          age: pet.age,
-          adoption_status: pet.adoptionStatus,
+          birthday: pet.birthday,
           weight: pet.weight,
           neutered: pet.neutered,
           sex: pet.sex,
@@ -258,21 +271,23 @@ class PetService implements IPetService {
 
     return {
       id: resultingPet.id,
-      animalTypeId: resultingPet.animal_type_id,
+      animalTag: resultingPet.animal_tag,
       name: resultingPet.name,
+      colorLevel: resultingPet.color_level,
       status: resultingPet.status,
-      breed: resultingPet.breed,
-      age: resultingPet.age,
-      adoptionStatus: resultingPet.adoption_status,
-      weight: resultingPet.weight,
-      neutered: resultingPet.neutered,
-      sex: resultingPet.sex,
-      photo: resultingPet.photo,
+      breed: resultingPet.breed ?? null,
+      age: resultingPet.birthday
+        ? this.getAgeFromBirthday(resultingPet.birthday)
+        : null,
+      weight: resultingPet.weight ?? null,
+      neutered: resultingPet.neutered ?? null,
+      sex: resultingPet.sex ?? null,
+      photo: resultingPet.photo ?? null,
       careInfo: {
-        id: resultingPetCareInfo.id,
-        safetyInfo: resultingPetCareInfo.safety_info ?? null,
-        medicalInfo: resultingPetCareInfo.medical_info ?? null,
-        managementInfo: resultingPetCareInfo.management_info ?? null,
+        id: resultingPetCareInfo?.id,
+        safetyInfo: resultingPetCareInfo?.safety_info ?? null,
+        medicalInfo: resultingPetCareInfo?.medical_info ?? null,
+        managementInfo: resultingPetCareInfo?.management_info ?? null,
       },
     };
   }

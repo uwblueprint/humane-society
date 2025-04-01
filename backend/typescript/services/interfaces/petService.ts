@@ -1,16 +1,16 @@
-import { PetStatus, Sex } from "../../types";
+import { PetStatus, Sex, AnimalTag } from "../../types";
 
 export interface PetRequestDTO {
-  animalTypeId: number;
+  animalTag: AnimalTag;
   name: string;
-  status: PetStatus;
-  breed: string;
-  age: number;
-  adoptionStatus: boolean;
-  weight: number;
-  neutered: boolean;
-  sex: Sex;
-  photo: string;
+  colorLevel: number;
+  status: PetStatus | null;
+  breed: string | null;
+  birthday: Date | null;
+  weight: number | null;
+  neutered: boolean | null;
+  sex: Sex | null;
+  photo: string | null;
   careInfo: {
     safetyInfo: string | null;
     medicalInfo: string | null;
@@ -20,16 +20,16 @@ export interface PetRequestDTO {
 
 export interface PetResponseDTO {
   id: number;
-  animalTypeId: number;
   name: string;
-  status: PetStatus;
-  breed: string;
-  age: number;
-  adoptionStatus: boolean;
-  weight: number;
-  neutered: boolean;
-  sex: Sex;
-  photo: string;
+  animalTag: AnimalTag;
+  colorLevel: number;
+  status: PetStatus | null;
+  breed: string | null;
+  age: number | null;
+  weight: number | null;
+  neutered: boolean | null;
+  sex: Sex | null;
+  photo: string | null;
   careInfo: {
     id: number;
     safetyInfo: string | null;
@@ -39,18 +39,23 @@ export interface PetResponseDTO {
 }
 
 export interface PetQuery {
-  animalTypeId?: string;
+  animalTag?: string;
   name?: string;
+  colorLevel?: string;
   status?: string;
   breed?: string;
   age?: string;
-  adoptionStatus?: string;
   weight?: string;
   neutered?: string;
   sex?: string;
 }
 
 export interface IPetService {
+  /**
+   * Gets the pet's age from their birthday
+   * @param birthday birthday of pet
+   */
+  getAgeFromBirthday(birthday: Date): number;
   /**
    * retrieve the Pet with the given id
    * @param id Pet id
@@ -98,5 +103,5 @@ export interface IPetService {
    * @returns returns array of Pets
    * @throws Error if retrieval fails
    */
-  filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
+  // filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
 }

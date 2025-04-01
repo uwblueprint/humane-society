@@ -1,16 +1,7 @@
-import {
-  Column,
-  Model,
-  Table,
-  ForeignKey,
-  BelongsTo,
-  DataType,
-  HasOne,
-} from "sequelize-typescript";
-import Animal_Type from "./animalType.model";
+import { Column, Model, Table, DataType, HasOne } from "sequelize-typescript";
 import PetCareInfo from "./petCareInfo.model";
 
-import { Sex, PetStatus } from "../types";
+import { Sex, PetStatus, AnimalTag } from "../types";
 
 @Table({
   tableName: "pets",
@@ -19,12 +10,11 @@ import { Sex, PetStatus } from "../types";
   updatedAt: "updated_at",
 })
 export default class Pet extends Model {
-  @ForeignKey(() => Animal_Type)
-  @Column({})
-  animal_type_id!: number;
-
-  @BelongsTo(() => Animal_Type)
-  animal_type!: Animal_Type;
+  @Column({
+    type: DataType.ENUM(...Object.values(AnimalTag)),
+    defaultValue: AnimalTag.DOG,
+  })
+  animal_tag!: AnimalTag;
 
   @Column({})
   name!: string;
@@ -40,31 +30,28 @@ export default class Pet extends Model {
   status!: PetStatus;
 
   @Column({})
-  breed!: string;
+  breed?: string;
 
   @Column({})
-  age!: number;
-
-  @Column({})
-  adoption_status!: boolean;
+  birthday?: Date;
 
   @HasOne(() => PetCareInfo, { foreignKey: "pet_id" })
   petCareInfo?: PetCareInfo;
 
   @Column({})
-  weight!: number;
+  weight?: number;
 
   @Column({})
-  skill_level!: number;
+  color_level!: number;
 
   @Column({})
-  neutered!: boolean;
+  neutered?: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })
-  sex!: Sex;
+  sex?: Sex;
 
   @Column({})
-  photo!: string;
+  photo?: string;
 
   @Column({})
   created_at!: Date;
