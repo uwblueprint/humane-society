@@ -8,7 +8,6 @@ export interface AddUserRequest {
   lastName: string;
   phoneNumber: string;
   email: string;
-  colorLevel: number;
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
 }
 
