@@ -5,10 +5,15 @@ export type User = {
   email: string;
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
-  skillLevel?: number | null;
+  colorLevel: number;
+  animalTags: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string;
 };
 
-export type CreateUserDTO = Omit<User, "id" | "status">;
+export type CreateUserDTO = Omit<
+  User,
+  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
+>;
