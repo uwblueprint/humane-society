@@ -9,7 +9,6 @@ import {
   loginRequestValidator,
   loginWithSignInLinkRequestValidator,
   inviteUserDtoValidator,
-  updateOwnUserDtoValidator,
 } from "../middlewares/validators/authValidators";
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
@@ -19,7 +18,7 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
-import { UserStatus, Role, UserDTO } from "../types";
+import { UserStatus, Role } from "../types";
 
 const authRouter: Router = Router();
 const userService: IUserService = new UserService();
@@ -166,37 +165,6 @@ authRouter.get("/:userId", isAuthorizedByUserId("userId"), async (req, res) => {
       } else {
         res.status(500).json({ error: getErrorMessage(error) });
       }
-    }
-  }
-});
-
-/* Update own user fields: firstName, lastName, phoneNumber */
-authRouter.put("/:userId", updateOwnUserDtoValidator, async (req, res) => {
-  const { userId } = req.params;
-  if (!isAuthorizedByEmail(userId)) {
-    res.status(401).json({ error: "User is not authorized to update fields." });
-    return;
-  }
-
-  try {
-    const user: UserDTO = await userService.getUserById(userId);
-    const updatedUser = await userService.updateUserById(Number(userId), {
-      firstName: req.body.firstName ?? user.firstName,
-      lastName: req.body.lastName ?? user.lastName,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      skillLevel: user.skillLevel,
-      canSeeAllLogs: user.canSeeAllLogs,
-      canAssignUsersToTasks: user.canAssignUsersToTasks,
-      phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
-    });
-    res.status(200).json(updatedUser);
-  } catch (error: unknown) {
-    if (error instanceof NotFoundError) {
-      res.status(400).json({ error: getErrorMessage(error) });
-    } else {
-      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 });

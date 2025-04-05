@@ -75,32 +75,3 @@ export const inviteUserDtoValidator = async (
   }
   return next();
 };
-
-export const updateOwnUserDtoValidator = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  if (
-    req.body.firstName !== undefined &&
-    req.body.firstName !== null &&
-    !validatePrimitive(req.body.firstName, "string")
-  ) {
-    return res.status(400).send(getApiValidationError("firstName", "string"));
-  }
-  if (
-    req.body.lastName !== undefined &&
-    req.body.lastName !== null &&
-    !validatePrimitive(req.body.lastName, "string")
-  ) {
-    return res.status(400).send(getApiValidationError("lastName", "string"));
-  }
-  if (
-    req.body.phoneNumber !== undefined &&
-    req.body.phoneNumber !== null &&
-    !validatePrimitive(req.body.phoneNumber, "string")
-  ) {
-    return res.status(400).send(getApiValidationError("phoneNumber", "string"));
-  }
-  return next();
-};
