@@ -211,7 +211,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     const updatedUser = await userService.updateUserById(userId, {
       firstName: req.body.firstName ?? user.firstName,
       lastName: req.body.lastName ?? user.lastName,
-      email: req.body.email ?? user.email,
+      email: user.email,
       role: req.body.role ?? user.role,
       status: req.body.status ?? user.status,
       colorLevel: req.body.colorLevel ?? user.colorLevel,
