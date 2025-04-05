@@ -1,5 +1,9 @@
 export const HOME_PAGE = "/"; // Pet List
 
+export const PET_LIST_PAGE = "/pet-list";
+
+export const ADD_PET_LIST_PAGE = "/pet-list/add";
+
 export const LOGIN_PAGE = "/login";
 
 export const FORGOT_PASSWORD_PAGE = "/forgot-password";

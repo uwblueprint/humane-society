@@ -1,6 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useReducer } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
@@ -37,21 +42,23 @@ import Layout from "./Layout";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
+import AddPetListPage from "./pages/AddPetListPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
-    AUTHENTICATED_USER_KEY,
+    AUTHENTICATED_USER_KEY
   );
 
-  const [authenticatedUser, setAuthenticatedUser] =
-    useState<AuthenticatedUser>(currentUser);
+  const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUser>(
+    currentUser
+  );
 
   // Some sort of global state. Context API replaces redux.
   // Split related states into different contexts as necessary.
   // Split dispatcher and state into separate contexts as necessary.
   const [sampleContext, dispatchSampleContextUpdate] = useReducer(
     sampleContextReducer,
-    DEFAULT_SAMPLE_CONTEXT,
+    DEFAULT_SAMPLE_CONTEXT
   );
 
   return (
@@ -83,7 +90,19 @@ const App = (): React.ReactElement => {
                 <PrivateRoute
                   exact
                   path={Routes.HOME_PAGE}
+                  component={() => <Redirect to={Routes.PET_LIST_PAGE} />}
+                  allowedRoles={AuthConstants.ALL_ROLES}
+                />
+                <PrivateRoute
+                  exact
+                  path={Routes.PET_LIST_PAGE}
                   component={PetListPage}
+                  allowedRoles={AuthConstants.ALL_ROLES}
+                />
+                <PrivateRoute
+                  exact
+                  path={Routes.ADD_PET_LIST_PAGE}
+                  component={AddPetListPage}
                   allowedRoles={AuthConstants.ALL_ROLES}
                 />
                 <PrivateRoute

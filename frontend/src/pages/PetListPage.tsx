@@ -1,5 +1,6 @@
-import { Flex } from "@chakra-ui/react";
+import { Button, Flex } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import mockData from "../temp/mock/petlist/mockPetList.json";
 import PetListTable from "../components/common/petlist/PetListTable";
 import { PetInfo } from "../components/common/petlist/PetListTableSection";
@@ -8,10 +9,15 @@ import Filter from "../components/common/Filter";
 import { TaskCategory } from "../types/TaskTypes";
 import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants";
 import getCurrentUserRole from "../utils/CommonUtils";
+import { ADD_PET_LIST_PAGE } from "../constants/Routes";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
+
+  const history = useHistory();
+
+  const handleAddNewPetClick = () => history.push(ADD_PET_LIST_PAGE);
 
   const handleClearFilters = () => {
     setFilters({});
@@ -33,9 +39,10 @@ const PetListPage = (): React.ReactElement => {
           if (filters[key].length === 0) return true;
           if (Array.isArray(prev[key as keyof PetInfo])) {
             return filters[key].some((filter) =>
-              (
-                prev[key as keyof PetInfo] as (string | TaskCategory)[]
-              ).includes(filter),
+              (prev[key as keyof PetInfo] as (
+                | string
+                | TaskCategory
+              )[]).includes(filter)
             );
           }
           return filters[key].includes(prev[key as keyof PetInfo] as string);
@@ -47,7 +54,7 @@ const PetListPage = (): React.ReactElement => {
   }, [filters, search]);
 
   const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(
-    getCurrentUserRole() as string,
+    getCurrentUserRole() as string
   );
   const petListFilterType = isVolunteer ? "petListVolunteer" : "petListAdmin";
 
@@ -64,11 +71,22 @@ const PetListPage = (): React.ReactElement => {
           onChange={handleFilterChange}
           selected={filters}
         />
-        <Search
-          placeholder="Search for a pet..."
-          onChange={handleSearchChange}
-          search={search}
-        />
+        <Flex gap="1rem" flexShrink="0" alignItems="center">
+          <Search
+            placeholder="Search for a pet..."
+            onChange={handleSearchChange}
+            search={search}
+          />
+          <Button
+            textStyle="button"
+            color="gray.100"
+            bgColor="blue.700"
+            onClick={handleAddNewPetClick}
+            padding="0.5rem 2rem"
+          >
+            Add Pet
+          </Button>
+        </Flex>
       </Flex>
       <PetListTable
         pets={filteredPets as PetInfo[]}

@@ -85,7 +85,7 @@ export const PetListTableSection = ({
         <Tr>
           <Td colSpan={3} px="2.62rem" py="0.625rem" bgColor="gray.100">
             <Flex justify="space-between">
-              <Text textStyle="subheading" m={0}>
+              <Text py="0.25rem" textStyle="subheading" m={0}>
                 {sectionTitle}
               </Text>
               <Box

@@ -34,7 +34,7 @@ const PetListTable = ({
     <Table w="100%" textAlign="left">
       <Thead borderBottom="1px solid" borderColor="gray.200">
         <Tr borderTop="1px solid" borderColor="gray.200">
-          <Th py="1rem" px="2.5rem">
+          <Th py="1.25rem" px="2.5rem">
             <Text color="gray.800" textStyle="subheading" m={0}>
               PET & STATUS
             </Text>
