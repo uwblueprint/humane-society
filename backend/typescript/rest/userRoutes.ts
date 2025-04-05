@@ -170,7 +170,12 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     );
 
     // update own user fields
-    const userUpdatableSet = new Set(["firstName", "lastName", "phoneNumber"]);
+    const userUpdatableSet = new Set([
+      "firstName",
+      "lastName",
+      "phoneNumber",
+      "profilePhoto",
+    ]);
     if (!isAdministrator && hasGivenUserId) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
         return !userUpdatableSet.has(field);
@@ -197,6 +202,12 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
         res.status(403).json({ error: deniedFieldsString });
         return;
       }
+    }
+
+    // update other user's fields as admin
+    if (isAdministrator && !hasGivenUserId && req.body.profilePhoto) {
+      res.status(403).json({ error: "Not authorized to update profile photo" });
+      return;
     }
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
