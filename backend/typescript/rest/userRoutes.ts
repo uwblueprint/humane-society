@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getAccessToken, isAuthorizedByRole } from "../middlewares/auth";
+import { getAccessToken } from "../middlewares/auth";
 import {
   createUserDtoValidator,
   updateUserDtoValidator,
@@ -21,11 +21,6 @@ import {
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
-userRouter.use(
-  isAuthorizedByRole(
-    new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
-  ),
-);
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
@@ -47,6 +42,19 @@ userRouter.get("/", async (req, res) => {
 
   if (!userId && !email) {
     try {
+      const accessToken = getAccessToken(req);
+      if (!accessToken) {
+        res.status(404).json({ error: "Access token not found" });
+        return;
+      }
+      const canGetAllUsers = await authService.isAuthorizedByRole(
+        accessToken,
+        new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
+      );
+      if (!canGetAllUsers) {
+        res.status(403).json({ error: "Not authorized to get all users" });
+        return;
+      }
       const users = await userService.getUsers();
       await sendResponseByMimeType<UserDTO>(res, 200, contentType, users);
     } catch (error: unknown) {
@@ -128,8 +136,6 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       phoneNumber: req.body.phoneNumber ?? null,
     });
 
-    // await authService.sendEmailVerificationLink(req.body.email);
-
     res.status(201).json(newUser);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
@@ -144,26 +150,41 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     return;
   }
 
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-
   try {
-    const canUpdateUser = await authService.isAuthorizedByRole(
-      accessToken,
-      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
-    );
-    if (!canUpdateUser) {
-      res.status(403).json({ error: "Not authorized to update user" });
+    const accessToken = getAccessToken(req);
+    if (!accessToken) {
+      res.status(404).json({ error: "Access token not found" });
       return;
     }
-
+    const isAdministrator = await authService.isAuthorizedByRole(
+      accessToken,
+      new Set([Role.ADMINISTRATOR]),
+    );
     const isBehaviourist = await authService.isAuthorizedByRole(
       accessToken,
       new Set([Role.ANIMAL_BEHAVIOURIST]),
     );
+    const hasGivenUserId = await authService.isAuthorizedByUserId(
+      accessToken,
+      req.params.userId,
+    );
+
+    // update own user fields
+    const userUpdatableSet = new Set(["firstName", "lastName", "phoneNumber"]);
+    if (!isAdministrator && hasGivenUserId) {
+      const deniedFieldSet = Object.keys(req.body).filter((field) => {
+        return !userUpdatableSet.has(field);
+      });
+      if (deniedFieldSet.length > 0) {
+        const deniedFieldsString = "Not authorized to update field(s): ".concat(
+          deniedFieldSet.join(", "),
+        );
+        res.status(403).json({ error: deniedFieldsString });
+        return;
+      }
+    }
+
+    // update other user's fields as behaviourist
     const behaviouristUpdatableSet = new Set(["colorLevel", "animalTags"]);
     if (isBehaviourist) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
