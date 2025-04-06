@@ -105,10 +105,10 @@ class PetService implements IPetService {
     try {
       newPet = await PgPet.create(
         {
-          animalTag: pet.animalTag,
+          animal_tag: pet.animalTag,
           name: pet.name,
           status: pet.status,
-          colorLevel: pet.colorLevel,
+          color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,
           birthday: pet.birthday,
@@ -235,10 +235,10 @@ class PetService implements IPetService {
     try {
       petUpdateResult = await PgPet.update(
         {
-          animalTag: pet.animalTag,
+          animal_tag: pet.animalTag,
           name: pet.name,
           status: pet.status,
-          colorLevel: pet.colorLevel,
+          color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,
           birthday: pet.birthday,

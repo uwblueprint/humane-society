@@ -39,7 +39,7 @@ export const up: Migration = async ({ context: sequelize }) => {
   });
   // manual bc sequelize will try to create a duplicate sex enum
   await queryInterface.sequelize.query(
-    `ALTER TABLE ${TABLE_NAME} ALTER COLUMN sex DROP NOT NULL;`,
+    `ALTER TABLE ${TABLE_NAME} ALTER COLUMN sex SET NOT NULL;`,
   );
   await queryInterface.changeColumn(TABLE_NAME, "neutered", {
     type: DataType.BOOLEAN,

@@ -3,7 +3,6 @@ import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 
 const ANIMAL_TYPE_TABLE_NAME = "animal_types";
-const PETS_TABLE_NAME = "pets";
 
 export const up: Migration = async ({ context: sequelize }) => {
   const queryInterface = sequelize.getQueryInterface();

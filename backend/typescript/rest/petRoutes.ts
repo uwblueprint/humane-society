@@ -21,9 +21,9 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
   try {
     const { body } = req;
     const pet = await petService.updatePet(id, {
-      animalTag: body.animal_tag,
+      animalTag: body.animalTag,
       name: body.name,
-      colorLevel: body.color_level,
+      colorLevel: body.colorLevel,
       status: body.status,
       breed: body.breed,
       birthday: body.birthday,
@@ -31,11 +31,13 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       neutered: body.neutered,
       sex: body.sex,
       photo: body.photo,
-      careInfo: {
-        safetyInfo: body.careInfo?.safetyInfo,
-        medicalInfo: body.careInfo?.medicalInfo,
-        managementInfo: body.careInfo?.managementInfo,
-      },
+      careInfo: body.careInfo
+        ? {
+            safetyInfo: body.careInfo.safetyInfo,
+            medicalInfo: body.careInfo.medicalInfo,
+            managementInfo: body.careInfo.managementInfo,
+          }
+        : undefined,
     });
     res.status(200).json(pet);
   } catch (e: unknown) {
@@ -84,20 +86,23 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
   try {
     const { body } = req;
     const pet = await petService.createPet({
-      animalTag: body.animal_tag,
+      animalTag: body.animalTag,
       name: body.name,
-      colorLevel: body.color_level,
+      colorLevel: body.colorLevel,
       status: body.status,
       breed: body.breed,
       birthday: body.birthday,
+      neutered: body.neutered,
       weight: body.weight,
       sex: body.sex,
       photo: body.photo,
-      careInfo: {
-        safetyInfo: body.careInfo?.safetyInfo,
-        medicalInfo: body.careInfo?.medicalInfo,
-        managementInfo: body.careInfo?.managementInfo,
-      },
+      careInfo: body.careInfo
+        ? {
+            safetyInfo: body.careInfo.safetyInfo,
+            medicalInfo: body.careInfo.medicalInfo,
+            managementInfo: body.careInfo.managementInfo,
+          }
+        : undefined,
     });
     res.status(200).json(pet);
   } catch (e: unknown) {
