@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
-import { UserListTableSection, UserInfo } from "./UserManagementTableSection";
+import UserListTableSection from "./UserManagementTableSection";
+import { User } from "../../../types/UserTypes";
 
 interface UserManagementTableProps {
-  users: UserInfo[];
+  users: User[];
   clearFilters: () => void;
 }
 

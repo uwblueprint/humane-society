@@ -12,22 +12,14 @@ import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staf
 import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
 
 import { UserRoles } from "../../../constants/UserConstants";
-import { AnimalTag, SkillLevel } from "../../../types/TaskTypes";
-
-export interface UserInfo {
-  id: number;
-  name?: string;
-  role: UserRoles;
-  colorLevel?: number;
-  image?: string;
-  animalTags: string[];
-}
+import { AnimalTag, ColorLevel } from "../../../types/TaskTypes";
+import { User } from "../../../types/UserTypes";
 
 interface UserListTableSectionProps {
-  users: UserInfo[];
+  users: User[];
 }
 
-export const UserListTableSection = ({
+const UserListTableSection = ({
   users,
 }: UserListTableSectionProps): React.ReactElement => {
   const roleIcons: Record<UserRoles, React.ElementType> = {
@@ -35,6 +27,14 @@ export const UserListTableSection = ({
     [UserRoles.BEHAVIOURIST]: BehaviouristTag,
     [UserRoles.STAFF]: StaffTag,
     [UserRoles.VOLUNTEER]: VolunteerTag,
+  };
+
+  const colorLevelMap: Record<number, ColorLevel> = {
+    1: ColorLevel.GREEN,
+    2: ColorLevel.YELLOW,
+    3: ColorLevel.ORANGE,
+    4: ColorLevel.RED,
+    5: ColorLevel.BLUE,
   };
 
   const animalTagIcons: Record<AnimalTag, React.ElementType> = {
@@ -58,9 +58,10 @@ export const UserListTableSection = ({
             <HStack gap="1rem" minWidth="max-content">
               <ProfilePhoto
                 // name={user.name}
-                color={SkillLevel.GREEN}
-                image={user.image}
+                color={colorLevelMap[user.colorLevel || 1]}
+                image={user.profilePhoto}
                 size="small"
+                type="user"
               />
               <Text textStyle="body" m={0} color="gray.700">
                 {user.name}
@@ -102,3 +103,5 @@ export const UserListTableSection = ({
     </Tbody>
   );
 };
+
+export default UserListTableSection;

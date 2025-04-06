@@ -1,5 +1,7 @@
 import { UserRoles } from "../constants/UserConstants";
 
+export type AnimalTag = "Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal";
+
 export type User = {
   id: number;
   firstName: string;
@@ -8,8 +10,8 @@ export type User = {
   email: string;
   role: UserRoles;
   status: string;
-  colorLevel: number;
-  animalTags: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"];
+  colorLevel?: number;
+  animalTags: AnimalTag[];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;

@@ -18,7 +18,10 @@ const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
           value={search}
           onChange={(e) => onChange(e.target.value)}
           focusBorderColor="blue.500"
-          textStyle="bodyItalic"
+          textStyle="body"
+          _placeholder={{
+            fontStyle: "italic",
+          }}
         />
         <InputRightElement>
           <SearchIcon color="gray.400" />

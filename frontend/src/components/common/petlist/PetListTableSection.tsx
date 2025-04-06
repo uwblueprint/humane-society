@@ -22,7 +22,7 @@ import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
-  SkillLevel,
+  ColorLevel,
   TaskCategory,
   TaskStatus,
 } from "../../../types/TaskTypes";
@@ -30,7 +30,7 @@ import {
 export interface PetInfo {
   id: number;
   name: string;
-  skill: SkillLevel;
+  skill: ColorLevel;
   image: string;
   taskCategories: TaskCategory[];
   status: TaskStatus;
@@ -113,6 +113,7 @@ export const PetListTableSection = ({
                   color={pet.skill}
                   image={pet.image}
                   size="large"
+                  type="pet"
                 />
                 <VStack align="flex-start" gap="0.5rem">
                   <Text textStyle="h3" m={0}>
