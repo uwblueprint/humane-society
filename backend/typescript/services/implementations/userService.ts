@@ -39,10 +39,12 @@ class UserService implements IUserService {
       email: firebaseUser.email ?? "",
       role: user.role,
       status: user.status,
-      skillLevel: user.skill_level,
+      colorLevel: user.color_level,
+      animalTags: user.animal_tags,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
       phoneNumber: user.phone_number,
+      profilePhoto: user.profile_photo,
     };
   }
 
@@ -73,10 +75,12 @@ class UserService implements IUserService {
       email: firebaseUser.email ?? "",
       role: user.role,
       status: user.status,
-      skillLevel: user.skill_level,
+      colorLevel: user.color_level,
+      animalTags: user.animal_tags,
       canSeeAllLogs: user.can_see_all_logs,
       canAssignUsersToTasks: user.can_assign_users_to_tasks,
       phoneNumber: user.phone_number,
+      profilePhoto: user.profile_photo,
     };
   }
 
@@ -156,10 +160,12 @@ class UserService implements IUserService {
             email: firebaseUser.email ?? "",
             role: user.role,
             status: user.status,
-            skillLevel: user.skill_level,
+            colorLevel: user.color_level,
+            animalTags: user.animal_tags,
             canSeeAllLogs: user.can_see_all_logs,
             canAssignUsersToTasks: user.can_assign_users_to_tasks,
             phoneNumber: user.phone_number,
+            profilePhoto: user.profile_photo,
           };
         }),
       );
@@ -187,11 +193,13 @@ class UserService implements IUserService {
           auth_id: firebaseUser.uid,
           role: user.role,
           status: UserStatus.INACTIVE,
+          color_level: 1,
           email: firebaseUser.email ?? "",
-          skill_level: user.skillLevel,
+          animal_tags: [],
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
           phone_number: user.phoneNumber,
+          profile_photo: "",
         });
       } catch (postgresError) {
         try {
@@ -220,10 +228,12 @@ class UserService implements IUserService {
       email: firebaseUser.email ?? "",
       role: newUser.role,
       status: newUser.status,
-      skillLevel: newUser.skill_level,
+      colorLevel: newUser.color_level,
+      animalTags: newUser.animal_tags,
       canSeeAllLogs: newUser.can_see_all_logs,
       canAssignUsersToTasks: newUser.can_assign_users_to_tasks,
       phoneNumber: newUser.phone_number,
+      profilePhoto: newUser.profile_photo,
     };
   }
 
@@ -238,10 +248,12 @@ class UserService implements IUserService {
           email: user.email,
           role: user.role,
           status: user.status,
-          skill_level: user.skillLevel,
+          color_level: user.colorLevel,
+          animal_tags: user.animalTags,
           can_see_all_logs: user.canSeeAllLogs,
           can_assign_users_to_tasks: user.canAssignUsersToTasks,
           phone_number: user.phoneNumber,
+          profile_photo: user.profilePhoto,
         },
         {
           where: { id: userId },
@@ -273,10 +285,12 @@ class UserService implements IUserService {
               email: oldUser.email,
               role: oldUser.role,
               status: oldUser.status,
-              skill_level: oldUser.skill_level,
+              color_level: oldUser.color_level,
+              animal_tags: oldUser.animal_tags,
               can_see_all_logs: oldUser.can_see_all_logs,
               can_assign_users_to_tasks: oldUser.can_assign_users_to_tasks,
               phone_number: oldUser.phone_number,
+              profile_photo: oldUser.profile_photo,
             },
             {
               where: { id: userId },
@@ -306,10 +320,12 @@ class UserService implements IUserService {
       email: updatedFirebaseUser.email ?? "",
       role: user.role,
       status: user.status,
-      skillLevel: user.skillLevel,
+      colorLevel: user.colorLevel,
+      animalTags: user.animalTags,
       canSeeAllLogs: user.canSeeAllLogs,
       canAssignUsersToTasks: user.canAssignUsersToTasks,
       phoneNumber: user.phoneNumber,
+      profilePhoto: user.profilePhoto,
     };
   }
 
@@ -341,10 +357,12 @@ class UserService implements IUserService {
             auth_id: deletedUser.auth_id,
             role: deletedUser.role,
             status: deletedUser.status,
-            skill_level: deletedUser.skill_level,
+            color_level: deletedUser.color_level,
+            animal_tags: deletedUser.animal_tags,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
             phone_number: deletedUser.phone_number,
+            profile_photo: deletedUser.profile_photo,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [
@@ -398,10 +416,12 @@ class UserService implements IUserService {
             auth_id: deletedUser.auth_id,
             role: deletedUser.role,
             status: deletedUser.status,
-            skill_level: deletedUser.skill_level,
+            color_level: deletedUser.color_level,
+            animal_tags: deletedUser.animal_tags,
             can_see_all_logs: deletedUser.can_see_all_logs,
             can_assign_users_to_tasks: deletedUser.can_assign_users_to_tasks,
             phone_number: deletedUser.phone_number,
+            profile_photo: deletedUser.profile_photo,
           });
         } catch (postgresError: unknown) {
           const errorMessage = [

@@ -36,7 +36,7 @@ export default class Pet extends Model {
   @Column({})
   weight?: number;
 
-  @Column({})
+  @Column({ type: DataType.INTEGER })
   color_level!: number;
 
   @Column({})

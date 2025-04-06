@@ -22,7 +22,9 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 
 const userRouter: Router = Router();
 userRouter.use(
-  isAuthorizedByRole(new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST])),
+  isAuthorizedByRole(
+    new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
+  ),
 );
 
 const userService: IUserService = new UserService();
@@ -99,16 +101,28 @@ userRouter.get("/", async (req, res) => {
   }
 });
 
-// This endpoint is for testing purposes
 /* Create a user */
 userRouter.post("/", createUserDtoValidator, async (req, res) => {
   try {
+    const accessToken = getAccessToken(req);
+    if (!accessToken) {
+      res.status(404).json({ error: "Access token not found" });
+      return;
+    }
+    const canCreateUser = await authService.isAuthorizedByRole(
+      accessToken,
+      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+    );
+    if (!canCreateUser) {
+      res.status(403).json({ error: "Not authorized to create user" });
+      return;
+    }
+
     const newUser = await userService.createUser({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       role: req.body.role,
-      skillLevel: req.body.skillLevel ?? null,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
       phoneNumber: req.body.phoneNumber ?? null,
@@ -137,11 +151,20 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
   }
 
   try {
+    const canUpdateUser = await authService.isAuthorizedByRole(
+      accessToken,
+      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+    );
+    if (!canUpdateUser) {
+      res.status(403).json({ error: "Not authorized to update user" });
+      return;
+    }
+
     const isBehaviourist = await authService.isAuthorizedByRole(
       accessToken,
       new Set([Role.ANIMAL_BEHAVIOURIST]),
     );
-    const behaviouristUpdatableSet = new Set(["skillLevel"]);
+    const behaviouristUpdatableSet = new Set(["colorLevel", "animalTags"]);
     if (isBehaviourist) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
         return !behaviouristUpdatableSet.has(field);
@@ -170,11 +193,13 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       email: req.body.email ?? user.email,
       role: req.body.role ?? user.role,
       status: req.body.status ?? user.status,
-      skillLevel: req.body.skillLevel ?? user.skillLevel,
+      colorLevel: req.body.colorLevel ?? user.colorLevel,
+      animalTags: req.body.animalTags ?? user.animalTags,
       canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
       canAssignUsersToTasks:
         req.body.canAssignUsersToTasks ?? user.canAssignUsersToTasks,
       phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
+      profilePhoto: req.body.profilePhoto ?? user.profilePhoto,
     });
     res.status(200).json(updatedUser);
   } catch (error: unknown) {

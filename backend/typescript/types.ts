@@ -17,13 +17,18 @@ export type UserDTO = {
   email: string;
   role: Role;
   status: UserStatus;
-  skillLevel?: number | null;
+  colorLevel: number;
+  animalTags: [AnimalTagEnum];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string | null;
 };
 
-export type CreateUserDTO = Omit<UserDTO, "id" | "status">;
+export type CreateUserDTO = Omit<
+  UserDTO,
+  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
+>;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
@@ -53,6 +58,23 @@ const petStatusValues = [
 export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
 export type PetStatus = typeof petStatusValues[number];
+
+export enum AnimalTagEnum {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat",
+  DOG = "Dog",
+  SMALL = "Small Animal",
+}
+
+// Skill level is in descending order, where Blue is the most skilled level of a volunteer
+export enum ColorLevel {
+  BLUE = "Blue", // 5
+  RED = "Red", // 4
+  ORANGE = "Orange", // 3
+  YELLOW = "Yellow", // 2
+  GREEN = "Green", // 1
+}
 
 export enum UserStatus {
   ACTIVE = "Active",

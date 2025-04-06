@@ -54,6 +54,17 @@ export const validateArray = (value: any, type: Type): boolean => {
   );
 };
 
+export const validateEnumArray = (value: any, enumType: any): boolean => {
+  return (
+    value !== undefined &&
+    value !== null &&
+    typeof value === "object" &&
+    Array.isArray(value) &&
+    value.every((item, index) => value.indexOf(item) === index) &&
+    value.every((item) => validateEnum(item, enumType))
+  );
+};
+
 export const validateFileType = (mimetype: string): boolean => {
   return allowableContentTypes.has(mimetype);
 };
