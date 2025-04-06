@@ -13,7 +13,7 @@ import {
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { sequelize, User } from "../../models";
+import { sequelize } from "../../models";
 // import ActivityType from "../../models/activityType.model";
 // import { Role } from "../../types";
 
@@ -314,115 +314,6 @@ class PetService implements IPetService {
     }
     return id;
   }
-
-  // async getPetList(userId: number): Promise<PetListResponseDTO[]> {
-  //   const PET_TABLE_NAME = "pets";
-  //   const ACTIVITY_TABLE_NAME = "activities";
-  //   const OCCUPIED = "Occupied";
-  //   const ONE_OR_MORE_DAYS_AGO = "One or more days ago";
-  //   const currentTime = new Date();
-  //   const oneDayAgo = currentTime.setDate(currentTime.getDate() - 1);
-  //   try {
-  //     const petList: PetListResponseDTO[] = [];
-  //     type Pet = InferAttributes<PgPet>;
-  //     type Activity = InferAttributes<PgActivity>;
-  //     type PetActivity = Pet & Activity;
-
-  //     // get the user's role somewhere
-  //     const user = await PgUser.findByPk(userId);
-  //     if (!user) {
-  //       return [];
-  //     }
-
-  //     const userRole = user.role;
-
-  //     const [petActivities] = await sequelize.query<PetActivity[]>(
-  //       `SELECT * FROM ${PET_TABLE_NAME} INNER JOIN ${ACTIVITY_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${ACTIVITY_TABLE_NAME}.pet_id`,
-  //       { type: QueryTypes.SELECT },
-  //     );
-  //     const petIdToPetData: Record<string, PetListResponseDTO> = {}; // awful name tbh
-  //     petActivities.forEach((petActivity) => {
-  //       // immediately skip/break if the user is a volunteer and the pet status is does not need care
-  //       if (userRole === Role.VOLUNTEER && petActivity.status === petStatusEnum[3]) {
-  //         continue;
-  //       }
-  //       // if the pet already exists in the hashMap
-  //       if (petIdToPetData[petActivity.pet_id]) {
-  //         const petData = petIdToPetData[petActivity.pet_id]
-  //         // add activity category if it has not completed yet
-  //         // "(if the tasks are not completed (end_time is null) AND the start_time has not passed)" TYPO, THIS IS FIXED, I GOTTA MAKE SURE THIS FITS THSI CRITERIA
-  //         if (petActivity.end_time === null && petActivity.start_time !== null) {
-  //           const activityType = await ActivityType.findByPk(petActivity.activity_type_id);
-  //           if (activityType) {
-  //             petData.taskCategories.push(activityType.category);
-  //             petData.lastCaredFor = OCCUPIED;
-  //           } else {
-  //             console.error(`Activity type with ID ${petActivity.activity_type_id} not found.`);
-  //           }
-  //         } else {
-  //           // compare end times if we haven't found that the pet is currently occupied yet
-  //           // (because if it is occupied, there's no more recent date)
-  //           if (petData.lastCaredFor !== OCCUPIED) {
-  //             if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
-  //               // check if the current activity is more recent than one day ago
-  //               if (petActivity.end_time?.getTime() > oneDayAgo.getTime()) { //  we need to 'parse' end_time since it's a sintrg
-  //                 petData.lastCaredFor = petActivity.end_time
-  //               }
-  //             } else if (petActivity.end_time > petData.end_time) {
-  //               petData.lastCaredFor = petActivity.end_time?.toLocaleTimeString();
-  //             }
-  //           }
-  //         }
-  //       } else {
-  //         // if the pet does not exist in the map
-  //         let lastCaredFor = petActivity.end_time;
-  //         if (
-  //           petActivity.start_time !== null &&
-  //           petActivity.end_time === null
-  //         ) {
-  //           lastCaredFor = "Occupied";
-  //         } else if (petActivity.endTime > oneDayAgo)
-  //         petIdToPetData[petActivity.pet_id] = {
-  //           id: petActivity.pet_id,
-  //           name: petActivity.name,
-  //           image: petActivity.image,
-  //           color: petActivity.color,
-  //           activityTypeArr: [petActivity.activity_type],
-  //           status: petActivity.status,
-  //           lastCaredFor,
-  //           hasUnassignedTask,
-  //         };
-  //       }
-  //     });
-  //     const currentTime = new Date();
-  //     const oneDayAgo = currentTime.setDate(currentTime.getDate() - 1);
-  //     Object.values(petIdToPetData).forEach((petData) => {
-  //       if ()
-  //       if (petData.lastCaredFor < oneDayAgo) {
-  //         petData.lastCaredFor = "One or more days ago";
-  //       }
-  //       petList.push(petData);
-  //     });
-  //     // join pet and activities table by pet_id
-  //     // make a hashmap of pets to an object like {activityArr, mostRecentEndTime}
-  //     // loop through every petActivity and fill the hashmap. only activities that are assigned today (and end time has not passed) should be pushed
-  //     // then loop through the keys of petActivity (so basically just every pet)
-  //     // push the PetListResponse object to the list (IF THEY ARE A VOLUNTEER, AND THE PET DOES NOT NEED CARE, DON'T PUSH)
-  //     // ! am i supposed to be updating the occupied status?? no right??
-  //     // unadoptedPets.forEach((pet) => {
-  //     //   // need to get assignedTo, lastCaredfFor, and task categories
-  //     //   const currPetListResponse: PetListResponseDTO= {
-  //     //     id: pet.id,
-  //     //     name: pet.name,
-  //     //     image: pet.image,
-  //     //     color: pet.color,
-  //     //     status: pet.status,
-  //     //   }
-  //     // });
-  //   } catch (e) {
-  //     return [];
-  //   }
-  // }
 }
 
 export default PetService;
