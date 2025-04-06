@@ -4,7 +4,7 @@ import {
   validatePrimitive,
   validateEnumArray,
 } from "./util";
-import { AnimalTagEnum } from "../../types";
+import { AnimalTag } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -99,11 +99,11 @@ export const updateUserDtoValidator = async (
   if (
     req.body.animalTags !== undefined &&
     req.body.animalTags !== null &&
-    !validateEnumArray(req.body.animalTags, AnimalTagEnum)
+    !validateEnumArray(req.body.animalTags, AnimalTag)
   ) {
     return res
       .status(400)
-      .send(getApiValidationError("animalTags", "AnimalTagEnum", true));
+      .send(getApiValidationError("animalTags", "AnimalTag", true));
   }
   if (
     req.body.profilePhoto !== undefined &&
