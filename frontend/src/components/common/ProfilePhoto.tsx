@@ -3,13 +3,13 @@ import { Flex, Image } from "@chakra-ui/react";
 import { ColorLevel } from "../../types/TaskTypes";
 import defaultUserProfile from "../../assets/icons/default-user-profile.svg";
 import defaultPetProfile from "../../assets/icons/default-pet-profile.svg";
+import invitedDefaultUserProfile from "../../assets/icons/invited-default-user-profile.svg";
 
 export interface ProfilePhotoProps {
-  // name: string;
   color: ColorLevel;
   image?: string;
   size: "small" | "large";
-  type: "user" | "pet";
+  type: "user" | "pet" | "invitedUser";
 }
 
 const borderColor: Record<ColorLevel, string> = {
@@ -18,6 +18,12 @@ const borderColor: Record<ColorLevel, string> = {
   [ColorLevel.ORANGE]: "orange.400",
   [ColorLevel.BLUE]: "blue.500",
   [ColorLevel.RED]: "red.600",
+};
+
+const fallbackImages: Record<"user" | "pet" | "invitedUser", string> = {
+  user: defaultUserProfile,
+  pet: defaultPetProfile,
+  invitedUser: invitedDefaultUserProfile,
 };
 
 const ProfilePhoto = ({
@@ -30,16 +36,17 @@ const ProfilePhoto = ({
   const containerSize = isSmall ? "2.625rem" : "8.69rem";
   const imageSize = isSmall ? "2.25rem" : "8.06rem";
 
-  const fallbackImage = type === "user" ? defaultUserProfile : defaultPetProfile;
+  const fallbackImage = fallbackImages[type];
+  const bgColor = type === "invitedUser" ? "gray.300" : borderColor[color];
 
   return (
     <Flex
-      padding="0.19rem"
+      p="0.19rem"
       boxSize={containerSize}
       justify="center"
       align="center"
       borderRadius="full"
-      backgroundColor={borderColor[color]}
+      backgroundColor={bgColor}
     >
       <Image
         src={image || fallbackImage}

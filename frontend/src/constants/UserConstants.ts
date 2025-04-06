@@ -5,5 +5,4 @@ export enum UserRoles {
   VOLUNTEER = "Volunteer",
 }
 
-export const temp = "" // Temp export to make linter happy, remove once another constant is added
-
+export const temp = ""; // Temp export to make linter happy, remove once another constant is added

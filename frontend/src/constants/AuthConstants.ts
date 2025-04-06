@@ -21,4 +21,3 @@ export const STAFF_BEHAVIOURISTS_ADMIN = new Set<string>([
 ]);
 
 export const STATUS = new Set<string>(["Active", "Invited"]);
-
