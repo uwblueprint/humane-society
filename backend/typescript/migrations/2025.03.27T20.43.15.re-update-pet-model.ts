@@ -1,6 +1,6 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
-import { sexEnum, AnimalTag } from "../types";
+import { AnimalTag, petStatusEnum } from "../types";
 
 const TABLE_NAME = "pets";
 const ANIMAL_TYPE_TABLE_NAME = "animal_types";
@@ -10,10 +10,22 @@ export const up: Migration = async ({ context: sequelize }) => {
 
   /* change animal_type_id to animal_tag (enum) */
   await queryInterface.removeColumn(TABLE_NAME, "animal_type_id");
+  // delete category enum, otherwise causes issues with migrating up, down, then up
   await queryInterface.addColumn(TABLE_NAME, "animal_tag", {
     type: DataType.ENUM(...Object.values(AnimalTag)),
     allowNull: false,
     defaultValue: AnimalTag.DOG,
+  });
+
+  /* update pet status enum */
+  await queryInterface.removeColumn(TABLE_NAME, "status");
+  await sequelize
+    .getQueryInterface()
+    .sequelize.query('DROP TYPE IF EXISTS "enum_pets_status";');
+  await queryInterface.addColumn(TABLE_NAME, "status", {
+    type: DataType.ENUM(...petStatusEnum),
+    allowNull: false,
+    defaultValue: "Needs Care",
   });
 
   /* turn columns optional */
@@ -71,11 +83,27 @@ export const down: Migration = async ({ context: sequelize }) => {
     },
   });
   await queryInterface.removeColumn(TABLE_NAME, "animal_tag");
-
   // delete enum, otherwise causes issues with migrating up, down, then up
   await sequelize
     .getQueryInterface()
     .sequelize.query('DROP TYPE IF EXISTS "enum_pets_animal_tag";');
+
+  /* update pet status enum */
+  await queryInterface.removeColumn(TABLE_NAME, "status");
+  // delete category enum, otherwise causes issues with migrating up, down, then up
+  await sequelize
+    .getQueryInterface()
+    .sequelize.query('DROP TYPE IF EXISTS "enum_pets_status";');
+  await queryInterface.addColumn(TABLE_NAME, "status", {
+    type: DataType.ENUM(
+      "Active",
+      "Assigned",
+      "Needs Care",
+      "Does Not Need Care",
+    ),
+    allowNull: false,
+    defaultValue: "Needs Care",
+  });
 
   /* turn columns mandatory */
   await queryInterface.changeColumn(TABLE_NAME, "photo", {
@@ -92,6 +120,10 @@ export const down: Migration = async ({ context: sequelize }) => {
       ALTER COLUMN sex SET DEFAULT 'F',
       ALTER COLUMN sex DROP NOT NULL;`,
   );
+  // have to fill null values first bc defaultValue only applies after :(
+  await queryInterface.sequelize.query(`
+    UPDATE "pets" SET "neutered" = false WHERE "neutered" IS NULL;
+  `);
   await queryInterface.changeColumn(TABLE_NAME, "neutered", {
     type: DataType.BOOLEAN,
     defaultValue: false,

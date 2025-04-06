@@ -4,6 +4,8 @@ import {
   validatePrimitive,
   validateEnum,
   validateDate,
+  validateNumberConstraint,
+  getConstraintError,
 } from "./util";
 import { petStatusEnum, sexEnum, AnimalTag } from "../../types";
 
@@ -16,7 +18,7 @@ export const petRequestDtoValidators = async (
 ) => {
   const { body } = req;
 
-  if (!validateEnum(body.animalTag, AnimalTag)) {
+  if (body.animalTag && !validateEnum(body.animalTag, AnimalTag)) {
     return res.status(400).send(getApiValidationError("animaTag", "AnimalTag"));
   }
 
@@ -24,56 +26,63 @@ export const petRequestDtoValidators = async (
     return res.status(400).send(getApiValidationError("name", "string"));
   }
 
-  if (!validatePrimitive(body.color_level, "integer")) {
+  if (!validatePrimitive(body.colorLevel, "integer")) {
     return res
       .status(400)
       .send(getApiValidationError("color_level", "integer"));
+  }
+
+  if (!validateNumberConstraint(body.colorLevel, 1, 5)) {
+    return res.status(400).send(getConstraintError("color_level", 1, 5));
   }
 
   if (!validateEnum(body.status, petStatusEnum)) {
     return res.status(400).send(getApiValidationError("status", "PetStatus"));
   }
 
-  if (!validatePrimitive(body.breed, "string")) {
+  if (body.breed && !validatePrimitive(body.breed, "string")) {
     return res.status(400).send(getApiValidationError("breed", "string"));
   }
 
-  if (!validateDate(body.birthday)) {
-    return res.status(400).send(getApiValidationError("age", "integer"));
+  if (body.birthday && !validateDate(body.birthday)) {
+    return res.status(400).send(getApiValidationError("birthday", "Date"));
   }
 
-  if (!validatePrimitive(body.weight, "decimal")) {
+  if (body.weight && !validatePrimitive(body.weight, "decimal")) {
     return res.status(400).send(getApiValidationError("weight", "decimal"));
   }
 
-  if (!validatePrimitive(body.neutered, "boolean")) {
+  if (body.neutered && !validatePrimitive(body.neutered, "boolean")) {
     return res.status(400).send(getApiValidationError("neutered", "boolean"));
   }
 
-  if (!validateEnum(body.sex, sexEnum)) {
+  if (body.sex && !validateEnum(body.sex, sexEnum)) {
     return res.status(400).send(getApiValidationError("sex", "Sex"));
   }
 
-  if (!validatePrimitive(body.photo, "string")) {
+  if (body.photo && !validatePrimitive(body.photo, "string")) {
     return res.status(400).send(getApiValidationError("photo", "string"));
   }
 
-  if (!validatePrimitive(body.careInfo.safetyInfo, "string")) {
-    return res
-      .status(400)
-      .send(getApiValidationError("careInfo.safetyInfo", "string"));
-  }
+  if (body.careInfo) {
+    const { safetyInfo, medicalInfo, managementInfo } = body.careInfo;
+    if (safetyInfo && !validatePrimitive(safetyInfo, "string")) {
+      return res
+        .status(400)
+        .send(getApiValidationError("careInfo.safetyInfo", "string"));
+    }
 
-  if (!validatePrimitive(body.careInfo.medicalInfo, "string")) {
-    return res
-      .status(400)
-      .send(getApiValidationError("careInfo.medicalInfo", "string"));
-  }
+    if (medicalInfo && !validatePrimitive(medicalInfo, "string")) {
+      return res
+        .status(400)
+        .send(getApiValidationError("careInfo.medicalInfo", "string"));
+    }
 
-  if (!validatePrimitive(body.careInfo.managementInfo, "string")) {
-    return res
-      .status(400)
-      .send(getApiValidationError("careInfo.managementInfo", "string"));
+    if (managementInfo && !validatePrimitive(managementInfo, "string")) {
+      return res
+        .status(400)
+        .send(getApiValidationError("careInfo.managementInfo", "string"));
+    }
   }
 
   return next();

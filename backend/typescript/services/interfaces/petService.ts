@@ -4,17 +4,17 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
-  status: PetStatus | null;
-  breed: string | null;
-  birthday: Date | null;
-  weight: number | null;
-  neutered: boolean | null;
-  sex: Sex | null;
-  photo: string | null;
-  careInfo: {
-    safetyInfo: string | null;
-    medicalInfo: string | null;
-    managementInfo: string | null;
+  status: PetStatus;
+  breed?: string;
+  neutered?: boolean;
+  birthday?: string;
+  weight?: number;
+  sex?: Sex;
+  photo?: string;
+  careInfo?: {
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
   };
 }
 
@@ -23,18 +23,18 @@ export interface PetResponseDTO {
   name: string;
   animalTag: AnimalTag;
   colorLevel: number;
-  status: PetStatus | null;
-  breed: string | null;
-  age: number | null;
-  weight: number | null;
-  neutered: boolean | null;
-  sex: Sex | null;
-  photo: string | null;
-  careInfo: {
+  status: PetStatus;
+  breed?: string;
+  neutered?: boolean;
+  age?: number;
+  weight?: number;
+  sex?: Sex;
+  photo?: string;
+  careInfo?: {
     id: number;
-    safetyInfo: string | null;
-    medicalInfo: string | null;
-    managementInfo: string | null;
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
   };
 }
 
@@ -55,7 +55,7 @@ export interface IPetService {
    * Gets the pet's age from their birthday
    * @param birthday birthday of pet
    */
-  getAgeFromBirthday(birthday: Date): number;
+  getAgeFromBirthday(birthday: string): number;
   /**
    * retrieve the Pet with the given id
    * @param id Pet id
@@ -87,7 +87,7 @@ export interface IPetService {
    * @returns the updated Pet
    * @throws Error if update fails
    */
-  updatePet(id: string, pet: PetRequestDTO): Promise<PetResponseDTO | null>;
+  updatePet(id: string, pet: PetRequestDTO): Promise<PetResponseDTO>;
 
   /**
    * delete the Pet with the given id

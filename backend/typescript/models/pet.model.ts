@@ -1,7 +1,7 @@
 import { Column, Model, Table, DataType, HasOne } from "sequelize-typescript";
 import PetCareInfo from "./petCareInfo.model";
 
-import { Sex, PetStatus, AnimalTag } from "../types";
+import { Sex, PetStatus, AnimalTag, petStatusEnum } from "../types";
 
 @Table({
   tableName: "pets",
@@ -20,20 +20,15 @@ export default class Pet extends Model {
   name!: string;
 
   @Column({
-    type: DataType.ENUM(
-      "Assigned",
-      "Active",
-      "Needs Care",
-      "Does Not Need Care",
-    ),
+    type: DataType.ENUM(...petStatusEnum),
   })
   status!: PetStatus;
 
   @Column({})
   breed?: string;
 
-  @Column({})
-  birthday?: Date;
+  @Column({ type: DataType.DATEONLY })
+  birthday?: string;
 
   @HasOne(() => PetCareInfo, { foreignKey: "pet_id" })
   petCareInfo?: PetCareInfo;

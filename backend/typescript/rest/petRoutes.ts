@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   petRequestDtoValidators,
-  // petFilterValidators,
+  /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
 import { PetResponseDTO, IPetService } from "../services/interfaces/petService";
@@ -32,9 +32,9 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       sex: body.sex,
       photo: body.photo,
       careInfo: {
-        safetyInfo: body.careInfo.safetyInfo,
-        medicalInfo: body.careInfo.medicalInfo,
-        managementInfo: body.careInfo.managementInfo,
+        safetyInfo: body.careInfo?.safetyInfo,
+        medicalInfo: body.careInfo?.medicalInfo,
+        managementInfo: body.careInfo?.managementInfo,
       },
     });
     res.status(200).json(pet);
@@ -91,13 +91,12 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
       breed: body.breed,
       birthday: body.birthday,
       weight: body.weight,
-      neutered: body.neutered,
       sex: body.sex,
       photo: body.photo,
       careInfo: {
-        safetyInfo: body.careInfo.safetyInfo,
-        medicalInfo: body.careInfo.medicalInfo,
-        managementInfo: body.careInfo.managementInfo,
+        safetyInfo: body.careInfo?.safetyInfo,
+        medicalInfo: body.careInfo?.medicalInfo,
+        managementInfo: body.careInfo?.managementInfo,
       },
     });
     res.status(200).json(pet);
