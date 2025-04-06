@@ -22,6 +22,7 @@ export type UserDTO = {
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
+  profilePhoto?: string | null;
 };
 
 export type CreateUserDTO = Omit<
