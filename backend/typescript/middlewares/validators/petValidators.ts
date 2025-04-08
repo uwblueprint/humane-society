@@ -31,7 +31,7 @@ export const petRequestDtoValidators = async (
   if (!validatePrimitive(body.colorLevel, "integer")) {
     return res
       .status(400)
-      .send(getApiValidationError("color_level", "integer"));
+      .send(getApiValidationError("colorLevel", "integer"));
   }
 
   if (!validateNumberConstraint(body.colorLevel, 1, 5)) {
