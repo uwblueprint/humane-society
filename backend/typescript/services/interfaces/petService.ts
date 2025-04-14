@@ -1,56 +1,61 @@
-import { PetStatus, Sex } from "../../types";
+import { PetStatus, Sex, AnimalTag } from "../../types";
 
 export interface PetRequestDTO {
-  animalTypeId: number;
+  animalTag: AnimalTag;
   name: string;
+  colorLevel: number;
   status: PetStatus;
-  breed: string;
-  age: number;
-  adoptionStatus: boolean;
-  weight: number;
-  neutered: boolean;
-  sex: Sex;
-  photo: string;
-  careInfo: {
-    safetyInfo: string | null;
-    medicalInfo: string | null;
-    managementInfo: string | null;
+  breed?: string;
+  neutered?: boolean;
+  birthday?: string;
+  weight?: number;
+  sex?: Sex;
+  photo?: string;
+  careInfo?: {
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
   };
 }
 
 export interface PetResponseDTO {
   id: number;
-  animalTypeId: number;
   name: string;
+  animalTag: AnimalTag;
+  colorLevel: number;
   status: PetStatus;
-  breed: string;
-  age: number;
-  adoptionStatus: boolean;
-  weight: number;
-  neutered: boolean;
-  sex: Sex;
-  photo: string;
-  careInfo: {
+  breed?: string;
+  neutered?: boolean;
+  age?: number;
+  weight?: number;
+  sex?: Sex;
+  photo?: string;
+  careInfo?: {
     id: number;
-    safetyInfo: string | null;
-    medicalInfo: string | null;
-    managementInfo: string | null;
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
   };
 }
 
 export interface PetQuery {
-  animalTypeId?: string;
+  animalTag?: string;
   name?: string;
+  colorLevel?: string;
   status?: string;
   breed?: string;
   age?: string;
-  adoptionStatus?: string;
   weight?: string;
   neutered?: string;
   sex?: string;
 }
 
 export interface IPetService {
+  /**
+   * Gets the pet's age from their birthday
+   * @param birthday birthday of pet
+   */
+  getAgeFromBirthday(birthday: string): number;
   /**
    * retrieve the Pet with the given id
    * @param id Pet id
@@ -82,7 +87,7 @@ export interface IPetService {
    * @returns the updated Pet
    * @throws Error if update fails
    */
-  updatePet(id: string, pet: PetRequestDTO): Promise<PetResponseDTO | null>;
+  updatePet(id: string, pet: PetRequestDTO): Promise<PetResponseDTO>;
 
   /**
    * delete the Pet with the given id
@@ -98,5 +103,5 @@ export interface IPetService {
    * @returns returns array of Pets
    * @throws Error if retrieval fails
    */
-  filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
+  // filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
 }
