@@ -51,7 +51,9 @@ cd humane-society
 3. Run the application
 
 ```bash
-docker-compose up --build
+docker compose up --build
+```
+```bash
 docker exec -it humane_society_backend /bin/bash -c "node migrate up"
 ```
 
