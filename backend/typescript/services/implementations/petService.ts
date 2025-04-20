@@ -487,7 +487,7 @@ class PetService implements IPetService {
             taskCategories,
             status: petActivity.status,
             lastCaredFor,
-            allTasksAssigned: petActivity.user_id, // if the activity has a user associated with it, it's assigned
+            allTasksAssigned: !!petActivity.user_id, // if the activity has a user associated with it, it's assigned
             isAssignedToMe: petActivity.user_id === currUserId,
           };
         }
