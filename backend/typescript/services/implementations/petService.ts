@@ -318,6 +318,7 @@ class PetService implements IPetService {
     return id;
   }
 
+  // petList helper functions
   dateToTimeString(date: DateTime): string {
     return date.setZone(TIME_ZONE).toFormat("t");
   }
@@ -331,6 +332,19 @@ class PetService implements IPetService {
   colorLevelToColor(colorLevel: number): ColorLevel {
     // (values are in descending order)
     return Object.values(ColorLevel)[5 - colorLevel];
+  }
+
+  sortPetItemListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
+    const statusToPriority: Record<PetStatus, number> = {
+      [PetStatus.NEEDS_CARE]: 0,
+      [PetStatus.OCCUPIED]: 1,
+      [PetStatus.DOES_NOT_NEED_CARE]: 2,
+    };
+    // put pets with 'needs care' status first, then occupied, then does not need care
+    const statusSortFunction = (a: PetListItemDTO, b: PetListItemDTO) => {
+      return statusToPriority[a.status] - statusToPriority[b.status];
+    };
+    return petList.sort(statusSortFunction);
   }
 
   async getPetList(userId: number): Promise<PetListItemDTO[]> {
@@ -370,14 +384,14 @@ class PetService implements IPetService {
         LEFT JOIN ${ACTIVITY_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${ACTIVITY_TABLE_NAME}.pet_id`,
         { type: QueryTypes.SELECT },
       );
-      const petIdToPetData: Record<string, PetListItemDTO> = {}; // awful name tbh
+      const petIdToPetListItem: Record<string, PetListItemDTO> = {};
 
       // eslint-disable-next-line no-restricted-syntax
       for (const petActivity of petActivities) {
         // if there's no activity_type_id, that means this pet doesn't have any assigned activities
         // (bc that's a mandatory column in activities)
         if (!petActivity.activity_type_id) {
-          petIdToPetData[petActivity.pet_id] = {
+          petIdToPetListItem[petActivity.pet_id] = {
             id: petActivity.pet_id,
             name: petActivity.name,
             photo: petActivity.photo,
@@ -391,14 +405,14 @@ class PetService implements IPetService {
           // eslint-disable-next-line no-continue
           continue;
         }
-        const petData = petIdToPetData[petActivity.pet_id];
+        const petData = petIdToPetListItem[petActivity.pet_id];
         // if the pet already exists in the hashMap
         if (petData) {
           // exisiting entry in the hashMap, to compare times
           if (!petActivity.end_time) {
             // if the activity has not finished
             if (petActivity.start_time) {
-              // if pet is currently occupied
+              // if pet is currently occupied, last cared for is current time
               petData.lastCaredFor = this.dateToTimeString(currentTime);
             }
             // add task category
@@ -465,7 +479,7 @@ class PetService implements IPetService {
               lastCaredFor = this.dateToTimeString(endTime);
             }
           }
-          petIdToPetData[petActivity.pet_id] = {
+          petIdToPetListItem[petActivity.pet_id] = {
             id: petActivity.pet_id,
             name: petActivity.name,
             photo: petActivity.photo,
@@ -478,9 +492,27 @@ class PetService implements IPetService {
           };
         }
       }
-      const response = Object.values(petIdToPetData);
-      // SORT -- first put everything assigned to the user first, and then within each section, sort based ascending start time
-      return response;
+      const unsortedPetList = Object.values(petIdToPetListItem);
+      // SORT -- first put everything assigned to the user first, and then within each section, sort based on status/urgency
+      const assignedToUser: PetListItemDTO[] = [];
+      const notAssignedToUser: PetListItemDTO[] = [];
+      unsortedPetList.forEach((petItem) => {
+        if (petItem.isAssignedToMe) {
+          assignedToUser.push(petItem);
+        } else {
+          notAssignedToUser.push(petItem);
+        }
+      });
+      const sortedAssignedPetList = this.sortPetItemListByStatus(
+        assignedToUser,
+      );
+      const sortedNotAssignedPetList = this.sortPetItemListByStatus(
+        notAssignedToUser,
+      );
+      const sortedPetList = sortedAssignedPetList.concat(
+        sortedNotAssignedPetList,
+      );
+      return sortedPetList;
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));
       return [];
