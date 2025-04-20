@@ -399,7 +399,7 @@ class PetService implements IPetService {
             taskCategories: [],
             status: petActivity.status,
             lastCaredFor: ONE_OR_MORE_DAYS_AGO,
-            hasUnassignedTask: null, // null if there are no tasks
+            allTasksAssigned: null, // null if there are no tasks
             isAssignedToMe: false,
           };
           // eslint-disable-next-line no-continue
@@ -429,7 +429,7 @@ class PetService implements IPetService {
             }
             if (!petActivity.user_id) {
               // check if task has not been assigned
-              petData.hasUnassignedTask = true;
+              petData.allTasksAssigned = false;
             } else if (petActivity.user_id === currUserId) {
               // if it is, check if task is assigned to user
               petData.isAssignedToMe = true;
@@ -487,7 +487,7 @@ class PetService implements IPetService {
             taskCategories,
             status: petActivity.status,
             lastCaredFor,
-            hasUnassignedTask: !petActivity.user_id, // if the activity has a user associated with it, it's assigned
+            allTasksAssigned: petActivity.user_id, // if the activity has a user associated with it, it's assigned
             isAssignedToMe: petActivity.user_id === currUserId,
           };
         }

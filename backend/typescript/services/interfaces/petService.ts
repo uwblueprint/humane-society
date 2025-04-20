@@ -45,7 +45,7 @@ export interface PetListItemDTO {
   taskCategories: Category[];
   status: PetStatus;
   lastCaredFor: string; // will hold a time or 'One or more days ago'
-  hasUnassignedTask: boolean | null; // null if there are no tasks
+  allTasksAssigned: boolean | null; // null if there are no tasks
   isAssignedToMe: boolean;
   photo?: string;
 }
