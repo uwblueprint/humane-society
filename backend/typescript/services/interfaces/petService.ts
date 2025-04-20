@@ -1,4 +1,4 @@
-import { PetStatus, Sex, AnimalTag } from "../../types";
+import { PetStatus, Sex, AnimalTag, ColorLevel, Category } from "../../types";
 
 export interface PetRequestDTO {
   animalTag: AnimalTag;
@@ -38,6 +38,18 @@ export interface PetResponseDTO {
   };
 }
 
+export interface PetListItemDTO {
+  id: number;
+  name: string;
+  color: ColorLevel;
+  taskCategories: Category[];
+  status: PetStatus;
+  lastCaredFor: string; // will hold a time or 'One or more days ago'
+  hasUnassignedTask: boolean | null; // null if there are no tasks
+  isAssignedToMe: boolean;
+  photo?: string;
+}
+
 export interface PetQuery {
   animalTag?: string;
   name?: string;
@@ -48,6 +60,19 @@ export interface PetQuery {
   weight?: string;
   neutered?: string;
   sex?: string;
+}
+
+// result of a join between pet and activity table
+export interface PetActivity {
+  pet_id: number;
+  name: string;
+  status: PetStatus;
+  photo?: string;
+  color_level: number;
+  user_id?: number;
+  activity_type_id?: number;
+  start_time?: Date;
+  end_time?: Date;
 }
 
 export interface IPetService {
@@ -104,4 +129,12 @@ export interface IPetService {
    * @throws Error if retrieval fails
    */
   // filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
+
+  /**
+   * get pets for pet list
+   * @param user_id
+   * @returns array of PetList results
+   * @throws Error if retrieval fails
+   */
+  getPetList(userId: number): Promise<PetListItemDTO[]>;
 }
