@@ -34,16 +34,24 @@ jobs:
               - "backend/typescript/**"
             python-backend:
               - "backend/python/**"
-
+    
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock', 'backend/typescript/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+      
       - name: Set up Node.js
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
         uses: actions/setup-node@v2
         with:
           node-version: "20.11.1"
-          cache: "yarn"
-          cache-dependency-path: |
-            frontend/yarn.lock
-            backend/typescript/yarn.lock
 
       - name: Install Node.js dependencies
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
