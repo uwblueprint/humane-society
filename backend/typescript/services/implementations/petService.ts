@@ -1,23 +1,25 @@
-import { Transaction } from "sequelize";
+import { Transaction, QueryTypes } from "sequelize";
+import { DateTime } from "luxon";
 import PgPet from "../../models/pet.model";
-// import PgActivity from "../../models/activity.model";
-// import PgActivityType from "../../models/activityType.model";
 import PgPetCareInfo from "../../models/petCareInfo.model";
-// import PgUser from "../../models/user.model";
+import PgUser from "../../models/user.model";
+import PgActivityType from "../../models/activityType.model";
 import {
   IPetService,
-  // PetListResponseDTO,
+  PetListItemDTO,
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
+  PetActivity,
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { sequelize } from "../../models";
-// import ActivityType from "../../models/activityType.model";
-// import { Role } from "../../types";
+import { PetStatus, ColorLevel } from "../../types";
 
 const Logger = logger(__filename);
+
+const TIME_ZONE = "America/New_York";
 
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
@@ -313,6 +315,207 @@ class PetService implements IPetService {
       throw error;
     }
     return id;
+  }
+
+  // petList helper functions
+  dateToTimeString(date: DateTime): string {
+    return date.setZone(TIME_ZONE).toFormat("t");
+  }
+
+  timeStringToDate(timeStr: string): DateTime {
+    const currentTime = DateTime.now().setZone(TIME_ZONE);
+    const fullDateString = `${currentTime.toFormat("DDDD")} ${timeStr}`;
+    return DateTime.fromFormat(fullDateString, "DDDD t");
+  }
+
+  colorLevelToColor(colorLevel: number): ColorLevel {
+    // (values are in descending order)
+    return Object.values(ColorLevel)[5 - colorLevel];
+  }
+
+  sortPetItemListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
+    const statusToPriority: Record<PetStatus, number> = {
+      [PetStatus.NEEDS_CARE]: 0,
+      [PetStatus.OCCUPIED]: 1,
+      [PetStatus.DOES_NOT_NEED_CARE]: 2,
+    };
+    // put pets with 'needs care' status first, then occupied, then does not need care
+    const statusSortFunction = (a: PetListItemDTO, b: PetListItemDTO) => {
+      return statusToPriority[a.status] - statusToPriority[b.status];
+    };
+    return petList.sort(statusSortFunction);
+  }
+
+  async getPetList(userId: number): Promise<PetListItemDTO[]> {
+    const PET_TABLE_NAME = "pets";
+    const ACTIVITY_TABLE_NAME = "activities";
+    const ONE_OR_MORE_DAYS_AGO = "One or more days ago";
+
+    // date constants
+    const currentTime = DateTime.now().setZone(TIME_ZONE);
+
+    const beginningOfToday = currentTime.set({
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+    try {
+      // get the user's role
+      const user = await PgUser.findByPk(userId);
+      if (!user) {
+        return [];
+      }
+      const currUserId = user.id;
+
+      const petActivities = await sequelize.query<PetActivity>(
+        `SELECT 
+        ${PET_TABLE_NAME}.id AS pet_id,
+        ${PET_TABLE_NAME}.name AS name,
+        ${PET_TABLE_NAME}.status AS status,
+        ${PET_TABLE_NAME}.photo AS photo,
+        ${PET_TABLE_NAME}.color_level AS color_level,
+        ${ACTIVITY_TABLE_NAME}.user_id AS user_id,
+        ${ACTIVITY_TABLE_NAME}.activity_type_id AS activity_type_id,
+        ${ACTIVITY_TABLE_NAME}.start_time AS start_time,
+        ${ACTIVITY_TABLE_NAME}.end_time AS end_time
+        FROM ${PET_TABLE_NAME}
+        LEFT JOIN ${ACTIVITY_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${ACTIVITY_TABLE_NAME}.pet_id`,
+        { type: QueryTypes.SELECT },
+      );
+      const petIdToPetListItem: Record<string, PetListItemDTO> = {};
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const petActivity of petActivities) {
+        // if there's no activity_type_id, that means this pet doesn't have any assigned activities
+        // (bc that's a mandatory column in activities)
+        if (!petActivity.activity_type_id) {
+          petIdToPetListItem[petActivity.pet_id] = {
+            id: petActivity.pet_id,
+            name: petActivity.name,
+            photo: petActivity.photo,
+            color: this.colorLevelToColor(petActivity.color_level),
+            taskCategories: [],
+            status: petActivity.status,
+            lastCaredFor: ONE_OR_MORE_DAYS_AGO,
+            allTasksAssigned: null, // null if there are no tasks
+            isAssignedToMe: false,
+          };
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        const petData = petIdToPetListItem[petActivity.pet_id];
+        // if the pet already exists in the hashMap
+        if (petData) {
+          // exisiting entry in the hashMap, to compare times
+          if (!petActivity.end_time) {
+            // if the activity has not finished
+            if (petActivity.start_time) {
+              // if pet is currently occupied, last cared for is current time
+              petData.lastCaredFor = this.dateToTimeString(currentTime);
+            }
+            // add task category
+            // eslint-disable-next-line no-await-in-loop
+            const activityType = await PgActivityType.findByPk(
+              petActivity.activity_type_id,
+            );
+            if (activityType) {
+              petData.taskCategories.push(activityType.category);
+            } else {
+              Logger.error(
+                `Activity type with ID ${petActivity.activity_type_id} not found.`,
+              );
+            }
+            if (!petActivity.user_id) {
+              // check if task has not been assigned
+              petData.allTasksAssigned = false;
+            } else if (petActivity.user_id === currUserId) {
+              // if it is, check if task is assigned to user
+              petData.isAssignedToMe = true;
+            }
+          } else {
+            // if activity has finished
+            const endTime = DateTime.fromJSDate(petActivity.end_time);
+            if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
+              if (endTime > beginningOfToday) {
+                petData.lastCaredFor = this.dateToTimeString(endTime);
+              }
+            } else if (endTime > this.timeStringToDate(petData.lastCaredFor)) {
+              petData.lastCaredFor = this.dateToTimeString(endTime);
+            }
+          }
+        } else {
+          // if the pet does not exist in the map
+          let lastCaredFor;
+          const taskCategories = [];
+          if (!petActivity.end_time) {
+            // if the activity has not finished
+            if (petActivity.start_time) {
+              lastCaredFor = this.dateToTimeString(currentTime); // pet is currently occupied
+            } else {
+              lastCaredFor = ONE_OR_MORE_DAYS_AGO; // assume if a pet has never been cared for it should read 'One or more days ago'
+            }
+            // add task category
+            // eslint-disable-next-line no-await-in-loop
+            const activityType = await PgActivityType.findByPk(
+              petActivity.activity_type_id,
+            );
+            if (activityType) {
+              taskCategories.push(activityType.category);
+            } else {
+              Logger.error(
+                `Activity type with ID ${petActivity.activity_type_id} not found.`,
+              );
+            }
+          } else {
+            // if the activity has finished
+            const endTime = DateTime.fromJSDate(petActivity.end_time);
+            if (endTime <= beginningOfToday) {
+              // activity has finished longer than a day ago
+              lastCaredFor = ONE_OR_MORE_DAYS_AGO;
+            } else {
+              // activity has finished sooner than a day ago
+              lastCaredFor = this.dateToTimeString(endTime);
+            }
+          }
+          petIdToPetListItem[petActivity.pet_id] = {
+            id: petActivity.pet_id,
+            name: petActivity.name,
+            photo: petActivity.photo,
+            color: this.colorLevelToColor(petActivity.color_level),
+            taskCategories,
+            status: petActivity.status,
+            lastCaredFor,
+            allTasksAssigned: !!petActivity.user_id, // if the activity has a user associated with it, it's assigned
+            isAssignedToMe: petActivity.user_id === currUserId,
+          };
+        }
+      }
+      const unsortedPetList = Object.values(petIdToPetListItem);
+      // SORT -- first put everything assigned to the user first, and then within each section, sort based on status/urgency
+      const assignedToUser: PetListItemDTO[] = [];
+      const notAssignedToUser: PetListItemDTO[] = [];
+      unsortedPetList.forEach((petItem) => {
+        if (petItem.isAssignedToMe) {
+          assignedToUser.push(petItem);
+        } else {
+          notAssignedToUser.push(petItem);
+        }
+      });
+      const sortedAssignedPetList = this.sortPetItemListByStatus(
+        assignedToUser,
+      );
+      const sortedNotAssignedPetList = this.sortPetItemListByStatus(
+        notAssignedToUser,
+      );
+      const sortedPetList = sortedAssignedPetList.concat(
+        sortedNotAssignedPetList,
+      );
+      return sortedPetList;
+    } catch (error: unknown) {
+      Logger.error(getErrorMessage(error));
+      return [];
+    }
   }
 }
 
