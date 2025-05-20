@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   petRequestDtoValidators,
-  petFilterValidators,
+  /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
 import { PetResponseDTO, IPetService } from "../services/interfaces/petService";
@@ -21,21 +21,23 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
   try {
     const { body } = req;
     const pet = await petService.updatePet(id, {
-      animalTypeId: body.animalTypeId,
+      animalTag: body.animalTag,
       name: body.name,
+      colorLevel: body.colorLevel,
       status: body.status,
       breed: body.breed,
-      age: body.age,
-      adoptionStatus: body.adoptionStatus,
+      birthday: body.birthday,
       weight: body.weight,
       neutered: body.neutered,
       sex: body.sex,
       photo: body.photo,
-      careInfo: {
-        safetyInfo: body.careInfo.safetyInfo,
-        medicalInfo: body.careInfo.medicalInfo,
-        managementInfo: body.careInfo.managementInfo,
-      },
+      careInfo: body.careInfo
+        ? {
+            safetyInfo: body.careInfo.safetyInfo,
+            medicalInfo: body.careInfo.medicalInfo,
+            managementInfo: body.careInfo.managementInfo,
+          }
+        : undefined,
     });
     res.status(200).json(pet);
   } catch (e: unknown) {
@@ -63,41 +65,44 @@ petRouter.delete("/:id", async (req, res) => {
   }
 });
 
+// FILTERING IS NOW DONE ON FRONT END
 /* Get Pets by filter criteria */
-petRouter.get("/filter", petFilterValidators, async (req, res) => {
-  const { query } = req;
-  const contentType = req.headers["content-type"];
-  try {
-    const pets = await petService.filterPets(query);
-    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
-  } catch (e: unknown) {
-    await sendResponseByMimeType(res, 500, contentType, [
-      {
-        error: INTERNAL_SERVER_ERROR_MESSAGE,
-      },
-    ]);
-  }
-});
+// petRouter.get("/filter", petFilterValidators, async (req, res) => {
+//   const { query } = req;
+//   const contentType = req.headers["content-type"];
+//   try {
+//     const pets = await petService.filterPets(query);
+//     await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
+//   } catch (e: unknown) {
+//     await sendResponseByMimeType(res, 500, contentType, [
+//       {
+//         error: INTERNAL_SERVER_ERROR_MESSAGE,
+//       },
+//     ]);
+//   }
+// });
 /* Create Pet */
 petRouter.post("/", petRequestDtoValidators, async (req, res) => {
   try {
     const { body } = req;
     const pet = await petService.createPet({
-      animalTypeId: body.animalTypeId,
+      animalTag: body.animalTag,
       name: body.name,
+      colorLevel: body.colorLevel,
       status: body.status,
       breed: body.breed,
-      age: body.age,
-      adoptionStatus: body.adoptionStatus,
-      weight: body.weight,
+      birthday: body.birthday,
       neutered: body.neutered,
+      weight: body.weight,
       sex: body.sex,
       photo: body.photo,
-      careInfo: {
-        safetyInfo: body.careInfo.safetyInfo,
-        medicalInfo: body.careInfo.medicalInfo,
-        managementInfo: body.careInfo.managementInfo,
-      },
+      careInfo: body.careInfo
+        ? {
+            safetyInfo: body.careInfo.safetyInfo,
+            medicalInfo: body.careInfo.medicalInfo,
+            managementInfo: body.careInfo.managementInfo,
+          }
+        : undefined,
     });
     res.status(200).json(pet);
   } catch (e: unknown) {
