@@ -152,6 +152,23 @@ authRouter.post(
   },
 );
 
+/* Get own user info */
+authRouter.get("/:userId", isAuthorizedByUserId("userId"), async (req, res) => {
+  const { userId } = req.params;
+  if (userId) {
+    try {
+      const user = await userService.getUserById(userId);
+      res.status(200).json(user);
+    } catch (error: unknown) {
+      if (error instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(error));
+      } else {
+        res.status(500).json({ error: getErrorMessage(error) });
+      }
+    }
+  }
+});
+
 /* Invite a user */
 authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   try {
