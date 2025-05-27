@@ -22,7 +22,7 @@ import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
-  SkillLevel,
+  ColorLevel,
   TaskCategory,
   TaskStatus,
 } from "../../../types/TaskTypes";
@@ -30,7 +30,7 @@ import {
 export interface PetInfo {
   id: number;
   name: string;
-  skill: SkillLevel;
+  skill: ColorLevel;
   image: string;
   taskCategories: TaskCategory[];
   status: TaskStatus;
@@ -50,12 +50,12 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const borderColor: Record<SkillLevel, string> = {
-    [SkillLevel.GREEN]: "green.300",
-    [SkillLevel.YELLOW]: "yellow.400",
-    [SkillLevel.ORANGE]: "orange.400",
-    [SkillLevel.BLUE]: "blue.500",
-    [SkillLevel.RED]: "red.600",
+  const borderColor: Record<ColorLevel, string> = {
+    [ColorLevel.GREEN]: "green.300",
+    [ColorLevel.YELLOW]: "yellow.400",
+    [ColorLevel.ORANGE]: "orange.400",
+    [ColorLevel.BLUE]: "blue.500",
+    [ColorLevel.RED]: "red.600",
   };
 
   const statusColor: Record<TaskStatus, string> = {

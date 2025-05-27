@@ -1,4 +1,4 @@
-export enum SkillLevel {
+export enum ColorLevel {
   GREEN = "Green",
   YELLOW = "Yellow",
   ORANGE = "Orange",
