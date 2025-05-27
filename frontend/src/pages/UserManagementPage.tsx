@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  AlertIcon,
-  CloseButton,
-  Flex,
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
 
@@ -33,7 +28,6 @@ import Search from "../components/common/Search";
 // }
 // };
 
-
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -51,29 +45,26 @@ const UserManagementPage = (): React.ReactElement => {
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
-const filteredUsers = useMemo(() => {
-  return users
-    .filter((user) => {
-      return Object.keys(filters).every((key) => {
-        const filterVals = filters[key as keyof typeof filters];
-        if (!filterVals || filterVals.length === 0) return true;
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => {
+        return Object.keys(filters).every((key) => {
+          const filterVals = filters[key as keyof typeof filters];
+          if (!filterVals || filterVals.length === 0) return true;
 
-        const value = user[key as keyof User];
+          const value = user[key as keyof User];
 
-        if (Array.isArray(value)) {
-          return filterVals.some((filter) =>
-            (value as string[]).includes(filter)
-          );
-        }
+          if (Array.isArray(value)) {
+            return filterVals.some((filter) =>
+              (value as string[]).includes(filter),
+            );
+          }
 
-        return filterVals.includes(value as string);
-      });
-    })
-    .filter((user) =>
-      user.name.toLowerCase().includes(search.toLowerCase())
-    );
-}, [filters, search, users]);
-
+          return filterVals.includes(value as string);
+        });
+      })
+      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
+  }, [filters, search, users]);
 
   const getUsers = async () => {
     try {
