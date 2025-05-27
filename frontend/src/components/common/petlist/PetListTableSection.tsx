@@ -50,14 +50,6 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const borderColor: Record<ColorLevel, string> = {
-    [ColorLevel.GREEN]: "green.300",
-    [ColorLevel.YELLOW]: "yellow.400",
-    [ColorLevel.ORANGE]: "orange.400",
-    [ColorLevel.BLUE]: "blue.500",
-    [ColorLevel.RED]: "red.600",
-  };
-
   const statusColor: Record<TaskStatus, string> = {
     [TaskStatus.NEEDS_CARE]: "red.400",
     [TaskStatus.DOES_NOT_NEED_CARE]: "gray.500",
@@ -117,9 +109,11 @@ export const PetListTableSection = ({
               {/* Pet & Status */}
               <HStack gap="3rem" minWidth="max-content">
                 <ProfilePhoto
-                  name={pet.name}
-                  color={borderColor[pet.skill]}
+                  // name={pet.name}
+                  color={pet.skill}
                   image={pet.image}
+                  size="large"
+                  type="pet"
                 />
                 <VStack align="flex-start" gap="0.5rem">
                   <Text textStyle="h3" m={0}>

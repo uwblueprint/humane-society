@@ -2,6 +2,7 @@ export type User = {
   id: number;
   firstName: string;
   lastName: string;
+  name: string;
   email: string;
   role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
   status: string;
@@ -15,5 +16,5 @@ export type User = {
 
 export type CreateUserDTO = Omit<
   User,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
+  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto" | 'name'
 >;
