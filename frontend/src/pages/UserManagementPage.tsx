@@ -1,14 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  // Table,
-  // Thead,
-  // Tbody,
-  // Tr,
-  // Th,
-  // Td,
-  // TableContainer,
-  // VStack,
-  // Button,
   Alert,
   AlertIcon,
   CloseButton,
@@ -16,9 +7,7 @@ import {
 } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
-// import AddUserFormModal, {
-//   AddUserRequest,
-// } from "../components/crud/AddUserFormModal";
+
 import UserManagementTable from "../components/common/user-management/UserManagementTable";
 import Filter from "../components/common/Filter";
 import Search from "../components/common/Search";
@@ -44,6 +33,7 @@ import Search from "../components/common/Search";
 // }
 // };
 
+
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -62,7 +52,7 @@ const UserManagementPage = (): React.ReactElement => {
     setSearch(value);
   };
 const filteredUsers = useMemo(() => {
-  return users 
+  return users
     .filter((user) => {
       return Object.keys(filters).every((key) => {
         const filterVals = filters[key as keyof typeof filters];

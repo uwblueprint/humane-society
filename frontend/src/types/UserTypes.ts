@@ -10,7 +10,7 @@ export type User = {
   email: string;
   role: UserRoles;
   status: string;
-  colorLevel?: number;
+  colorLevel: number;
   animalTags: AnimalTag[];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;

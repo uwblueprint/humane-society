@@ -51,6 +51,16 @@ const filterConfig: Record<string, FilterSection[]> = {
   ],
   userManagement: [
     {
+      name: "Animal Tag",
+      value: "animalTags",
+      options: Object.values(AnimalTag),
+    },
+    {
+      name: "Colour Level",
+      value: "colorLevel",
+      options: Object.values(ColorLevel),
+    },
+    {
       name: "Role",
       value: "role",
       options: Array.from(ALL_ROLES),
