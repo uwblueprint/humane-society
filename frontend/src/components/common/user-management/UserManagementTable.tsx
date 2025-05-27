@@ -12,6 +12,7 @@ const UserManagementTable = ({
   users,
   clearFilters,
 }: UserManagementTableProps): React.ReactElement => {
+  
   return (
     <Table w="100%" textAlign="left">
       <Thead borderBottom="1px solid" borderColor="gray.200">

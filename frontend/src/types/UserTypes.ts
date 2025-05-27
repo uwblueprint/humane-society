@@ -1,13 +1,17 @@
+import { UserRoles } from "../constants/UserConstants";
+
+export type AnimalTag = "Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal";
+
 export type User = {
   id: number;
   firstName: string;
   lastName: string;
   name: string;
   email: string;
-  role: "Administrator" | "Animal Behaviourist" | "Staff" | "Volunteer";
+  role: UserRoles;
   status: string;
-  colorLevel: number;
-  animalTags: ["Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal"];
+  colorLevel?: number;
+  animalTags: AnimalTag[];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
@@ -16,5 +20,5 @@ export type User = {
 
 export type CreateUserDTO = Omit<
   User,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto" | 'name'
+  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
 >;
