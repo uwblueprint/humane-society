@@ -173,6 +173,15 @@ const setPassword = async (
   }
 };
 
+const forgotPassword = async (email: string): Promise<boolean> => {
+  try {
+    await baseAPIClient.post(`/auth/forgot-password/${email}`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 export default {
   login,
   loginWithSignInLink,
@@ -183,4 +192,5 @@ export default {
   refresh,
   setPassword,
   getEmailOfCurrentUser,
+  forgotPassword,
 };
