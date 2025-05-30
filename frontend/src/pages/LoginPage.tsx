@@ -19,7 +19,7 @@ import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
 import authAPIClient from "../APIClients/AuthAPIClient";
-import { CREATE_PASSWORD_PAGE, HOME_PAGE } from "../constants/Routes";
+import { CREATE_PASSWORD_PAGE, FORGOT_PASSWORD_PAGE, HOME_PAGE } from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
 import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
@@ -29,6 +29,11 @@ const LoginPage = (): React.ReactElement => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [status, setStatus] = useState<"loading" | "error" | "default">(
+    "default",
+  );
+
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -37,7 +42,7 @@ const LoginPage = (): React.ReactElement => {
     setPassword(event.target.value);
   };
   const handleForgotPassword = () => {
-    // Forgot password doesn’t have to route to anything yet
+    setRedirectTo(FORGOT_PASSWORD_PAGE);
   };
   const handleLogin = async () => {
     setErrorMessage("");
@@ -56,11 +61,6 @@ const LoginPage = (): React.ReactElement => {
       setErrorMessage("Invalid login credentials.");
     }
   };
-
-  const [redirectTo, setRedirectTo] = useState<string | null>(null);
-  const [status, setStatus] = useState<"loading" | "error" | "default">(
-    "default",
-  );
 
   useEffect(() => {
     setStatus("loading");
@@ -88,7 +88,7 @@ const LoginPage = (): React.ReactElement => {
 
     if (authenticatedUser) {
       setRedirectTo(HOME_PAGE);
-    } else {
+    } else if (redirectTo !== FORGOT_PASSWORD_PAGE) {
       checkIfSignInLink();
     }
   }, [authenticatedUser, setAuthenticatedUser]);
