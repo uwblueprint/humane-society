@@ -214,4 +214,19 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
   }
 });
 
+// sends a password reset email to the user given email
+authRouter.post("/forgot-password/:email", async (req, res) => {
+  try {
+    const email = req.params.email;   
+    await authService.resetPassword(email);
+    // TODO: add logic to check if email was sent successfully if we want to
+    res.status(200).json({ message: "Password reset email sent successfully" });
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ error: getErrorMessage(error) });
+    } else {
+      res.status(500).json({ error: getErrorMessage(error) });
+    }
+  }
+});
 export default authRouter;
