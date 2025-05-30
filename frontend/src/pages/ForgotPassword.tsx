@@ -11,6 +11,7 @@ import {
 import StatusMessage from "../components/common/StatusMessage";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
+import AuthAPIClient from "../APIClients/AuthAPIClient";
 
 type SentEmail = {
   email: string;
@@ -23,7 +24,7 @@ const ForgotPassword = (): React.ReactElement => {
   const [sentEmailToUser, setSentEmailToUser] = useState(false);
   const [userEmailId, setUserEmaild] = useState("");
 
-  const handleUserAuth = (userEmail: string) => {
+  const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
@@ -31,31 +32,42 @@ const ForgotPassword = (): React.ReactElement => {
     );
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
-    } else if (sentEmails.some((item) => item.email === userEmail)) {
+    } else if (sentEmails.some((item) => item.email === userEmail) || sentEmail) {
+      // show "already sent" message if email was previously sent OR if we just sent one in this session
       setValidUser(true);
       setSentEmail(false);
       setSentEmailToUser(true);
     } else {
-      // make API call to check if user exists
+      // make API call to send forgot password email
       setValidUser(true);
-      setSentEmail(true);
-      // send email logic
-      const newEmail: SentEmail = {
-        email: userEmail,
-        timestamp: new Date().getTime(),
-      };
-      sentEmails.push(newEmail);
-      localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
-      setTimeout(() => {
-        const updatedSentEmails: SentEmail[] = JSON.parse(
-          localStorage.getItem("sentEmails") || "[]",
-        );
-        const filteredEmails = updatedSentEmails.filter(
-          (item: SentEmail) => item.email !== userEmail,
-        );
-        localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
-        setSentEmailToUser(false);
-      }, 60000);
+      
+      try {
+        const success = await AuthAPIClient.forgotPassword(userEmail);
+        if (success) {
+          setSentEmail(true);
+          // keep the localStorage logic for preventing duplicate sends in UI
+          const newEmail: SentEmail = {
+            email: userEmail,
+            timestamp: new Date().getTime(),
+          };
+          sentEmails.push(newEmail);
+          localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+          setTimeout(() => {
+            const updatedSentEmails: SentEmail[] = JSON.parse(
+              localStorage.getItem("sentEmails") || "[]",
+            );
+            const filteredEmails = updatedSentEmails.filter(
+              (item: SentEmail) => item.email !== userEmail,
+            );
+            localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
+            setSentEmailToUser(false);
+          }, 60000);
+        } else {
+          setValidUser(false);
+        }
+      } catch (error) {
+        setValidUser(false);
+      }
     }
   };
 
