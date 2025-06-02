@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // import react 
 import {
   Table,
   Thead,
@@ -12,18 +12,18 @@ import {
   Alert,
   AlertIcon,
   CloseButton,
-} from "@chakra-ui/react";
-import UserAPIClient from "../APIClients/UserAPIClient";
+} from "@chakra-ui/react"; // components from chakra
+import UserAPIClient from "../APIClients/UserAPIClient"; // all the user stuff 
 import { User } from "../types/UserTypes";
 import MainPageButton from "../components/common/MainPageButton";
-import AddUserFormModal, {
+import AddUserFormModal, { // i also need to create a button to add new tasks i think 
   AddUserRequest,
 } from "../components/crud/AddUserFormModal";
 
 const handleUserSubmit = async (formData: AddUserRequest) => {
   // eslint-disable-next-line no-useless-catch
   try {
-    await UserAPIClient.create({
+    await UserAPIClient.create({ // this calls the create function and tries to create a user when the form is submitted? using the info from the form??
       firstName: formData.firstName,
       lastName: formData.lastName,
       phoneNumber: formData.phoneNumber,
@@ -34,21 +34,21 @@ const handleUserSubmit = async (formData: AddUserRequest) => {
         | "Staff"
         | "Volunteer",
     });
-    await UserAPIClient.invite(formData.email);
+    await UserAPIClient.invite(formData.email); // if not, throw error 
   } catch (error) {
     throw error;
   }
 };
 
 const UserManagementPage = (): React.ReactElement => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]); // create states for?
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const getUsers = async () => {
     try {
-      const fetchedUsers = await UserAPIClient.get();
+      const fetchedUsers = await UserAPIClient.get(); // grab all the users from the list of users 
       if (fetchedUsers != null) {
         setUsers(fetchedUsers);
       }
@@ -57,7 +57,7 @@ const UserManagementPage = (): React.ReactElement => {
     }
   };
 
-  const addUser = () => {
+  const addUser = () => { // if in the add user state, open the modal
     setIsModalOpen(true);
   };
 
@@ -65,16 +65,16 @@ const UserManagementPage = (): React.ReactElement => {
     setIsModalOpen(false);
   };
 
-  const refreshUserManagementTable = async () => {
+  const refreshUserManagementTable = async () => { // if you want to refresh, get users 
     await getUsers();
   };
 
-  useEffect(() => {
+  useEffect(() => { // on load, use this effect of grabbing users? 
     getUsers();
   }, []);
 
   return (
-    <div style={{ textAlign: "center", width: "75%", margin: "0px auto" }}>
+    <div style={{ textAlign: "center", width: "75%", margin: "0px auto" }}>  
       <h1>User Management</h1>
       <VStack spacing="24px" style={{ margin: "24px auto" }}>
         {successMessage && (
