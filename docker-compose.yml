@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   frontend:
     # TODO: rename container for your project
@@ -13,7 +11,8 @@ services:
     ports:
       - 3000:3000
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=true
     env_file:
       - ./frontend/.env
   ts-backend:
@@ -52,6 +51,5 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
 volumes:
   postgres_data:
