@@ -28,6 +28,8 @@ const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,15 +42,26 @@ const LoginPage = (): React.ReactElement => {
     // Forgot password doesn’t have to route to anything yet
   };
   const handleLogin = async () => {
+    setEmailError("");
+    setPasswordError("");
     setErrorMessage("");
-    if (!email || !password) {
-      setErrorMessage("Email and Password are required.");
-      return;
+
+    let hasError = false;
+
+    if (!email) {
+      setEmailError("Email is required.");
+      hasError = true;
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      hasError = true;
     }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
+
+    if (!password) {
+      setPasswordError("Password is required.");
+      hasError = true;
     }
+
+    if (hasError) return;
 
     const user: AuthenticatedUser = await authAPIClient.login(email, password);
     setAuthenticatedUser(user);
@@ -198,13 +211,19 @@ const LoginPage = (): React.ReactElement => {
                       >
                         Email:
                       </FormLabel>
-                      <FormControl isInvalid={!!errorMessage}>
+                      <FormControl isInvalid={!!emailError || !!errorMessage}>
                         <ResponsiveEmailInput
                           value={email}
                           onChange={handleEmailChange}
                         />
+                        {emailError && (
+                          <Text fontSize="12px" color="red.500" mt="0.25rem">
+                            {emailError}
+                          </Text>
+                        )}
                       </FormControl>
                     </Box>
+
                     <Box>
                       <FormLabel
                         textColor="var(--gray-600, #4A5568)"
@@ -213,11 +232,18 @@ const LoginPage = (): React.ReactElement => {
                       >
                         Password:
                       </FormLabel>
-                      <FormControl isInvalid={!!errorMessage}>
+                      <FormControl
+                        isInvalid={!!passwordError || !!errorMessage}
+                      >
                         <ResponsivePasswordInput
                           value={password}
                           onChange={handlePasswordChange}
                         />
+                        {passwordError && (
+                          <Text fontSize="12px" color="red.500" mt="0.25rem">
+                            {passwordError}
+                          </Text>
+                        )}
                       </FormControl>
                     </Box>
                   </Stack>
