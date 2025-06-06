@@ -37,14 +37,14 @@ jobs:
       
       - name: Set up Node.js
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "20.11.1"
           cache: "yarn"
           cache-dependency-path: |
             frontend/yarn.lock
             backend/typescript/yarn.lock
-
+            
       - name: Install Node.js dependencies
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
         run: yarn --cwd ./frontend --prefer-offline && yarn --cwd ./backend/typescript --prefer-offline

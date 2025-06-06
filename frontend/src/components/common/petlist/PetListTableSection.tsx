@@ -22,7 +22,7 @@ import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
-  SkillLevel,
+  ColorLevel,
   TaskCategory,
   TaskStatus,
 } from "../../../types/TaskTypes";
@@ -30,7 +30,7 @@ import {
 export interface PetInfo {
   id: number;
   name: string;
-  skill: SkillLevel;
+  skill: ColorLevel;
   image: string;
   taskCategories: TaskCategory[];
   status: TaskStatus;
@@ -49,14 +49,6 @@ export const PetListTableSection = ({
   sectionTitle,
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
-
-  const borderColor: Record<SkillLevel, string> = {
-    [SkillLevel.GREEN]: "green.300",
-    [SkillLevel.YELLOW]: "yellow.400",
-    [SkillLevel.ORANGE]: "orange.400",
-    [SkillLevel.BLUE]: "blue.500",
-    [SkillLevel.RED]: "red.600",
-  };
 
   const statusColor: Record<TaskStatus, string> = {
     [TaskStatus.NEEDS_CARE]: "red.400",
@@ -117,9 +109,11 @@ export const PetListTableSection = ({
               {/* Pet & Status */}
               <HStack gap="3rem" minWidth="max-content">
                 <ProfilePhoto
-                  name={pet.name}
-                  color={borderColor[pet.skill]}
+                  // name={pet.name}
+                  color={pet.skill}
                   image={pet.image}
+                  size="large"
+                  type="pet"
                 />
                 <VStack align="flex-start" gap="0.5rem">
                   <Text textStyle="h3" m={0}>
