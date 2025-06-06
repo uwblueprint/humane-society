@@ -3,7 +3,7 @@ import { snakeCase } from "lodash";
 import UserModel from "../../../models/user.model";
 import UserService from "../userService";
 
-import { UserDTO } from "../../../types";
+import { UserDTO, Role, UserStatus } from "../../../types";
 
 import { testSql } from "../../../testUtils/testDb";
 
@@ -12,13 +12,15 @@ const testUsers = [
     firstName: "Peter",
     lastName: "Pan",
     authId: "123",
-    role: "Admin",
+    role: Role.ADMINISTRATOR,
+    status: UserStatus.ACTIVE,
   },
   {
     firstName: "Wendy",
     lastName: "Darling",
     authId: "321",
-    role: "User",
+    role: Role.STAFF,
+    status: UserStatus.ACTIVE,
   },
 ];
 

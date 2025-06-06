@@ -8,9 +8,10 @@ import {
 } from "../services/interfaces/simpleEntityService";
 import { getErrorMessage } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { Role } from "../types";
 
 const simpleEntityRouter: Router = Router();
-simpleEntityRouter.use(isAuthorizedByRole(new Set(["User", "Admin"])));
+simpleEntityRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 
 const simpleEntityService: ISimpleEntityService = new SimpleEntityService();
 

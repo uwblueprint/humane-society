@@ -1,9 +1,10 @@
 import * as firebaseAdmin from "firebase-admin";
 
+import fs from "fs";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, Token } from "../../types";
+import { AuthDTO, Role, Token, ResponseSuccessDTO } from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -58,17 +59,12 @@ class AuthService implements IAuthService {
         /* eslint-disable-next-line no-empty */
       } catch (error) {}
 
-      const user = await this.userService.createUser(
-        {
-          firstName: googleUser.firstName,
-          lastName: googleUser.lastName,
-          email: googleUser.email,
-          role: "User",
-          password: "",
-        },
-        googleUser.localId,
-        "GOOGLE",
-      );
+      const user = await this.userService.createUser({
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        email: googleUser.email,
+        role: Role.STAFF,
+      });
 
       return { ...token, ...user };
     } catch (error) {
@@ -104,6 +100,66 @@ class AuthService implements IAuthService {
     }
   }
 
+  async generateSignInLink(email: string): Promise<string> {
+    const actionCodeSettings = {
+      url: `http://localhost:3000/login/?email=${email}`,
+      handleCodeInApp: true,
+    };
+
+    try {
+      const signInLink = firebaseAdmin
+        .auth()
+        .generateSignInWithEmailLink(email, actionCodeSettings);
+      return await signInLink;
+    } catch (error) {
+      Logger.error(
+        `Failed to generate email sign-in link for user with email ${email}`,
+      );
+      throw error;
+    }
+  }
+
+  async sendInviteEmail(
+    name: string,
+    email: string,
+    role: string,
+  ): Promise<void> {
+    if (!this.emailService) {
+      const errorMessage =
+        "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
+      Logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    try {
+      let roleString =
+        role === "Administrator" || role === "Animal Behaviourist"
+          ? "an "
+          : "a ";
+      roleString += role;
+
+      const signInLink = await this.generateSignInLink(email);
+      const emailTemplate = fs.readFileSync(
+        `${__dirname}/../../html-templates/email.html`,
+        "utf8",
+      );
+      const renderedEmailTemplate = emailTemplate
+        .replace("{{ name }}", name)
+        .replace("{{ roleString }}", roleString)
+        .replace(/{{ signInLink }}/g, signInLink);
+      this.emailService.sendEmail(
+        email,
+        "Welcome to the Oakville and Milton Humane Society!",
+        renderedEmailTemplate,
+      );
+    } catch (error) {
+      Logger.error(
+        `Failed to send email invite link for user with email ${email}`,
+      );
+      throw error;
+    }
+  }
+
   async resetPassword(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
@@ -134,7 +190,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  async sendEmailVerificationLink(email: string): Promise<void> {
+  /* async sendEmailVerificationLink(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
         "Attempted to call sendEmailVerificationLink but this instance of AuthService does not have an EmailService instance";
@@ -145,23 +201,27 @@ class AuthService implements IAuthService {
     try {
       const emailVerificationLink = await firebaseAdmin
         .auth()
-        .generateEmailVerificationLink(email);
-      const emailBody = `
+        .generateEmailVerificationLink(email);        
+        const emailBody = `
       Hello,
+      <br><br>
+      You have been invited to the Oakville and Milton Humane Society as a <role>.
       <br><br>
       Please click the following link to verify your email and activate your account.
       <strong>This link is only valid for 1 hour.</strong>
       <br><br>
-      <a href=${emailVerificationLink}>Verify email</a>`;
+      <a href=${emailVerificationLink}>Verify email</a>
+      <br><br>
+      To log in for the first time, use this email and the following link.</strong>`;
 
-      this.emailService.sendEmail(email, "Verify your email", emailBody);
+      this.emailService.sendEmail(email, "Welcome to the Oakville and Milton Humane Society!", emailBody);
     } catch (error) {
       Logger.error(
         `Failed to generate email verification link for user with email ${email}`,
       );
       throw error;
     }
-  }
+  } */
 
   async isAuthorizedByRole(
     accessToken: string,
@@ -174,12 +234,10 @@ class AuthService implements IAuthService {
       const userRole = await this.userService.getUserRoleByAuthId(
         decodedIdToken.uid,
       );
-
-      const firebaseUser = await firebaseAdmin
-        .auth()
-        .getUser(decodedIdToken.uid);
-
-      return firebaseUser.emailVerified && roles.has(userRole);
+      // const firebaseUser = await firebaseAdmin
+      //   .auth()
+      //   .getUser(decodedIdToken.uid);
+      return /* firebaseUser.emailVerified && */ roles.has(userRole);
     } catch (error) {
       return false;
     }
@@ -197,12 +255,13 @@ class AuthService implements IAuthService {
         decodedIdToken.uid,
       );
 
-      const firebaseUser = await firebaseAdmin
-        .auth()
-        .getUser(decodedIdToken.uid);
+      // const firebaseUser = await firebaseAdmin
+      //   .auth()
+      //   .getUser(decodedIdToken.uid);
 
       return (
-        firebaseUser.emailVerified && String(tokenUserId) === requestedUserId
+        /* firebaseUser.emailVerified && */ String(tokenUserId) ===
+        requestedUserId
       );
     } catch (error) {
       return false;
@@ -227,6 +286,29 @@ class AuthService implements IAuthService {
       );
     } catch (error) {
       return false;
+    }
+  }
+
+  async setPassword(
+    email: string,
+    newPassword: string,
+  ): Promise<ResponseSuccessDTO> {
+    let errorMessage = "An unknown error occured. Please try again later.";
+    try {
+      const uid = await (await firebaseAdmin.auth().getUserByEmail(email)).uid;
+      await firebaseAdmin.auth().updateUser(uid, {
+        password: newPassword,
+      });
+      return { success: true } as ResponseSuccessDTO;
+    } catch (error: any) {
+      Logger.error(`Failed to update password. Error: ${error}`);
+      if (error.code === "auth/invalid-password") {
+        errorMessage =
+          "Password is too weak! Make sure it matches the password policy in Firebase.";
+      } else if (error.code === "auth/user-not-found") {
+        errorMessage = "No user found with the provided email!";
+      }
+      return { success: false, errorMessage };
     }
   }
 }

@@ -1,10 +1,4 @@
-import {
-  CreateUserDTO,
-  Role,
-  SignUpMethod,
-  UpdateUserDTO,
-  UserDTO,
-} from "../../types";
+import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
 
 interface IUserService {
   /**
@@ -57,16 +51,10 @@ interface IUserService {
   /**
    * Create a user, email verification configurable
    * @param user the user to be created
-   * @param authId the user's firebase auth id, optional
-   * @param signUpMethod the method user used to signup
    * @returns a UserDTO with the created user's information
    * @throws Error if user creation fails
    */
-  createUser(
-    user: CreateUserDTO,
-    authId?: string,
-    signUpMethod?: SignUpMethod,
-  ): Promise<UserDTO>;
+  createUser(user: CreateUserDTO): Promise<UserDTO>;
 
   /**
    * Update a user.
@@ -76,14 +64,14 @@ interface IUserService {
    * @returns a UserDTO with the updated user's information
    * @throws Error if user update fails
    */
-  updateUserById(userId: string, user: UpdateUserDTO): Promise<UserDTO>;
+  updateUserById(userId: number, user: UpdateUserDTO): Promise<UserDTO>;
 
   /**
    * Delete a user by id
    * @param userId user's userId
    * @throws Error if user deletion fails
    */
-  deleteUserById(userId: string): Promise<void>;
+  deleteUserById(userId: number): Promise<void>;
 
   /**
    * Delete a user by email

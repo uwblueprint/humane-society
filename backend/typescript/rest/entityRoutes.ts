@@ -12,11 +12,12 @@ import {
 } from "../services/interfaces/IEntityService";
 import { getErrorMessage } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { Role } from "../types";
 
 const upload = multer({ dest: "uploads/" });
 
 const entityRouter: Router = Router();
-entityRouter.use(isAuthorizedByRole(new Set(["User", "Admin"])));
+entityRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 
 const defaultBucket = process.env.FIREBASE_STORAGE_DEFAULT_BUCKET || "";
 const fileStorageService: IFileStorageService = new FileStorageService(

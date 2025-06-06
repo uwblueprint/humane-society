@@ -118,4 +118,21 @@ const update = async (
   }
 };
 
-export default { create, get, getFile, getCSV, update };
+const deleteEntity = async (
+  uuid: number | string,
+): Promise<EntityResponse[] | null> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.delete(`/entities/${uuid}`, {
+      headers: { Authorization: bearerToken },
+    });
+    return data.fileURL;
+  } catch (error) {
+    return null;
+  }
+};
+
+export default { create, get, getFile, getCSV, update, deleteEntity };

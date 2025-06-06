@@ -13,7 +13,7 @@ const MainPageButton = (): React.ReactElement => {
         type="button"
         style={{ textAlign: "center" }}
       >
-        Go Back
+        Go To PetList
       </button>
     </div>
   );

@@ -6,6 +6,7 @@ import { HOME_PAGE } from "../../constants/Routes";
 import AuthContext from "../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../types/AuthTypes";
 
+// NOTE: OHMS Onboarding flow does not use this page, this is from starter code
 const Signup = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
   const [firstName, setFirstName] = useState("");

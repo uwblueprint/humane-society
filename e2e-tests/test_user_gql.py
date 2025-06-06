@@ -142,14 +142,14 @@ def test_users_gql(backend_url, auth_header, lang, api, new_user_email):
     body1 = {
         "firstName": "Test",
         "lastName": "Script",
-        "role": "User",
+        "role": "Staff",
         "email": new_user_email,
         "password": "password",
     }
     body2 = {
         "firstName": "Test2",
         "lastName": "Script2",
-        "role": "User",
+        "role": "Staff",
         "email": new_user_email,
     }
     if lang != "ts":

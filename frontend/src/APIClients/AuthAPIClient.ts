@@ -1,5 +1,8 @@
+import { signInWithEmailLink } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import auth from "../firebase/firebase";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { AuthenticatedUser } from "../types/AuthTypes";
+import { AuthenticatedUser, PasswordSetResponse } from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
 import {
   getLocalStorageObjProperty,
@@ -23,6 +26,37 @@ const login = async (
   }
 };
 
+const loginWithSignInLink = async (
+  url: string,
+  email: string,
+): Promise<AuthenticatedUser> => {
+  try {
+    const result = await signInWithEmailLink(auth, email, url);
+    const accessToken = await result.user.getIdToken();
+    const { refreshToken } = result.user;
+    const { data } = await baseAPIClient.post(
+      "/auth/loginWithSignInLink",
+      { accessToken, refreshToken, email },
+      { withCredentials: true },
+    );
+    localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(data));
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof FirebaseError) {
+      if (
+        error.code === "auth/invalid-action-code" ||
+        error.code === "auth/expired-action-code"
+      ) {
+        console.log(
+          `Attempt to use invalidated sign-in link, ask administrator for new link: ${error.message}`,
+        ); // link has already been used once or has expired
+      }
+      // email has already been validated and user shouldn't be disabled, so auth/invalid-email and auth/user-disabled isn't checked
+    }
+    return null;
+  }
+};
+
 const loginWithGoogle = async (idToken: string): Promise<AuthenticatedUser> => {
   try {
     const { data } = await baseAPIClient.post(
@@ -37,7 +71,7 @@ const loginWithGoogle = async (idToken: string): Promise<AuthenticatedUser> => {
   }
 };
 
-const logout = async (userId: string | undefined): Promise<boolean> => {
+const logout = async (userId: number | undefined): Promise<boolean> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -110,11 +144,43 @@ const refresh = async (): Promise<boolean> => {
   }
 };
 
+const getEmailOfCurrentUser = async (): Promise<string> => {
+  const email = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "email");
+  if (typeof email === "string") {
+    return email;
+  }
+  throw new Error("Email not found for the current user");
+};
+
+const setPassword = async (
+  newPassword: string,
+): Promise<PasswordSetResponse> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const email = await getEmailOfCurrentUser();
+    // set password
+    const response = await baseAPIClient.post(
+      `/auth/setPassword/${email}`,
+      { newPassword },
+      { headers: { Authorization: bearerToken } },
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, errorMessage: "An unknown error occured." };
+  }
+};
+
 export default {
   login,
+  loginWithSignInLink,
   logout,
   loginWithGoogle,
   register,
   resetPassword,
   refresh,
+  setPassword,
+  getEmailOfCurrentUser,
 };
