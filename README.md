@@ -3,8 +3,7 @@ The Oakville and Milton Humane Society is a non-profit organization dedicated to
 
 ## Summer 2025 Team 
 **Tony Qiu** (Project Lead)
-**Sophia Zhu** (Project Manager, Developer)
-**Aayush Patel** (Developer)
+**Sophia Zhu** (Product Manager, Developer)
 **Aiden Suh** (Developer)
 **David Lu** (Developer)
 **Gateek Chandak** (Developer)
