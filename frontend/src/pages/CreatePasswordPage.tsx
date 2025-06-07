@@ -14,7 +14,7 @@ import { useHistory } from "react-router-dom";
 import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
 import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
 import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
-import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
+import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -197,31 +197,13 @@ const CreatePasswordPage = (): React.ReactElement => {
         </Flex>
       </Center>
       {showModal && (
-        <ResponsiveModalWindow>
-          <Text
-            color="blue.700"
-            textAlign="center"
-            textStyle={{ base: "h2", md: "h1" }}
-          >
-            Success!
-          </Text>
-          <Text
-            textStyle={{ base: "bodyMobile", md: "body" }}
-            textAlign="center"
-          >
-            Welcome to the Oakville & Milton Humane Society
-          </Text>
-          <Button
-            color="gray.100"
-            bg="blue.700"
-            height="3rem"
-            padding="0rem 1.875rem"
-            textStyle="button"
-            onClick={handleGetStarted}
-          >
-            Get Started
-          </Button>
-        </ResponsiveModalWindow>
+        <ResponsivePopupModal
+          open={showModal}
+          title="Success!"
+          message="Welcome to the Oakville & Milton Humane Society"
+          primaryButtonText="Get Started"
+          onPrimaryClick={handleGetStarted}
+        />
       )}
     </Flex>
   );
