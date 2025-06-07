@@ -1,4 +1,4 @@
-// Serves as a general component for a responsive popup that 
+// Serves as a general component for a responsive popup that
 // works for mobile and tablet view. Supports up to 2 action buttons
 // with red/blue options for the primary button.
 
@@ -26,7 +26,6 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
   secondaryButtonText,
   onSecondaryClick,
 }) => {
-
   const hasSecondaryButton = secondaryButtonText && onSecondaryClick;
 
   if (!open) return null;
@@ -56,32 +55,35 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
         boxShadow="lg"
       >
         {/* Title */}
-        <Text 
-          fontSize={{ base: "20px", md: "40px" }} 
-          fontWeight="600" lineHeight="100%"
-          color="blue.700" 
+        <Text
+          fontSize={{ base: "20px", md: "40px" }}
+          fontWeight="600"
+          lineHeight="100%"
+          color="blue.700"
           textAlign="center"
         >
           {title}
         </Text>
         {/* Message Body */}
-        <Text 
-          fontSize={{ base: "14px", md: "18px" }} 
-          fontWeight="400" color="gray.600" 
-          lineHeight="150%" textAlign="center" 
-          pl={{ base: "0px", md: "40px" }} 
+        <Text
+          fontSize={{ base: "14px", md: "18px" }}
+          fontWeight="400"
+          color="gray.600"
+          lineHeight="150%"
+          textAlign="center"
+          pl={{ base: "0px", md: "40px" }}
           pr={{ base: "0px", md: "40px" }}
         >
           {message}
         </Text>
 
         {/* Buttons */}
-        <Flex 
-          height={{ base: hasSecondaryButton ? "80px" : "32px", md: "48px" }} 
-          minH="32px" 
-          direction={{ base: "column-reverse", md: "row" }} 
-          gap={{ base: "16px", md: "24px" }} 
-          width="100%" 
+        <Flex
+          height={{ base: hasSecondaryButton ? "80px" : "32px", md: "48px" }}
+          minH="32px"
+          direction={{ base: "column-reverse", md: "row" }}
+          gap={{ base: "16px", md: "24px" }}
+          width="100%"
           justifyContent="center"
         >
           {/* Secondary Button */}
@@ -103,12 +105,16 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
           <Button
             fontSize={{ base: "12px", md: "18px" }}
             height={{ base: "32px", md: "48px" }}
-            minWidth={{ md: "200px"}}
+            minWidth={{ md: "200px" }}
             pl={{ md: "30px" }}
             pr={{ md: "30px" }}
-            color={ primaryButtonColor === "blue" ? "white" : "red.800"}
-            bg={ primaryButtonColor === "blue" ? "blue.700" : "red.200"}
-            _hover={ (primaryButtonColor === "blue") ? {bg: "blue.700"} : {bg: "red.200"} }
+            color={primaryButtonColor === "blue" ? "white" : "red.800"}
+            bg={primaryButtonColor === "blue" ? "blue.700" : "red.200"}
+            _hover={
+              primaryButtonColor === "blue"
+                ? { bg: "blue.700" }
+                : { bg: "red.200" }
+            }
             onClick={onPrimaryClick}
             flex={hasSecondaryButton ? "1" : "unset"}
           >
