@@ -9,9 +9,11 @@ interface ResponsivePopupModalProps {
   open: boolean; // Controls whether the modal is visible
   title: string; // Title displayed at the top of the modal
   message: string; // Main message or body text of the modal
-  primaryButtonText: string; // Text for the primary action button
-  onPrimaryClick: () => void; // Function to call when the primary button is clicked
+  // Primary button props
+  primaryButtonText?: string; // Text for the primary action button
+  onPrimaryClick?: () => void; // Function to call when the primary button is clicked
   primaryButtonColor?: "blue" | "red"; // Optional: sets primary button color; defaults to "blue"
+  // Secondary button props
   secondaryButtonText?: string; // Optional: text for the secondary button (if shown)
   onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
 }
@@ -26,6 +28,7 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
   secondaryButtonText,
   onSecondaryClick,
 }) => {
+  const hasPrimaryButton = primaryButtonText && onPrimaryClick;
   const hasSecondaryButton = secondaryButtonText && onSecondaryClick;
 
   if (!open) return null;
@@ -78,49 +81,53 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
         </Text>
 
         {/* Buttons */}
-        <Flex
-          height={{ base: hasSecondaryButton ? "80px" : "32px", md: "48px" }}
-          minH="32px"
-          direction={{ base: "column-reverse", md: "row" }}
-          gap={{ base: "16px", md: "24px" }}
-          width="100%"
-          justifyContent="center"
-        >
-          {/* Secondary Button */}
-          {hasSecondaryButton && (
-            <Button
-              flex="1"
-              variant="outline"
-              onClick={onSecondaryClick}
-              bg="gray.200"
-              color="gray.700"
-              fontSize={{ base: "12px", md: "18px" }}
-              _hover={{ bg: "gray.200" }}
-              height={{ base: "32px", md: "48px" }}
-            >
-              {secondaryButtonText}
-            </Button>
-          )}
-          {/* Primary Button */}
-          <Button
-            fontSize={{ base: "12px", md: "18px" }}
-            height={{ base: "32px", md: "48px" }}
-            minWidth={{ md: "200px" }}
-            pl={{ md: "30px" }}
-            pr={{ md: "30px" }}
-            color={primaryButtonColor === "blue" ? "white" : "red.800"}
-            bg={primaryButtonColor === "blue" ? "blue.700" : "red.200"}
-            _hover={
-              primaryButtonColor === "blue"
-                ? { bg: "blue.700" }
-                : { bg: "red.200" }
-            }
-            onClick={onPrimaryClick}
-            flex={hasSecondaryButton ? "1" : "unset"}
+        {(hasPrimaryButton || hasSecondaryButton) && (
+          <Flex
+            height={{ base: hasSecondaryButton ? "80px" : "32px", md: "48px" }}
+            minH="32px"
+            direction={{ base: "column-reverse", md: "row" }}
+            gap={{ base: "16px", md: "24px" }}
+            width="100%"
+            justifyContent="center"
           >
-            {primaryButtonText}
-          </Button>
-        </Flex>
+            {/* Secondary Button */}
+            {hasSecondaryButton && (
+              <Button
+                flex="1"
+                variant="outline"
+                onClick={onSecondaryClick}
+                bg="gray.200"
+                color="gray.700"
+                fontSize={{ base: "12px", md: "18px" }}
+                _hover={{ bg: "gray.200" }}
+                height={{ base: "32px", md: "48px" }}
+              >
+                {secondaryButtonText}
+              </Button>
+            )}
+            {/* Primary Button */}
+            {hasPrimaryButton && (
+              <Button
+                fontSize={{ base: "12px", md: "18px" }}
+                height={{ base: "32px", md: "48px" }}
+                minWidth={{ md: "200px" }}
+                pl={{ md: "30px" }}
+                pr={{ md: "30px" }}
+                color={primaryButtonColor === "blue" ? "white" : "red.800"}
+                bg={primaryButtonColor === "blue" ? "blue.700" : "red.200"}
+                _hover={
+                  primaryButtonColor === "blue"
+                    ? { bg: "blue.700" }
+                    : { bg: "red.200" }
+                }
+                onClick={onPrimaryClick}
+                flex={hasSecondaryButton ? "1" : "unset"}
+              >
+                {primaryButtonText}
+              </Button>
+            )}
+          </Flex>
+        )}
       </Flex>
     </Center>
   );
