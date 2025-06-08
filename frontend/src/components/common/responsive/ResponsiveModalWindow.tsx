@@ -18,7 +18,7 @@ const ResponsiveModalWindow = ({
       bg="rgba(26, 32, 44, 0.60)"
     >
       <Flex
-        bg="var(--gray-50, gray.50)"
+        bg="gray.50"
         align-items="center"
         width={{ base: "90%", sm: "21.375rem", md: "33.625rem" }}
         direction="column"

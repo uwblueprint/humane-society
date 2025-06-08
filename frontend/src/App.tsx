@@ -66,16 +66,16 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <Route
+                exact
+                path={Routes.FORGOT_PASSWORD_PAGE}
+                component={ForgotPasswordPage}
+              />
               <PrivateRoute
                 exact
                 path={Routes.CREATE_PASSWORD_PAGE}
                 component={CreatePasswordPage}
                 allowedRoles={AuthConstants.ALL_ROLES}
-              />
-              <Route
-                exact
-                path={Routes.FORGOT_PASSWORD_PAGE}
-                component={ForgotPasswordPage}
               />
               {/* Protected Routes Wrapped in Layout */}
               <Layout>

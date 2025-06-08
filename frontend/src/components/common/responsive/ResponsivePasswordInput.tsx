@@ -22,7 +22,7 @@ const ResponsivePasswordInput = ({
   return (
     <InputGroup size="md">
       <Input
-        fontSize="14px"
+        fontSize="16px"
         height="2.4rem"
         pr="2rem"
         type={showPassword ? "text" : "password"}

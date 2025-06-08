@@ -35,7 +35,7 @@ const LoginPage = (): React.ReactElement => {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "error" | "default">(
-    "default"
+    "default",
   );
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +76,7 @@ const LoginPage = (): React.ReactElement => {
       if (signInEmail && isSignInLink) {
         const user: AuthenticatedUser = await authAPIClient.loginWithSignInLink(
           url,
-          signInEmail
+          signInEmail,
         );
         if (user) {
           setAuthenticatedUser(user);
@@ -184,7 +184,7 @@ const LoginPage = (): React.ReactElement => {
               <ResponsiveLogo />
               <ResponsiveAuthContainer>
                 <Text
-                  color="#4A5568"
+                  color="gray.700"
                   textStyle={{ base: "h2Mobile", md: "h2" }}
                   mb="0"
                   textAlign="center"
@@ -196,7 +196,7 @@ const LoginPage = (): React.ReactElement => {
                     <Box>
                       <FormLabel
                         fontSize="14px"
-                        textColor="var(--gray-600, #4A5568)"
+                        textColor="gray.600"
                         lineHeight="8px"
                       >
                         Email:
@@ -210,8 +210,8 @@ const LoginPage = (): React.ReactElement => {
                     </Box>
                     <Box>
                       <FormLabel
-                        textColor="var(--gray-600, #4A5568)"
-                        fontSize="14px"
+                        textColor="gray.600"
+                        fontSize="16px"
                         lineHeight="8px"
                       >
                         Password:
@@ -243,7 +243,7 @@ const LoginPage = (): React.ReactElement => {
                       color="white"
                       h="2.4rem"
                       width="100%"
-                      bg="var(--blue-700, #2C5282)"
+                      bg="blue.700"
                     >
                       Login
                     </Button>

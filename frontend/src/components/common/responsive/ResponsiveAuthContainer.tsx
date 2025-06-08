@@ -14,7 +14,7 @@ const ResponsiveAuthContainer = ({
         base: "2.25rem",
         md: "2.5rem",
       }}
-      background="var(--gray-100, gray.100)"
+      background="gray.100"
       borderRadius="0.375rem"
       justifyContent="center"
     >

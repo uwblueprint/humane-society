@@ -7,6 +7,7 @@ import {
   FormControl,
   FormErrorMessage,
   Flex,
+  FormLabel,
 } from "@chakra-ui/react";
 import StatusMessage from "../components/common/StatusMessage";
 import background from "../assets/images/background.png";
@@ -28,7 +29,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
-      localStorage.getItem("sentEmails") || "[]"
+      localStorage.getItem("sentEmails") || "[]",
     );
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
@@ -57,10 +58,10 @@ const ForgotPasswordPage = (): React.ReactElement => {
           localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
           setTimeout(() => {
             const updatedSentEmails: SentEmail[] = JSON.parse(
-              localStorage.getItem("sentEmails") || "[]"
+              localStorage.getItem("sentEmails") || "[]",
             );
             const filteredEmails = updatedSentEmails.filter(
-              (item: SentEmail) => item.email !== userEmail
+              (item: SentEmail) => item.email !== userEmail,
             );
             localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
             setSentEmailToUser(false);
@@ -129,9 +130,9 @@ const ForgotPasswordPage = (): React.ReactElement => {
           your password.
         </Text>
         <Flex direction="column" gap="8px">
-          <Text m="0" color="gray.600" textStyle="body">
+          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
             Email:
-          </Text>
+          </FormLabel>
           <FormControl isInvalid={!validUser}>
             <Input
               placeholder="username@humanesociety.org"
@@ -140,6 +141,11 @@ const ForgotPasswordPage = (): React.ReactElement => {
               _placeholder={{ color: "gray.400" }}
               borderColor="gray.400"
               onChange={handleInputChange}
+              fontSize="16px"
+              height="2.4rem"
+              py="14.5px"
+              px="16px"
+              bg="#FFFFFF"
             />
             {!validUser && (
               <FormErrorMessage fontSize="16px">
