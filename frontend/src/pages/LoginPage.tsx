@@ -19,7 +19,11 @@ import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
 import authAPIClient from "../APIClients/AuthAPIClient";
-import { CREATE_PASSWORD_PAGE, HOME_PAGE } from "../constants/Routes";
+import {
+  CREATE_PASSWORD_PAGE,
+  FORGOT_PASSWORD_PAGE,
+  HOME_PAGE,
+} from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
 import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
@@ -29,6 +33,10 @@ const LoginPage = (): React.ReactElement => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [status, setStatus] = useState<"loading" | "error" | "default">(
+    "default",
+  );
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -37,7 +45,7 @@ const LoginPage = (): React.ReactElement => {
     setPassword(event.target.value);
   };
   const handleForgotPassword = () => {
-    // Forgot password doesn’t have to route to anything yet
+    setRedirectTo(FORGOT_PASSWORD_PAGE);
   };
   const handleLogin = async () => {
     setErrorMessage("");
@@ -56,11 +64,6 @@ const LoginPage = (): React.ReactElement => {
       setErrorMessage("Invalid login credentials.");
     }
   };
-
-  const [redirectTo, setRedirectTo] = useState<string | null>(null);
-  const [status, setStatus] = useState<"loading" | "error" | "default">(
-    "default",
-  );
 
   useEffect(() => {
     setStatus("loading");
@@ -88,7 +91,7 @@ const LoginPage = (): React.ReactElement => {
 
     if (authenticatedUser) {
       setRedirectTo(HOME_PAGE);
-    } else {
+    } else if (redirectTo !== FORGOT_PASSWORD_PAGE) {
       checkIfSignInLink();
     }
   }, [authenticatedUser, setAuthenticatedUser]);
@@ -147,7 +150,7 @@ const LoginPage = (): React.ReactElement => {
               <ResponsiveLogo />
               <ResponsiveAuthContainer>
                 <Text
-                  color="#4A5568"
+                  color="gray.700"
                   textStyle={{ base: "h2Mobile", md: "h2" }}
                   mb="0"
                   textAlign="center"
@@ -159,7 +162,7 @@ const LoginPage = (): React.ReactElement => {
                     <Box>
                       <FormLabel
                         fontSize="14px"
-                        textColor="var(--gray-600, #4A5568)"
+                        textColor="gray.600"
                         lineHeight="8px"
                       >
                         Email:
@@ -173,8 +176,8 @@ const LoginPage = (): React.ReactElement => {
                     </Box>
                     <Box>
                       <FormLabel
-                        textColor="var(--gray-600, #4A5568)"
-                        fontSize="14px"
+                        textColor="gray.600"
+                        fontSize="16px"
                         lineHeight="8px"
                       >
                         Password:
@@ -206,7 +209,7 @@ const LoginPage = (): React.ReactElement => {
                       color="white"
                       h="2.4rem"
                       width="100%"
-                      bg="var(--blue-700, #2C5282)"
+                      bg="blue.700"
                     >
                       Login
                     </Button>

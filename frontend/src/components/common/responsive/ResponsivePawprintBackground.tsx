@@ -21,7 +21,7 @@ const ResponsivePawprintBackground = (): React.ReactElement => {
         sx={{
           backgroundImage: "url('/images/pawprint_background.png')",
           backgroundRepeat: "no-repeat",
-          backgroundColor: "var(--blue-700, #2C5282)",
+          backgroundColor: "blue.700",
           backgroundPosition: "center",
           zIndex: -1,
 

@@ -7,23 +7,25 @@ import {
   FormControl,
   FormErrorMessage,
   Flex,
+  FormLabel,
 } from "@chakra-ui/react";
 import StatusMessage from "../components/common/StatusMessage";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
+import AuthAPIClient from "../APIClients/AuthAPIClient";
 
 type SentEmail = {
   email: string;
   timestamp: number;
 };
 
-const ForgotPassword = (): React.ReactElement => {
+const ForgotPasswordPage = (): React.ReactElement => {
   const [validUser, setValidUser] = useState(true);
   const [sentEmail, setSentEmail] = useState(false);
   const [sentEmailToUser, setSentEmailToUser] = useState(false);
   const [userEmailId, setUserEmaild] = useState("");
 
-  const handleUserAuth = (userEmail: string) => {
+  const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
@@ -31,31 +33,45 @@ const ForgotPassword = (): React.ReactElement => {
     );
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
-    } else if (sentEmails.some((item) => item.email === userEmail)) {
+    } else if (
+      sentEmails.some((item) => item.email === userEmail) ||
+      sentEmail
+    ) {
+      // show "already sent" message if email was previously sent OR if we just sent one in this session
       setValidUser(true);
       setSentEmail(false);
       setSentEmailToUser(true);
     } else {
-      // make API call to check if user exists
+      // make API call to send forgot password email
       setValidUser(true);
-      setSentEmail(true);
-      // send email logic
-      const newEmail: SentEmail = {
-        email: userEmail,
-        timestamp: new Date().getTime(),
-      };
-      sentEmails.push(newEmail);
-      localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
-      setTimeout(() => {
-        const updatedSentEmails: SentEmail[] = JSON.parse(
-          localStorage.getItem("sentEmails") || "[]",
-        );
-        const filteredEmails = updatedSentEmails.filter(
-          (item: SentEmail) => item.email !== userEmail,
-        );
-        localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
-        setSentEmailToUser(false);
-      }, 60000);
+
+      try {
+        const success = await AuthAPIClient.forgotPassword(userEmail);
+        if (success) {
+          setSentEmail(true);
+          // keep the localStorage logic for preventing duplicate sends in UI
+          const newEmail: SentEmail = {
+            email: userEmail,
+            timestamp: new Date().getTime(),
+          };
+          sentEmails.push(newEmail);
+          localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+          setTimeout(() => {
+            const updatedSentEmails: SentEmail[] = JSON.parse(
+              localStorage.getItem("sentEmails") || "[]",
+            );
+            const filteredEmails = updatedSentEmails.filter(
+              (item: SentEmail) => item.email !== userEmail,
+            );
+            localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
+            setSentEmailToUser(false);
+          }, 60000);
+        } else {
+          setValidUser(false);
+        }
+      } catch (error) {
+        setValidUser(false);
+      }
     }
   };
 
@@ -88,40 +104,48 @@ const ForgotPassword = (): React.ReactElement => {
       overflow="auto"
     >
       <Box
-        maxWidth="100vw"
-        width={["90vw", "50vw", "50vw", "40vw", "30vw"]}
+        width="100vw"
+        maxWidth="500px"
         padding={["36px", "36px", "36px", "60px 64px"]}
         borderRadius="6px"
-        backgroundColor="var(--gray-50, #F7FAFC)"
+        backgroundColor="gray.50"
         boxShadow="lg"
+        gap="36px"
         display="flex"
         flexDirection="column"
         marginTop="20px"
         marginBottom="20px"
       >
         <Text
-          color="#4A5568"
+          color="gray.600"
           textStyle="h2"
           textAlign="center"
           lineHeight="120%"
+          m="0"
         >
           Forgot Password?
         </Text>
-        <Text py="36px" color="#4A5568" textStyle="body" textAlign="center">
+        <Text m="0" color="gray.600" textStyle="body">
           Please enter the email address associated with your account to reset
           your password.
         </Text>
-        <Box>
-          <Text color="#4A5568" textStyle="body">
+        <Flex direction="column" gap="8px">
+          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
             Email:
-          </Text>
+          </FormLabel>
           <FormControl isInvalid={!validUser}>
             <Input
               placeholder="username@humanesociety.org"
               size="lg"
               borderRadius="md"
+              _placeholder={{ color: "gray.400" }}
               borderColor="gray.400"
               onChange={handleInputChange}
+              fontSize="16px"
+              height="2.4rem"
+              py="14.5px"
+              px="16px"
+              bg="#FFFFFF"
             />
             {!validUser && (
               <FormErrorMessage fontSize="16px">
@@ -141,7 +165,7 @@ const ForgotPassword = (): React.ReactElement => {
           >
             Send
           </Button>
-        </Box>
+        </Flex>
         {sentEmail && (
           <StatusMessage message="A password reset link has been sent to your email!" />
         )}
@@ -153,4 +177,4 @@ const ForgotPassword = (): React.ReactElement => {
   );
 };
 
-export default ForgotPassword;
+export default ForgotPasswordPage;
