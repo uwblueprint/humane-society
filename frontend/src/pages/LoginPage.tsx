@@ -26,7 +26,7 @@ import {
 } from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
-import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
+import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
 
 const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -106,54 +106,20 @@ const LoginPage = (): React.ReactElement => {
 
   return (
     <>
-      {status === "loading" && (
-        <Flex
-          maxWidth="100vw"
-          height="100vh"
-          position="relative"
-          backgroundRepeat="no-repeat"
-          backgroundPosition="center"
-          backgroundSize="cover"
-          sx={{
-            "@media (orientation: landscape)": {
-              height: "auto",
-              minHeight: "100vh",
-              overflowY: "auto",
-            },
-          }}
-        >
-          <ResponsiveModalWindow>
-            <Text color="#2C5282" textAlign="center">
-              Loading, please wait...
-            </Text>
-          </ResponsiveModalWindow>
-        </Flex>
-      )}
+      <ResponsivePopupModal
+        open={status === "loading"}
+        title="Loading"
+        message="Loading, please wait..."
+      />
 
-      {status === "error" && (
-        <Flex
-          maxWidth="100vw"
-          height="100vh"
-          position="relative"
-          backgroundRepeat="no-repeat"
-          backgroundPosition="center"
-          backgroundSize="cover"
-          sx={{
-            "@media (orientation: landscape)": {
-              height: "auto",
-              minHeight: "100vh",
-              overflowY: "auto",
-            },
-          }}
-        >
-          <ResponsiveModalWindow>
-            <Text color="red.500" textAlign="center">
-              An error occurred. If your link is expired, ask an adminstrator
-              for assistance.
-            </Text>
-          </ResponsiveModalWindow>
-        </Flex>
-      )}
+      <ResponsivePopupModal
+        open={status === "error"}
+        title="Error"
+        message="An error occurred. If your link is expired, ask an administrator for assistance."
+        primaryButtonText="Close"
+        onPrimaryClick={() => setStatus("default")}
+        primaryButtonColor="red"
+      />
 
       {status === "default" && !redirectTo && (
         <Flex
