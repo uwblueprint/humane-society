@@ -2,17 +2,18 @@
 The Oakville and Milton Humane Society is a non-profit organization dedicated to protecting and improving the life of animals within the community and connecting them to the communities that care about them in Oakville and Milton. We will be developing a web application that allows volunteers to sign up for pet-sitting tasks, enabling volunteers to efficiently care for multiple animals.
 
 ## Summer 2025 Team 
-**Tony Qiu** (Project Lead)
-**Sophia Zhu** (Product Manager, Developer)
-**Aiden Suh** (Developer)
-**David Lu** (Developer)
-**Gateek Chandak** (Developer)
-**Haresh Goyal** (Developer)
-**Harry He** (Developer)
-**Mehul Sharma** (Developer)
-**Smeet Shah** (Developer)
-**Surya Jammalamadaka** (Developer)
-**Teresa Yu** (Developer)
+- **Tony Qiu** (Project Lead)
+- **Sehshasayi Thuray** (Project Lead)
+- **Sophia Zhu** (Product Manager, Developer)
+- **Aiden Suh** (Developer)
+- **David Lu** (Developer)
+- **Gateek Chandak** (Developer)
+- **Haresh Goyal** (Developer)
+- **Harry He** (Developer)
+- **Mehul Sharma** (Developer)
+- **Smeet Shah** (Developer)
+- **Surya Jammalamadaka** (Developer)
+- **Teresa Yu** (Developer)
 
 ## Stack Choices
 **Backend Language:** TypeScript (Express.js on Node.js) <br>
