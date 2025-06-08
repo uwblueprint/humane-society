@@ -18,7 +18,7 @@ type SentEmail = {
   timestamp: number;
 };
 
-const ForgotPassword = (): React.ReactElement => {
+const ForgotPasswordPage = (): React.ReactElement => {
   const [validUser, setValidUser] = useState(true);
   const [sentEmail, setSentEmail] = useState(false);
   const [sentEmailToUser, setSentEmailToUser] = useState(false);
@@ -28,11 +28,14 @@ const ForgotPassword = (): React.ReactElement => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     // added uwblueprint for test
     const sentEmails: SentEmail[] = JSON.parse(
-      localStorage.getItem("sentEmails") || "[]",
+      localStorage.getItem("sentEmails") || "[]"
     );
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
-    } else if (sentEmails.some((item) => item.email === userEmail) || sentEmail) {
+    } else if (
+      sentEmails.some((item) => item.email === userEmail) ||
+      sentEmail
+    ) {
       // show "already sent" message if email was previously sent OR if we just sent one in this session
       setValidUser(true);
       setSentEmail(false);
@@ -40,7 +43,7 @@ const ForgotPassword = (): React.ReactElement => {
     } else {
       // make API call to send forgot password email
       setValidUser(true);
-      
+
       try {
         const success = await AuthAPIClient.forgotPassword(userEmail);
         if (success) {
@@ -54,10 +57,10 @@ const ForgotPassword = (): React.ReactElement => {
           localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
           setTimeout(() => {
             const updatedSentEmails: SentEmail[] = JSON.parse(
-              localStorage.getItem("sentEmails") || "[]",
+              localStorage.getItem("sentEmails") || "[]"
             );
             const filteredEmails = updatedSentEmails.filter(
-              (item: SentEmail) => item.email !== userEmail,
+              (item: SentEmail) => item.email !== userEmail
             );
             localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
             setSentEmailToUser(false);
@@ -100,31 +103,33 @@ const ForgotPassword = (): React.ReactElement => {
       overflow="auto"
     >
       <Box
-        maxWidth="100vw"
-        width={["90vw", "50vw", "50vw", "40vw", "30vw"]}
+        width="100vw"
+        maxWidth="500px"
         padding={["36px", "36px", "36px", "60px 64px"]}
         borderRadius="6px"
-        backgroundColor="var(--gray-50, #F7FAFC)"
+        backgroundColor="gray.50"
         boxShadow="lg"
+        gap="36px"
         display="flex"
         flexDirection="column"
         marginTop="20px"
         marginBottom="20px"
       >
         <Text
-          color="#4A5568"
+          color="gray.600"
           textStyle="h2"
           textAlign="center"
           lineHeight="120%"
+          m="0"
         >
           Forgot Password?
         </Text>
-        <Text py="36px" color="#4A5568" textStyle="body" textAlign="center">
+        <Text m="0" color="gray.600" textStyle="body">
           Please enter the email address associated with your account to reset
           your password.
         </Text>
-        <Box>
-          <Text color="#4A5568" textStyle="body">
+        <Flex direction="column" gap="8px">
+          <Text m="0" color="gray.600" textStyle="body">
             Email:
           </Text>
           <FormControl isInvalid={!validUser}>
@@ -132,6 +137,7 @@ const ForgotPassword = (): React.ReactElement => {
               placeholder="username@humanesociety.org"
               size="lg"
               borderRadius="md"
+              _placeholder={{ color: "gray.400" }}
               borderColor="gray.400"
               onChange={handleInputChange}
             />
@@ -153,7 +159,7 @@ const ForgotPassword = (): React.ReactElement => {
           >
             Send
           </Button>
-        </Box>
+        </Flex>
         {sentEmail && (
           <StatusMessage message="A password reset link has been sent to your email!" />
         )}
@@ -165,4 +171,4 @@ const ForgotPassword = (): React.ReactElement => {
   );
 };
 
-export default ForgotPassword;
+export default ForgotPasswordPage;

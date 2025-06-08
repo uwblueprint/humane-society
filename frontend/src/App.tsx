@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
-import ForgotPasswordPage from "./pages/ForgotPassword";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";

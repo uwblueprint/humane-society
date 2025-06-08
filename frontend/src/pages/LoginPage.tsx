@@ -19,7 +19,11 @@ import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
 import authAPIClient from "../APIClients/AuthAPIClient";
-import { CREATE_PASSWORD_PAGE, FORGOT_PASSWORD_PAGE, HOME_PAGE } from "../constants/Routes";
+import {
+  CREATE_PASSWORD_PAGE,
+  FORGOT_PASSWORD_PAGE,
+  HOME_PAGE,
+} from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
 import ResponsiveModalWindow from "../components/common/responsive/ResponsiveModalWindow";
@@ -31,9 +35,8 @@ const LoginPage = (): React.ReactElement => {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "error" | "default">(
-    "default",
+    "default"
   );
-
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -73,7 +76,7 @@ const LoginPage = (): React.ReactElement => {
       if (signInEmail && isSignInLink) {
         const user: AuthenticatedUser = await authAPIClient.loginWithSignInLink(
           url,
-          signInEmail,
+          signInEmail
         );
         if (user) {
           setAuthenticatedUser(user);
