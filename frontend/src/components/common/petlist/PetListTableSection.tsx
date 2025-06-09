@@ -23,7 +23,7 @@ import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
-  TaskCategory,
+  TaskTaskType,
   TaskStatus,
 } from "../../../types/TaskTypes";
 
@@ -32,7 +32,7 @@ export interface PetInfo {
   name: string;
   skill: ColorLevel;
   image: string;
-  taskCategories: TaskCategory[];
+  taskCategories: TaskTaskType[];
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
@@ -56,18 +56,18 @@ export const PetListTableSection = ({
     [TaskStatus.ASSIGNED]: "blue.500",
   };
 
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
-    [TaskCategory.WALK]: WalkIcon,
-    [TaskCategory.GAMES]: GamesIcon,
-    [TaskCategory.PEN_TIME]: PenTimeIcon,
-    [TaskCategory.HUSBANDRY]: HusbandryIcon,
-    [TaskCategory.TRAINING]: TrainingIcon,
-    [TaskCategory.MISC]: MiscIcon,
+  const taskTaskTypeIcons: Record<TaskTaskType, React.ElementType> = {
+    [TaskTaskType.WALK]: WalkIcon,
+    [TaskTaskType.GAMES]: GamesIcon,
+    [TaskTaskType.PEN_TIME]: PenTimeIcon,
+    [TaskTaskType.HUSBANDRY]: HusbandryIcon,
+    [TaskTaskType.TRAINING]: TrainingIcon,
+    [TaskTaskType.MISC]: MiscIcon,
   };
 
-  const getDisplayedCategories = (taskCategories: TaskCategory[]) =>
+  const getDisplayedCategories = (taskCategories: TaskTaskType[]) =>
     taskCategories.slice(0, 4);
-  const getExtraTasks = (taskCategories: TaskCategory[]) =>
+  const getExtraTasks = (taskCategories: TaskTaskType[]) =>
     taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
 
   return (
@@ -137,15 +137,15 @@ export const PetListTableSection = ({
               <HStack gap="2rem" minWidth="max-content">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
-                    (category, index) => {
+                    (taskType, index) => {
                       return (
                         <HStack key={index} gap="0.8125rem" p={0}>
                           <Icon
-                            as={taskCategoryIcons[category]}
+                            as={taskTaskTypeIcons[taskType]}
                             boxSize="2.5rem"
                           />
                           <Text textStyle="caption" m={0}>
-                            {category}
+                            {taskType}
                           </Text>
                         </HStack>
                       );

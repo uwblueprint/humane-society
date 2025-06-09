@@ -1,26 +1,26 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 
-const OLD_TABLE_NAME = "activities";
-const NEW_TABLE_NAME = "activity_types";
-const USER_PET_ACTIVITIES_TABLE = "user_pet_activities";
-const ACTIVITIES_TABLE = "activities";
+const OLD_TABLE_NAME = "tasks";
+const NEW_TABLE_NAME = "task_templates";
+const USER_PET_ACTIVITIES_TABLE = "user_pet_tasks";
+const ACTIVITIES_TABLE = "tasks";
 
 export const up: Migration = async ({ context: sequelize }) => {
-  // Rename the activities table to activity_types
+  // Rename the tasks table to task_templates
   await sequelize
     .getQueryInterface()
     .renameTable(OLD_TABLE_NAME, NEW_TABLE_NAME);
 
-  // Change the activity_id column in user_pet_activities to activity_type_id
+  // Change the task_id column in user_pet_tasks to task_template_id
   await sequelize
     .getQueryInterface()
-    .renameColumn(USER_PET_ACTIVITIES_TABLE, "activity_id", "activity_type_id");
+    .renameColumn(USER_PET_ACTIVITIES_TABLE, "task_id", "task_template_id");
 
-  // Update the references for activity_type_id to point to the new activity_types table
+  // Update the references for task_template_id to point to the new task_templates table
   await sequelize
     .getQueryInterface()
-    .changeColumn(USER_PET_ACTIVITIES_TABLE, "activity_type_id", {
+    .changeColumn(USER_PET_ACTIVITIES_TABLE, "task_template_id", {
       type: DataType.INTEGER,
       allowNull: false,
       references: {
@@ -29,32 +29,32 @@ export const up: Migration = async ({ context: sequelize }) => {
       },
     });
 
-  // Change the name of user_pet_activities to activities
+  // Change the name of user_pet_tasks to tasks
   await sequelize
     .getQueryInterface()
     .renameTable(USER_PET_ACTIVITIES_TABLE, ACTIVITIES_TABLE);
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
-  // Rename the activities table back to user_pet_activities
+  // Rename the tasks table back to user_pet_tasks
   await sequelize
     .getQueryInterface()
     .renameTable(ACTIVITIES_TABLE, USER_PET_ACTIVITIES_TABLE);
 
-  // Rename the activity_types table back to activities
+  // Rename the task_templates table back to tasks
   await sequelize
     .getQueryInterface()
     .renameTable(NEW_TABLE_NAME, OLD_TABLE_NAME);
 
-  // Revert the activity_type_id column back to activity_id
+  // Revert the task_template_id column back to task_id
   await sequelize
     .getQueryInterface()
-    .renameColumn(USER_PET_ACTIVITIES_TABLE, "activity_type_id", "activity_id");
+    .renameColumn(USER_PET_ACTIVITIES_TABLE, "task_template_id", "task_id");
 
-  // Revert the activity_id column to reference the old activities table
+  // Revert the task_id column to reference the old tasks table
   await sequelize
     .getQueryInterface()
-    .changeColumn(USER_PET_ACTIVITIES_TABLE, "activity_id", {
+    .changeColumn(USER_PET_ACTIVITIES_TABLE, "task_id", {
       type: DataType.INTEGER,
       allowNull: false,
       references: {

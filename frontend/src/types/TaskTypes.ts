@@ -6,7 +6,7 @@ export enum ColorLevel {
   BLUE = "Blue",
 }
 
-export enum TaskCategory {
+export enum TaskTaskType {
   WALK = "Walk",
   GAMES = "Games",
   PEN_TIME = "Pen Time",

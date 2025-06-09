@@ -7,12 +7,12 @@ import YAML from "yamljs";
 
 import { sequelize } from "./models";
 import authRouter from "./rest/authRoutes";
-import activityTypeRouter from "./rest/activityTypeRoutes";
+import taskTemplateRouter from "./rest/taskTemplateRoutes";
 import entityRouter from "./rest/entityRoutes";
 import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
-import activityRouter from "./rest/activityRoutes";
+import taskRouter from "./rest/taskRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -35,12 +35,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
-app.use("/activity-types", activityTypeRouter);
+app.use("/task-templates", taskTemplateRouter);
 app.use("/entities", entityRouter);
 app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
-app.use("/activities", activityRouter);
+app.use("/tasks", taskRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 sequelize.authenticate();
