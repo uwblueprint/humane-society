@@ -2,7 +2,7 @@ import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 import { TaskType } from "../types";
 
-const TABLE_NAME = "task_templates";
+const TABLE_NAME = "activity_types";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().addColumn(TABLE_NAME, "taskType", {
