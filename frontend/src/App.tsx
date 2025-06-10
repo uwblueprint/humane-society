@@ -31,6 +31,7 @@ import EditTeamInfoPage from "./pages/EditTeamPage";
 import HooksDemo from "./pages/HooksDemo";
 import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
+import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
@@ -156,6 +157,12 @@ const App = (): React.ReactElement => {
                     exact
                     path={`${Routes.PROFILE_PAGE}/:id`}
                     component={ProfilePage}
+                    allowedRoles={AuthConstants.ALL_ROLES}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={`${Routes.PET_PROFILE_PAGE}/:id`}
+                    component={PetProfilePage}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
                   <PrivateRoute
