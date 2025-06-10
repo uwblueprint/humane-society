@@ -10,7 +10,7 @@ export const up: Migration = async ({ context: sequelize }) => {
 
   /* change animal_type_id to animal_tag (enum) */
   await queryInterface.removeColumn(TABLE_NAME, "animal_type_id");
-  // delete taskType enum, otherwise causes issues with migrating up, down, then up
+  // delete category enum, otherwise causes issues with migrating up, down, then up
   await queryInterface.addColumn(TABLE_NAME, "animal_tag", {
     type: DataType.ENUM(...Object.values(AnimalTag)),
     allowNull: false,
@@ -87,7 +87,7 @@ export const down: Migration = async ({ context: sequelize }) => {
 
   /* update pet status enum */
   await queryInterface.removeColumn(TABLE_NAME, "status");
-  // delete taskType enum, otherwise causes issues with migrating up, down, then up
+  // delete category enum, otherwise causes issues with migrating up, down, then up
   await sequelize
     .getQueryInterface()
     .sequelize.query('DROP TYPE IF EXISTS "enum_pets_status";');
