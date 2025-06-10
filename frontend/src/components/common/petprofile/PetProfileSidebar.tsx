@@ -9,6 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React from "react";
+import { capitalize } from "lodash";
 import {
   AlertCircleIcon,
   CakeIcon,
@@ -37,13 +38,6 @@ export interface PetProfileSidebarProps {
   sex: SexEnum;
   avatarUrl: string;
   petCare: CareInfo;
-}
-
-function capitalizeWord(word: string): string {
-  if (word.length > 0) {
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
-  }
-  return word;
 }
 
 function getCareInfoIcon(key: string): string {
@@ -219,7 +213,7 @@ function PetProfileSidebar({
         {Object.entries(petCare).map(([key, description]) => (
           <ArrowDropdown
             key={key}
-            headerText={capitalizeWord(key)}
+            headerText={capitalize(key)}
             iconSrc={getCareInfoIcon(key)}
             bodyText={description}
           />
