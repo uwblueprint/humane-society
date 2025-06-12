@@ -27,45 +27,55 @@ const ForgotPasswordPage = (): React.ReactElement => {
 
   const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
-    // added uwblueprint for test
-    const sentEmails: SentEmail[] = JSON.parse(
+    const expiryTime = 60 * 1000; // 60 seconds
+    const now = new Date().getTime();
+  
+    // Load and filter sent emails to keep only unexpired entries
+    let sentEmails: SentEmail[] = JSON.parse(
       localStorage.getItem("sentEmails") || "[]",
     );
+    sentEmails = sentEmails.filter((item) => now - item.timestamp < expiryTime);
+    localStorage.setItem("sentEmails", JSON.stringify(sentEmails)); // Save cleaned list
+  
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
     } else if (
       sentEmails.some((item) => item.email === userEmail) ||
       sentEmail
     ) {
-      // show "already sent" message if email was previously sent OR if we just sent one in this session
+      // already sent to this user in the last 60s
       setValidUser(true);
       setSentEmail(false);
       setSentEmailToUser(true);
     } else {
-      // make API call to send forgot password email
+      // Proceed to send email
       setValidUser(true);
-
+  
       try {
         const success = await AuthAPIClient.forgotPassword(userEmail);
         if (success) {
           setSentEmail(true);
-          // keep the localStorage logic for preventing duplicate sends in UI
+  
+          // Add new email to localStorage with timestamp
           const newEmail: SentEmail = {
             email: userEmail,
-            timestamp: new Date().getTime(),
+            timestamp: now,
           };
           sentEmails.push(newEmail);
           localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+  
+          // Optionally, reset the "already sent" message after timeout
           setTimeout(() => {
-            const updatedSentEmails: SentEmail[] = JSON.parse(
+            let updatedSentEmails: SentEmail[] = JSON.parse(
               localStorage.getItem("sentEmails") || "[]",
             );
-            const filteredEmails = updatedSentEmails.filter(
-              (item: SentEmail) => item.email !== userEmail,
+            updatedSentEmails = updatedSentEmails.filter(
+              (item: SentEmail) =>
+                item.email !== userEmail || now - item.timestamp < expiryTime,
             );
-            localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
+            localStorage.setItem("sentEmails", JSON.stringify(updatedSentEmails));
             setSentEmailToUser(false);
-          }, 60000);
+          }, expiryTime);
         } else {
           setValidUser(false);
         }
