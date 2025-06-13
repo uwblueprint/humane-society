@@ -55,4 +55,4 @@ const PageTitleUpdater: React.FC = () => {
   return null;
 };
 
-export default PageTitleUpdater; 
+export default PageTitleUpdater;
