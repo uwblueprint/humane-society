@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "ISC", 
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@types/graphql-upload": "^8.0.6",
