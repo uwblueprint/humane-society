@@ -6,6 +6,7 @@ import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";
@@ -70,6 +71,11 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}
                 component={ForgotPasswordPage}
+              />
+              <Route
+                exact
+                path={Routes.RESET_PASSWORD_PAGE}
+                component={ResetPasswordPage}
               />
               <PrivateRoute
                 exact
