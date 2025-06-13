@@ -50,7 +50,7 @@ const PageTitleUpdater: React.FC = () => {
 
   useEffect(() => {
     document.title = getPageTitle();
-  }, [location.pathname]);
+  }, [location.pathname, getPageTitle]);
 
   return null;
 };
