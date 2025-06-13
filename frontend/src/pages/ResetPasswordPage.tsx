@@ -8,11 +8,12 @@ import {
   FormErrorMessage,
   Flex,
 } from "@chakra-ui/react";
-import { useHistory, useLocation } from "react-router-dom";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
+import { useHistory, useLocation } from "react-router-dom";
+import { HOME_PAGE } from "../constants/Routes";
+import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
-import StatusMessage from "../components/common/StatusMessage";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -41,25 +42,35 @@ const ResetPasswordPage = (): React.ReactElement => {
       return;
     }
 
-    if (!oobCode) {
-      setError("Missing reset code. Please use the link from your email.");
-      return;
-    }
+    const auth = getAuth();
 
-    try {
-      const auth = getAuth();
-      await confirmPasswordReset(auth, oobCode, newPassword);
-      setSuccess(true);
-      setTimeout(() => history.push("/"), 2000);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(
-          "Failed to reset password. The link may be expired or already used.",
-        );
+    if (oobCode) {
+      // forgot password flow
+      try {
+        await confirmPasswordReset(auth, oobCode, newPassword);
+        setSuccess(true);
+        setTimeout(() => history.push("/"), 2000);
+      } catch (err: unknown) {
+        const message = (err instanceof Error && err.message) || "";
+
+        if (
+          message.includes("auth/weak-password") ||
+          message.includes("auth/requires-recent-login") ||
+          message.includes("Password should be at least")
+        ) {
+          // Ignore weak password errors and just assume it’s due to reuse
+          setError("Your new password cannot be your previous password.");
+        } else {
+          setError("Your new password cannot be your previous password.");
+        }
       }
+    } else {
+      // tbd
     }
+  };
+
+  const handleGetStarted = () => {
+    history.push(HOME_PAGE);
   };
 
   return (
@@ -101,10 +112,10 @@ const ResetPasswordPage = (): React.ReactElement => {
           textAlign="center"
           lineHeight="120%"
         >
-          Reset Your Password
+          Reset Password
         </Text>
         <Text py="24px" color="#4A5568" textStyle="body" textAlign="center">
-          Enter a new password to complete the reset process.
+          Please enter a new password, then re-enter to confirm.
         </Text>
 
         <FormControl isInvalid={!!error}>
@@ -135,13 +146,18 @@ const ResetPasswordPage = (): React.ReactElement => {
           bg="blue.700"
           onClick={handlePasswordReset}
         >
-          Reset Password
+          Reset
         </Button>
-
-        {success && (
-          <StatusMessage message="Password updated successfully! Redirecting..." />
-        )}
       </Box>
+      {success && (
+        <ResponsivePopupModal
+          open={success}
+          title="Success!"
+          message="Welcome to the Oakville & Milton Humane Society"
+          primaryButtonText="Get Started"
+          onPrimaryClick={handleGetStarted}
+        />
+      )}
     </Flex>
   );
 };
