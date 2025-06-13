@@ -160,26 +160,24 @@ class AuthService implements IAuthService {
     }
   }
 
-  async resetPassword(email: string): Promise<void> {
+  // rename to sendforgotPasswordEmail
+  async sendforgotPasswordEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
-        "Attempted to call resetPassword but this instance of AuthService does not have an EmailService instance";
+        "Attempted to call sendforgotPasswordEmail but this instance of AuthService does not have an EmailService instance";
       Logger.error(errorMessage);
       throw new Error(errorMessage);
     }
-  
     try {
-      const firebaseLink = await firebaseAdmin.auth().generatePasswordResetLink(email);
-  
+      const firebaseLink = await firebaseAdmin
+        .auth()
+        .generatePasswordResetLink(email);
       const url = new URL(firebaseLink);
       const oobCode = url.searchParams.get("oobCode");
-  
       if (!oobCode) {
         throw new Error("oobCode not found in Firebase reset link");
       }
-  
       const customResetLink = `http://localhost:3000/reset-password?oobCode=${oobCode}`;
-  
       const emailBody = `
         Hello,
         <br><br>
@@ -189,8 +187,11 @@ class AuthService implements IAuthService {
         <br><br>
         <a href="${customResetLink}">Reset Password</a>
       `;
-  
-      await this.emailService.sendEmail(email, "Your Password Reset Link", emailBody);
+      await this.emailService.sendEmail(
+        email,
+        "Your Password Reset Link",
+        emailBody,
+      );
     } catch (error) {
       Logger.error(
         `Failed to generate password reset link for user with email ${email}`,
@@ -198,8 +199,6 @@ class AuthService implements IAuthService {
       throw error;
     }
   }
-  
-
   /* async sendEmailVerificationLink(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =

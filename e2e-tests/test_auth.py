@@ -18,9 +18,9 @@ def register_user(backend_url, body, access_token_field):
     return response.json()
 
 
-def reset_password(backend_url, auth_header, email):
+def send_forgot_password_email(backend_url, auth_header, email):
     response = requests.post(
-        f"{backend_url}/auth/resetPassword/{email}",
+        f"{backend_url}/auth/sendforgotPasswordEmail/{email}",
         headers=auth_header,
     )
     assert response.status_code == 204

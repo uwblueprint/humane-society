@@ -58,7 +58,7 @@ interface IUserService {
 
   /**
    * Update a user.
-   * Note: the password cannot be updated using this method, use IAuthService.resetPassword instead
+   * Note: the password cannot be updated using this method, use IAuthService.sendforgotPasswordEmail instead
    * @param userId user's id
    * @param user the user to be updated
    * @returns a UserDTO with the updated user's information

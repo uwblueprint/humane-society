@@ -108,14 +108,14 @@ const register = async (
   }
 };
 
-const resetPassword = async (email: string | undefined): Promise<boolean> => {
+const sendforgotPasswordEmail = async (email: string | undefined): Promise<boolean> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
   try {
     await baseAPIClient.post(
-      `/auth/resetPassword/${email}`,
+      `/auth/sendforgotPasswordEmail/${email}`,
       {},
       { headers: { Authorization: bearerToken } },
     );
@@ -188,7 +188,7 @@ export default {
   logout,
   loginWithGoogle,
   register,
-  resetPassword,
+  sendforgotPasswordEmail,
   refresh,
   setPassword,
   getEmailOfCurrentUser,
