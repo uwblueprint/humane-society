@@ -1,6 +1,6 @@
 import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
 import { FilterSection } from "../types/FilterTypes";
-import { AnimalTag, TaskTaskType, ColorLevel } from "../types/TaskTypes";
+import { AnimalTag, TaskType, ColorLevel } from "../types/TaskTypes";
 
 const filterConfig: Record<string, FilterSection[]> = {
   petListAdmin: [
@@ -11,8 +11,8 @@ const filterConfig: Record<string, FilterSection[]> = {
     },
     {
       name: "Task TaskType",
-      value: "taskCategories",
-      options: Object.values(TaskTaskType),
+      value: "taskTypes",
+      options: Object.values(TaskType),
     },
     {
       name: "Status",
@@ -34,8 +34,8 @@ const filterConfig: Record<string, FilterSection[]> = {
     },
     {
       name: "Task TaskType",
-      value: "taskCategories",
-      options: Object.values(TaskTaskType),
+      value: "taskTypes",
+      options: Object.values(TaskType),
     },
     {
       name: "Status",

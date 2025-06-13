@@ -40,7 +40,7 @@ export enum AnimalTag {
 export interface Task {
   id: number;
   name: string;
-  category: TaskCategory;
+  category: TaskType;
   instructions: string;
 }
 
@@ -48,40 +48,40 @@ export const mockTasks: Task[] = [
   {
     id: 1,
     name: "Morning walk",
-    category: TaskCategory.WALK,
+    category: TaskType.WALK,
     instructions:
       "Morning walks with the walker walkwalkwalkwalkwalkwalkwalkwalk…",
   },
   {
     id: 2,
     name: "Everything is Awesome!",
-    category: TaskCategory.GAMES,
+    category: TaskType.GAMES,
     instructions:
       "The focus of Everything is Awesome game is to make the dog feel appreciated and engaged.",
   },
   {
     id: 3,
     name: "Nap time",
-    category: TaskCategory.PEN_TIME,
+    category: TaskType.PEN_TIME,
     instructions: "Instructions here blablablabalbblablablablablablalbalb.",
   },
   {
     id: 4,
     name: "Feeding",
-    category: TaskCategory.HUSBANDRY,
+    category: TaskType.HUSBANDRY,
     instructions:
       "Feeding the pet instructions here filler text filler text filler text filler text.",
   },
   {
     id: 5,
     name: "Toilet training",
-    category: TaskCategory.TRAINING,
+    category: TaskType.TRAINING,
     instructions: "Step‐by‐step guide to toilet training your pet goes here.",
   },
   {
     id: 6,
     name: "blahblahblahblahblahbalhalhalblahblabla…",
-    category: TaskCategory.MISC,
+    category: TaskType.MISC,
     instructions: "Instructions here blablablabalbblablablablablablablblabb.",
   },
 ];

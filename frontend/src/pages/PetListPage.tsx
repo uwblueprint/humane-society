@@ -5,7 +5,7 @@ import PetListTable from "../components/pet-list/PetListTable";
 import { PetInfo } from "../components/pet-list/PetListTableSection";
 import Search from "../components/common/Search";
 import Filter from "../components/common/Filter";
-import { TaskTaskType } from "../types/TaskTypes";
+import { TaskType } from "../types/TaskTypes";
 import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants";
 import getCurrentUserRole from "../utils/CommonUtils";
 
@@ -34,7 +34,7 @@ const PetListPage = (): React.ReactElement => {
           if (Array.isArray(prev[key as keyof PetInfo])) {
             return filters[key].some((filter) =>
               (
-                prev[key as keyof PetInfo] as (string | TaskTaskType)[]
+                prev[key as keyof PetInfo] as (string | TaskType)[]
               ).includes(filter),
             );
           }

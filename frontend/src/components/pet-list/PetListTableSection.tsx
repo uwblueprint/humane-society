@@ -22,7 +22,7 @@ export interface PetInfo {
   name: string;
   skill: ColorLevel;
   image: string;
-  taskCategories: TaskType[];
+  taskTypes: TaskType[];
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
@@ -49,10 +49,10 @@ export const PetListTableSection = ({
     [TaskType.MISC]: MiscIcon,
   };
 
-  const getDisplayedCategories = (taskCategories: TaskType[]) =>
-    taskCategories.slice(0, 4);
-  const getExtraTasks = (taskCategories: TaskType[]) =>
-    taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
+  const getDisplayedCategories = (taskTypes: TaskType[]) =>
+    taskTypes.slice(0, 4);
+  const getExtraTasks = (taskTypes: TaskType[]) =>
+    taskTypes.length > 4 ? `+${taskTypes.length - 4}` : null;
 
   return (
     <Tbody>
@@ -105,25 +105,20 @@ export const PetListTableSection = ({
               {/* Task Categories */}
               <Flex gap="2rem" minWidth="max-content" alignItems="center">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
-                  {getDisplayedCategories(pet.taskCategories).map(
+                  {getDisplayedCategories(pet.taskTypes).map(
                     (taskType, index) => {
                       return (
-                        <Flex
-                          key={index}
-                          gap="0.8125rem"
-                          alignItems="center"
-                          p={0}
-                        >
+                        <Flex key={index} gap="0.8125rem" p={0}>
                           <Icon as={taskTypeIcons[taskType]} boxSize="2.5rem" />
-                          <Text textStyle="caption" m={0} color="gray.700">
+                          <Text textStyle="caption" m={0}>
                             {taskType}
                           </Text>
                         </Flex>
                       );
-                    },
+                    }
                   )}
                 </SimpleGrid>
-                {getExtraTasks(pet.taskCategories) && (
+                {getExtraTasks(pet.taskTypes) && (
                   <Flex
                     borderRadius="0.375rem"
                     boxSize="2.5rem"
@@ -132,7 +127,7 @@ export const PetListTableSection = ({
                     bg="gray.400"
                   >
                     <Text color="gray.50" textStyle="bodyBold" m={0}>
-                      {getExtraTasks(pet.taskCategories)}
+                      {getExtraTasks(pet.taskTypes)}
                     </Text>
                   </Flex>
                 )}
