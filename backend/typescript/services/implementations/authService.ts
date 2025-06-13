@@ -167,21 +167,30 @@ class AuthService implements IAuthService {
       Logger.error(errorMessage);
       throw new Error(errorMessage);
     }
-
+  
     try {
-      const resetLink = await firebaseAdmin
-        .auth()
-        .generatePasswordResetLink(email);
+      const firebaseLink = await firebaseAdmin.auth().generatePasswordResetLink(email);
+  
+      const url = new URL(firebaseLink);
+      const oobCode = url.searchParams.get("oobCode");
+  
+      if (!oobCode) {
+        throw new Error("oobCode not found in Firebase reset link");
+      }
+  
+      const customResetLink = `http://localhost:3000/reset-password?oobCode=${oobCode}`;
+  
       const emailBody = `
-      Hello,
-      <br><br>
-      We have received a password reset request for your account.
-      Please click the following link to reset it.
-      <strong>This link is only valid for 1 hour.</strong>
-      <br><br>
-      <a href=${resetLink}>Reset Password</a>`;
-
-      this.emailService.sendEmail(email, "Your Password Reset Link", emailBody);
+        Hello,
+        <br><br>
+        We have received a password reset request for your account.
+        Please click the following link to reset it.
+        <strong>This link is only valid for 1 hour.</strong>
+        <br><br>
+        <a href="${customResetLink}">Reset Password</a>
+      `;
+  
+      await this.emailService.sendEmail(email, "Your Password Reset Link", emailBody);
     } catch (error) {
       Logger.error(
         `Failed to generate password reset link for user with email ${email}`,
@@ -189,6 +198,7 @@ class AuthService implements IAuthService {
       throw error;
     }
   }
+  
 
   /* async sendEmailVerificationLink(email: string): Promise<void> {
     if (!this.emailService) {
