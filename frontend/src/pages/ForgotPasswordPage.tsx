@@ -29,14 +29,14 @@ const ForgotPasswordPage = (): React.ReactElement => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     const expiryTime = 60 * 1000; // 60 seconds
     const now = new Date().getTime();
-  
+
     // Load and filter sent emails to keep only unexpired entries
     let sentEmails: SentEmail[] = JSON.parse(
       localStorage.getItem("sentEmails") || "[]",
     );
     sentEmails = sentEmails.filter((item) => now - item.timestamp < expiryTime);
     localStorage.setItem("sentEmails", JSON.stringify(sentEmails)); // Save cleaned list
-  
+
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
     } else if (
@@ -50,12 +50,12 @@ const ForgotPasswordPage = (): React.ReactElement => {
     } else {
       // Proceed to send email
       setValidUser(true);
-  
+
       try {
         const success = await AuthAPIClient.forgotPassword(userEmail);
         if (success) {
           setSentEmail(true);
-  
+
           // Add new email to localStorage with timestamp
           const newEmail: SentEmail = {
             email: userEmail,
@@ -63,7 +63,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
           };
           sentEmails.push(newEmail);
           localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
-  
+
           // Optionally, reset the "already sent" message after timeout
           setTimeout(() => {
             let updatedSentEmails: SentEmail[] = JSON.parse(
@@ -73,7 +73,10 @@ const ForgotPasswordPage = (): React.ReactElement => {
               (item: SentEmail) =>
                 item.email !== userEmail || now - item.timestamp < expiryTime,
             );
-            localStorage.setItem("sentEmails", JSON.stringify(updatedSentEmails));
+            localStorage.setItem(
+              "sentEmails",
+              JSON.stringify(updatedSentEmails),
+            );
             setSentEmailToUser(false);
           }, expiryTime);
         } else {

@@ -55,7 +55,9 @@ const ResetPasswordPage = (): React.ReactElement => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Failed to reset password. The link may be expired or already used.");
+        setError(
+          "Failed to reset password. The link may be expired or already used.",
+        );
       }
     }
   };
@@ -93,7 +95,12 @@ const ResetPasswordPage = (): React.ReactElement => {
         marginTop="20px"
         marginBottom="20px"
       >
-        <Text color="#4A5568" textStyle="h2" textAlign="center" lineHeight="120%">
+        <Text
+          color="#4A5568"
+          textStyle="h2"
+          textAlign="center"
+          lineHeight="120%"
+        >
           Reset Your Password
         </Text>
         <Text py="24px" color="#4A5568" textStyle="body" textAlign="center">
