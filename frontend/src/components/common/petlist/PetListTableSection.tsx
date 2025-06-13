@@ -23,7 +23,7 @@ import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
-  TaskTaskType,
+  TaskType,
   TaskStatus,
 } from "../../../types/TaskTypes";
 import PetStatus from "../PetStatus";
@@ -33,7 +33,7 @@ export interface PetInfo {
   name: string;
   skill: ColorLevel;
   image: string;
-  taskCategories: TaskTaskType[];
+  taskTypes: TaskType[];
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
@@ -51,19 +51,19 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
-    [TaskCategory.WALK]: WalkIcon,
-    [TaskCategory.GAMES]: GamesIcon,
-    [TaskCategory.PEN_TIME]: PenTimeIcon,
-    [TaskCategory.HUSBANDRY]: HusbandryIcon,
-    [TaskCategory.TRAINING]: TrainingIcon,
-    [TaskCategory.MISC]: MiscIcon,
+  const taskTypeIcons: Record<TaskType, React.ElementType> = {
+    [TaskType.WALK]: WalkIcon,
+    [TaskType.GAMES]: GamesIcon,
+    [TaskType.PEN_TIME]: PenTimeIcon,
+    [TaskType.HUSBANDRY]: HusbandryIcon,
+    [TaskType.TRAINING]: TrainingIcon,
+    [TaskType.MISC]: MiscIcon,
   };
 
-  const getDisplayedCategories = (taskCategories: TaskTaskType[]) =>
-    taskCategories.slice(0, 4);
-  const getExtraTasks = (taskCategories: TaskTaskType[]) =>
-    taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
+  const getDisplayedCategories = (taskTypes: TaskType[]) =>
+    taskTypes.slice(0, 4);
+  const getExtraTasks = (taskTypes: TaskType[]) =>
+    taskTypes.length > 4 ? `+${taskTypes.length - 4}` : null;
 
   return (
     <Tbody>
@@ -122,12 +122,12 @@ export const PetListTableSection = ({
               {/* Task Categories */}
               <HStack gap="2rem" minWidth="max-content">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
-                  {getDisplayedCategories(pet.taskCategories).map(
+                  {getDisplayedCategories(pet.taskTypes).map(
                     (taskType, index) => {
                       return (
                         <HStack key={index} gap="0.8125rem" p={0}>
                           <Icon
-                            as={taskTaskTypeIcons[taskType]}
+                            as={taskTypeIcons[taskType]}
                             boxSize="2.5rem"
                           />
                           <Text textStyle="caption" m={0}>
@@ -138,7 +138,7 @@ export const PetListTableSection = ({
                     },
                   )}
                 </SimpleGrid>
-                {getExtraTasks(pet.taskCategories) && (
+                {getExtraTasks(pet.taskTypes) && (
                   <Flex
                     borderRadius="0.375rem"
                     boxSize="2.5rem"
@@ -147,7 +147,7 @@ export const PetListTableSection = ({
                     bg="gray.400"
                   >
                     <Text color="gray.50" textStyle="bodyBold" m={0}>
-                      {getExtraTasks(pet.taskCategories)}
+                      {getExtraTasks(pet.taskTypes)}
                     </Text>
                   </Flex>
                 )}
