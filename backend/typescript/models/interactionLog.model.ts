@@ -48,6 +48,7 @@ export default class Interaction extends Model {
 
   // Cache for loaded polymorphic associations
   private _target_user?: User;
+
   private _target_pet?: Pets;
 
   // Getter for target_user
@@ -66,7 +67,8 @@ export default class Interaction extends Model {
       const user = await User.findByPk(this.target_id);
       this._target_user = user || undefined;
       return user;
-    } else if (this.target_type === "pets" && !this._target_pet) {
+    }
+    if (this.target_type === "pets" && !this._target_pet) {
       const pet = await Pets.findByPk(this.target_id);
       this._target_pet = pet || undefined;
       return pet;
@@ -77,7 +79,7 @@ export default class Interaction extends Model {
 
   // Helper method to get target with type safety
   async getTarget(): Promise<User | Pets | null> {
-    return await this.loadTarget();
+    return this.loadTarget();
   }
 
   // Method to include polymorphic associations in queries
