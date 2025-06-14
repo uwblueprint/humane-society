@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import PgActivityType from "../../models/activityType.model";
 import {
   IActivityTypeService,
@@ -6,7 +7,6 @@ import {
 } from "../interfaces/activityTypeService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { Op } from "sequelize";
 
 const Logger = logger(__filename);
 
@@ -32,16 +32,18 @@ class ActivityTypeService implements IActivityTypeService {
     };
   }
 
-  async getActivityTypes(page: number, limit: number): Promise<ActivityTypeResponseDTO[]> {
-  
+  async getActivityTypes(
+    page: number,
+    limit: number,
+  ): Promise<ActivityTypeResponseDTO[]> {
     try {
       const activityTypes: Array<PgActivityType> = await PgActivityType.findAll(
         {
           where: {
             id: {
-              [Op.lt]: page*limit + 1,
-              [Op.gt]: (page - 1) * limit
-            }
+              [Op.lt]: page * limit + 1,
+              [Op.gt]: (page - 1) * limit,
+            },
           },
           raw: true,
         },
