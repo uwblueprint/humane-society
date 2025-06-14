@@ -6,7 +6,7 @@ const ResetPassword = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
 
   const onResetPasswordClick = async () => {
-    await authAPIClient.sendforgotPasswordEmail(authenticatedUser?.email);
+    await authAPIClient.sendForgotPasswordEmail(authenticatedUser?.email);
   };
 
   return (
