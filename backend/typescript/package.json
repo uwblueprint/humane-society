@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "ISC", 
   "dependencies": {
     "@types/graphql-upload": "^8.0.6",
     "@types/json2csv": "^5.0.3",
