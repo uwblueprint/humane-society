@@ -37,7 +37,7 @@ def register_user(backend_url, body, access_token_field):
 def send_forgot_password_email(backend_url, auth_header, email):
     query = """
     mutation($email: String!) {
-        sendforgotPasswordEmail(email: $email)
+        sendForgotPasswordEmail(email: $email)
     }
     """
     response = requests.post(
