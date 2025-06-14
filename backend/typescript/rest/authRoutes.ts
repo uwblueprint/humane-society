@@ -112,7 +112,7 @@ authRouter.post(
 
 /* Emails a password reset link to the user with the specified email */
 authRouter.post(
-  "/sendforgotPasswordEmail/:email",
+  "/send-forgot-password-email/:email",
   isAuthorizedByEmail("email"),
   async (req, res) => {
     try {
