@@ -20,7 +20,7 @@ def register_user(backend_url, body, access_token_field):
 
 def send_forgot_password_email(backend_url, auth_header, email):
     response = requests.post(
-        f"{backend_url}/auth/sendforgotPasswordEmail/{email}",
+        f"{backend_url}/auth/send-forgot-password-email/{email}",
         headers=auth_header,
     )
     assert response.status_code == 204
