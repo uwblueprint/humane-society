@@ -190,7 +190,7 @@ export default {
   logout,
   loginWithGoogle,
   register,
-  sendforgotPasswordEmail,
+  sendForgotPasswordEmail,
   refresh,
   setPassword,
   getEmailOfCurrentUser,
