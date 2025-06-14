@@ -108,7 +108,7 @@ const register = async (
   }
 };
 
-const sendforgotPasswordEmail = async (
+const sendForgotPasswordEmail = async (
   email: string | undefined,
 ): Promise<boolean> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
