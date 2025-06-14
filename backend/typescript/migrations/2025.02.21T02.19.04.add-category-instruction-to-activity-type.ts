@@ -1,6 +1,14 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
-import { Category } from "../types";
+
+enum Category {
+  GAMES = "Games",
+  HUSBANDRY = "Husbandry",
+  PEN_TIME = "Pen Time",
+  TRAINING = "Training",
+  WALK = "Walk",
+  MISC = "Misc.",
+}
 
 const TABLE_NAME = "activity_types";
 

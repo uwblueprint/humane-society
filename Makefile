@@ -18,7 +18,7 @@ generate-migration:
 ifndef NAME
 	$(error NAME argument was not provided. Command should include a NAME parameter)
 endif
-	docker exec -it humane_society_backend /bin/bash -c "node migrate create --name $(name).ts"
+	docker exec -it humane_society_backend /bin/bash -c "node migrate create --name $(NAME).ts"
 
 # Docker Commands
 start-docker:
