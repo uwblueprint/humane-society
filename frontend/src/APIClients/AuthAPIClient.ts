@@ -117,7 +117,7 @@ const sendforgotPasswordEmail = async (
   )}`;
   try {
     await baseAPIClient.post(
-      `/auth/sendforgotPasswordEmail/${email}`,
+      `/auth/send-forgot-password-email/${email}`,
       {},
       { headers: { Authorization: bearerToken } },
     );
