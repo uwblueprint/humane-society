@@ -46,7 +46,7 @@ def send_forgot_password_email(backend_url, auth_header, email):
         headers=auth_header,
     )
     assert "data" in response.json()
-    assert "sendforgotPasswordEmail" in response.json()["data"]
+    assert "sendForgotPasswordEmail" in response.json()["data"]
     data = response.json()["data"]["sendforgotPasswordEmail"]
     assert data
     return data
