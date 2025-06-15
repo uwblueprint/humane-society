@@ -13,8 +13,11 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
   const newConfig = { ...config };
 
   // if access token in header has expired, do a refresh
-  const authHeaderParts = config.headers.Authorization?.split(" ");
+  const authHeader = config.headers?.Authorization;
+  const authHeaderParts =
+    typeof authHeader === "string" ? authHeader.split(" ") : null;
   if (
+    config.headers && // Add this check
     authHeaderParts &&
     authHeaderParts.length >= 2 &&
     authHeaderParts[0].toLowerCase() === "bearer"
@@ -39,6 +42,9 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
         accessToken,
       );
 
+      if (!newConfig.headers) {
+        newConfig.headers = {};
+      }
       newConfig.headers.Authorization = accessToken;
     }
   }
