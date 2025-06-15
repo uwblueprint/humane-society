@@ -34,10 +34,10 @@ def register_user(backend_url, body, access_token_field):
     return data
 
 
-def reset_password(backend_url, auth_header, email):
+def send_forgot_password_email(backend_url, auth_header, email):
     query = """
     mutation($email: String!) {
-        resetPassword(email: $email)
+        sendForgotPasswordEmail(email: $email)
     }
     """
     response = requests.post(
@@ -46,8 +46,8 @@ def reset_password(backend_url, auth_header, email):
         headers=auth_header,
     )
     assert "data" in response.json()
-    assert "resetPassword" in response.json()["data"]
-    data = response.json()["data"]["resetPassword"]
+    assert "sendForgotPasswordEmail" in response.json()["data"]
+    data = response.json()["data"]["sendForgotPasswordEmail"]
     assert data
     return data
 
