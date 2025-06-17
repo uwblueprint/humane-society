@@ -20,7 +20,7 @@ export const up: Migration = async ({ context: sequelize }) => {
     detailed_description: {
       type: DataType.STRING,
       allowNull: false,
-    }
+    },
   });
 
   // Create interaction_log table
