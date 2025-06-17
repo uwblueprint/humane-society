@@ -13,6 +13,7 @@ import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 import activityRouter from "./rest/activityRoutes";
+import matchmakingRouter from "./rest/matchmakingRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -41,7 +42,9 @@ app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/activities", activityRouter);
+app.use("/matchmaking", matchmakingRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 sequelize.authenticate();
 
