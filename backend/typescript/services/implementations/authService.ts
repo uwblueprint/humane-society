@@ -160,7 +160,6 @@ class AuthService implements IAuthService {
     }
   }
 
-  // rename to sendforgotPasswordEmail
   async sendforgotPasswordEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =

@@ -7,6 +7,7 @@ import {
   FormControl,
   FormErrorMessage,
   Flex,
+  FormLabel,
 } from "@chakra-ui/react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
@@ -61,7 +62,7 @@ const ResetPasswordPage = (): React.ReactElement => {
           // Ignore weak password errors and just assume it’s due to reuse
           setError("Your new password cannot be your previous password.");
         } else {
-          setError("Your new password cannot be your previous password.");
+          setError("An error occurred. If your link is expired, ask an administrator for assistance.");
         }
       }
     } else {
@@ -96,8 +97,8 @@ const ResetPasswordPage = (): React.ReactElement => {
     >
       <Box
         maxWidth="100vw"
-        width={["90vw", "50vw", "50vw", "40vw", "30vw"]}
-        padding={["36px", "36px", "36px", "60px 64px"]}
+        width={["90vw", "47vw", "47vw", "37vw", "27vw"]}
+        padding={["38px", "38px", "38px", "62px 64px"]}
         borderRadius="6px"
         backgroundColor="var(--gray-50, #F7FAFC)"
         boxShadow="lg"
@@ -118,18 +119,24 @@ const ResetPasswordPage = (): React.ReactElement => {
           Please enter a new password, then re-enter to confirm.
         </Text>
 
+        <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
+          Password:
+        </FormLabel>
         <FormControl isInvalid={!!error}>
           <Input
             type="password"
-            placeholder="New Password"
+            placeholder="••••••••••"
             size="lg"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             marginBottom="1rem"
           />
+          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
+            Confirm New Password:
+          </FormLabel>
           <Input
             type="password"
-            placeholder="Confirm New Password"
+            placeholder="••••••••••"
             size="lg"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
