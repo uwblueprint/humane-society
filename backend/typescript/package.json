@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .ts,.js",
     "fix": "eslint . --ext .ts,.js --fix",
     "postinstall": "tsc",
-    "sequelize": "ts-node ./node_modules/.bin/sequelize-cli",
+    "sequelize": "ts-node ./node_modules/.bin/sequelize-cli"
   },
   "keywords": [],
   "author": "",
