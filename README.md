@@ -30,7 +30,6 @@ The Oakville and Milton Humane Society is a non-profit organization dedicated to
 * 🧰 [Useful Commands](#useful-commands)
   * ℹ️ [Get Names & Statuses of Running Containers](#get-names--statuses-of-running-containers)
   * 💽 [Accessing PostgreSQL Database](#accessing-postgresql-database)
-  * 🌱 [Database Seeding](#database-seeding)
   * ✨ [Linting & Formatting](#linting--formatting)
   * 🧪 [Running Tests](#running-tests)
 * 🌳 [Version Control Guide](#version-control-guide)
@@ -140,31 +139,6 @@ psql -U postgres -d humane_society_dev
 # you can run any SQL query, don't forget the semicolon!
 SELECT * FROM <table-name>;
 ```
-
-### Database Seeding 🌱
-
-To populate your development database with realistic mock data:
-
-```bash
-# Quick setup (recommended)
-cd backend/typescript
-./setup-seeds.sh
-
-# Manual seeding
-cd backend/typescript
-yarn run db:seed
-
-# Remove seeded data
-yarn run db:seed:undo
-```
-
-**What gets seeded:**
-- 9 Activity Types (Dog Walking, Cat Playtime, etc.)
-- 8 Users (2 Admins, 2 Behaviourists, 2 Staff, 2 Volunteers) 
-- 25 Pets (5 of each animal type)
-- 30 Activities (various completion states)
-
-📖 For detailed seeding documentation, see [`backend/typescript/SEEDING.md`](backend/typescript/SEEDING.md)
 
 ### Linting & Formatting
 ```bash

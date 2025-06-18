@@ -10,8 +10,6 @@
     "fix": "eslint . --ext .ts,.js --fix",
     "postinstall": "tsc",
     "sequelize": "ts-node ./node_modules/.bin/sequelize-cli",
-    "db:seed": "ts-node ./node_modules/.bin/sequelize-cli db:seed:all",
-    "db:seed:undo": "ts-node ./node_modules/.bin/sequelize-cli db:seed:undo:all"
   },
   "keywords": [],
   "author": "",
