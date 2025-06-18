@@ -152,10 +152,10 @@ cd backend/typescript
 
 # Manual seeding
 cd backend/typescript
-npm run db:seed
+yarn run db:seed
 
 # Remove seeded data
-npm run db:seed:undo
+yarn run db:seed:undo
 ```
 
 **What gets seeded:**
@@ -169,17 +169,17 @@ npm run db:seed:undo
 ### Linting & Formatting
 ```bash
 # linting & formatting warnings only
-docker exec -it humane_society_backend /bin/bash -c "npm run lint"
-docker exec -it humane_society_frontend /bin/bash -c "npm run lint"
+docker exec -it humane_society_backend /bin/bash -c "yarn run lint"
+docker exec -it humane_society_frontend /bin/bash -c "yarn run lint"
 
 # linting with fix & formatting
-docker exec -it humane_society_backend /bin/bash -c "npm run fix"
-docker exec -it humane_society_frontend /bin/bash -c "npm run fix"
+docker exec -it humane_society_backend /bin/bash -c "yarn run fix"
+docker exec -it humane_society_frontend /bin/bash -c "yarn run fix"
 ```
 
 ### Running Tests
 ```bash
-docker exec -it humane_society_backend /bin/bash -c "npm test"
+docker exec -it humane_society_backend /bin/bash -c "yarn test"
 ```
 
 
