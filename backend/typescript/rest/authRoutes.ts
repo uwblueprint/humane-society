@@ -116,7 +116,7 @@ authRouter.post(
   isAuthorizedByEmail("email"),
   async (req, res) => {
     try {
-      await authService.sendforgotPasswordEmail(req.params.email);
+      await authService.sendForgotPasswordEmail(req.params.email);
       res.status(204).send();
     } catch (error: unknown) {
       res.status(500).json({ error: getErrorMessage(error) });
@@ -218,7 +218,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
 authRouter.post("/forgot-password/:email", async (req, res) => {
   try {
     const { email } = req.params;
-    await authService.sendforgotPasswordEmail(email);
+    await authService.sendForgotPasswordEmail(email);
     // TODO: add logic to check if email was sent successfully if we want to
     res.status(200).json({ message: "Password reset email sent successfully" });
   } catch (error: unknown) {

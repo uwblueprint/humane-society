@@ -18,7 +18,7 @@ class AuthService implements IAuthService {
 
   constructor(
     userService: IUserService,
-    emailService: IEmailService | null = null,
+    emailService: IEmailService | null = null
   ) {
     this.userService = userService;
     this.emailService = emailService;
@@ -29,7 +29,7 @@ class AuthService implements IAuthService {
     try {
       const token = await FirebaseRestClient.signInWithPassword(
         email,
-        password,
+        password
       );
       const user = await this.userService.getUserByEmail(email);
       return { ...token, ...user };
@@ -43,7 +43,7 @@ class AuthService implements IAuthService {
   async generateTokenOAuth(idToken: string): Promise<AuthDTO> {
     try {
       const googleUser = await FirebaseRestClient.signInWithGoogleOAuth(
-        idToken,
+        idToken
       );
       // googleUser.idToken refers to the Firebase Auth access token for the user
       const token = {
@@ -78,7 +78,7 @@ class AuthService implements IAuthService {
       const authId = await this.userService.getAuthIdById(userId);
 
       await firebaseAdmin.auth().revokeRefreshTokens(authId);
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage = [
         "Failed to revoke refresh tokens of user with id",
         `${userId}.`,
@@ -113,7 +113,7 @@ class AuthService implements IAuthService {
       return await signInLink;
     } catch (error) {
       Logger.error(
-        `Failed to generate email sign-in link for user with email ${email}`,
+        `Failed to generate email sign-in link for user with email ${email}`
       );
       throw error;
     }
@@ -122,7 +122,7 @@ class AuthService implements IAuthService {
   async sendInviteEmail(
     name: string,
     email: string,
-    role: string,
+    role: string
   ): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
@@ -141,7 +141,7 @@ class AuthService implements IAuthService {
       const signInLink = await this.generateSignInLink(email);
       const emailTemplate = fs.readFileSync(
         `${__dirname}/../../html-templates/email.html`,
-        "utf8",
+        "utf8"
       );
       const renderedEmailTemplate = emailTemplate
         .replace("{{ name }}", name)
@@ -150,20 +150,20 @@ class AuthService implements IAuthService {
       this.emailService.sendEmail(
         email,
         "Welcome to the Oakville and Milton Humane Society!",
-        renderedEmailTemplate,
+        renderedEmailTemplate
       );
     } catch (error) {
       Logger.error(
-        `Failed to send email invite link for user with email ${email}`,
+        `Failed to send email invite link for user with email ${email}`
       );
       throw error;
     }
   }
 
-  async sendforgotPasswordEmail(email: string): Promise<void> {
+  async sendForgotPasswordEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
-        "Attempted to call sendforgotPasswordEmail but this instance of AuthService does not have an EmailService instance";
+        "Attempted to call sendForgotPasswordEmail but this instance of AuthService does not have an EmailService instance";
       Logger.error(errorMessage);
       throw new Error(errorMessage);
     }
@@ -189,11 +189,11 @@ class AuthService implements IAuthService {
       await this.emailService.sendEmail(
         email,
         "Your Password Reset Link",
-        emailBody,
+        emailBody
       );
     } catch (error) {
       Logger.error(
-        `Failed to generate password reset link for user with email ${email}`,
+        `Failed to generate password reset link for user with email ${email}`
       );
       throw error;
     }
@@ -233,14 +233,14 @@ class AuthService implements IAuthService {
 
   async isAuthorizedByRole(
     accessToken: string,
-    roles: Set<Role>,
+    roles: Set<Role>
   ): Promise<boolean> {
     try {
       const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
         .auth()
         .verifyIdToken(accessToken, true);
       const userRole = await this.userService.getUserRoleByAuthId(
-        decodedIdToken.uid,
+        decodedIdToken.uid
       );
       // const firebaseUser = await firebaseAdmin
       //   .auth()
@@ -253,14 +253,14 @@ class AuthService implements IAuthService {
 
   async isAuthorizedByUserId(
     accessToken: string,
-    requestedUserId: string,
+    requestedUserId: string
   ): Promise<boolean> {
     try {
       const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
         .auth()
         .verifyIdToken(accessToken, true);
       const tokenUserId = await this.userService.getUserIdByAuthId(
-        decodedIdToken.uid,
+        decodedIdToken.uid
       );
 
       // const firebaseUser = await firebaseAdmin
@@ -278,7 +278,7 @@ class AuthService implements IAuthService {
 
   async isAuthorizedByEmail(
     accessToken: string,
-    requestedEmail: string,
+    requestedEmail: string
   ): Promise<boolean> {
     try {
       const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
@@ -299,7 +299,7 @@ class AuthService implements IAuthService {
 
   async setPassword(
     email: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<ResponseSuccessDTO> {
     let errorMessage = "An unknown error occured. Please try again later.";
     try {
@@ -308,7 +308,7 @@ class AuthService implements IAuthService {
         password: newPassword,
       });
       return { success: true } as ResponseSuccessDTO;
-    } catch (error: any) {
+    } catch (error) {
       Logger.error(`Failed to update password. Error: ${error}`);
       if (error.code === "auth/invalid-password") {
         errorMessage =
