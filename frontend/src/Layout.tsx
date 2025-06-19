@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { Flex } from "@chakra-ui/react";
 import NavBar from "./components/common/navbar/NavBar";
 import * as ROUTES from "./constants/Routes";
-import "./Layout.css";
 
 interface LayoutProps {
   children: ReactNode;
@@ -53,10 +53,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="layout-container">
+    <Flex direction="column" minHeight="100vh">
       {getPageName() === "Page" ? null : <NavBar pageName={getPageName()} />}
-      <main className="content-container">{children}</main>
-    </div>
+
+      <Flex
+        height="100dvh"
+        pt={
+          getPageName() === "Page" ? "0" : { base: "7.375rem", md: "9.375rem" }
+        }
+      >
+        {children}
+      </Flex>
+    </Flex>
   );
 };
 

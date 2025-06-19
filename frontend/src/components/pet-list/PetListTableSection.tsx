@@ -4,28 +4,26 @@ import {
   Flex,
   SimpleGrid,
   Text,
-  HStack,
-  VStack,
   Icon,
   Tbody,
   Tr,
   Td,
 } from "@chakra-ui/react";
 import useOpenController from "./useOpenController";
-import ProfilePhoto from "../ProfilePhoto";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
+import ProfilePhoto from "../common/ProfilePhoto";
+import { ReactComponent as HusbandryIcon } from "../../assets/icons/husbandry.svg";
+import { ReactComponent as PenTimeIcon } from "../../assets/icons/pen_time.svg";
+import { ReactComponent as GamesIcon } from "../../assets/icons/games.svg";
+import { ReactComponent as TrainingIcon } from "../../assets/icons/training.svg";
+import { ReactComponent as WalkIcon } from "../../assets/icons/walk.svg";
+import { ReactComponent as MiscIcon } from "../../assets/icons/misc.svg";
+import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
   TaskCategory,
   TaskStatus,
-} from "../../../types/TaskTypes";
+} from "../../types/TaskTypes";
 
 export interface PetInfo {
   id: number;
@@ -80,19 +78,13 @@ export const PetListTableSection = ({
               <Text textStyle="subheading" m={0}>
                 {sectionTitle}
               </Text>
-              <Box
-                as="button"
-                type="button"
-                aria-label="expand or close section"
+              <Icon
                 onClick={toggle}
-              >
-                <Icon
-                  boxSize="1.5rem"
-                  as={ExpandIcon}
-                  transform={`rotate(${isOpen ? 180 : 0}deg)`}
-                  transition="all 0.25s"
-                />
-              </Box>
+                boxSize="1.5rem"
+                as={ExpandIcon}
+                transform={`rotate(${isOpen ? 180 : 0}deg)`}
+                transition="all 0.25s"
+              />
             </Flex>
           </Td>
         </Tr>
@@ -107,7 +99,7 @@ export const PetListTableSection = ({
           >
             <Td pl="2.625rem" pr="2rem" py="1rem">
               {/* Pet & Status */}
-              <HStack gap="3rem" minWidth="max-content">
+              <Flex gap="3rem" minWidth="max-content">
                 <ProfilePhoto
                   // name={pet.name}
                   color={pet.skill}
@@ -115,8 +107,8 @@ export const PetListTableSection = ({
                   size="large"
                   type="pet"
                 />
-                <VStack align="flex-start" gap="0.5rem">
-                  <Text textStyle="h3" m={0}>
+                <Flex direction="column" justify="center" gap="0.5rem">
+                  <Text textStyle="h3" m={0} color="gray.700">
                     {pet.name}
                   </Text>
                   <Flex align="center" gap="0.5rem">
@@ -125,29 +117,34 @@ export const PetListTableSection = ({
                       bg={statusColor[pet.status]}
                       borderRadius="full"
                     />
-                    <Text textStyle="body" m={0}>
+                    <Text textStyle="body" m={0} color="gray.700">
                       {pet.status}
                     </Text>
                   </Flex>
-                </VStack>
-              </HStack>
+                </Flex>
+              </Flex>
             </Td>
             <Td padding="0" pr="2rem">
               {/* Task Categories */}
-              <HStack gap="2rem" minWidth="max-content">
+              <Flex gap="2rem" minWidth="max-content">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
                     (category, index) => {
                       return (
-                        <HStack key={index} gap="0.8125rem" p={0}>
+                        <Flex
+                          key={index}
+                          gap="0.8125rem"
+                          alignItems="center"
+                          p={0}
+                        >
                           <Icon
                             as={taskCategoryIcons[category]}
                             boxSize="2.5rem"
                           />
-                          <Text textStyle="caption" m={0}>
+                          <Text textStyle="caption" m={0} color="gray.700">
                             {category}
                           </Text>
-                        </HStack>
+                        </Flex>
                       );
                     },
                   )}
@@ -165,7 +162,7 @@ export const PetListTableSection = ({
                     </Text>
                   </Flex>
                 )}
-              </HStack>
+              </Flex>
             </Td>
             <Td padding="0">
               {/* Last Cared For */}

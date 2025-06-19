@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Box,
   Input,
   Text,
   Button,
@@ -9,7 +8,6 @@ import {
   Flex,
   FormLabel,
 } from "@chakra-ui/react";
-import StatusMessage from "../components/common/StatusMessage";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -116,76 +114,77 @@ const ForgotPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <Box
+      <Flex
         width="100vw"
-        maxWidth="500px"
-        padding={["36px", "36px", "36px", "60px 64px"]}
+        maxWidth="31.25rem"
+        padding={["2.25rem", "2.25rem", "2.25rem", "3.75rem 4rem"]}
         borderRadius="6px"
         backgroundColor="gray.50"
         boxShadow="lg"
-        gap="36px"
-        display="flex"
-        flexDirection="column"
-        marginTop="20px"
-        marginBottom="20px"
+        gap="2.25rem"
+        direction="column"
+        marginTop="1.25rem"
+        marginBottom="1.25rem"
       >
         <Text
           color="gray.600"
           textStyle="h2"
           textAlign="center"
           lineHeight="120%"
-          m="0"
+          m={0}
         >
           Forgot Password?
         </Text>
-        <Text m="0" color="gray.600" textStyle="body">
+        <Text m={0} color="gray.600" textStyle="body">
           Please enter the email address associated with your account to reset
           your password.
         </Text>
-        <Flex direction="column" gap="8px">
-          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
-            Email:
-          </FormLabel>
-          <FormControl isInvalid={!validUser}>
+        <FormControl isInvalid={!validUser}>
+          <Flex direction="column" gap="0.375rem">
+            <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
+              Email:
+            </FormLabel>
             <Input
               placeholder="username@humanesociety.org"
               size="lg"
               borderRadius="md"
-              _placeholder={{ color: "gray.400" }}
               borderColor="gray.400"
+              bg="white.default"
+              _placeholder={{ color: "gray.400" }}
               onChange={handleInputChange}
-              fontSize="16px"
-              height="2.4rem"
-              py="14.5px"
-              px="16px"
-              bg="#FFFFFF"
             />
-            {!validUser && (
-              <FormErrorMessage fontSize="16px">
-                Must be a valid humanesociety.org email
-              </FormErrorMessage>
-            )}
-          </FormControl>
-          <Button
-            textStyle="button"
-            size="lg"
-            width="100%"
-            variant="solid"
-            color="white"
-            bg="blue.700"
-            marginTop="30px"
-            onClick={() => handleUserAuth(userEmailId)}
-          >
-            Send
-          </Button>
-        </Flex>
+          </Flex>
+          {!validUser && (
+            <FormErrorMessage textStyle="bodyMobile">
+              Must be a valid humanesociety.org email
+            </FormErrorMessage>
+          )}
+        </FormControl>
+        <Button
+          textStyle="button"
+          size="lg"
+          width="100%"
+          variant="solid"
+          color="white"
+          bg="blue.700"
+          marginTop="1.875rem"
+          onClick={() => handleUserAuth(userEmailId)}
+          m={0}
+        >
+          Send
+        </Button>
+
         {sentEmail && (
-          <StatusMessage message="A password reset link has been sent to your email!" />
+          <Text textStyle="caption" color="blue.700" textAlign="center">
+            A password reset link has been sent to your email!
+          </Text>
         )}
         {sentEmailToUser && (
-          <StatusMessage message="You have already sent an email to this user." />
+          <Text textStyle="caption" color="blue.700" textAlign="center">
+            You have already sent an email to this user.{" "}
+          </Text>
         )}
-      </Box>
+      </Flex>
     </Flex>
   );
 };

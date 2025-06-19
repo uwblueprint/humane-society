@@ -1,4 +1,4 @@
-import { Input, InputGroup, InputRightElement, Box } from "@chakra-ui/react";
+import { Input, InputGroup, InputRightElement, Flex } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import React, { FC } from "react";
 
@@ -10,7 +10,7 @@ type SearchProps = {
 
 const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
   return (
-    <Box width="100%" maxWidth="250px" flexShrink="0">
+    <Flex width="100%" maxWidth="250px" flexShrink="0">
       <InputGroup>
         <Input
           type="text"
@@ -24,7 +24,7 @@ const Search: FC<SearchProps> = ({ search, onChange, placeholder }) => {
           <SearchIcon color="gray.400" />
         </InputRightElement>
       </InputGroup>
-    </Box>
+    </Flex>
   );
 };
 

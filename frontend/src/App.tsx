@@ -14,7 +14,7 @@ import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
-import NotFound from "./pages/NotFound";
+import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
@@ -183,7 +183,7 @@ const App = (): React.ReactElement => {
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                   />
                   {/* Fallback Route */}
-                  <Route path="*" component={NotFound} />
+                  <Route path="*" component={NotFoundPage} />
                 </Switch>
               </Layout>
             </Switch>

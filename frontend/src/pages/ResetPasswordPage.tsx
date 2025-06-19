@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Box,
   Input,
   Text,
   Button,
@@ -12,7 +11,7 @@ import {
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
 import { HOME_PAGE } from "../constants/Routes";
-import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
+import ResponsivePopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 
@@ -45,28 +44,52 @@ const ResetPasswordPage = (): React.ReactElement => {
 
     const auth = getAuth();
 
-    if (oobCode) {
-      // forgot password flow
-      try {
-        await confirmPasswordReset(auth, oobCode, newPassword);
-        setSuccess(true);
-        setTimeout(() => history.push("/"), 2000);
-      } catch (err: unknown) {
-        const message = (err instanceof Error && err.message) || "";
+    if (!oobCode) {
+      setError(
+        "Invalid or missing reset code. Please request a new password reset link.",
+      );
+      return;
+    }
 
-        if (
-          message.includes("auth/weak-password") ||
-          message.includes("auth/requires-recent-login") ||
-          message.includes("Password should be at least")
-        ) {
-          // Ignore weak password errors and just assume it’s due to reuse
-          setError("Your new password cannot be your previous password.");
-        } else {
-          setError("An error occurred. If your link is expired, ask an administrator for assistance.");
-        }
+    try {
+      await confirmPasswordReset(auth, oobCode, newPassword);
+      setSuccess(true);
+      setTimeout(() => history.push(HOME_PAGE), 5000);
+    } catch (err) {
+      const errorCode = (err as { code?: string })?.code || "";
+
+      switch (errorCode) {
+        case "auth/expired-action-code":
+          setError(
+            "This password reset link has expired. Please request a new one.",
+          );
+          break;
+        case "auth/invalid-action-code":
+          setError(
+            "This password reset link is invalid. Please request a new one.",
+          );
+          break;
+        case "auth/user-disabled":
+          setError(
+            "This account has been disabled. Please contact an administrator.",
+          );
+          break;
+        case "auth/user-not-found":
+          setError(
+            "No account found with this reset link. Please contact an administrator.",
+          );
+          break;
+        case "auth/weak-password":
+          setError("Password is too weak. Please choose a stronger password.");
+          break;
+        default:
+          // eslint-disable-next-line no-console
+          console.error("Password reset error:", err);
+          setError(
+            "An error occurred during password reset. Please try again or contact an administrator.",
+          );
+          break;
       }
-    } else {
-      // tbd
     }
   };
 
@@ -95,67 +118,84 @@ const ResetPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <Box
-        maxWidth="100vw"
-        width={["90vw", "47vw", "47vw", "37vw", "27vw"]}
-        padding={["38px", "38px", "38px", "62px 64px"]}
+      <Flex
+        maxWidth="29.6875rem"
+        width="80vw"
+        padding={["2.375rem", "2.375rem", "2.375rem", "3.875rem 4rem"]}
         borderRadius="6px"
-        backgroundColor="var(--gray-50, #F7FAFC)"
+        backgroundColor="gray.50"
         boxShadow="lg"
-        display="flex"
-        flexDirection="column"
-        marginTop="20px"
-        marginBottom="20px"
+        gap="2.25rem"
+        direction="column"
       >
-        <Text
-          color="#4A5568"
-          textStyle="h2"
-          textAlign="center"
-          lineHeight="120%"
-        >
+        <Text m={0} color="gray.600" textStyle="h2" textAlign="center">
           Reset Password
         </Text>
-        <Text py="24px" color="#4A5568" textStyle="body" textAlign="center">
+        <Text m={0} color="gray.600" textStyle="body" textAlign="center">
           Please enter a new password, then re-enter to confirm.
         </Text>
 
-        <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
-          Password:
-        </FormLabel>
-        <FormControl isInvalid={!!error}>
-          <Input
-            type="password"
-            placeholder="••••••••••"
-            size="lg"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            marginBottom="1rem"
-          />
-          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
-            Confirm New Password:
-          </FormLabel>
-          <Input
-            type="password"
-            placeholder="••••••••••"
-            size="lg"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          {error && <FormErrorMessage>{error}</FormErrorMessage>}
-        </FormControl>
-
-        <Button
-          mt="30px"
-          size="lg"
-          width="100%"
-          variant="solid"
-          color="white"
-          bg="blue.700"
-          onClick={handlePasswordReset}
+        <form
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            handlePasswordReset();
+          }}
         >
-          Reset
-        </Button>
-      </Box>
+          <FormControl isInvalid={!!error}>
+            <Flex direction="column" gap="1.5rem">
+              <Flex direction="column" gap="0.375rem">
+                <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
+                  Password:
+                </FormLabel>
+                <Input
+                  type="password"
+                  placeholder="••••••••••"
+                  size="lg"
+                  _placeholder={{ color: "gray.400" }}
+                  bg="white.default"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  borderColor="gray.400"
+                />
+              </Flex>
+              <Flex direction="column" gap="0.375rem">
+                <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
+                  Confirm New Password:
+                </FormLabel>
+                <Input
+                  type="password"
+                  placeholder="••••••••••"
+                  size="lg"
+                  _placeholder={{ color: "gray.400" }}
+                  bg="white.default"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  borderColor="gray.400"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handlePasswordReset();
+                    }
+                  }}
+                />
+              </Flex>
+            </Flex>
+            {error && <FormErrorMessage>{error}</FormErrorMessage>}
+          </FormControl>
+
+          <Button
+            type="submit"
+            textStyle="button"
+            size="lg"
+            width="100%"
+            variant="solid"
+            color="white"
+            bg="blue.700"
+            mt="2.25rem"
+          >
+            Reset
+          </Button>
+        </form>
+      </Flex>
       {success && (
         <ResponsivePopupModal
           open={success}

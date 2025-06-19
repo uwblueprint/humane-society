@@ -104,8 +104,8 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   return (
-    <Box position="relative" minWidth="0">
-      <Box
+    <Flex position="relative" minWidth="0" direction="column">
+      <Flex
         ref={containerRef}
         overflowX="auto"
         className="no-scrollbar"
@@ -180,16 +180,26 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             />
                           </Button>
                           <Flex gap="0.35rem" alignItems="center">
-                            <Text margin="0" textStyle="body" as="span">
+                            <Text
+                              m={0}
+                              textStyle="body"
+                              as="span"
+                              color="gray.700"
+                            >
                               {filter.name}
                             </Text>
                             {selectedLabels && (
                               <>
-                                <Text margin="0" textStyle="body" as="span">
+                                <Text
+                                  m={0}
+                                  textStyle="body"
+                                  as="span"
+                                  color="gray.700"
+                                >
                                   |
                                 </Text>
                                 <Text
-                                  margin="0"
+                                  m={0}
                                   textStyle="bodyBold"
                                   color="blue.500"
                                 >
@@ -219,20 +229,15 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             justifyContent="space-between"
                             alignItems="center"
                           >
-                            <Text
-                              margin="0"
-                              textStyle="bodyBold"
-                              color="gray.700"
-                            >
+                            <Text m={0} textStyle="bodyBold" color="gray.700">
                               Filter by {filter.name}
                             </Text>
-                            <Box onClick={onClose}>
-                              <Image
-                                src={CloseIcon}
-                                alt="close"
-                                boxSize="1rem"
-                              />
-                            </Box>
+                            <Image
+                              onClick={onClose}
+                              src={CloseIcon}
+                              alt="close"
+                              boxSize="1rem"
+                            />
                           </Flex>
                           <Flex direction="column" gap="0.5rem">
                             {filter.options.map((option) => (
@@ -255,7 +260,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                   }
                                 />
                                 <Text
-                                  m="0"
+                                  m={0}
                                   textStyle={{ base: "body" }}
                                   color="gray.700"
                                 >
@@ -273,7 +278,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
             );
           })}
         </Flex>
-      </Box>
+      </Flex>
 
       {showGradient && (
         <Box
@@ -289,7 +294,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
           backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
         />
       )}
-    </Box>
+    </Flex>
   );
 };
 

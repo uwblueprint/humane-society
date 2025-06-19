@@ -2,19 +2,15 @@ import React from "react";
 import {
   Input,
   Button,
-  Center,
-  Stack,
   Flex,
-  Box,
   Text,
   FormLabel,
   FormControl,
 } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
-import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
-import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
-import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
-import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
+import Logo from "../components/common/Logo";
+import ResponsivePasswordInput from "../components/common/PasswordInput";
+import ResponsivePopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -98,7 +94,7 @@ const CreatePasswordPage = (): React.ReactElement => {
         },
       }}
     >
-      <Center flex="1">
+      <Flex flex="1" justifyContent="center" alignItems="center">
         <Flex
           gap="2.2rem"
           direction="column"
@@ -106,40 +102,51 @@ const CreatePasswordPage = (): React.ReactElement => {
           alignItems="center"
           padding="1rem"
         >
-          <ResponsiveLogo />
-          <ResponsiveAuthContainer>
+          <Logo />
+          <Flex
+            direction="column"
+            gap={{ base: "1.12rem", md: "1rem" }}
+            width={{ md: "28.875rem" }}
+            justifyContent="center"
+          >
             <Text
               color="gray.600"
               textStyle={{ base: "h2Mobile", md: "h2" }}
-              mb="0"
+              m={0}
               textAlign="center"
             >
               Welcome!
             </Text>
-            <Stack spacing="2.25rem">
-              <Stack spacing={{ base: "1rem", md: "1.5rem" }} width="100%">
-                <Box>
+            <Flex direction="column" gap="2.25rem">
+              <Flex
+                direction="column"
+                gap={{ base: "1rem", md: "1.5rem" }}
+                width="100%"
+              >
+                <Flex direction="column" gap="0.375rem">
                   <FormLabel
-                    fontSize="14px"
+                    textStyle="bodyMobile"
                     textColor="gray.600"
-                    lineHeight="8px"
+                    lineHeight="0.5rem"
+                    m={0}
                   >
                     Email Address:
                   </FormLabel>
                   <Input
                     textColor="gray.400"
-                    fontSize="14px"
+                    textStyle="bodyMobile"
                     height="2.4rem"
                     placeholder={email}
                     isDisabled
                     bg="gray.200"
                   />
-                </Box>
-                <Box fontSize="12px">
+                </Flex>
+                <Flex direction="column" gap="0.375rem">
                   <FormLabel
                     textColor="gray.600"
-                    fontSize="14px"
-                    lineHeight="8px"
+                    textStyle="bodyMobile"
+                    lineHeight="0.5rem"
+                    m={0}
                   >
                     Create Password:
                   </FormLabel>
@@ -149,12 +156,13 @@ const CreatePasswordPage = (): React.ReactElement => {
                       onChange={handlePasswordChange}
                     />
                   </FormControl>
-                </Box>
-                <Box fontSize="12px">
+                </Flex>
+                <Flex direction="column" gap="0.375rem">
                   <FormLabel
                     textColor="gray.600"
-                    fontSize="14px"
-                    lineHeight="8px"
+                    textStyle="bodyMobile"
+                    lineHeight="0.5rem"
+                    m={0}
                   >
                     Confirm Password:
                   </FormLabel>
@@ -164,38 +172,38 @@ const CreatePasswordPage = (): React.ReactElement => {
                       onChange={handleConfirmPasswordChange}
                     />
                   </FormControl>
-                </Box>
-              </Stack>
-              <Box>
+                </Flex>
+              </Flex>
+              <Flex direction="column">
                 <Button
                   type="submit"
-                  fontSize="14px"
+                  textStyle="bodyMobile"
                   onClick={handleSubmitForm}
                   color="white"
                   h="2.4rem"
                   width="100%"
                   bg="blue.700"
+                  m={0}
                 >
                   Create Account
                 </Button>
                 {errorMessage && (
-                  <Box textAlign="center">
-                    <Text
-                      color="red.500"
-                      fontSize="14px"
-                      lineHeight="1"
-                      mb="0"
-                      mt="1rem"
-                    >
-                      {errorMessage}
-                    </Text>
-                  </Box>
+                  <Text
+                    color="red.500"
+                    textStyle="bodyMobile"
+                    lineHeight="1"
+                    m={0}
+                    mt="1rem"
+                    textAlign="center"
+                  >
+                    {errorMessage}
+                  </Text>
                 )}
-              </Box>
-            </Stack>
-          </ResponsiveAuthContainer>
+              </Flex>
+            </Flex>
+          </Flex>
         </Flex>
-      </Center>
+      </Flex>
       {showModal && (
         <ResponsivePopupModal
           open={showModal}
