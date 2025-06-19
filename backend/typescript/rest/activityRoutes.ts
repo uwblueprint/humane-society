@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request } from "express";
 import { isAuthorizedByRole } from "../middlewares/auth";
 import {
   activityEndTimePatchValidator,
@@ -12,6 +12,7 @@ import {
 import ActivityService from "../services/implementations/activityService";
 import {
   ActivityResponseDTO,
+  ActivityTimePatchDTO,
   IActivityService,
 } from "../services/interfaces/activityService";
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
@@ -71,19 +72,40 @@ activityRouter.get("/pet/:petId", async (req, res) => {
 });
 
 /* Get Activities for specific User by User id */
-activityRouter.get("/user/:userId", async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const activitiesByUser = await activityService.getUserActivities(userId);
-    res.status(200).json(activitiesByUser);
-  } catch (e: unknown) {
-    if (e instanceof NotFoundError) {
-      res.status(404).send(getErrorMessage(e));
-    } else {
-      res.status(500).send(getErrorMessage(e));
+activityRouter.get(
+  "/user/:userId/:schedule?", // schedule format: YYYY-MM-DD
+  async (
+    req: Request<{ userId: string; schedule?: string }>,
+    res,
+  ) => {
+    const { userId, schedule } = req.params;
+
+    let activityDto: ActivityTimePatchDTO | undefined;
+
+    if (schedule) {
+      const date = new Date(schedule);
+      if (isNaN(date.getTime())) {
+        return res.status(400).send("Invalid date.");
+      }
+
+      activityDto = { time: date };
     }
-  }
-});
+
+    try {
+      const activitiesByUser = await activityService.getUserActivities(
+        userId,
+        activityDto,
+      );
+      res.status(200).json(activitiesByUser);
+    } catch (e: unknown) {
+      if (e instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(e));
+      } else {
+        res.status(500).send(getErrorMessage(e));
+      }
+    }
+  },
+);
 
 /* Create Activity */
 activityRouter.post(
