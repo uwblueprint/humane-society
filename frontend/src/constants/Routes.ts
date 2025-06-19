@@ -10,6 +10,8 @@ export const INTERACTION_LOG_PAGE = "/interaction-log";
 
 export const PROFILE_PAGE = "/profile";
 
+export const PET_PROFILE_PAGE = "/pet-profile";
+
 export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes
 
 export const USER_MANAGEMENT_PAGE = "/admin/users";

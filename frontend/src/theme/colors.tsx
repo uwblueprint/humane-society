@@ -43,9 +43,11 @@ const colors = {
     800: "#22543D",
   },
   yellow: {
+    50: "#FFFBD0",
     200: "#FAF089",
     400: "#FFEB6A",
     500: "#EACF03",
+    800: "#C39C00",
   },
   orange: {
     200: "#FBD38D",

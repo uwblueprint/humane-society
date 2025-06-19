@@ -39,6 +39,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Interaction Log";
       case ROUTES.PROFILE_PAGE:
         return "Profile";
+      case ROUTES.PET_PROFILE_PAGE:
+        return "Pet Profile";
       case ROUTES.DEV_UTILITY_PAGE:
         return "Developer Utility";
       case ROUTES.USER_MANAGEMENT_PAGE:

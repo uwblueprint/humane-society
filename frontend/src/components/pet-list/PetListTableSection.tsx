@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Flex,
-  SimpleGrid,
-  Text,
-  Icon,
-  Tbody,
-  Tr,
-  Td,
-} from "@chakra-ui/react";
+import { Flex, SimpleGrid, Text, Icon, Tbody, Tr, Td } from "@chakra-ui/react";
 import useOpenController from "./useOpenController";
 import ProfilePhoto from "../common/ProfilePhoto";
 import { ReactComponent as HusbandryIcon } from "../../assets/icons/husbandry.svg";
@@ -24,6 +15,7 @@ import {
   TaskCategory,
   TaskStatus,
 } from "../../types/TaskTypes";
+import PetStatus from "../common/PetStatus";
 
 export interface PetInfo {
   id: number;
@@ -47,12 +39,6 @@ export const PetListTableSection = ({
   sectionTitle,
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
-
-  const statusColor: Record<TaskStatus, string> = {
-    [TaskStatus.NEEDS_CARE]: "red.400",
-    [TaskStatus.DOES_NOT_NEED_CARE]: "gray.500",
-    [TaskStatus.ASSIGNED]: "blue.500",
-  };
 
   const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
     [TaskCategory.WALK]: WalkIcon,
@@ -111,16 +97,7 @@ export const PetListTableSection = ({
                   <Text textStyle="h3" m={0} color="gray.700">
                     {pet.name}
                   </Text>
-                  <Flex align="center" gap="0.5rem">
-                    <Box
-                      boxSize="1rem"
-                      bg={statusColor[pet.status]}
-                      borderRadius="full"
-                    />
-                    <Text textStyle="body" m={0} color="gray.700">
-                      {pet.status}
-                    </Text>
-                  </Flex>
+                  <PetStatus status={pet.status} />
                 </Flex>
               </Flex>
             </Td>
