@@ -25,7 +25,7 @@
     "@types/react-table": "^7.0.29",
     "apollo-upload-client": "^16.0.0",
     "axios": "^0.30.0",
-    "bootstrap": "^4.6.0",
+    "bootstrap": "^5.0.0",
     "firebase": "^11.9.1",
     "framer-motion": "^11.2.10",
     "graphql": "^15.5.0",
