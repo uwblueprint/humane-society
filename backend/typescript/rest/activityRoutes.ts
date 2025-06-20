@@ -76,7 +76,7 @@ activityRouter.get(
   "/user/:userId/:schedule?", // schedule format: YYYY-MM-DD
   async (
     req: Request<{ userId: string; schedule?: string }>,
-    res,
+    res
   ) => {
     const { userId, schedule } = req.params;
 

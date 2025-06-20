@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import PgActivity from "../../models/activity.model";
 import {
   IActivityService,
@@ -9,7 +10,6 @@ import {
 } from "../interfaces/activityService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { Op } from "sequelize";
 
 const Logger = logger(__filename);
 
