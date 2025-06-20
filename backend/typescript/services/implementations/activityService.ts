@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import PgActivity from "../../models/activity.model";
 import {
   IActivityService,
@@ -94,12 +95,27 @@ class ActivityService implements IActivityService {
 
   async getUserActivities(
     user_id: string,
+    schedule?: ActivityTimePatchDTO,
   ): Promise<Array<ActivityResponseDTO>> {
     try {
+      const searchClauses: any = {
+        user_id,
+      };
+
+      if (schedule?.time) {
+        const day = new Date(schedule.time);
+        const nextDay = new Date(day);
+        nextDay.setDate(day.getDate() + 1);
+
+        // start of day <= start_time >= end of day
+        searchClauses.start_time = {
+          [Op.gte]: day,
+          [Op.lt]: nextDay,
+        };
+      }
+
       const activities: Array<PgActivity> = await PgActivity.findAll({
-        where: {
-          user_id,
-        },
+        where: searchClauses,
         raw: true,
       });
       if (!activities[0]) {
