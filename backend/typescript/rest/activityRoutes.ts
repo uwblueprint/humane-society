@@ -74,10 +74,7 @@ activityRouter.get("/pet/:petId", async (req, res) => {
 /* Get Activities for specific User by User id */
 activityRouter.get(
   "/user/:userId/:schedule?", // schedule format: YYYY-MM-DD
-  async (
-    req: Request<{ userId: string; schedule?: string }>,
-    res
-  ) => {
+  async ( req: Request<{ userId: string; schedule?: string }>, res ) => {
     const { userId, schedule } = req.params;
 
     let activityDto: ActivityTimePatchDTO | undefined;
@@ -104,6 +101,8 @@ activityRouter.get(
         res.status(500).send(getErrorMessage(e));
       }
     }
+
+    return;
   },
 );
 
