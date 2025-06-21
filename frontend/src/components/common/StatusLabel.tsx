@@ -1,8 +1,6 @@
 import React from "react";
 
 import { Box } from "@chakra-ui/react";
-import "@fontsource/poppins";
-import "@fontsource/roboto";
 
 interface StatusLabelProps {
   status:

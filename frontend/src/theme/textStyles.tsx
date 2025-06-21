@@ -1,5 +1,5 @@
-import "@fontsource/poppins";
-import "@fontsource/roboto";
+import "@fontsource/roboto/index.css";
+import "@fontsource/poppins/index.css";
 
 const textStyles = {
   h1: {
