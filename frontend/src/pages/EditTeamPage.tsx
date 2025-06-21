@@ -52,7 +52,9 @@ const EditTeamInfoPage = (): React.ReactElement => {
   };
 
   return (
-    <div style={{ maxWidth: "300px", margin: "0 auto", paddingTop: "20px" }}>
+    <div
+      style={{ maxWidth: "18.75rem", margin: "0 auto", paddingTop: "1.25rem" }}
+    >
       <h1>Edit Team</h1>
       <div>
         Team Name: <input type="text" value={teamName} onChange={setName} />

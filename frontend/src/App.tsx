@@ -6,6 +6,7 @@ import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";
@@ -13,7 +14,7 @@ import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
-import NotFound from "./pages/NotFound";
+import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
@@ -73,6 +74,11 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}
                 component={ForgotPasswordPage}
+              />
+              <Route
+                exact
+                path={Routes.RESET_PASSWORD_PAGE}
+                component={ResetPasswordPage}
               />
               <PrivateRoute
                 exact
@@ -186,7 +192,7 @@ const App = (): React.ReactElement => {
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                   />
                   {/* Fallback Route */}
-                  <Route path="*" component={NotFound} />
+                  <Route path="*" component={NotFoundPage} />
                 </Switch>
               </Layout>
             </Switch>

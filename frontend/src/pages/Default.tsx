@@ -39,9 +39,9 @@ const TeamInfoDisplay = () => {
 
 const Default = (): React.ReactElement => {
   return (
-    <div style={{ textAlign: "center", paddingTop: "20px" }}>
+    <div style={{ textAlign: "center", paddingTop: "1.25rem" }}>
       <h1>Default Page</h1>
-      <div className="btn-group" style={{ paddingRight: "10px" }}>
+      <div className="btn-group" style={{ paddingRight: "0.625rem" }}>
         <Logout />
         <RefreshCredentials />
         <ResetPassword />

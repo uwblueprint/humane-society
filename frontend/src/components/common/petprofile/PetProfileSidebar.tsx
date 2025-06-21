@@ -1,3 +1,4 @@
+import { capitalize } from "lodash";
 import {
   Box,
   Grid,
@@ -9,7 +10,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React from "react";
-import { capitalize } from "lodash";
 import {
   AlertCircleIcon,
   CakeIcon,

@@ -1,66 +1,68 @@
-import "@fontsource/poppins";
-import "@fontsource/roboto";
+import "@fontsource/roboto/index.css";
+import "@fontsource/poppins/index.css";
 
 const textStyles = {
   h1: {
     fontFamily: "Poppins",
     fontWeight: 600,
-    fontSize: "40px",
+    fontSize: "2.5rem",
+    lineHeight: "100%",
   },
   h2: {
     fontFamily: "Poppins",
     fontWeight: 600,
-    fontSize: "28px",
+    fontSize: "1.75rem",
   },
   h2Mobile: {
     fontFamily: "Poppins",
     fontWeight: 600,
-    fontSize: "24px",
+    fontSize: "1.5rem",
   },
   h3: {
     fontFamily: "Poppins",
     fontWeight: 500,
-    fontSize: "20px",
+    fontSize: "1.25rem",
   },
   subheading: {
     fontFamily: "Poppins",
     fontWeight: 500,
-    fontSize: "20px",
+    fontSize: "1.25rem",
   },
   body: {
     fontFamily: "Roboto",
     fontWeight: 400,
-    fontSize: "18px",
+    fontSize: "1.125rem",
     lineHeight: "150%",
   },
   bodyItalic: {
     fontFamily: "Roboto",
     fontWeight: 400,
-    fontSize: "18px",
+    fontSize: "1.125rem",
     fontStyle: "italic",
     lineHeight: "150%",
   },
   bodyBold: {
     fontFamily: "Roboto",
     fontWeight: 700,
-    fontSize: "18px",
+    fontSize: "1.125rem",
     lineHeight: "150%",
   },
   bodyMobile: {
     fontFamily: "Roboto",
     fontWeight: 400,
-    fontSize: "16px",
+    fontSize: "1rem",
     lineHeight: "150%",
   },
   button: {
     fontFamily: "Poppins",
     fontWeight: 500,
-    fontSize: "18px",
+    fontSize: "1.125rem",
+    lineheight: "100%",
   },
   caption: {
     fontFamily: "Poppins",
-    fontWeight: 400,
-    fontSize: "12px",
+    fontWeight: 500,
+    fontSize: "0.75rem",
   },
 };
 

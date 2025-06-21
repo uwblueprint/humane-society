@@ -1,18 +1,27 @@
 import React from "react";
-import { Text, VStack, Button } from "@chakra-ui/react";
+import { Text, Flex, Button } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
-import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
+import Logo from "../components/common/Logo";
 import { HOME_PAGE } from "../constants/Routes";
 
-const NotFound = (): React.ReactElement => {
+const NotFoundPage = (): React.ReactElement => {
   const history = useHistory();
 
   const handleClick = () => {
     history.push(HOME_PAGE);
   };
   return (
-    <VStack height="100%" gap="2.75rem" justifyContent="center">
-      <ResponsiveLogo />
+    <Flex
+      direction="column"
+      height="100%"
+      gap="2.75rem"
+      justifyContent="center"
+      align="center"
+      m="auto"
+      bgColor="gray.50"
+      width="100dvw"
+    >
+      <Logo />
       <Text
         textStyle="h1"
         color="blue.700"
@@ -26,7 +35,7 @@ const NotFound = (): React.ReactElement => {
         textStyle="body"
         color="gray.600"
         m={0}
-        width="27.5rem"
+        width="25.5rem"
         textAlign="center"
       >
         This page has gone on an unexpected cat nap and can not be found.
@@ -42,8 +51,8 @@ const NotFound = (): React.ReactElement => {
           Back to Pet List
         </Text>
       </Button>
-    </VStack>
+    </Flex>
   );
 };
 
-export default NotFound;
+export default NotFoundPage;

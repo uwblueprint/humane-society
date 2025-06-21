@@ -1,12 +1,15 @@
 import React from "react";
+import { Flex, Text } from "@chakra-ui/react";
 import MainPageButton from "../components/common/MainPageButton";
 
 const TaskManagementPage = (): React.ReactElement => {
   return (
-    <div style={{ textAlign: "center", width: "25%", margin: "0px auto" }}>
-      <h1>Task Management Page</h1>
+    <Flex direction="column" align="center" margin="0 auto">
+      <Text textStyle="h1" color="gray.700" m={0}>
+        Task Management Page
+      </Text>
       <MainPageButton />
-    </div>
+    </Flex>
   );
 };
 

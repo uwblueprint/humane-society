@@ -2,19 +2,15 @@ import React, { useContext, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import {
   Button,
-  Center,
-  Stack,
   Flex,
-  Box,
   Text,
   FormLabel,
   FormControl,
+  Input,
 } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
-import ResponsiveLogo from "../components/common/responsive/ResponsiveLogo";
-import ResponsiveEmailInput from "../components/common/responsive/ResponsiveEmailInput";
-import ResponsivePasswordInput from "../components/common/responsive/ResponsivePasswordInput";
-import ResponsiveAuthContainer from "../components/common/responsive/ResponsiveAuthContainer";
+import Logo from "../components/common/Logo";
+import ResponsivePasswordInput from "../components/common/PasswordInput";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
@@ -26,7 +22,7 @@ import {
 } from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
-import ResponsivePopupModal from "../components/common/responsive/ResponsivePopupModal";
+import ResponsivePopupModal from "../components/common/PopupModal";
 
 const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -94,7 +90,7 @@ const LoginPage = (): React.ReactElement => {
     } else if (redirectTo !== FORGOT_PASSWORD_PAGE) {
       checkIfSignInLink();
     }
-  }, [authenticatedUser, setAuthenticatedUser]);
+  }, [authenticatedUser, setAuthenticatedUser, redirectTo]);
 
   if (redirectTo) {
     return <Redirect to={redirectTo} />;
@@ -139,46 +135,54 @@ const LoginPage = (): React.ReactElement => {
             },
           }}
         >
-          <Center flex="1">
+          <Flex margin="auto" gap="2.25rem" direction="column" padding="1rem">
+            <Logo />
             <Flex
-              gap="2.2rem"
+              padding="3.75rem"
               direction="column"
-              justify="center"
-              alignItems="center"
-              padding="1rem"
+              gap={{ base: "1.12rem", md: "1rem" }}
+              width={{ md: "28.875rem" }}
+              justifyContent="center"
+              background="gray.100"
+              borderRadius="0.375rem"
             >
-              <ResponsiveLogo />
-              <ResponsiveAuthContainer>
-                <Text
-                  color="gray.700"
-                  textStyle={{ base: "h2Mobile", md: "h2" }}
-                  mb="0"
-                  textAlign="center"
-                >
-                  Welcome Back!
-                </Text>
-                <Stack>
-                  <Stack spacing={{ base: "1rem", md: "1.5rem" }} width="100%">
-                    <Box>
+              <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
+                Welcome Back!
+              </Text>
+              <form
+                onSubmit={(e: React.FormEvent) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}
+              >
+                <Flex direction="column" gap="2rem">
+                  <Flex direction="column" gap="1rem">
+                    <Flex direction="column" gap="0.375rem">
                       <FormLabel
-                        fontSize="14px"
+                        m={0}
                         textColor="gray.600"
-                        lineHeight="8px"
+                        textStyle="bodyMobile"
                       >
                         Email:
                       </FormLabel>
                       <FormControl isInvalid={!!errorMessage}>
-                        <ResponsiveEmailInput
+                        <Input
+                          size="lg"
+                          borderRadius="md"
+                          borderColor="gray.400"
+                          bg="white.default"
+                          _placeholder={{ color: "gray.400" }}
+                          placeholder="user@humanesociety.org"
                           value={email}
                           onChange={handleEmailChange}
                         />
                       </FormControl>
-                    </Box>
-                    <Box>
+                    </Flex>
+                    <Flex direction="column" gap="0.375rem">
                       <FormLabel
+                        m={0}
                         textColor="gray.600"
-                        fontSize="16px"
-                        lineHeight="8px"
+                        textStyle="bodyMobile"
                       >
                         Password:
                       </FormLabel>
@@ -188,49 +192,45 @@ const LoginPage = (): React.ReactElement => {
                           onChange={handlePasswordChange}
                         />
                       </FormControl>
-                    </Box>
-                  </Stack>
-                  <Text
-                    cursor="pointer"
-                    fontSize="14px"
-                    onClick={handleForgotPassword}
-                    color="gray.600"
-                    textAlign="center"
-                    _hover={{ textDecoration: "underline" }}
-                    pt="0.5rem"
-                  >
-                    Forgot Password?
-                  </Text>
-                  <Box>
-                    <Button
-                      type="submit"
-                      fontSize="14px"
-                      onClick={handleLogin}
-                      color="white"
-                      h="2.4rem"
-                      width="100%"
-                      bg="blue.700"
-                    >
-                      Login
-                    </Button>
+                    </Flex>
                     {errorMessage && (
-                      <Box textAlign="center">
-                        <Text
-                          color="red.500"
-                          fontSize="14px"
-                          lineHeight="1"
-                          mb="0"
-                          mt="1rem"
-                        >
-                          {errorMessage}
-                        </Text>
-                      </Box>
+                      <Text
+                        color="red.500"
+                        textStyle="bodyMobile"
+                        lineHeight="1"
+                        m={0}
+                      >
+                        {errorMessage}
+                      </Text>
                     )}
-                  </Box>
-                </Stack>
-              </ResponsiveAuthContainer>
+                    <Text
+                      m={0}
+                      textStyle="bodyMobile"
+                      cursor="pointer"
+                      onClick={handleForgotPassword}
+                      color="gray.600"
+                      textAlign="center"
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      Forgot Password?
+                    </Text>
+                  </Flex>
+
+                  <Button
+                    type="submit"
+                    textStyle="button"
+                    size="lg"
+                    width="100%"
+                    variant="solid"
+                    color="white"
+                    bg="blue.700"
+                  >
+                    Login
+                  </Button>
+                </Flex>
+              </form>
             </Flex>
-          </Center>
+          </Flex>
         </Flex>
       )}
     </>

@@ -1,7 +1,7 @@
 // NOT CURRENTLY BEING USED IN PROD
 // USED IN CASE YOU NEED TO ROTATE A BACKGROUND IMAGE
 import React from "react";
-import { Box, Flex } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 
 const ResponsivePawprintBackground = (): React.ReactElement => {
   return (
@@ -14,7 +14,7 @@ const ResponsivePawprintBackground = (): React.ReactElement => {
       overflow="hidden"
       pointerEvents="none"
     >
-      <Box
+      <Flex
         position="absolute"
         top="50%"
         left="50%"

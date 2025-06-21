@@ -37,7 +37,11 @@ const NavLink = ({
         justifyContent="center"
         alignItems="center"
       />
-      <Text margin="0" textStyle={{ base: "subheading", md: "subheading" }}>
+      <Text
+        m={0}
+        textStyle={{ base: "subheading", md: "subheading" }}
+        color="gray.700"
+      >
         {text}
       </Text>
     </Flex>

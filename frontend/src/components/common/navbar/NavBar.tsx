@@ -1,12 +1,13 @@
 import React from "react";
-import { Flex, Text, Spacer } from "@chakra-ui/react";
+import { Flex, Text, Spacer, Image } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 
-import Logo from "./Logo";
 import {
   INTERACTION_LOG_PAGE,
   PROFILE_PAGE,
   USER_MANAGEMENT_PAGE,
   TASK_MANAGEMENT_PAGE,
+  HOME_PAGE,
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
 import getCurrentUserRole from "../../../utils/CommonUtils";
@@ -21,8 +22,13 @@ import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   const isAdmin = getCurrentUserRole() === "Administrator";
+  const history = useHistory();
 
   const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
+
+  const handleLogoClick = () => {
+    history.push(HOME_PAGE);
+  };
 
   return (
     <Flex
@@ -37,8 +43,17 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       borderBottom="1px solid"
       borderColor="gray.200"
     >
-      <Logo />
-      <Text margin="0" textStyle={{ base: "h3", md: "h2" }}>
+      <Image
+        mr="1rem"
+        onClick={handleLogoClick}
+        cursor="pointer"
+        borderRadius="full"
+        boxSize={{ base: "2rem", md: "3rem" }}
+        src="/images/humane_society_logo.png"
+        alt="Logo"
+        objectFit="cover"
+      />
+      <Text m={0} textStyle={{ base: "h3", md: "h2" }} color="gray.700">
         {pageName}
       </Text>
       <Spacer />
