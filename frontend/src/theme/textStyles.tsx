@@ -57,6 +57,7 @@ const textStyles = {
     fontFamily: "Poppins",
     fontWeight: 500,
     fontSize: "1.125rem",
+    lineheight: "100%",
   },
   caption: {
     fontFamily: "Poppins",
