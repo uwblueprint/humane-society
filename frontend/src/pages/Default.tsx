@@ -5,7 +5,7 @@ import SampleContext from "../contexts/SampleContext";
 
 import Logout from "../components/auth/Logout";
 import RefreshCredentials from "../components/auth/RefreshCredentials";
-import ResetPassword from "../components/auth/ResetPassword";
+import DefaultResetPassword from "../components/auth/DefaultResetPassword";
 
 type ButtonProps = { text: string; path: string };
 
@@ -44,7 +44,7 @@ const Default = (): React.ReactElement => {
       <div className="btn-group" style={{ paddingRight: "0.625rem" }}>
         <Logout />
         <RefreshCredentials />
-        <ResetPassword />
+        <DefaultResetPassword />
         <Button text="Create Entity" path={Routes.CREATE_ENTITY_PAGE} />
         <Button text="Update Entity" path={Routes.UPDATE_ENTITY_PAGE} />
         <Button text="Display Entities" path={Routes.DISPLAY_ENTITY_PAGE} />
