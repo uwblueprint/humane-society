@@ -160,7 +160,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  async sendForgotPasswordEmail(email: string): Promise<void> {
+  async sendPasswordResetEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
         "Attempted to call sendForgotPasswordEmail but this instance of AuthService does not have an EmailService instance";
@@ -309,12 +309,20 @@ class AuthService implements IAuthService {
       });
       return { success: true } as ResponseSuccessDTO;
     } catch (error) {
-      Logger.error(`Failed to update password. Error: ${error}`);
-      if (error.code === "auth/invalid-password") {
-        errorMessage =
-          "Password is too weak! Make sure it matches the password policy in Firebase.";
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage = "No user found with the provided email!";
+      Logger.error(
+        `Failed to update password. Error: ${getErrorMessage(error)}`,
+      );
+      if (error instanceof Error && "code" in error) {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        if ((error as any).code === "auth/invalid-password") {
+          errorMessage =
+            "Password is too weak! Make sure it matches the password policy in Firebase.";
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        } else if ((error as any).code === "auth/user-not-found") {
+          errorMessage = "No user found with the provided email!";
+        }
+      } else {
+        errorMessage = "Unknown error occurred.";
       }
       return { success: false, errorMessage };
     }
