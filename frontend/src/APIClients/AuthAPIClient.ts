@@ -108,11 +108,11 @@ const register = async (
   }
 };
 
-const sendForgotPasswordEmail = async (
+const sendPasswordResetEmail = async (
   email: string | undefined,
 ): Promise<boolean> => {
   try {
-    await baseAPIClient.post(`/auth/send-forgot-password-email/${email}`);
+    await baseAPIClient.post(`/auth/send-password-reset-email/${email}`);
     return true;
   } catch (error) {
     return false;
@@ -167,24 +167,14 @@ const setPassword = async (
   }
 };
 
-const forgotPassword = async (email: string): Promise<boolean> => {
-  try {
-    await baseAPIClient.post(`/auth/forgot-password/${email}`);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
 export default {
   login,
   loginWithSignInLink,
   logout,
   loginWithGoogle,
   register,
-  sendForgotPasswordEmail,
+  sendPasswordResetEmail,
   refresh,
   setPassword,
   getEmailOfCurrentUser,
-  forgotPassword,
 };

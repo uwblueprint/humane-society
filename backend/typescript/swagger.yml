@@ -597,7 +597,7 @@ paths:
           description: Invalid request
 
 
-  /auth/send-forgot-password-email/{email}:
+  /auth/send-password-reset-email/{email}:
     post:
       security:
         - bearerAuth: []

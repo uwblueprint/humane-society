@@ -50,7 +50,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
       setValidUser(true);
 
       try {
-        const success = await AuthAPIClient.forgotPassword(userEmail);
+        const success = await AuthAPIClient.sendPasswordResetEmail(userEmail);
         if (success) {
           setSentEmail(true);
 

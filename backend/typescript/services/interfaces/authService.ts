@@ -57,7 +57,7 @@ interface IAuthService {
    * @param email email of user requesting password reset
    * @throws Error if unable to generate link or send email
    */
-  sendForgotPasswordEmail(email: string): Promise<void>;
+  sendPasswordResetEmail(email: string): Promise<void>;
 
   /**
    * Generate an email verification link for the user with the given email and send

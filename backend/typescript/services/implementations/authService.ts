@@ -163,7 +163,7 @@ class AuthService implements IAuthService {
   async sendPasswordResetEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
-        "Attempted to call sendForgotPasswordEmail but this instance of AuthService does not have an EmailService instance";
+        "Attempted to call sendPasswordResetEmail but this instance of AuthService does not have an EmailService instance";
       Logger.error(errorMessage);
       throw new Error(errorMessage);
     }
