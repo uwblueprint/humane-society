@@ -74,14 +74,14 @@ activityRouter.get("/pet/:petId", async (req, res) => {
 /* Get Activities for specific User by User id */
 activityRouter.get(
   "/user/:userId/:schedule?", // schedule format: YYYY-MM-DD
-  async ( req: Request<{ userId: string; schedule?: string }>, res ) => {
+  async (req: Request<{ userId: string; schedule?: string }>, res) => {
     const { userId, schedule } = req.params;
 
     let activityDto: ActivityTimePatchDTO | undefined;
 
     if (schedule) {
       const date = new Date(schedule);
-      if (isNaN(date.getTime())) {
+      if (Number.isNaN(date.getTime())) {
         return res.status(400).send("Invalid date.");
       }
 
@@ -93,16 +93,13 @@ activityRouter.get(
         userId,
         activityDto,
       );
-      res.status(200).json(activitiesByUser);
+      return res.status(200).json(activitiesByUser);
     } catch (e: unknown) {
       if (e instanceof NotFoundError) {
-        res.status(404).send(getErrorMessage(e));
-      } else {
-        res.status(500).send(getErrorMessage(e));
+        return res.status(404).send(getErrorMessage(e));
       }
+      return res.status(500).send(getErrorMessage(e));
     }
-
-    return;
   },
 );
 
