@@ -93,7 +93,7 @@ const UserListTableSection = ({
           >
             {/* NAME */}
             <Td pl="2.625rem" pr="7rem" py="0.25rem">
-              <Flex gap="1rem" minWidth="max-content">
+              <Flex gap="1rem" minWidth="max-content" align="center">
                 <ProfilePhoto
                   image={user.profilePhoto}
                   color={colorLevelMap[user.colorLevel || 1]}

@@ -1,14 +1,9 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
-import {
-  Button,
-  Flex,
-  Text,
-  FormLabel,
-  FormControl,
-  Input,
-} from "@chakra-ui/react";
+import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
+
+import Input from "../components/common/Input";
 import Logo from "../components/common/Logo";
 import ResponsivePasswordInput from "../components/common/PasswordInput";
 import background from "../assets/images/background.png";
@@ -167,11 +162,6 @@ const LoginPage = (): React.ReactElement => {
                       </FormLabel>
                       <FormControl isInvalid={!!errorMessage}>
                         <Input
-                          size="lg"
-                          borderRadius="md"
-                          borderColor="gray.400"
-                          bg="white.default"
-                          _placeholder={{ color: "gray.400" }}
                           placeholder="user@humanesociety.org"
                           value={email}
                           onChange={handleEmailChange}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Input,
   Text,
   Button,
   FormControl,
@@ -8,6 +7,8 @@ import {
   Flex,
   FormLabel,
 } from "@chakra-ui/react";
+
+import Input from "../components/common/Input";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -146,11 +147,6 @@ const ForgotPasswordPage = (): React.ReactElement => {
             </FormLabel>
             <Input
               placeholder="username@humanesociety.org"
-              size="lg"
-              borderRadius="md"
-              borderColor="gray.400"
-              bg="white.default"
-              _placeholder={{ color: "gray.400" }}
               onChange={handleInputChange}
             />
           </Flex>

@@ -1,13 +1,8 @@
 import React from "react";
-import {
-  Input,
-  Button,
-  Flex,
-  Text,
-  FormLabel,
-  FormControl,
-} from "@chakra-ui/react";
+import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
+
+import Input from "../components/common/Input";
 import Logo from "../components/common/Logo";
 import ResponsivePasswordInput from "../components/common/PasswordInput";
 import ResponsivePopupModal from "../components/common/PopupModal";
