@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Box,
   Button,
   Container,
   Flex,
@@ -8,10 +7,8 @@ import {
   Image,
   Input,
   SimpleGrid,
-  Stack,
   Text,
   useToast,
-  VStack,
   Icon,
 } from "@chakra-ui/react";
 import { HiUpload, HiRefresh } from "react-icons/hi";
@@ -211,7 +208,7 @@ const DevFileStorageUpload: React.FC = () => {
   };
 
   const FileGrid = ({ files }: { files: FileStatus[] }) => (
-    <Box>
+    <Flex direction="column">
       <Flex justify="space-between" align="center" mb={4}>
         <Heading size="md">Uploaded Files</Heading>
         <Button
@@ -222,49 +219,51 @@ const DevFileStorageUpload: React.FC = () => {
           Refresh All
         </Button>
       </Flex>
-      <SimpleGrid columns={[1, 2, 3]} spacing={4}>
+      <SimpleGrid columns={[1, 2, 3]} spacing="4rem">
         {files.map((file) => (
-          <Box
+          <Flex
             key={file.id}
             borderWidth="1px"
             borderRadius="lg"
             overflow="hidden"
             p={4}
           >
-            <VStack spacing={3}>
+            <Flex direction="column" gap="3rem">
               <Text noOfLines={1}>{file.name}</Text>
               {file.url ? (
                 <Image
                   src={file.url}
                   alt={file.name}
-                  maxH="200px"
+                  maxH="12.5rem"
                   objectFit="contain"
                   fallback={
-                    <Box
-                      height="200px"
+                    <Flex
+                      height="12.5rem"
                       width="100%"
                       bg="gray.100"
-                      display="flex"
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <Text color="gray.500">Image not available</Text>
-                    </Box>
+                      <Text color="gray.500" textStyle="body">
+                        Image not available
+                      </Text>
+                    </Flex>
                   }
                 />
               ) : (
-                <Box
-                  height="200px"
+                <Flex
+                  height="12.5rem"
                   width="100%"
                   bg="gray.100"
-                  display="flex"
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Text color="gray.500">Image not available</Text>
-                </Box>
+                  <Text color="gray.500" textStyle="body">
+                    Image not available
+                  </Text>
+                </Flex>
               )}
-              <Flex gap={2} width="100%">
+              <Flex gap="0.5rem" width="100%">
                 <Button
                   size="sm"
                   colorScheme="blue"
@@ -281,19 +280,19 @@ const DevFileStorageUpload: React.FC = () => {
                   Delete
                 </Button>
               </Flex>
-            </VStack>
-          </Box>
+            </Flex>
+          </Flex>
         ))}
       </SimpleGrid>
-    </Box>
+    </Flex>
   );
 
   return (
     <Container maxW="container.xl" py={8}>
-      <Stack spacing={8}>
+      <Flex direction="column" gap="8rem">
         <Heading>File Storage Upload</Heading>
 
-        <Box
+        <Flex
           borderWidth="2px"
           borderStyle="dashed"
           borderRadius="md"
@@ -315,7 +314,7 @@ const DevFileStorageUpload: React.FC = () => {
             onChange={handleFileChange}
             cursor="pointer"
           />
-          <VStack spacing={2}>
+          <Flex direction="column" gap="2rem">
             <HiUpload size={24} />
             <Text>Drag and drop here to upload</Text>
             <Text fontSize="sm" color="gray.700">
@@ -335,17 +334,17 @@ const DevFileStorageUpload: React.FC = () => {
             >
               Select File
             </Button>
-          </VStack>
-        </Box>
+          </Flex>
+        </Flex>
 
         {error && (
-          <Box p={4} bg="red.100" color="red.700" borderRadius="md">
+          <Flex p={4} bg="red.100" color="red.700" borderRadius="md">
             {error}
-          </Box>
+          </Flex>
         )}
 
         {uploadedFiles.length > 0 && <FileGrid files={uploadedFiles} />}
-      </Stack>
+      </Flex>
     </Container>
   );
 };
