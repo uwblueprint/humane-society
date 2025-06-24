@@ -42,7 +42,7 @@ const MultiSelect = <T extends string | number>({
   useEffect(() => {
     if (colours.length !== values.length) {
       throw new Error(
-        `Colours array length (${colours.length}) must match values array length (${values.length})`
+        `Colours array length (${colours.length}) must match values array length (${values.length})`,
       );
     }
   }, [colours, values]);
@@ -106,39 +106,59 @@ const MultiSelect = <T extends string | number>({
 
   return (
     <Box ref={containerRef} position="relative" width="100%">
+      {label && (
+        <FormLabel
+          mb="8px"
+          fontSize="14px"
+          fontWeight="500"
+          color={error ? "red.500" : "gray.700"}
+        >
+          {label}
+          {required && (
+            <Text as="span" color="red.500" ml="4px">
+              *
+            </Text>
+          )}
+        </FormLabel>
+      )}
       <Box
         as="button"
         type="button"
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor="gray.300"
+        borderColor={error ? "red.300" : "gray.300"}
         borderRadius="8px"
         padding="12px 16px"
         cursor="pointer"
         onClick={handleToggle}
         position="relative"
-        _hover={{ 
+        _hover={{
           borderColor: "gray.400",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
         }}
-        _focus={{ 
-          outline: "none", 
+        _focus={{
+          outline: "none",
           borderColor: "blue.400",
-          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)" 
+          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
         }}
         height="48px"
         transition="all 0.2s ease"
         boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
       >
-        <Flex justify="space-between" align="center" gap="0.75rem" wrap="nowrap">
-          <Flex align="center" gap="0.5rem" flex="1" minWidth="0">
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="0.75rem"
+          wrap="nowrap"
+        >
+          <Flex align="center" gap="0.75rem" flex="1" minWidth="0">
             {selected.length > 0 ? (
-              <Flex gap="0.5rem" wrap="wrap" align="center" overflow="hidden">
+              <Flex gap="0.75rem" wrap="wrap" align="center" overflow="hidden">
                 {selected.map((value) => {
                   const color = getColorForValue(value);
                   const colorScheme = getColorScheme(color);
-                  
+
                   return (
                     <Tag
                       key={String(value)}
@@ -163,7 +183,7 @@ const MultiSelect = <T extends string | number>({
                         }}
                         ml="4px"
                         _hover={{
-                          bg: "whiteAlpha.300"
+                          bg: "whiteAlpha.300",
                         }}
                       />
                     </Tag>
@@ -184,14 +204,29 @@ const MultiSelect = <T extends string | number>({
               </Text>
             )}
           </Flex>
-          <Icon
-            as={ExpandIcon}
-            boxSize="16px"
-            color="gray.500"
-            transform={`rotate(${isOpen ? 180 : 0}deg)`}
-            transition="transform 0.2s ease"
+          <Box
+            bg="gray.50"
+            borderLeft="1px solid"
+            borderColor="gray.200"
+            px="16px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
             flexShrink={0}
-          />
+            ml="12px"
+            mr="-16px"
+            height="calc(100% + 24px)"
+            my="-12px"
+            borderRadius="0 6px 6px 0"
+          >
+            <Icon
+              as={ExpandIcon}
+              boxSize="16px"
+              color="gray.400"
+              transform={`rotate(${isOpen ? 180 : 0}deg)`}
+              transition="transform 0.2s ease"
+            />
+          </Box>
         </Flex>
       </Box>
 
@@ -215,7 +250,7 @@ const MultiSelect = <T extends string | number>({
             const isSelected = selected.includes(value);
             const color = colours[index];
             const colorScheme = getColorScheme(color);
-            
+
             return (
               <Flex
                 key={String(value)}
@@ -227,9 +262,9 @@ const MultiSelect = <T extends string | number>({
                 gap="12px"
                 cursor="pointer"
                 bg="transparent"
-                _hover={{ 
+                _hover={{
                   bg: `${colorScheme}.50`,
-                  transform: "translateY(-1px)"
+                  transform: "translateY(-1px)",
                 }}
                 onClick={() => handleSelect(value)}
                 transition="all 0.2s ease"
@@ -253,8 +288,8 @@ const MultiSelect = <T extends string | number>({
                     borderColor: `${colorScheme}.500`,
                     _hover: {
                       bg: `${colorScheme}.600`,
-                      borderColor: `${colorScheme}.600`
-                    }
+                      borderColor: `${colorScheme}.600`,
+                    },
                   }}
                 />
                 <Text
@@ -276,4 +311,4 @@ const MultiSelect = <T extends string | number>({
   );
 };
 
-export default MultiSelect; 
+export default MultiSelect;

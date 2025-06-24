@@ -1,21 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, AlertIcon, Box, CloseButton, Flex } from "@chakra-ui/react";
+import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
 
 import Filter from "../components/common/Filter";
 import Search from "../components/common/Search";
-// import SingleSelect from "../components/common/SingleSelect";
-// import MultiSelect from "../components/common/MultiSelect";
+import SingleSelect from "../components/common/SingleSelect";
+import MultiSelect from "../components/common/MultiSelect";
 import UserManagementTable from "../components/user-management/UserManagementTable";
-// // import { AnimalTag, ColorLevel } from "../types/TaskTypes";
+import { AnimalTag, ColorLevel } from "../types/TaskTypes";
 
 // Import animal tag icons
-// import { ReactComponent as BirdIcon } from "../assets/icons/animal-tag/bird.svg";
-// import { ReactComponent as BunnyIcon } from "../assets/icons/animal-tag/bunny.svg";
-// import { ReactComponent as CatIcon } from "../assets/icons/animal-tag/cat.svg";
-// import { ReactComponent as DogIcon } from "../assets/icons/animal-tag/dog.svg";
-// import { ReactComponent as SmallAnimalIcon } from "../assets/icons/animal-tag/small-animal.svg";
+import { ReactComponent as BirdIcon } from "../assets/icons/animal-tag/bird.svg";
+import { ReactComponent as BunnyIcon } from "../assets/icons/animal-tag/bunny.svg";
+import { ReactComponent as CatIcon } from "../assets/icons/animal-tag/cat.svg";
+import { ReactComponent as DogIcon } from "../assets/icons/animal-tag/dog.svg";
+import { ReactComponent as SmallAnimalIcon } from "../assets/icons/animal-tag/small-animal.svg";
 
 // Import star icon for color levels
 import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
@@ -46,21 +47,17 @@ const UserManagementPage = (): React.ReactElement => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
-  
+
   // Testing for the Select Component Filters
-  /*
   const [selectedColorLevel, setSelectedColorLevel] = useState<string | null>(null);
   const [selectedAnimalTags, setSelectedAnimalTags] = useState<string[]>([]);
-  */
 
   const handleClearFilters = () => {
     setFilters({});
     setSearch("");
     // Testing for the Select Component Filters
-    /*
     setSelectedColorLevel(null);
     setSelectedAnimalTags([]);
-    */
   };
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
@@ -88,11 +85,7 @@ const UserManagementPage = (): React.ReactElement => {
           return filterVals.includes(value as string);
         });
       })
-      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
-    }, [filters, search, users]);
-    
-    /*
-    Testing for the Select Component Filters
+      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
       .filter((user) => {
         // Apply SingleSelect Color Level filter
         if (selectedColorLevel) {
@@ -117,7 +110,7 @@ const UserManagementPage = (): React.ReactElement => {
         return true;
       });
   }, [filters, search, users, selectedColorLevel, selectedAnimalTags]);
-  */
+
 
   const getUsers = async () => {
     try {
@@ -136,12 +129,10 @@ const UserManagementPage = (): React.ReactElement => {
   }, []);
 
   // Testing for the Select Component Filters
-  /*
   const colorLevelOptions = Object.values(ColorLevel); // ["Green", "Yellow", "Orange", "Red", "Blue"]
   const animalTagOptions = Object.values(AnimalTag); // ["Bird", "Bunny", "Cat", "Dog", "Small Animal"]
   const animalTagColors = ["blue", "orange", "yellow", "green", "purple"]; // Colors for each animal tag
   const colorLevelIcons = [StarIcon, StarIcon, StarIcon, StarIcon, StarIcon]; // Star icons for each color level
-  */
 
   return (
     <Flex direction="column" gap="2rem" width="100%">
@@ -176,7 +167,6 @@ const UserManagementPage = (): React.ReactElement => {
       </Flex>
 
       {/* Testing for the Select Component Filters */}
-      {/*
       <Flex
         padding="0 2.5rem"
         gap="1.5rem"
@@ -192,6 +182,7 @@ const UserManagementPage = (): React.ReactElement => {
             placeholder="Any level"
             icons={colorLevelIcons}
             label="Color Level"
+            required={true}
             maxHeight="160px"
           />
         </Box>
@@ -207,7 +198,6 @@ const UserManagementPage = (): React.ReactElement => {
           />
         </Box>
       </Flex>
-      */}
       <UserManagementTable
         users={filteredUsers}
         clearFilters={handleClearFilters}

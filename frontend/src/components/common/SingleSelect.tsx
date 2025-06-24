@@ -1,12 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Box,
-  Flex,
-  Text,
-  FormLabel,
-  Icon,
-  Image,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, FormLabel, Icon } from "@chakra-ui/react";
 import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
 
 interface SingleSelectProps<T> {
@@ -39,7 +32,7 @@ const SingleSelect = <T extends string | number>({
   useEffect(() => {
     if (icons && icons.length !== values.length) {
       throw new Error(
-        `Icons array length (${icons.length}) must match values array length (${values.length})`
+        `Icons array length (${icons.length}) must match values array length (${values.length})`,
       );
     }
   }, [icons, values]);
@@ -78,15 +71,15 @@ const SingleSelect = <T extends string | number>({
   // Get color for icon based on value
   const getIconColor = (value: T): string => {
     const colorMap: Record<string, string> = {
-      "Green": "green.500",
-      "Yellow": "yellow.500", 
-      "Orange": "orange.500",
-      "Red": "red.500",
-      "Blue": "blue.500",
-      "Bird": "blue.400",
-      "Bunny": "orange.400",
-      "Cat": "yellow.400",
-      "Dog": "green.400",
+      Green: "green.500",
+      Yellow: "yellow.500",
+      Orange: "orange.500",
+      Red: "red.500",
+      Blue: "blue.500",
+      Bird: "blue.400",
+      Bunny: "orange.400",
+      Cat: "yellow.400",
+      Dog: "green.400",
       "Small Animal": "purple.400",
     };
     return colorMap[String(value)] || "orange.400";
@@ -95,15 +88,15 @@ const SingleSelect = <T extends string | number>({
   // Get hover background color based on value
   const getHoverColor = (value: T): string => {
     const colorMap: Record<string, string> = {
-      "Green": "green.50",
-      "Yellow": "yellow.50", 
-      "Orange": "orange.50",
-      "Red": "red.50",
-      "Blue": "blue.50",
-      "Bird": "blue.50",
-      "Bunny": "orange.50",
-      "Cat": "yellow.50",
-      "Dog": "green.50",
+      Green: "green.50",
+      Yellow: "yellow.50",
+      Orange: "orange.50",
+      Red: "red.50",
+      Blue: "blue.50",
+      Bird: "blue.50",
+      Bunny: "orange.50",
+      Cat: "yellow.50",
+      Dog: "green.50",
       "Small Animal": "purple.50",
     };
     return colorMap[String(value)] || "orange.50";
@@ -111,26 +104,41 @@ const SingleSelect = <T extends string | number>({
 
   return (
     <Box ref={containerRef} position="relative" width="100%">
+      {label && (
+        <FormLabel
+          mb="8px"
+          fontSize="14px"
+          fontWeight="500"
+          color={error ? "red.500" : "gray.700"}
+        >
+          {label}
+          {required && (
+            <Text as="span" color="red.500" ml="4px">
+              *
+            </Text>
+          )}
+        </FormLabel>
+      )}
       <Box
         as="button"
         type="button"
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor="gray.300"
+        borderColor={error ? "red.300" : "gray.300"}
         borderRadius="8px"
         padding="12px 16px"
         cursor="pointer"
         onClick={handleToggle}
         position="relative"
-        _hover={{ 
+        _hover={{
           borderColor: "gray.400",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
         }}
-        _focus={{ 
-          outline: "none", 
+        _focus={{
+          outline: "none",
           borderColor: "blue.400",
-          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)" 
+          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
         }}
         height="48px"
         transition="all 0.2s ease"
@@ -141,9 +149,9 @@ const SingleSelect = <T extends string | number>({
             {selected ? (
               <Flex align="center" gap="8px">
                 {icons && (
-                  <Icon 
-                    as={icons[values.indexOf(selected)]} 
-                    boxSize="16px" 
+                  <Icon
+                    as={icons[values.indexOf(selected)]}
+                    boxSize="16px"
                     color={getIconColor(selected)}
                   />
                 )}
@@ -173,14 +181,29 @@ const SingleSelect = <T extends string | number>({
               </Text>
             )}
           </Flex>
-          <Icon
-            as={ExpandIcon}
-            boxSize="16px"
-            color="gray.500"
-            transform={`rotate(${isOpen ? 180 : 0}deg)`}
-            transition="transform 0.2s ease"
+          <Box
+            bg="gray.50"
+            borderLeft="1px solid"
+            borderColor="gray.200"
+            px="16px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
             flexShrink={0}
-          />
+            ml="12px"
+            mr="-16px"
+            height="calc(100% + 24px)"
+            my="-12px"
+            borderRadius="0 6px 6px 0"
+          >
+            <Icon
+              as={ExpandIcon}
+              boxSize="16px"
+              color="gray.400"
+              transform={`rotate(${isOpen ? 180 : 0}deg)`}
+              transition="transform 0.2s ease"
+            />
+          </Box>
         </Flex>
       </Box>
 
@@ -203,7 +226,7 @@ const SingleSelect = <T extends string | number>({
           {values.map((value, index) => {
             const IconComponent = icons?.[index];
             const isSelected = selected === value;
-            
+
             return (
               <Flex
                 key={String(value)}
@@ -215,9 +238,9 @@ const SingleSelect = <T extends string | number>({
                 gap="12px"
                 cursor="pointer"
                 bg="transparent"
-                _hover={{ 
+                _hover={{
                   bg: getHoverColor(value),
-                  transform: "translateY(-1px)"
+                  transform: "translateY(-1px)",
                 }}
                 onClick={() => handleSelect(value)}
                 transition="all 0.2s ease"
@@ -226,9 +249,9 @@ const SingleSelect = <T extends string | number>({
                 my="2px"
               >
                 {IconComponent && (
-                  <Icon 
-                    as={IconComponent} 
-                    boxSize="18px" 
+                  <Icon
+                    as={IconComponent}
+                    boxSize="18px"
                     color={getIconColor(value)}
                   />
                 )}
@@ -251,4 +274,4 @@ const SingleSelect = <T extends string | number>({
   );
 };
 
-export default SingleSelect; 
+export default SingleSelect;
