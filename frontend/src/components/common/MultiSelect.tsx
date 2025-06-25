@@ -168,8 +168,6 @@ const MultiSelect = <T extends string | number>({
                       variant="subtle"
                       fontSize="14px"
                       fontWeight="600"
-                      px="12px"
-                      py="6px"
                       boxShadow="0 1px 3px rgba(0, 0, 0, 0.12)"
                       onClick={(e) => {
                         e.stopPropagation();

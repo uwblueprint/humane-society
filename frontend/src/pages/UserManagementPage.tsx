@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
-import { Box } from "@chakra-ui/react";
+import { Alert, AlertIcon, CloseButton, Flex, Box } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
 
@@ -49,7 +48,9 @@ const UserManagementPage = (): React.ReactElement => {
   const [search, setSearch] = useState<string>("");
 
   // Testing for the Select Component Filters
-  const [selectedColorLevel, setSelectedColorLevel] = useState<string | null>(null);
+  const [selectedColorLevel, setSelectedColorLevel] = useState<string | null>(
+    null,
+  );
   const [selectedAnimalTags, setSelectedAnimalTags] = useState<string[]>([]);
 
   const handleClearFilters = () => {
@@ -90,11 +91,11 @@ const UserManagementPage = (): React.ReactElement => {
         // Apply SingleSelect Color Level filter
         if (selectedColorLevel) {
           const colorLevelMap: Record<string, number> = {
-            "Green": 1,
-            "Yellow": 2,
-            "Orange": 3,
-            "Red": 4,
-            "Blue": 5,
+            Green: 1,
+            Yellow: 2,
+            Orange: 3,
+            Red: 4,
+            Blue: 5,
           };
           return user.colorLevel === colorLevelMap[selectedColorLevel];
         }
@@ -103,14 +104,13 @@ const UserManagementPage = (): React.ReactElement => {
       .filter((user) => {
         // Apply MultiSelect Animal Tags filter
         if (selectedAnimalTags.length > 0) {
-          return selectedAnimalTags.some(tag => 
-            user.animalTags.includes(tag as AnimalTag)
+          return selectedAnimalTags.some((tag) =>
+            user.animalTags.includes(tag as AnimalTag),
           );
         }
         return true;
       });
   }, [filters, search, users, selectedColorLevel, selectedAnimalTags]);
-
 
   const getUsers = async () => {
     try {
@@ -182,7 +182,7 @@ const UserManagementPage = (): React.ReactElement => {
             placeholder="Any level"
             icons={colorLevelIcons}
             label="Color Level"
-            required={true}
+            required
             maxHeight="160px"
           />
         </Box>

@@ -27,10 +27,10 @@ const SelectExamples: React.FC = () => {
           placeholder="Select a level"
           icons={levelIcons}
           label="Color Level"
-          required={true}
+          required
           error={false}
         />
-        
+
         <MultiSelect
           values={animalTags}
           onSelect={setSelectedTags}
@@ -41,7 +41,7 @@ const SelectExamples: React.FC = () => {
           required={false}
           error={false}
         />
-        
+
         {/* Error state examples */}
         <SingleSelect
           values={colorLevels}
@@ -50,12 +50,12 @@ const SelectExamples: React.FC = () => {
           placeholder="This has an error"
           icons={levelIcons}
           label="Error Example"
-          required={true}
-          error={true}
+          required
+          error
         />
       </VStack>
     </Box>
   );
 };
 
-export default SelectExamples; 
+export default SelectExamples;
