@@ -18,10 +18,6 @@ const PasswordInput = ({
   return (
     <InputGroup size="md">
       <Input
-        borderRadius="md"
-        borderColor="gray.400"
-        bg="white.default"
-        _placeholder={{ color: "gray.400" }}
         type={showPassword ? "text" : "password"}
         value={value}
         placeholder="••••••••••"
