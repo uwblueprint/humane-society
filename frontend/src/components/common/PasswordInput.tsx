@@ -1,28 +1,23 @@
 import React from "react";
-import {
-  IconButton,
-  Input,
-  InputGroup,
-  InputRightElement,
-} from "@chakra-ui/react";
+import { IconButton, InputGroup, InputRightElement } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import Input from "./Input";
 
-interface ResponsivePasswordInputProps {
+interface PasswordInputProps {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ResponsivePasswordInput = ({
+const PasswordInput = ({
   value,
   onChange,
-}: ResponsivePasswordInputProps): React.ReactElement => {
+}: PasswordInputProps): React.ReactElement => {
   const [showPassword, setShowPassword] = React.useState(false);
   const handlePasswordClick = () => setShowPassword(!showPassword);
 
   return (
     <InputGroup size="md">
       <Input
-        size="lg"
         borderRadius="md"
         borderColor="gray.400"
         bg="white.default"
@@ -59,4 +54,4 @@ const ResponsivePasswordInput = ({
   );
 };
 
-export default ResponsivePasswordInput;
+export default PasswordInput;

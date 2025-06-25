@@ -4,8 +4,8 @@ import { useHistory } from "react-router-dom";
 
 import Input from "../components/common/Input";
 import Logo from "../components/common/Logo";
-import ResponsivePasswordInput from "../components/common/PasswordInput";
-import ResponsivePopupModal from "../components/common/PopupModal";
+import PasswordInput from "../components/common/PasswordInput";
+import PopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -146,7 +146,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     Create Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
-                    <ResponsivePasswordInput
+                    <PasswordInput
                       value={password}
                       onChange={handlePasswordChange}
                     />
@@ -162,7 +162,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     Confirm Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
-                    <ResponsivePasswordInput
+                    <PasswordInput
                       value={confirmPassword}
                       onChange={handleConfirmPasswordChange}
                     />
@@ -200,7 +200,7 @@ const CreatePasswordPage = (): React.ReactElement => {
         </Flex>
       </Flex>
       {showModal && (
-        <ResponsivePopupModal
+        <PopupModal
           open={showModal}
           title="Success!"
           message="Welcome to the Oakville & Milton Humane Society"

@@ -12,7 +12,7 @@ import { useHistory, useLocation } from "react-router-dom";
 
 import Input from "../components/common/Input";
 import { HOME_PAGE } from "../constants/Routes";
-import ResponsivePopupModal from "../components/common/PopupModal";
+import PopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 
@@ -190,7 +190,7 @@ const ResetPasswordPage = (): React.ReactElement => {
         </form>
       </Flex>
       {success && (
-        <ResponsivePopupModal
+        <PopupModal
           open={success}
           title="Success!"
           message="Welcome to the Oakville & Milton Humane Society"
