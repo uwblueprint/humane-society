@@ -82,7 +82,7 @@ activityRouter.get(
     if (schedule) {
       const date = new Date(schedule);
       if (Number.isNaN(date.getTime())) {
-        return res.status(400).send("Invalid date.");
+        res.status(400).send("Invalid date.");
       }
 
       activityDto = { time: date };
@@ -93,12 +93,12 @@ activityRouter.get(
         userId,
         activityDto,
       );
-      return res.status(200).json(activitiesByUser);
+      res.status(200).json(activitiesByUser);
     } catch (e: unknown) {
       if (e instanceof NotFoundError) {
-        return res.status(404).send(getErrorMessage(e));
+        res.status(404).send(getErrorMessage(e));
       }
-      return res.status(500).send(getErrorMessage(e));
+      res.status(500).send(getErrorMessage(e));
     }
   },
 );

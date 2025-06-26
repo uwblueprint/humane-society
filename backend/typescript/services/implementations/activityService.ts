@@ -22,7 +22,7 @@ class ActivityService implements IActivityService {
       if (!activity) {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to get activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -56,7 +56,7 @@ class ActivityService implements IActivityService {
         endTime: activity.end_time,
         notes: activity.notes,
       }));
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to get activites. Reason = ${getErrorMessage(error)}`,
       );
@@ -85,7 +85,7 @@ class ActivityService implements IActivityService {
         endTime: activity.end_time,
         notes: activity.notes,
       }));
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to get activites. Reason = ${getErrorMessage(error)}`,
       );
@@ -98,7 +98,10 @@ class ActivityService implements IActivityService {
     schedule?: ActivityTimePatchDTO,
   ): Promise<Array<ActivityResponseDTO>> {
     try {
-      const searchClauses: any = {
+      const searchClauses: {
+        user_id: string;
+        start_time?: { [Op.gte]: Date; [Op.lt]: Date };
+      } = {
         user_id,
       };
 
@@ -107,7 +110,6 @@ class ActivityService implements IActivityService {
         const nextDay = new Date(day);
         nextDay.setDate(day.getDate() + 1);
 
-        // start of day <= start_time >= end of day
         searchClauses.start_time = {
           [Op.gte]: day,
           [Op.lt]: nextDay,
@@ -131,7 +133,7 @@ class ActivityService implements IActivityService {
         endTime: activity.end_time,
         notes: activity.notes,
       }));
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to get activites. Reason = ${getErrorMessage(error)}`,
       );
@@ -153,7 +155,7 @@ class ActivityService implements IActivityService {
         end_time: activity.endTime,
         notes: activity.notes,
       });
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to create activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -195,7 +197,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -231,7 +233,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -267,7 +269,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -303,7 +305,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -339,7 +341,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -375,7 +377,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       [, [resultingActivity]] = updateResult;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to update activity. Reason = ${getErrorMessage(error)}`,
       );
@@ -402,7 +404,7 @@ class ActivityService implements IActivityService {
         throw new NotFoundError(`Activity id ${id} not found`);
       }
       return id;
-    } catch (error: unknown) {
+    } catch (error) {
       Logger.error(
         `Failed to delete activity. Reason = ${getErrorMessage(error)}`,
       );
