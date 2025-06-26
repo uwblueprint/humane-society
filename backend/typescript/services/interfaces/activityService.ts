@@ -62,7 +62,10 @@ export interface IActivityService {
    * @returns returns array of Activities
    * @throws Error if retrieval fails
    */
-  getUserActivities(user_id: string): Promise<Array<ActivityResponseDTO>>;
+  getUserActivities(
+    user_id: string,
+    schedule?: ActivityTimePatchDTO,
+  ): Promise<Array<ActivityResponseDTO>>;
 
   /**
    * create a Activity with the fields given in the DTO, return created Activity
