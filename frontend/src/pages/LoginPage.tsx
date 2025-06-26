@@ -33,7 +33,7 @@ const LoginPage = (): React.ReactElement => {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "error" | "default">(
-    "default"
+    "default",
   );
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +85,7 @@ const LoginPage = (): React.ReactElement => {
       if (signInEmail && isSignInLink) {
         const user: AuthenticatedUser = await authAPIClient.loginWithSignInLink(
           url,
-          signInEmail
+          signInEmail,
         );
         if (user) {
           setAuthenticatedUser(user);
@@ -190,7 +190,12 @@ const LoginPage = (): React.ReactElement => {
                           onChange={handleEmailChange}
                         />
                         {emailError && (
-                          <Text fontSize="12px" color="red.500" mt="0.25rem">
+                          <Text
+                            textStyle="bodyMobile"
+                            color="red.500"
+                            m={0}
+                            mt="0.25rem"
+                          >
                             {emailError}
                           </Text>
                         )}
@@ -212,7 +217,11 @@ const LoginPage = (): React.ReactElement => {
                           onChange={handlePasswordChange}
                         />
                         {passwordError && (
-                          <Text fontSize="12px" color="red.500" mt="0.25rem">
+                          <Text
+                            textStyle="bodyMobile"
+                            color="red.500"
+                            mt="0.25rem"
+                          >
                             {passwordError}
                           </Text>
                         )}
