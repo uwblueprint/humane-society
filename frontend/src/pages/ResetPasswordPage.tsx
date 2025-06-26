@@ -4,7 +4,6 @@ import {
   Text,
   Button,
   FormControl,
-  FormErrorMessage,
   Flex,
   FormLabel,
 } from "@chakra-ui/react";
@@ -179,7 +178,11 @@ const ResetPasswordPage = (): React.ReactElement => {
                 />
               </Flex>
             </Flex>
-            {error && <FormErrorMessage>{error}</FormErrorMessage>}
+            {error && (
+              <Text m={0} mt="0.25rem" textStyle="bodyMobile" color="red.500">
+                {error}
+              </Text>
+            )}
           </FormControl>
 
           <Button
