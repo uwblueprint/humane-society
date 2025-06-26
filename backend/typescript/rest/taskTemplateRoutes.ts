@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { activityTypeRequestDtoValidator } from "../middlewares/validators/activityTypeValidators";
-import ActivityTypeService from "../services/implementations/activityTypeService";
+import { taskTemplateRequestDtoValidator } from "../middlewares/validators/taskTemplateValidators";
+import TaskTemplateService from "../services/implementations/taskTemplateService";
 import {
-  ActivityTypeResponseDTO,
-  IActivityTypeService,
-} from "../services/interfaces/activityTypeService";
+  TaskTemplateResponseDTO,
+  ITaskTemplateService,
+} from "../services/interfaces/taskTemplateService";
 import {
   getErrorMessage,
   NotFoundError,
@@ -12,21 +12,21 @@ import {
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 
-const activityTypeRouter: Router = Router();
+const taskTemplateRouter: Router = Router();
 
-const activityTypeService: IActivityTypeService = new ActivityTypeService();
+const taskTemplateService: ITaskTemplateService = new TaskTemplateService();
 
-/* Create ActivityType */
-activityTypeRouter.post(
+/* Create TaskTemplate */
+taskTemplateRouter.post(
   "/",
-  activityTypeRequestDtoValidator,
+  taskTemplateRequestDtoValidator,
   async (req, res) => {
     try {
       const { body } = req;
-      const newActivityType = await activityTypeService.createActivityType({
-        activityName: body.activityName,
+      const newTaskTemplate = await taskTemplateService.createTaskTemplate({
+        taskName: body.taskName,
       });
-      res.status(201).json(newActivityType);
+      res.status(201).json(newTaskTemplate);
     } catch (e: unknown) {
       if (e instanceof NotFoundError) {
         res.status(404).send(getErrorMessage(e));
@@ -37,16 +37,16 @@ activityTypeRouter.post(
   },
 );
 
-/* Get all ActivityTypes */
-activityTypeRouter.get("/", async (req, res) => {
+/* Get all TaskTemplates */
+taskTemplateRouter.get("/", async (req, res) => {
   const contentType = req.headers["content-type"];
   try {
-    const activityTypes = await activityTypeService.getActivityTypes();
-    await sendResponseByMimeType<ActivityTypeResponseDTO>(
+    const taskTemplates = await taskTemplateService.getTaskTemplates();
+    await sendResponseByMimeType<TaskTemplateResponseDTO>(
       res,
       200,
       contentType,
-      activityTypes,
+      taskTemplates,
     );
   } catch (e: unknown) {
     await sendResponseByMimeType(res, 500, contentType, [
@@ -57,13 +57,13 @@ activityTypeRouter.get("/", async (req, res) => {
   }
 });
 
-/* Get ActivityType by id */
-activityTypeRouter.get("/:id", async (req, res) => {
+/* Get TaskTemplate by id */
+taskTemplateRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const activityType = await activityTypeService.getActivityType(id);
-    res.status(200).json(activityType);
+    const taskTemplate = await taskTemplateService.getTaskTemplate(id);
+    res.status(200).json(taskTemplate);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
@@ -73,18 +73,18 @@ activityTypeRouter.get("/:id", async (req, res) => {
   }
 });
 
-/* Update ActivityType by id */
-activityTypeRouter.put(
+/* Update TaskTemplate by id */
+taskTemplateRouter.put(
   "/:id",
-  activityTypeRequestDtoValidator,
+  taskTemplateRequestDtoValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
       const { body } = req;
-      const activityType = await activityTypeService.updateActivityType(id, {
-        activityName: body.activityName,
+      const taskTemplate = await taskTemplateService.updateTaskTemplate(id, {
+        taskName: body.taskName,
       });
-      res.status(200).json(activityType);
+      res.status(200).json(taskTemplate);
     } catch (e: unknown) {
       if (e instanceof NotFoundError) {
         res.status(404).send(getErrorMessage(e));
@@ -95,12 +95,12 @@ activityTypeRouter.put(
   },
 );
 
-/* Delete ActivityType by id */
-activityTypeRouter.delete("/:id", async (req, res) => {
+/* Delete TaskTemplate by id */
+taskTemplateRouter.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedId = await activityTypeService.deleteActivityType(id);
+    const deletedId = await taskTemplateService.deleteTaskTemplate(id);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
@@ -111,4 +111,4 @@ activityTypeRouter.delete("/:id", async (req, res) => {
   }
 });
 
-export default activityTypeRouter;
+export default taskTemplateRouter;

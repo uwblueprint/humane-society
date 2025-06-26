@@ -23,16 +23,17 @@ import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
-  TaskCategory,
+  TaskType,
   TaskStatus,
 } from "../../../types/TaskTypes";
+import PetStatus from "../PetStatus";
 
 export interface PetInfo {
   id: number;
   name: string;
   skill: ColorLevel;
   image: string;
-  taskCategories: TaskCategory[];
+  taskTypes: TaskType[];
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
@@ -50,25 +51,19 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const statusColor: Record<TaskStatus, string> = {
-    [TaskStatus.NEEDS_CARE]: "red.400",
-    [TaskStatus.DOES_NOT_NEED_CARE]: "gray.500",
-    [TaskStatus.ASSIGNED]: "blue.500",
+  const taskTypeIcons: Record<TaskType, React.ElementType> = {
+    [TaskType.WALK]: WalkIcon,
+    [TaskType.GAMES]: GamesIcon,
+    [TaskType.PEN_TIME]: PenTimeIcon,
+    [TaskType.HUSBANDRY]: HusbandryIcon,
+    [TaskType.TRAINING]: TrainingIcon,
+    [TaskType.MISC]: MiscIcon,
   };
 
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
-    [TaskCategory.WALK]: WalkIcon,
-    [TaskCategory.GAMES]: GamesIcon,
-    [TaskCategory.PEN_TIME]: PenTimeIcon,
-    [TaskCategory.HUSBANDRY]: HusbandryIcon,
-    [TaskCategory.TRAINING]: TrainingIcon,
-    [TaskCategory.MISC]: MiscIcon,
-  };
-
-  const getDisplayedCategories = (taskCategories: TaskCategory[]) =>
-    taskCategories.slice(0, 4);
-  const getExtraTasks = (taskCategories: TaskCategory[]) =>
-    taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
+  const getDisplayedCategories = (taskTypes: TaskType[]) =>
+    taskTypes.slice(0, 4);
+  const getExtraTasks = (taskTypes: TaskType[]) =>
+    taskTypes.length > 4 ? `+${taskTypes.length - 4}` : null;
 
   return (
     <Tbody>
@@ -119,16 +114,7 @@ export const PetListTableSection = ({
                   <Text textStyle="h3" m={0}>
                     {pet.name}
                   </Text>
-                  <Flex align="center" gap="0.5rem">
-                    <Box
-                      boxSize="1rem"
-                      bg={statusColor[pet.status]}
-                      borderRadius="full"
-                    />
-                    <Text textStyle="body" m={0}>
-                      {pet.status}
-                    </Text>
-                  </Flex>
+                  <PetStatus status={pet.status} />
                 </VStack>
               </HStack>
             </Td>
@@ -136,23 +122,23 @@ export const PetListTableSection = ({
               {/* Task Categories */}
               <HStack gap="2rem" minWidth="max-content">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
-                  {getDisplayedCategories(pet.taskCategories).map(
-                    (category, index) => {
+                  {getDisplayedCategories(pet.taskTypes).map(
+                    (taskType, index) => {
                       return (
                         <HStack key={index} gap="0.8125rem" p={0}>
                           <Icon
-                            as={taskCategoryIcons[category]}
+                            as={taskTypeIcons[taskType]}
                             boxSize="2.5rem"
                           />
                           <Text textStyle="caption" m={0}>
-                            {category}
+                            {taskType}
                           </Text>
                         </HStack>
                       );
                     },
                   )}
                 </SimpleGrid>
-                {getExtraTasks(pet.taskCategories) && (
+                {getExtraTasks(pet.taskTypes) && (
                   <Flex
                     borderRadius="0.375rem"
                     boxSize="2.5rem"
@@ -161,7 +147,7 @@ export const PetListTableSection = ({
                     bg="gray.400"
                   >
                     <Text color="gray.50" textStyle="bodyBold" m={0}>
-                      {getExtraTasks(pet.taskCategories)}
+                      {getExtraTasks(pet.taskTypes)}
                     </Text>
                   </Flex>
                 )}

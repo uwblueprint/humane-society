@@ -12,7 +12,7 @@ const ResponsiveEmailInput = ({
 }: ResponsiveEmailInputProps): React.ReactElement => {
   return (
     <Input
-      fontSize="14px"
+      fontSize="16px"
       height="2.4rem"
       bg="#FFFFFF"
       placeholder="user@humanesociety.org"

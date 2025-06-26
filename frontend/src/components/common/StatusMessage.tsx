@@ -11,7 +11,7 @@ const StatusMessage = ({
   color = "blue.700",
 }: StatusMessageProps): React.ReactElement => {
   return (
-    <Text color={color} textAlign="center" lineHeight="120%" marginTop="16px">
+    <Text color={color} textAlign="center" lineHeight="120%" m="0">
       {message}
     </Text>
   );

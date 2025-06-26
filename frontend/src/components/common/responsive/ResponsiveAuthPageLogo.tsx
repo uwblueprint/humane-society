@@ -6,9 +6,10 @@ const ResponsiveLogo = (): React.ReactElement => {
     <Center
       height={{ base: "8rem", md: "10.85rem" }}
       aspectRatio="27.3/14"
-      bg="#2C5282"
+      bg="blue.700"
       borderRadius="2.6875rem"
-      border="1px solid var(--gray-200, #E2E8F0)"
+      borderColor="gray.200"
+      border="1px solid"
     >
       <Image
         src="/images/humane_society_logo_text.png"

@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
-import ForgotPasswordPage from "./pages/ForgotPassword";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";
@@ -31,6 +31,7 @@ import EditTeamInfoPage from "./pages/EditTeamPage";
 import HooksDemo from "./pages/HooksDemo";
 import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
+import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
@@ -66,16 +67,16 @@ const App = (): React.ReactElement => {
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <Route
+                exact
+                path={Routes.FORGOT_PASSWORD_PAGE}
+                component={ForgotPasswordPage}
+              />
               <PrivateRoute
                 exact
                 path={Routes.CREATE_PASSWORD_PAGE}
                 component={CreatePasswordPage}
                 allowedRoles={AuthConstants.ALL_ROLES}
-              />
-              <Route
-                exact
-                path={Routes.FORGOT_PASSWORD_PAGE}
-                component={ForgotPasswordPage}
               />
               {/* Protected Routes Wrapped in Layout */}
               <Layout>
@@ -156,6 +157,12 @@ const App = (): React.ReactElement => {
                     exact
                     path={`${Routes.PROFILE_PAGE}/:id`}
                     component={ProfilePage}
+                    allowedRoles={AuthConstants.ALL_ROLES}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={`${Routes.PET_PROFILE_PAGE}/:id`}
+                    component={PetProfilePage}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
                   <PrivateRoute
