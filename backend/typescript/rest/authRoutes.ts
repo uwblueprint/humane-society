@@ -111,18 +111,19 @@ authRouter.post(
 );
 
 /* Emails a password reset link to the user with the specified email */
-authRouter.post(
-  "/resetPassword/:email",
-  isAuthorizedByEmail("email"),
-  async (req, res) => {
-    try {
-      await authService.resetPassword(req.params.email);
-      res.status(204).send();
-    } catch (error: unknown) {
+authRouter.post("/send-password-reset-email/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    await authService.sendPasswordResetEmail(email);
+    res.status(204).send();
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ error: getErrorMessage(error) });
+    } else {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-  },
-);
+  }
+});
 
 // updates user password and updates status
 authRouter.post(

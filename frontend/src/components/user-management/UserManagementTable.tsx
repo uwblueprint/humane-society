@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
 import UserListTableSection from "./UserManagementTableSection";
-import { User } from "../../../types/UserTypes";
+import { User } from "../../types/UserTypes";
 
 interface UserManagementTableProps {
   users: User[];
@@ -12,7 +12,6 @@ const UserManagementTable = ({
   users,
   clearFilters,
 }: UserManagementTableProps): React.ReactElement => {
-  
   return (
     <Table w="100%" textAlign="left">
       <Thead borderBottom="1px solid" borderColor="gray.200">

@@ -22,11 +22,12 @@ const ResponsivePasswordInput = ({
   return (
     <InputGroup size="md">
       <Input
-        fontSize="14px"
-        height="2.4rem"
-        pr="2rem"
+        size="lg"
+        borderRadius="md"
+        borderColor="gray.400"
+        bg="white.default"
+        _placeholder={{ color: "gray.400" }}
         type={showPassword ? "text" : "password"}
-        bg="#FFFFFF"
         value={value}
         placeholder="••••••••••"
         onChange={onChange}

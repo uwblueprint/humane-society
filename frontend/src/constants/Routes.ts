@@ -4,9 +4,13 @@ export const LOGIN_PAGE = "/login";
 
 export const FORGOT_PASSWORD_PAGE = "/forgot-password";
 
+export const RESET_PASSWORD_PAGE = "/reset-password";
+
 export const INTERACTION_LOG_PAGE = "/interaction-log";
 
 export const PROFILE_PAGE = "/profile";
+
+export const PET_PROFILE_PAGE = "/pet-profile";
 
 export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes
 

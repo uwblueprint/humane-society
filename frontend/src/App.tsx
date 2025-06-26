@@ -5,7 +5,8 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
 import Signup from "./components/auth/Signup";
-import ForgotPasswordPage from "./pages/ForgotPassword";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";
@@ -13,7 +14,7 @@ import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
-import NotFound from "./pages/NotFound";
+import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
@@ -31,9 +32,11 @@ import EditTeamInfoPage from "./pages/EditTeamPage";
 import HooksDemo from "./pages/HooksDemo";
 import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
+import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
+import PageTitleUpdater from "./components/common/PageTitleUpdater";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
@@ -63,19 +66,25 @@ const App = (): React.ReactElement => {
           value={{ authenticatedUser, setAuthenticatedUser }}
         >
           <Router>
+            <PageTitleUpdater />
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
+              <Route
+                exact
+                path={Routes.FORGOT_PASSWORD_PAGE}
+                component={ForgotPasswordPage}
+              />
+              <Route
+                exact
+                path={Routes.RESET_PASSWORD_PAGE}
+                component={ResetPasswordPage}
+              />
               <PrivateRoute
                 exact
                 path={Routes.CREATE_PASSWORD_PAGE}
                 component={CreatePasswordPage}
                 allowedRoles={AuthConstants.ALL_ROLES}
-              />
-              <Route
-                exact
-                path={Routes.FORGOT_PASSWORD_PAGE}
-                component={ForgotPasswordPage}
               />
               {/* Protected Routes Wrapped in Layout */}
               <Layout>
@@ -160,6 +169,12 @@ const App = (): React.ReactElement => {
                   />
                   <PrivateRoute
                     exact
+                    path={`${Routes.PET_PROFILE_PAGE}/:id`}
+                    component={PetProfilePage}
+                    allowedRoles={AuthConstants.ALL_ROLES}
+                  />
+                  <PrivateRoute
+                    exact
                     path={Routes.ADMIN_PAGE}
                     component={AdminPage}
                     allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
@@ -177,7 +192,7 @@ const App = (): React.ReactElement => {
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                   />
                   {/* Fallback Route */}
-                  <Route path="*" component={NotFound} />
+                  <Route path="*" component={NotFoundPage} />
                 </Switch>
               </Layout>
             </Switch>
