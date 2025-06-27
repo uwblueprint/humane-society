@@ -1,6 +1,5 @@
 import { UserRoles } from "../constants/UserConstants";
-
-export type AnimalTag = "Bird" | "Bunny" | "Cat" | "Dog" | "Small Animal";
+import { AnimalTag } from "./TaskTypes";
 
 export type User = {
   id: number;

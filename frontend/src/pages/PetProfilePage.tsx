@@ -32,13 +32,10 @@ const PetProfilePage = (): React.ReactElement => {
   return (
     <>
       <NavBar pageName="Pet Profile" />
-      {/* Fill background */}
-      <Flex position="absolute" height="100%" width="100vw" top="0" zIndex={-1}>
-        <Flex backgroundColor="white" width="28%" maxW="20rem" />
-        <Flex backgroundColor="gray.100" flex="1" paddingTop="3rem" />
+      <Flex flex="1">
+        <PetProfileSidebar {...sampleProp} />
+        <Flex backgroundColor="gray.100" flex="1" paddingTop="8.5rem" />
       </Flex>
-      {/* Actual page */}
-      <PetProfileSidebar {...sampleProp} />
     </>
   );
 };

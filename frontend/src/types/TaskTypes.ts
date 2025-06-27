@@ -6,6 +6,14 @@ export enum ColorLevel {
   BLUE = "Blue",
 }
 
+export const colorLevelMap: Record<number, ColorLevel> = {
+  1: ColorLevel.GREEN,
+  2: ColorLevel.YELLOW,
+  3: ColorLevel.ORANGE,
+  4: ColorLevel.RED,
+  5: ColorLevel.BLUE,
+};
+
 export enum TaskCategory {
   WALK = "Walk",
   GAMES = "Games",
