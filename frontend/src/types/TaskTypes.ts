@@ -1,3 +1,16 @@
+export type Task = {
+  id: number;
+  user_id: number;
+  pet_id: number;
+  task_template_id: number;
+  scheduled_start_time: Date;
+  start_time: Date;
+  end_time: Date;
+  notes?: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export enum ColorLevel {
   GREEN = "Green",
   YELLOW = "Yellow",
