@@ -45,7 +45,6 @@ app.use("/activities", activityRouter);
 app.use("/matchmaking", matchmakingRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-
 sequelize.authenticate();
 
 firebaseAdmin.initializeApp({
