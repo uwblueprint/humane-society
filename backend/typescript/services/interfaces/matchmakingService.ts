@@ -1,5 +1,5 @@
-import { PetResponseDTO } from "../implementations/petService";
-import { UserResponseDTO } from "../implementations/userService";
+import { PetResponseDTO } from "../interfaces/petService";
+import { UserResponseDTO } from "../interfaces/userService";
 
 export interface IMatchmakingService {
   /* eslint-disable class-methods-use-this */
