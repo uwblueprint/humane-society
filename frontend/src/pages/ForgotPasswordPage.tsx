@@ -3,7 +3,6 @@ import {
   Text,
   Button,
   FormControl,
-  FormErrorMessage,
   Flex,
   FormLabel,
 } from "@chakra-ui/react";
@@ -151,9 +150,9 @@ const ForgotPasswordPage = (): React.ReactElement => {
             />
           </Flex>
           {!validUser && (
-            <FormErrorMessage textStyle="bodyMobile">
+            <Text textStyle="bodyMobile" color="red.500" m={0} mt="0.25rem">
               Must be a valid humanesociety.org email
-            </FormErrorMessage>
+            </Text>
           )}
         </FormControl>
         <Button
