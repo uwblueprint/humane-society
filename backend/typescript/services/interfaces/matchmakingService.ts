@@ -1,4 +1,4 @@
-import { PetResponseDTO } from "../interfaces/petService";
+import { PetResponseDTO } from "./petService";
 import { UserDTO } from "../../types";
 
 export interface IMatchmakingService {
