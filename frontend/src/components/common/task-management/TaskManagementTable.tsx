@@ -1,5 +1,15 @@
 import React from "react";
-import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody, Box } from "@chakra-ui/react";
+import {
+  Text,
+  Flex,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Td,
+  Tbody,
+  Box,
+} from "@chakra-ui/react";
 import { Task } from "../../../types/TaskTypes";
 import TaskManagementTableSection from "./TaskManagementTableSection";
 
@@ -39,7 +49,12 @@ const TaskManagementTable = ({
           <Tbody>
             <Tr>
               <Td colSpan={3}>
-                <Flex direction="column" alignItems="center" gap="1rem" my="5rem">
+                <Flex
+                  direction="column"
+                  alignItems="center"
+                  gap="1rem"
+                  my="5rem"
+                >
                   <Text m="0" textStyle="subheading">
                     No tasks currently match.
                   </Text>
@@ -65,4 +80,4 @@ const TaskManagementTable = ({
   );
 };
 
-export default TaskManagementTable; 
+export default TaskManagementTable;

@@ -39,38 +39,41 @@ export interface Task {
 export const mockTasks: Task[] = [
   {
     id: 1,
-    name: 'Morning walk',
+    name: "Morning walk",
     category: TaskCategory.WALK,
-    instructions: 'Morning walks with the walker walkwalkwalkwalkwalkwalkwalkwalk…'
+    instructions:
+      "Morning walks with the walker walkwalkwalkwalkwalkwalkwalkwalk…",
   },
   {
     id: 2,
-    name: 'Everything is Awesome!',
+    name: "Everything is Awesome!",
     category: TaskCategory.GAMES,
-    instructions: 'The focus of Everything is Awesome game is to make the dog feel appreciated and engaged.'
+    instructions:
+      "The focus of Everything is Awesome game is to make the dog feel appreciated and engaged.",
   },
   {
     id: 3,
-    name: 'Nap time',
+    name: "Nap time",
     category: TaskCategory.PEN_TIME,
-    instructions: 'Instructions here blablablabalbblablablablablablalbalb.'
+    instructions: "Instructions here blablablabalbblablablablablablalbalb.",
   },
   {
     id: 4,
-    name: 'Feeding',
+    name: "Feeding",
     category: TaskCategory.HUSBANDRY,
-    instructions: 'Feeding the pet instructions here filler text filler text filler text filler text.'
+    instructions:
+      "Feeding the pet instructions here filler text filler text filler text filler text.",
   },
   {
     id: 5,
-    name: 'Toilet training',
+    name: "Toilet training",
     category: TaskCategory.TRAINING,
-    instructions: 'Step‐by‐step guide to toilet training your pet goes here.'
+    instructions: "Step‐by‐step guide to toilet training your pet goes here.",
   },
   {
     id: 6,
-    name: 'blahblahblahblahblahbalhalhalblahblabla…',
+    name: "blahblahblahblahblahbalhalhalblahblabla…",
     category: TaskCategory.MISC,
-    instructions: 'Instructions here blablablabalbblablablablablablablblabb.'
-  }
+    instructions: "Instructions here blablablabalbblablablablablablablblabb.",
+  },
 ];

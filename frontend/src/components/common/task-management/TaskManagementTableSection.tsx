@@ -54,4 +54,4 @@ const TaskManagementTableSection = ({
   );
 };
 
-export default TaskManagementTableSection; 
+export default TaskManagementTableSection;

@@ -12,34 +12,42 @@ const baseAPIClient = axios.create({
 baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
   const newConfig = { ...config };
 
+  // Ensure headers exist
+  if (!newConfig.headers) {
+    newConfig.headers = {};
+  }
+
   // if access token in header has expired, do a refresh
-  const authHeaderParts = config.headers.Authorization?.split(" ");
-  if (
-    authHeaderParts &&
-    authHeaderParts.length >= 2 &&
-    authHeaderParts[0].toLowerCase() === "bearer"
-  ) {
-    const decodedToken = jwtDecode(authHeaderParts[1]) as DecodedJWT;
-
+  const authHeader = config.headers?.Authorization;
+  if (typeof authHeader === "string") {
+    const authHeaderParts = authHeader.split(" ");
     if (
-      decodedToken &&
-      (typeof decodedToken === "string" ||
-        decodedToken.exp <= Math.round(new Date().getTime() / 1000))
+      authHeaderParts &&
+      authHeaderParts.length >= 2 &&
+      authHeaderParts[0].toLowerCase() === "bearer"
     ) {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/auth/refresh`,
-        {},
-        { withCredentials: true },
-      );
+      const decodedToken = jwtDecode(authHeaderParts[1]) as DecodedJWT;
 
-      const accessToken = data.accessToken || data.access_token;
-      setLocalStorageObjProperty(
-        AUTHENTICATED_USER_KEY,
-        "accessToken",
-        accessToken,
-      );
+      if (
+        decodedToken &&
+        (typeof decodedToken === "string" ||
+          decodedToken.exp <= Math.round(new Date().getTime() / 1000))
+      ) {
+        const { data } = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
-      newConfig.headers.Authorization = accessToken;
+        const accessToken = data.accessToken || data.access_token;
+        setLocalStorageObjProperty(
+          AUTHENTICATED_USER_KEY,
+          "accessToken",
+          accessToken,
+        );
+
+        newConfig.headers.Authorization = accessToken;
+      }
     }
   }
 

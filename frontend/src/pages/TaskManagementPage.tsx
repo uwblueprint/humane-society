@@ -31,9 +31,10 @@ const TaskManagementPage = (): React.ReactElement => {
           return filterVals.includes(task[key as keyof typeof task] as string);
         });
       })
-      .filter((task) => 
-        task.name.toLowerCase().includes(search.toLowerCase()) ||
-        task.instructions.toLowerCase().includes(search.toLowerCase())
+      .filter(
+        (task) =>
+          task.name.toLowerCase().includes(search.toLowerCase()) ||
+          task.instructions.toLowerCase().includes(search.toLowerCase()),
       );
   }, [filters, search]);
 
