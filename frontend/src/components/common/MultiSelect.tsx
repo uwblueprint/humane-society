@@ -22,6 +22,7 @@ interface MultiSelectProps<T> {
   colours: string[];
   required?: boolean;
   maxHeight?: string;
+  maxVisibleTags?: number;
 }
 
 const MultiSelect = <T extends string | number>({
@@ -34,6 +35,7 @@ const MultiSelect = <T extends string | number>({
   colours,
   required = false,
   maxHeight = "200px",
+  maxVisibleTags = 2,
 }: MultiSelectProps<T>): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -104,6 +106,14 @@ const MultiSelect = <T extends string | number>({
     return colorMap[color.toLowerCase()] || "gray";
   };
 
+  // Calculate which tags to show and if we need a "+X more" indicator
+  // Reserve space for the "+X more" indicator by showing one fewer tag when needed
+  const shouldShowMore = selected.length > maxVisibleTags;
+  const displayTags = shouldShowMore
+    ? selected.slice(0, maxVisibleTags - 1)
+    : selected;
+  const remainingCount = selected.length - displayTags.length;
+
   return (
     <Box ref={containerRef} position="relative" width="100%">
       {label && (
@@ -151,24 +161,32 @@ const MultiSelect = <T extends string | number>({
           align="center"
           gap="0.75rem"
           wrap="nowrap"
+          height="100%"
         >
-          <Flex align="center" gap="0.75rem" flex="1" minWidth="0">
+          <Flex
+            align="center"
+            gap="0.5rem"
+            flex="1"
+            minWidth="0"
+            overflow="hidden"
+          >
             {selected.length > 0 ? (
-              <Flex gap="0.75rem" wrap="wrap" align="center" overflow="hidden">
-                {selected.map((value) => {
+              <Flex gap="0.5rem" align="center" overflow="hidden" flex="1">
+                {displayTags.map((value) => {
                   const color = getColorForValue(value);
                   const colorScheme = getColorScheme(color);
 
                   return (
                     <Tag
                       key={String(value)}
-                      size="md"
+                      size="sm"
                       colorScheme={colorScheme}
                       borderRadius="full"
                       variant="subtle"
-                      fontSize="14px"
+                      fontSize="12px"
                       fontWeight="600"
                       boxShadow="0 1px 3px rgba(0, 0, 0, 0.12)"
+                      flexShrink={0}
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
@@ -179,7 +197,7 @@ const MultiSelect = <T extends string | number>({
                           e.stopPropagation();
                           handleRemoveTag(value);
                         }}
-                        ml="4px"
+                        ml="2px"
                         _hover={{
                           bg: "whiteAlpha.300",
                         }}
@@ -187,6 +205,21 @@ const MultiSelect = <T extends string | number>({
                     </Tag>
                   );
                 })}
+                {shouldShowMore && (
+                  <Box
+                    bg="gray.100"
+                    borderRadius="full"
+                    px="8px"
+                    py="2px"
+                    fontSize="12px"
+                    fontWeight="600"
+                    color="gray.600"
+                    flexShrink={0}
+                    minWidth="fit-content"
+                  >
+                    +{remainingCount} more
+                  </Box>
+                )}
               </Flex>
             ) : (
               <Text
