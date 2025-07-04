@@ -109,15 +109,17 @@ const SingleSelect = <T extends string | number>({
         transition="all 0.2s ease"
         boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
       >
-        <Flex justify="space-between" align="center" gap="0.75rem" height="100%">
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="0.75rem"
+          height="100%"
+        >
           <Flex align="center" gap="8px" flex="1" minWidth="0" px="16px">
             {selected ? (
               <Flex align="center" gap="8px">
                 {icons && (
-                  <Icon
-                    as={icons[values.indexOf(selected)]}
-                    boxSize="16px"
-                  />
+                  <Icon as={icons[values.indexOf(selected)]} boxSize="16px" />
                 )}
                 <Text
                   m={0}
@@ -185,7 +187,6 @@ const SingleSelect = <T extends string | number>({
         >
           {values.map((value, index) => {
             const IconComponent = icons?.[index];
-            const isSelected = selected === value;
             const isLastItem = index === values.length - 1;
 
             return (
@@ -209,12 +210,7 @@ const SingleSelect = <T extends string | number>({
                   mx="4px"
                   my="2px"
                 >
-                  {IconComponent && (
-                    <Icon
-                      as={IconComponent}
-                      boxSize="18px"
-                    />
-                  )}
+                  {IconComponent && <Icon as={IconComponent} boxSize="18px" />}
                   <Text
                     m={0}
                     textStyle="body"
@@ -226,12 +222,7 @@ const SingleSelect = <T extends string | number>({
                   </Text>
                 </Flex>
                 {!isLastItem && (
-                  <Box
-                    height="1px"
-                    bg="gray.50"
-                    mx="16px"
-                    my="4px"
-                  />
+                  <Box height="1px" bg="gray.50" mx="16px" my="4px" />
                 )}
               </Box>
             );

@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import { Box, Flex, VStack } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import SingleSelect from "./SingleSelect";
 import MultiSelect from "./MultiSelect";
 import { ReactComponent as StarIcon } from "../../assets/icons/star.svg";
-import { ReactComponent as CatIcon } from "../../assets/icons/animal-tag/cat.svg";
-import { ReactComponent as DogIcon } from "../../assets/icons/animal-tag/dog.svg";
-import { ReactComponent as BirdIcon } from "../../assets/icons/animal-tag/bird.svg";
 
 const SelectExamples: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
@@ -14,7 +11,6 @@ const SelectExamples: React.FC = () => {
   const colorLevels = ["Green", "Yellow", "Orange", "Red", "Blue"];
   const animalTags = ["Cat", "Dog", "Bird"];
   const levelIcons = [StarIcon, StarIcon, StarIcon, StarIcon, StarIcon];
-  const tagIcons = [CatIcon, DogIcon, BirdIcon];
   const tagColors = ["yellow", "green", "blue"];
 
   return (

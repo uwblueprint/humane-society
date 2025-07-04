@@ -10,13 +10,6 @@ import MultiSelect from "../components/common/MultiSelect";
 import UserManagementTable from "../components/user-management/UserManagementTable";
 import { AnimalTag, ColorLevel } from "../types/TaskTypes";
 
-// Import animal tag icons
-import { ReactComponent as BirdIcon } from "../assets/icons/animal-tag/bird.svg";
-import { ReactComponent as BunnyIcon } from "../assets/icons/animal-tag/bunny.svg";
-import { ReactComponent as CatIcon } from "../assets/icons/animal-tag/cat.svg";
-import { ReactComponent as DogIcon } from "../assets/icons/animal-tag/dog.svg";
-import { ReactComponent as SmallAnimalIcon } from "../assets/icons/animal-tag/small-animal.svg";
-
 // Import star icon for color levels
 import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
 

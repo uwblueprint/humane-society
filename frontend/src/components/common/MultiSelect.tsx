@@ -332,12 +332,7 @@ const MultiSelect = <T extends string | number>({
                   </Text>
                 </Flex>
                 {!isLastItem && (
-                  <Box
-                    height="1px"
-                    bg="gray.50"
-                    mx="16px"
-                    my="4px"
-                  />
+                  <Box height="1px" bg="gray.50" mx="16px" my="4px" />
                 )}
               </Box>
             );
