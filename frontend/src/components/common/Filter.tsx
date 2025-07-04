@@ -233,14 +233,14 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             >
                               Filter by {filter.name}
                             </Text>
-                            <Box 
+                            <Box
                               onClick={onClose}
                               cursor="pointer"
                               padding="0.25rem"
                               borderRadius="0.25rem"
                               _hover={{
                                 backgroundColor: "gray.200",
-                                transform: "scale(1.1)"
+                                transform: "scale(1.1)",
                               }}
                               transition="all 0.2s"
                             >
