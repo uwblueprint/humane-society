@@ -68,40 +68,6 @@ const SingleSelect = <T extends string | number>({
 
   const displayValue = selected !== null ? String(selected) : placeholder;
 
-  // Get color for icon based on value
-  const getIconColor = (value: T): string => {
-    const colorMap: Record<string, string> = {
-      Green: "green.500",
-      Yellow: "yellow.500",
-      Orange: "orange.500",
-      Red: "red.500",
-      Blue: "blue.500",
-      Bird: "blue.400",
-      Bunny: "orange.400",
-      Cat: "yellow.400",
-      Dog: "green.400",
-      "Small Animal": "purple.400",
-    };
-    return colorMap[String(value)] || "orange.400";
-  };
-
-  // Get hover background color based on value
-  const getHoverColor = (value: T): string => {
-    const colorMap: Record<string, string> = {
-      Green: "green.50",
-      Yellow: "yellow.50",
-      Orange: "orange.50",
-      Red: "red.50",
-      Blue: "blue.50",
-      Bird: "blue.50",
-      Bunny: "orange.50",
-      Cat: "yellow.50",
-      Dog: "green.50",
-      "Small Animal": "purple.50",
-    };
-    return colorMap[String(value)] || "orange.50";
-  };
-
   return (
     <Box ref={containerRef} position="relative" width="100%">
       {label && (
@@ -125,9 +91,8 @@ const SingleSelect = <T extends string | number>({
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor={error ? "red.300" : "gray.300"}
+        borderColor={error ? "red.300" : "gray.200"}
         borderRadius="8px"
-        padding="12px 16px"
         cursor="pointer"
         onClick={handleToggle}
         position="relative"
@@ -144,22 +109,20 @@ const SingleSelect = <T extends string | number>({
         transition="all 0.2s ease"
         boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
       >
-        <Flex justify="space-between" align="center" gap="0.75rem">
-          <Flex align="center" gap="8px" flex="1" minWidth="0">
+        <Flex justify="space-between" align="center" gap="0.75rem" height="100%">
+          <Flex align="center" gap="8px" flex="1" minWidth="0" px="16px">
             {selected ? (
               <Flex align="center" gap="8px">
                 {icons && (
                   <Icon
                     as={icons[values.indexOf(selected)]}
                     boxSize="16px"
-                    color={getIconColor(selected)}
                   />
                 )}
                 <Text
                   m={0}
-                  fontSize="16px"
-                  fontWeight="600"
-                  color="blue.600"
+                  textStyle="body"
+                  color="gray.600"
                   overflow="hidden"
                   textOverflow="ellipsis"
                   whiteSpace="nowrap"
@@ -170,7 +133,7 @@ const SingleSelect = <T extends string | number>({
             ) : (
               <Text
                 m={0}
-                fontSize="16px"
+                textStyle="body"
                 color="gray.400"
                 fontStyle="italic"
                 overflow="hidden"
@@ -182,7 +145,7 @@ const SingleSelect = <T extends string | number>({
             )}
           </Flex>
           <Box
-            bg="gray.50"
+            bg="gray.100"
             borderLeft="1px solid"
             borderColor="gray.200"
             px="16px"
@@ -190,10 +153,7 @@ const SingleSelect = <T extends string | number>({
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
-            ml="12px"
-            mr="-16px"
-            height="calc(100% + 24px)"
-            my="-12px"
+            height="100%"
             borderRadius="0 6px 6px 0"
           >
             <Icon
@@ -239,7 +199,7 @@ const SingleSelect = <T extends string | number>({
                 cursor="pointer"
                 bg="transparent"
                 _hover={{
-                  bg: getHoverColor(value),
+                  bg: "gray.50",
                   transform: "translateY(-1px)",
                 }}
                 onClick={() => handleSelect(value)}
@@ -252,13 +212,11 @@ const SingleSelect = <T extends string | number>({
                   <Icon
                     as={IconComponent}
                     boxSize="18px"
-                    color={getIconColor(value)}
                   />
                 )}
                 <Text
                   m={0}
-                  fontSize="16px"
-                  fontWeight="500"
+                  textStyle="body"
                   color="gray.700"
                   textAlign="left"
                   flex="1"

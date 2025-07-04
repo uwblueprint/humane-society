@@ -137,9 +137,8 @@ const MultiSelect = <T extends string | number>({
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor={error ? "red.300" : "gray.300"}
+        borderColor={error ? "red.300" : "gray.200"}
         borderRadius="8px"
-        padding="12px 16px"
         cursor="pointer"
         onClick={handleToggle}
         position="relative"
@@ -169,6 +168,7 @@ const MultiSelect = <T extends string | number>({
             flex="1"
             minWidth="0"
             overflow="hidden"
+            px="16px"
           >
             {selected.length > 0 ? (
               <Flex gap="0.5rem" align="center" overflow="hidden" flex="1">
@@ -224,7 +224,7 @@ const MultiSelect = <T extends string | number>({
             ) : (
               <Text
                 m={0}
-                fontSize="16px"
+                textStyle="body"
                 color="gray.400"
                 fontStyle="italic"
                 overflow="hidden"
@@ -236,7 +236,7 @@ const MultiSelect = <T extends string | number>({
             )}
           </Flex>
           <Box
-            bg="gray.50"
+            bg="gray.100"
             borderLeft="1px solid"
             borderColor="gray.200"
             px="16px"
@@ -244,10 +244,7 @@ const MultiSelect = <T extends string | number>({
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
-            ml="12px"
-            mr="-16px"
-            height="calc(100% + 24px)"
-            my="-12px"
+            height="100%"
             borderRadius="0 6px 6px 0"
           >
             <Icon
@@ -325,8 +322,7 @@ const MultiSelect = <T extends string | number>({
                 />
                 <Text
                   m={0}
-                  fontSize="16px"
-                  fontWeight="500"
+                  textStyle="body"
                   color="gray.700"
                   textAlign="left"
                   flex="1"
