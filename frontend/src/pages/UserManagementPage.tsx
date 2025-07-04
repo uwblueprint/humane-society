@@ -12,6 +12,7 @@ import { AnimalTag, ColorLevel } from "../types/TaskTypes";
 
 // Import star icon for color levels
 import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
+import Pagination from "../components/common/Pagination";
 
 // const handleUserSubmit = async (formData: AddUserRequest) => {
 // eslint-disable-next-line no-useless-catch
@@ -53,6 +54,9 @@ const UserManagementPage = (): React.ReactElement => {
     setSelectedColorLevel(null);
     setSelectedAnimalTags([]);
   };
+  const [page, setPage] = useState<number>(1);
+
+  const usersPerPage = 10; // You can adjust this value as needed
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
@@ -103,7 +107,9 @@ const UserManagementPage = (): React.ReactElement => {
         }
         return true;
       });
-  }, [filters, search, users, selectedColorLevel, selectedAnimalTags]);
+  }, [filters, search, users, selectedColorLevel, selectedAnimalTags, page]);
+
+  const filteredUsersLength = filteredUsers.length;
 
   const getUsers = async () => {
     try {
@@ -192,8 +198,14 @@ const UserManagementPage = (): React.ReactElement => {
         </Box>
       </Flex>
       <UserManagementTable
-        users={filteredUsers}
+        users={filteredUsers.splice((page - 1) * usersPerPage, usersPerPage)}
         clearFilters={handleClearFilters}
+      />
+      <Pagination
+        value={page}
+        onChange={(newPage) => setPage(newPage)}
+        numberOfItems={filteredUsersLength}
+        itemsPerPage={usersPerPage}
       />
     </Flex>
   );
