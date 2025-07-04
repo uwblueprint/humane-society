@@ -96,7 +96,7 @@ const Button = ({
   disabled,
   type,
   isLoading,
-  width,
+  ...props
 }: CustomButtonProps) => {
   const sizing = SIZE_STYLES[size];
   const styles = VARIANT_STYLES[variant];
@@ -104,7 +104,7 @@ const Button = ({
   return (
     <ChakraButton
       height="fit-content"
-      width={width}
+      minWidth="fit-content"
       textStyle="button"
       fontFamily="Poppins"
       fontWeight={500}
@@ -122,6 +122,8 @@ const Button = ({
       disabled={disabled}
       type={type}
       isLoading={isLoading}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...props}
     >
       {children}
     </ChakraButton>
