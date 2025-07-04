@@ -109,8 +109,8 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   return (
-    <Box position="relative" minWidth="0">
-      <Box
+    <Flex position="relative" minWidth="0" direction="column">
+      <Flex
         ref={containerRef}
         overflowX="auto"
         className="no-scrollbar"
@@ -187,16 +187,26 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             />
                           </Box>
                           <Flex gap="0.35rem" alignItems="center">
-                            <Text margin="0" textStyle="body" as="span">
+                            <Text
+                              m={0}
+                              textStyle="body"
+                              as="span"
+                              color="gray.700"
+                            >
                               {filter.name}
                             </Text>
                             {selectedLabels && (
                               <>
-                                <Text margin="0" textStyle="body" as="span">
+                                <Text
+                                  m={0}
+                                  textStyle="body"
+                                  as="span"
+                                  color="gray.700"
+                                >
                                   |
                                 </Text>
                                 <Text
-                                  margin="0"
+                                  m={0}
                                   textStyle="bodyBold"
                                   color="blue.500"
                                 >
@@ -226,11 +236,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             justifyContent="space-between"
                             alignItems="center"
                           >
-                            <Text
-                              margin="0"
-                              textStyle="bodyBold"
-                              color="gray.700"
-                            >
+                            <Text m={0} textStyle="bodyBold" color="gray.700">
                               Filter by {filter.name}
                             </Text>
                             <Box
@@ -262,9 +268,14 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                 <Checkbox
                                   m="0"
                                   size="lg"
+                                  borderRadius="sm"
                                   cursor="pointer"
-                                  borderRadius="lg"
-                                  colorScheme="blue"
+                                  overflow="hidden"
+                                  colorScheme="blue.700"
+                                  _checked={{
+                                    bg: "blue.700",
+                                    borderColor: "blue.700",
+                                  }}
                                   borderColor="gray.600"
                                   isChecked={selectedValues.includes(option)}
                                   onChange={() =>
@@ -272,7 +283,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                   }
                                 />
                                 <Text
-                                  m="0"
+                                  m={0}
                                   textStyle={{ base: "body" }}
                                   color="gray.700"
                                 >
@@ -290,7 +301,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
             );
           })}
         </Flex>
-      </Box>
+      </Flex>
 
       {showGradient && (
         <Box
@@ -306,7 +317,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
           backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
         />
       )}
-    </Box>
+    </Flex>
   );
 };
 

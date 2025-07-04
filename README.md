@@ -143,12 +143,12 @@ SELECT * FROM <table-name>;
 ### Linting & Formatting
 ```bash
 # linting & formatting warnings only
-docker exec -it humane_society_backend /bin/bash -c "yarn lint"
-docker exec -it humane_society_frontend /bin/bash -c "yarn lint"
+docker exec -it humane_society_backend /bin/bash -c "yarn run lint"
+docker exec -it humane_society_frontend /bin/bash -c "yarn run lint"
 
 # linting with fix & formatting
-docker exec -it humane_society_backend /bin/bash -c "yarn fix"
-docker exec -it humane_society_frontend /bin/bash -c "yarn fix"
+docker exec -it humane_society_backend /bin/bash -c "yarn run fix"
+docker exec -it humane_society_frontend /bin/bash -c "yarn run fix"
 ```
 
 ### Running Tests

@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { Flex, Button } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import TaskManagementTable from "../components/common/task-management/TaskManagementTable";
 import Filter from "../components/common/Filter";
 import Search from "../components/common/Search";
 import { mockTasks } from "../types/TaskTypes";
+import Button from "../components/common/Button";
 
 const TaskManagementPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
@@ -58,14 +59,7 @@ const TaskManagementPage = (): React.ReactElement => {
             onChange={handleSearchChange}
             search={search}
           />
-          <Button
-            bg="blue.700"
-            color="white"
-            textStyle="button"
-            height="2.5rem"
-            px="1.5rem"
-            _hover={{ bg: "blue.600" }}
-          >
+          <Button variant="dark-blue" size="medium">
             Add Task Template
           </Button>
         </Flex>

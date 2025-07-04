@@ -1,15 +1,12 @@
 import React, { useState } from "react";
 import {
-  Box,
   Input,
   Text,
   Button,
   FormControl,
-  FormErrorMessage,
   Flex,
   FormLabel,
 } from "@chakra-ui/react";
-import StatusMessage from "../components/common/StatusMessage";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
@@ -27,45 +24,58 @@ const ForgotPasswordPage = (): React.ReactElement => {
 
   const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
-    // added uwblueprint for test
-    const sentEmails: SentEmail[] = JSON.parse(
+    const expiryTime = 60 * 1000; // 60 seconds
+    const now = new Date().getTime();
+
+    // Load and filter sent emails to keep only unexpired entries
+    let sentEmails: SentEmail[] = JSON.parse(
       localStorage.getItem("sentEmails") || "[]",
     );
+    sentEmails = sentEmails.filter((item) => now - item.timestamp < expiryTime);
+    localStorage.setItem("sentEmails", JSON.stringify(sentEmails)); // Save cleaned list
+
     if (!emailPattern.test(userEmail)) {
       setValidUser(false);
     } else if (
       sentEmails.some((item) => item.email === userEmail) ||
       sentEmail
     ) {
-      // show "already sent" message if email was previously sent OR if we just sent one in this session
+      // already sent to this user in the last 60s
       setValidUser(true);
       setSentEmail(false);
       setSentEmailToUser(true);
     } else {
-      // make API call to send forgot password email
+      // Proceed to send email
       setValidUser(true);
 
       try {
-        const success = await AuthAPIClient.forgotPassword(userEmail);
+        const success = await AuthAPIClient.sendPasswordResetEmail(userEmail);
         if (success) {
           setSentEmail(true);
-          // keep the localStorage logic for preventing duplicate sends in UI
+
+          // Add new email to localStorage with timestamp
           const newEmail: SentEmail = {
             email: userEmail,
-            timestamp: new Date().getTime(),
+            timestamp: now,
           };
           sentEmails.push(newEmail);
           localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+
+          // Optionally, reset the "already sent" message after timeout
           setTimeout(() => {
-            const updatedSentEmails: SentEmail[] = JSON.parse(
+            let updatedSentEmails: SentEmail[] = JSON.parse(
               localStorage.getItem("sentEmails") || "[]",
             );
-            const filteredEmails = updatedSentEmails.filter(
-              (item: SentEmail) => item.email !== userEmail,
+            updatedSentEmails = updatedSentEmails.filter(
+              (item: SentEmail) =>
+                item.email !== userEmail || now - item.timestamp < expiryTime,
             );
-            localStorage.setItem("sentEmails", JSON.stringify(filteredEmails));
+            localStorage.setItem(
+              "sentEmails",
+              JSON.stringify(updatedSentEmails),
+            );
             setSentEmailToUser(false);
-          }, 60000);
+          }, expiryTime);
         } else {
           setValidUser(false);
         }
@@ -103,76 +113,77 @@ const ForgotPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <Box
+      <Flex
         width="100vw"
-        maxWidth="500px"
-        padding={["36px", "36px", "36px", "60px 64px"]}
+        maxWidth="31.25rem"
+        padding={["2.25rem", "2.25rem", "2.25rem", "3.75rem 4rem"]}
         borderRadius="6px"
         backgroundColor="gray.50"
         boxShadow="lg"
-        gap="36px"
-        display="flex"
-        flexDirection="column"
-        marginTop="20px"
-        marginBottom="20px"
+        gap="2.25rem"
+        direction="column"
+        marginTop="1.25rem"
+        marginBottom="1.25rem"
       >
         <Text
           color="gray.600"
           textStyle="h2"
           textAlign="center"
           lineHeight="120%"
-          m="0"
+          m={0}
         >
           Forgot Password?
         </Text>
-        <Text m="0" color="gray.600" textStyle="body">
+        <Text m={0} color="gray.600" textStyle="body">
           Please enter the email address associated with your account to reset
           your password.
         </Text>
-        <Flex direction="column" gap="8px">
-          <FormLabel textColor="gray.600" fontSize="16px" lineHeight="8px">
-            Email:
-          </FormLabel>
-          <FormControl isInvalid={!validUser}>
+        <FormControl isInvalid={!validUser}>
+          <Flex direction="column" gap="0.375rem">
+            <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
+              Email:
+            </FormLabel>
             <Input
               placeholder="username@humanesociety.org"
               size="lg"
               borderRadius="md"
-              _placeholder={{ color: "gray.400" }}
               borderColor="gray.400"
+              bg="white.default"
+              _placeholder={{ color: "gray.400" }}
               onChange={handleInputChange}
-              fontSize="16px"
-              height="2.4rem"
-              py="14.5px"
-              px="16px"
-              bg="#FFFFFF"
             />
-            {!validUser && (
-              <FormErrorMessage fontSize="16px">
-                Must be a valid humanesociety.org email
-              </FormErrorMessage>
-            )}
-          </FormControl>
-          <Button
-            textStyle="button"
-            size="lg"
-            width="100%"
-            variant="solid"
-            color="white"
-            bg="blue.700"
-            marginTop="30px"
-            onClick={() => handleUserAuth(userEmailId)}
-          >
-            Send
-          </Button>
-        </Flex>
+          </Flex>
+          {!validUser && (
+            <Text textStyle="bodyMobile" color="red.500" m={0} mt="0.25rem">
+              Must be a valid humanesociety.org email
+            </Text>
+          )}
+        </FormControl>
+        <Button
+          textStyle="button"
+          size="lg"
+          width="100%"
+          variant="solid"
+          color="white"
+          bg="blue.700"
+          marginTop="1.875rem"
+          onClick={() => handleUserAuth(userEmailId)}
+          m={0}
+        >
+          Send
+        </Button>
+
         {sentEmail && (
-          <StatusMessage message="A password reset link has been sent to your email!" />
+          <Text textStyle="caption" color="blue.700" textAlign="center">
+            A password reset link has been sent to your email!
+          </Text>
         )}
         {sentEmailToUser && (
-          <StatusMessage message="You have already sent an email to this user." />
+          <Text textStyle="caption" color="blue.700" textAlign="center">
+            You have already sent an email to this user.{" "}
+          </Text>
         )}
-      </Box>
+      </Flex>
     </Flex>
   );
 };

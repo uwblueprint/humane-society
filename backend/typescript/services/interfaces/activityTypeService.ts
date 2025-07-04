@@ -21,7 +21,10 @@ export interface IActivityTypeService {
    * @returns Returns an array of ActivityTypes
    * @throws Error if retrieval fails
    */
-  getActivityTypes(): Promise<ActivityTypeResponseDTO[]>;
+  getActivityTypes(
+    page: number,
+    limit: number,
+  ): Promise<ActivityTypeResponseDTO[]>;
 
   /**
    * Create an ActivityType with the fields given in the DTO, return created ActivityType

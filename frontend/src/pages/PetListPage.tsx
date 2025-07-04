@@ -1,8 +1,8 @@
 import { Flex } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
 import mockData from "../temp/mock/petlist/mockPetList.json";
-import PetListTable from "../components/common/petlist/PetListTable";
-import { PetInfo } from "../components/common/petlist/PetListTableSection";
+import PetListTable from "../components/pet-list/PetListTable";
+import { PetInfo } from "../components/pet-list/PetListTableSection";
 import Search from "../components/common/Search";
 import Filter from "../components/common/Filter";
 import { TaskCategory } from "../types/TaskTypes";
@@ -52,7 +52,7 @@ const PetListPage = (): React.ReactElement => {
   const petListFilterType = isVolunteer ? "petListVolunteer" : "petListAdmin";
 
   return (
-    <Flex direction="column" gap="2rem">
+    <Flex direction="column" gap="2rem" width="100%">
       <Flex
         padding="0 2.5rem"
         maxWidth="100vw"
