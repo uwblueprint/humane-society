@@ -6,6 +6,7 @@ import { User } from "../types/UserTypes";
 import Filter from "../components/common/Filter";
 import Search from "../components/common/Search";
 import UserManagementTable from "../components/user-management/UserManagementTable";
+import Pagination from "../components/common/Pagination";
 
 // const handleUserSubmit = async (formData: AddUserRequest) => {
 // eslint-disable-next-line no-useless-catch
@@ -37,6 +38,9 @@ const UserManagementPage = (): React.ReactElement => {
     setFilters({});
     setSearch("");
   };
+  const [page, setPage] = useState<number>(1);
+
+  const usersPerPage = 10; // You can adjust this value as needed
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
@@ -116,6 +120,12 @@ const UserManagementPage = (): React.ReactElement => {
       <UserManagementTable
         users={filteredUsers}
         clearFilters={handleClearFilters}
+      />
+      <Pagination
+        value={page}
+        onChange={(newPage) => setPage(newPage)}
+        numberOfItems={filteredUsers.length}
+        itemsPerPage={usersPerPage}
       />
     </Flex>
   );
