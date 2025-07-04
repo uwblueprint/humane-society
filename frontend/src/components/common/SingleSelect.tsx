@@ -186,44 +186,54 @@ const SingleSelect = <T extends string | number>({
           {values.map((value, index) => {
             const IconComponent = icons?.[index];
             const isSelected = selected === value;
+            const isLastItem = index === values.length - 1;
 
             return (
-              <Flex
-                key={String(value)}
-                as="button"
-                type="button"
-                width="calc(100% - 8px)"
-                padding="12px 16px"
-                align="center"
-                gap="12px"
-                cursor="pointer"
-                bg="transparent"
-                _hover={{
-                  bg: "gray.50",
-                  transform: "translateY(-1px)",
-                }}
-                onClick={() => handleSelect(value)}
-                transition="all 0.2s ease"
-                borderRadius="8px"
-                mx="4px"
-                my="2px"
-              >
-                {IconComponent && (
-                  <Icon
-                    as={IconComponent}
-                    boxSize="18px"
+              <Box key={String(value)}>
+                <Flex
+                  as="button"
+                  type="button"
+                  width="calc(100% - 8px)"
+                  padding="12px 16px"
+                  align="center"
+                  gap="12px"
+                  cursor="pointer"
+                  bg="transparent"
+                  _hover={{
+                    bg: "gray.50",
+                    transform: "translateY(-1px)",
+                  }}
+                  onClick={() => handleSelect(value)}
+                  transition="all 0.2s ease"
+                  borderRadius="8px"
+                  mx="4px"
+                  my="2px"
+                >
+                  {IconComponent && (
+                    <Icon
+                      as={IconComponent}
+                      boxSize="18px"
+                    />
+                  )}
+                  <Text
+                    m={0}
+                    textStyle="body"
+                    color="gray.700"
+                    textAlign="left"
+                    flex="1"
+                  >
+                    {String(value)}
+                  </Text>
+                </Flex>
+                {!isLastItem && (
+                  <Box
+                    height="1px"
+                    bg="gray.50"
+                    mx="16px"
+                    my="4px"
                   />
                 )}
-                <Text
-                  m={0}
-                  textStyle="body"
-                  color="gray.700"
-                  textAlign="left"
-                  flex="1"
-                >
-                  {String(value)}
-                </Text>
-              </Flex>
+              </Box>
             );
           })}
         </Box>

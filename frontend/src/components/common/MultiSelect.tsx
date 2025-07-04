@@ -278,58 +278,68 @@ const MultiSelect = <T extends string | number>({
             const isSelected = selected.includes(value);
             const color = colours[index];
             const colorScheme = getColorScheme(color);
+            const isLastItem = index === values.length - 1;
 
             return (
-              <Flex
-                key={String(value)}
-                as="button"
-                type="button"
-                width="calc(100% - 8px)"
-                padding="12px 16px"
-                align="center"
-                gap="12px"
-                cursor="pointer"
-                bg="transparent"
-                _hover={{
-                  bg: `${colorScheme}.50`,
-                  transform: "translateY(-1px)",
-                }}
-                onClick={() => handleSelect(value)}
-                transition="all 0.2s ease"
-                borderRadius="8px"
-                mx="4px"
-                my="2px"
-              >
-                <Checkbox
-                  m="0"
-                  size="md"
+              <Box key={String(value)}>
+                <Flex
+                  as="button"
+                  type="button"
+                  width="calc(100% - 8px)"
+                  padding="12px 16px"
+                  align="center"
+                  gap="12px"
                   cursor="pointer"
-                  borderRadius="6px"
-                  colorScheme={colorScheme}
-                  borderColor="gray.400"
-                  borderWidth="2px"
-                  isChecked={isSelected}
-                  onChange={() => {}} // Handled by parent click
-                  onClick={(e) => e.stopPropagation()}
-                  _checked={{
-                    bg: `${colorScheme}.500`,
-                    borderColor: `${colorScheme}.500`,
-                    _hover: {
-                      bg: `${colorScheme}.600`,
-                      borderColor: `${colorScheme}.600`,
-                    },
+                  bg="transparent"
+                  _hover={{
+                    bg: `${colorScheme}.50`,
+                    transform: "translateY(-1px)",
                   }}
-                />
-                <Text
-                  m={0}
-                  textStyle="body"
-                  color="gray.700"
-                  textAlign="left"
-                  flex="1"
+                  onClick={() => handleSelect(value)}
+                  transition="all 0.2s ease"
+                  borderRadius="8px"
+                  mx="4px"
+                  my="2px"
                 >
-                  {String(value)}
-                </Text>
-              </Flex>
+                  <Checkbox
+                    m="0"
+                    size="md"
+                    cursor="pointer"
+                    borderRadius="6px"
+                    colorScheme={colorScheme}
+                    borderColor="gray.400"
+                    borderWidth="2px"
+                    isChecked={isSelected}
+                    onChange={() => {}} // Handled by parent click
+                    onClick={(e) => e.stopPropagation()}
+                    _checked={{
+                      bg: `${colorScheme}.500`,
+                      borderColor: `${colorScheme}.500`,
+                      _hover: {
+                        bg: `${colorScheme}.600`,
+                        borderColor: `${colorScheme}.600`,
+                      },
+                    }}
+                  />
+                  <Text
+                    m={0}
+                    textStyle="body"
+                    color="gray.700"
+                    textAlign="left"
+                    flex="1"
+                  >
+                    {String(value)}
+                  </Text>
+                </Flex>
+                {!isLastItem && (
+                  <Box
+                    height="1px"
+                    bg="gray.50"
+                    mx="16px"
+                    my="4px"
+                  />
+                )}
+              </Box>
             );
           })}
         </Box>
