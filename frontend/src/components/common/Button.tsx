@@ -96,6 +96,7 @@ const Button = ({
   disabled,
   type,
   isLoading,
+  width,
 }: CustomButtonProps) => {
   const sizing = SIZE_STYLES[size];
   const styles = VARIANT_STYLES[variant];
@@ -103,6 +104,7 @@ const Button = ({
   return (
     <ChakraButton
       height="fit-content"
+      width={width}
       textStyle="button"
       fontFamily="Poppins"
       fontWeight={500}

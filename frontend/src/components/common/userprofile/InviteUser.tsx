@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button } from "@chakra-ui/react";
+import Button from "../Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 
 export interface InviteUserProps {
@@ -16,19 +16,10 @@ const InviteUser = ({ email }: InviteUserProps): React.ReactElement => {
 
   return (
     <Button
-      type="button"
-      className="btn"
-      onClick={onInviteClick}
+      variant="dark-blue"
       width="100%"
-      sx={{
-        backgroundColor: "blue.700",
-        color: "white",
-        fontWeight: "normal",
-        _active: { backgroundColor: "blue.800" },
-        _hover: { color: "white", backgroundColor: "blue.800" },
-        _focus: { boxShadow: "0 0 0 .2rem rgba(44, 82, 130, .25)" },
-        _focusVisible: { boxShadow: "0 0 0 .2rem rgba(44, 82, 130, .25)" },
-      }}
+      size="medium"
+      onClick={onInviteClick}
     >
       Resend Invite Email
     </Button>
