@@ -3,9 +3,9 @@ import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { User } from "../types/UserTypes";
 
-import UserManagementTable from "../components/common/user-management/UserManagementTable";
 import Filter from "../components/common/Filter";
 import Search from "../components/common/Search";
+import UserManagementTable from "../components/user-management/UserManagementTable";
 
 // const handleUserSubmit = async (formData: AddUserRequest) => {
 // eslint-disable-next-line no-useless-catch
@@ -83,7 +83,7 @@ const UserManagementPage = (): React.ReactElement => {
   }, []);
 
   return (
-    <Flex direction="column" gap="2rem">
+    <Flex direction="column" gap="2rem" width="100%">
       {errorMessage && (
         <Alert status="error" mb={4}>
           <AlertIcon />

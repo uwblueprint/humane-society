@@ -2,11 +2,12 @@ import React, { useContext } from "react";
 import authAPIClient from "../../APIClients/AuthAPIClient";
 import AuthContext from "../../contexts/AuthContext";
 
-const ResetPassword = (): React.ReactElement => {
+/* Note: only used for Default.tsx page for testing */
+const DefaultResetPassword = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
 
   const onResetPasswordClick = async () => {
-    await authAPIClient.resetPassword(authenticatedUser?.email);
+    await authAPIClient.sendPasswordResetEmail(authenticatedUser?.email);
   };
 
   return (
@@ -20,4 +21,4 @@ const ResetPassword = (): React.ReactElement => {
   );
 };
 
-export default ResetPassword;
+export default DefaultResetPassword;

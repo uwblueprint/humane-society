@@ -1,33 +1,33 @@
 import React from "react";
-import { Box, HStack, Icon, Tbody, Td, Text, Tr } from "@chakra-ui/react";
-import ProfilePhoto from "../ProfilePhoto";
+import { Flex, Icon, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 
 // TODO: move these into index.ts
-import { ReactComponent as BirdTag } from "../../../assets/icons/animal-tag/bird.svg";
-import { ReactComponent as BunnyTag } from "../../../assets/icons/animal-tag/bunny.svg";
-import { ReactComponent as CatTag } from "../../../assets/icons/animal-tag/cat.svg";
-import { ReactComponent as DogTag } from "../../../assets/icons/animal-tag/dog.svg";
-import { ReactComponent as SmallAnimalTag } from "../../../assets/icons/animal-tag/small-animal.svg";
+import { ReactComponent as BirdTag } from "../../assets/icons/animal-tag/bird.svg";
+import { ReactComponent as BunnyTag } from "../../assets/icons/animal-tag/bunny.svg";
+import { ReactComponent as CatTag } from "../../assets/icons/animal-tag/cat.svg";
+import { ReactComponent as DogTag } from "../../assets/icons/animal-tag/dog.svg";
+import { ReactComponent as SmallAnimalTag } from "../../assets/icons/animal-tag/small-animal.svg";
 
-import { ReactComponent as InvitedBirdTag } from "../../../assets/icons/animal-tag/invited-bird.svg";
-import { ReactComponent as InvitedBunnyTag } from "../../../assets/icons/animal-tag/invited-bunny.svg";
-import { ReactComponent as InvitedCatTag } from "../../../assets/icons/animal-tag/invited-cat.svg";
-import { ReactComponent as InvitedDogTag } from "../../../assets/icons/animal-tag/invited-dog.svg";
-import { ReactComponent as InvitedSmallAnimalTag } from "../../../assets/icons/animal-tag/invited-small-animal.svg";
+import { ReactComponent as InvitedBirdTag } from "../../assets/icons/animal-tag/invited-bird.svg";
+import { ReactComponent as InvitedBunnyTag } from "../../assets/icons/animal-tag/invited-bunny.svg";
+import { ReactComponent as InvitedCatTag } from "../../assets/icons/animal-tag/invited-cat.svg";
+import { ReactComponent as InvitedDogTag } from "../../assets/icons/animal-tag/invited-dog.svg";
+import { ReactComponent as InvitedSmallAnimalTag } from "../../assets/icons/animal-tag/invited-small-animal.svg";
 
-import { ReactComponent as AdminTag } from "../../../assets/icons/user-role/admin.svg";
-import { ReactComponent as BehaviouristTag } from "../../../assets/icons/user-role/behaviourist.svg";
-import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staff.svg";
-import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
+import { ReactComponent as AdminTag } from "../../assets/icons/user-role/admin.svg";
+import { ReactComponent as BehaviouristTag } from "../../assets/icons/user-role/behaviourist.svg";
+import { ReactComponent as StaffTag } from "../../assets/icons/user-role/staff.svg";
+import { ReactComponent as VolunteerTag } from "../../assets/icons/user-role/volunteer.svg";
 
-import { ReactComponent as InvitedAdminTag } from "../../../assets/icons/user-role/invited-admin.svg";
-import { ReactComponent as InvitedBehaviouristTag } from "../../../assets/icons/user-role/invited-behaviourist.svg";
-import { ReactComponent as InvitedStaffTag } from "../../../assets/icons/user-role/invited-staff.svg";
-import { ReactComponent as InvitedVolunteerTag } from "../../../assets/icons/user-role/invited-volunteer.svg";
+import { ReactComponent as InvitedAdminTag } from "../../assets/icons/user-role/invited-admin.svg";
+import { ReactComponent as InvitedBehaviouristTag } from "../../assets/icons/user-role/invited-behaviourist.svg";
+import { ReactComponent as InvitedStaffTag } from "../../assets/icons/user-role/invited-staff.svg";
+import { ReactComponent as InvitedVolunteerTag } from "../../assets/icons/user-role/invited-volunteer.svg";
 
-import { UserRoles } from "../../../constants/UserConstants";
-import { AnimalTag, ColorLevel } from "../../../types/TaskTypes";
-import { User } from "../../../types/UserTypes";
+import { UserRoles } from "../../constants/UserConstants";
+import { AnimalTag, ColorLevel } from "../../types/TaskTypes";
+import { User } from "../../types/UserTypes";
+import ProfilePhoto from "../common/ProfilePhoto";
 
 interface UserListTableSectionProps {
   users: User[];
@@ -93,7 +93,7 @@ const UserListTableSection = ({
           >
             {/* NAME */}
             <Td pl="2.625rem" pr="7rem" py="0.25rem">
-              <HStack gap="1rem" minWidth="max-content">
+              <Flex gap="1rem" minWidth="max-content">
                 <ProfilePhoto
                   image={user.profilePhoto}
                   color={colorLevelMap[user.colorLevel || 1]}
@@ -103,38 +103,34 @@ const UserListTableSection = ({
                 <Text textStyle="body" m={0} color={textColor}>
                   {user.name}
                 </Text>
-              </HStack>
+              </Flex>
             </Td>
 
             {/* ROLE */}
             <Td padding="0" pr="12rem" py="0.25rem">
-              <HStack>
-                <Box borderRadius="full">
-                  <Icon as={RoleIcon} boxSize="2rem" minWidth="max-content" />
-                </Box>
-              </HStack>
+              <Flex borderRadius="full">
+                <Icon as={RoleIcon} boxSize="2rem" minWidth="max-content" />
+              </Flex>
             </Td>
 
             {/* ANIMAL TAGS */}
             <Td padding="0" pr="2rem" py="0.25rem">
-              <HStack wrap="wrap">
+              <Flex wrap="wrap">
                 {user.animalTags.map((tag) => {
                   const AnimalIcon = isInvited
                     ? invitedAnimalTagIcons[tag]
                     : animalTagIcons[tag];
                   return (
-                    <Box key={tag}>
-                      <HStack gap="0.5rem">
-                        <Icon
-                          minWidth="max-content"
-                          boxSize="2rem"
-                          as={AnimalIcon}
-                        />
-                      </HStack>
-                    </Box>
+                    <Flex gap="0.5rem" key={tag}>
+                      <Icon
+                        minWidth="max-content"
+                        boxSize="2rem"
+                        as={AnimalIcon}
+                      />
+                    </Flex>
                   );
                 })}
-              </HStack>
+              </Flex>
             </Td>
           </Tr>
         );
