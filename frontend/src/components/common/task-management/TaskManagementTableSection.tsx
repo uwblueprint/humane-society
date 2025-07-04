@@ -41,7 +41,7 @@ const TaskManagementTableSection = ({
               </Text>
             </HStack>
           </Td>
-          <Td width="60%" py="1rem" pr="2.5rem" pl="0">
+          <Td width="60%" py="1rem" pr="2.5rem" pl="4rem">
             <Box>
               <Text textStyle="body" m={0} noOfLines={2}>
                 {task.instructions}

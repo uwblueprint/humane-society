@@ -100,8 +100,9 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   const handleClearFilter = (filterName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (selected[filterName]?.length) {
-      e.stopPropagation();
       const newFilters = { ...selected, [filterName]: [] };
       onChange(newFilters);
     }
@@ -157,19 +158,21 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                         }}
                       >
                         <Flex gap="0.75rem" align="center">
-                          <Button
+                          <Box
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
-                            minW="auto"
-                            height="auto"
-                            padding="0"
+                            cursor="pointer"
                             aria-label={
                               selectedValues.length > 0
                                 ? "Clear filter"
                                 : "Filter options"
                             }
-                            onClick={(e) => handleClearFilter(filter.value, e)}
+                            onClick={(e) => {
+                              if (selectedValues.length > 0) {
+                                handleClearFilter(filter.value, e);
+                              }
+                            }}
                           >
                             <img
                               style={{
@@ -182,7 +185,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                               src={FilterOpenIcon}
                               alt=""
                             />
-                          </Button>
+                          </Box>
                           <Flex gap="0.35rem" alignItems="center">
                             <Text margin="0" textStyle="body" as="span">
                               {filter.name}
@@ -230,7 +233,17 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             >
                               Filter by {filter.name}
                             </Text>
-                            <Box onClick={onClose}>
+                            <Box 
+                              onClick={onClose}
+                              cursor="pointer"
+                              padding="0.25rem"
+                              borderRadius="0.25rem"
+                              _hover={{
+                                backgroundColor: "gray.200",
+                                transform: "scale(1.1)"
+                              }}
+                              transition="all 0.2s"
+                            >
                               <Image
                                 src={CloseIcon}
                                 alt="close"

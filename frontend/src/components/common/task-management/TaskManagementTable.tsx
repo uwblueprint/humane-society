@@ -37,7 +37,7 @@ const TaskManagementTable = ({
                 CATEGORY
               </Text>
             </Th>
-            <Th width="60%" py="1rem" pr="2.5rem" pl="0">
+            <Th width="60%" py="1rem" pr="2.5rem" pl="4rem">
               <Text color="gray.800" textStyle="subheading" m={0}>
                 INSTRUCTIONS
               </Text>
