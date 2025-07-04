@@ -250,9 +250,14 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                 <Checkbox
                                   m="0"
                                   size="lg"
+                                  borderRadius="sm"
                                   cursor="pointer"
-                                  borderRadius="lg"
-                                  colorScheme="blue"
+                                  overflow="hidden"
+                                  colorScheme="blue.700"
+                                  _checked={{
+                                    bg: "blue.700",
+                                    borderColor: "blue.700",
+                                  }}
                                   borderColor="gray.600"
                                   isChecked={selectedValues.includes(option)}
                                   onChange={() =>

@@ -107,7 +107,6 @@ const SingleSelect = <T extends string | number>({
         }}
         height="48px"
         transition="all 0.2s ease"
-        boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
       >
         <Flex
           justify="space-between"
@@ -150,18 +149,17 @@ const SingleSelect = <T extends string | number>({
             bg="gray.100"
             borderLeft="1px solid"
             borderColor="gray.200"
-            px="16px"
             display="flex"
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
             height="100%"
             borderRadius="0 6px 6px 0"
+            px="0.5rem"
           >
             <Icon
               as={ExpandIcon}
-              boxSize="16px"
-              color="gray.400"
+              boxSize="1.75rem"
               transform={`rotate(${isOpen ? 180 : 0}deg)`}
               transition="transform 0.2s ease"
             />
@@ -184,6 +182,8 @@ const SingleSelect = <T extends string | number>({
           maxHeight={maxHeight}
           overflowY="auto"
           boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
+          py="0.5rem"
+          px="0.5rem"
         >
           {values.map((value, index) => {
             const IconComponent = icons?.[index];
@@ -192,23 +192,17 @@ const SingleSelect = <T extends string | number>({
             return (
               <Box key={String(value)}>
                 <Flex
-                  as="button"
-                  type="button"
-                  width="calc(100% - 8px)"
-                  padding="12px 16px"
+                  padding="0.75rem 1rem"
                   align="center"
-                  gap="12px"
+                  gap="0.75rem"
                   cursor="pointer"
                   bg="transparent"
                   _hover={{
-                    bg: "gray.50",
-                    transform: "translateY(-1px)",
+                    bg: "gray.100",
                   }}
                   onClick={() => handleSelect(value)}
                   transition="all 0.2s ease"
-                  borderRadius="8px"
-                  mx="4px"
-                  my="2px"
+                  borderRadius="md"
                 >
                   {IconComponent && <Icon as={IconComponent} boxSize="18px" />}
                   <Text

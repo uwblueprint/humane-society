@@ -22,7 +22,6 @@ interface MultiSelectProps<T> {
   colours: string[];
   required?: boolean;
   maxHeight?: string;
-  maxVisibleTags?: number;
 }
 
 const MultiSelect = <T extends string | number>({
@@ -35,7 +34,6 @@ const MultiSelect = <T extends string | number>({
   colours,
   required = false,
   maxHeight = "200px",
-  maxVisibleTags = 2,
 }: MultiSelectProps<T>): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,29 +89,6 @@ const MultiSelect = <T extends string | number>({
     return colours[index] || "gray";
   };
 
-  // Map color names to Chakra UI color scheme
-  const getColorScheme = (color: string): string => {
-    const colorMap: Record<string, string> = {
-      green: "green",
-      yellow: "yellow",
-      orange: "orange",
-      red: "red",
-      blue: "blue",
-      purple: "purple",
-      pink: "pink",
-      teal: "teal",
-    };
-    return colorMap[color.toLowerCase()] || "gray";
-  };
-
-  // Calculate which tags to show and if we need a "+X more" indicator
-  // Reserve space for the "+X more" indicator by showing one fewer tag when needed
-  const shouldShowMore = selected.length > maxVisibleTags;
-  const displayTags = shouldShowMore
-    ? selected.slice(0, maxVisibleTags - 1)
-    : selected;
-  const remainingCount = selected.length - displayTags.length;
-
   return (
     <Box ref={containerRef} position="relative" width="100%">
       {label && (
@@ -144,60 +119,65 @@ const MultiSelect = <T extends string | number>({
         position="relative"
         _hover={{
           borderColor: "gray.400",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
         }}
         _focus={{
           outline: "none",
           borderColor: "blue.400",
-          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
         }}
         height="48px"
         transition="all 0.2s ease"
-        boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
       >
         <Flex
           justify="space-between"
           align="center"
-          gap="0.75rem"
           wrap="nowrap"
           height="100%"
         >
           <Flex
             align="center"
-            gap="0.5rem"
+            gap="0rem"
             flex="1"
             minWidth="0"
             overflow="hidden"
-            px="16px"
+            pl="1rem"
           >
             {selected.length > 0 ? (
-              <Flex gap="0.5rem" align="center" overflow="hidden" flex="1">
-                {displayTags.map((value) => {
+              <Flex
+                gap="0.5rem"
+                align="center"
+                flex="1"
+                overflowX="auto"
+                overflowY="hidden"
+                css={{
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                  "-ms-overflow-style": "none",
+                  "scrollbar-width": "none",
+                }}
+                pb="2px"
+              >
+                {selected.map((value) => {
                   const color = getColorForValue(value);
-                  const colorScheme = getColorScheme(color);
 
                   return (
                     <Tag
                       key={String(value)}
-                      size="sm"
-                      colorScheme={colorScheme}
+                      colorScheme={color}
                       borderRadius="full"
-                      variant="subtle"
-                      fontSize="12px"
-                      fontWeight="600"
-                      boxShadow="0 1px 3px rgba(0, 0, 0, 0.12)"
                       flexShrink={0}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
+                      px="1.5rem"
+                      py="0.25rem"
                     >
-                      <TagLabel>{String(value)}</TagLabel>
+                      <TagLabel textStyle="button" m={0}>
+                        {String(value)}
+                      </TagLabel>
                       <TagCloseButton
+                        color="blue.700"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveTag(value);
                         }}
-                        ml="2px"
                         _hover={{
                           bg: "whiteAlpha.300",
                         }}
@@ -205,21 +185,6 @@ const MultiSelect = <T extends string | number>({
                     </Tag>
                   );
                 })}
-                {shouldShowMore && (
-                  <Box
-                    bg="gray.100"
-                    borderRadius="full"
-                    px="8px"
-                    py="2px"
-                    fontSize="12px"
-                    fontWeight="600"
-                    color="gray.600"
-                    flexShrink={0}
-                    minWidth="fit-content"
-                  >
-                    +{remainingCount} more
-                  </Box>
-                )}
               </Flex>
             ) : (
               <Text
@@ -239,18 +204,17 @@ const MultiSelect = <T extends string | number>({
             bg="gray.100"
             borderLeft="1px solid"
             borderColor="gray.200"
-            px="16px"
             display="flex"
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
             height="100%"
             borderRadius="0 6px 6px 0"
+            px="0.5rem"
           >
             <Icon
               as={ExpandIcon}
-              boxSize="16px"
-              color="gray.400"
+              boxSize="1.75rem"
               transform={`rotate(${isOpen ? 180 : 0}deg)`}
               transition="transform 0.2s ease"
             />
@@ -268,58 +232,46 @@ const MultiSelect = <T extends string | number>({
           bg="white"
           border="1px solid"
           borderColor="gray.200"
-          borderRadius="12px"
-          mt="8px"
+          borderRadius="0.75rem"
+          mt="0.5rem"
           maxHeight={maxHeight}
           overflowY="auto"
           boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
+          px="0.5rem"
+          py="0.5rem"
         >
           {values.map((value, index) => {
             const isSelected = selected.includes(value);
-            const color = colours[index];
-            const colorScheme = getColorScheme(color);
             const isLastItem = index === values.length - 1;
 
             return (
               <Box key={String(value)}>
                 <Flex
-                  as="button"
-                  type="button"
-                  width="calc(100% - 8px)"
-                  padding="12px 16px"
+                  padding="0.75rem 1rem"
                   align="center"
-                  gap="12px"
+                  gap="0.75rem"
                   cursor="pointer"
                   bg="transparent"
                   _hover={{
-                    bg: `${colorScheme}.50`,
-                    transform: "translateY(-1px)",
+                    bg: "gray.100",
                   }}
-                  onClick={() => handleSelect(value)}
                   transition="all 0.2s ease"
-                  borderRadius="8px"
-                  mx="4px"
-                  my="2px"
+                  borderRadius="md"
                 >
                   <Checkbox
                     m="0"
-                    size="md"
+                    size="lg"
+                    borderRadius="sm"
                     cursor="pointer"
-                    borderRadius="6px"
-                    colorScheme={colorScheme}
-                    borderColor="gray.400"
-                    borderWidth="2px"
-                    isChecked={isSelected}
-                    onChange={() => {}} // Handled by parent click
-                    onClick={(e) => e.stopPropagation()}
+                    overflow="hidden"
+                    colorScheme="blue.700"
                     _checked={{
-                      bg: `${colorScheme}.500`,
-                      borderColor: `${colorScheme}.500`,
-                      _hover: {
-                        bg: `${colorScheme}.600`,
-                        borderColor: `${colorScheme}.600`,
-                      },
+                      bg: "blue.700",
+                      borderColor: "blue.700",
                     }}
+                    borderColor="gray.600"
+                    isChecked={isSelected}
+                    onChange={() => handleSelect(value)}
                   />
                   <Text
                     m={0}
@@ -327,6 +279,7 @@ const MultiSelect = <T extends string | number>({
                     color="gray.700"
                     textAlign="left"
                     flex="1"
+                    onClick={() => handleSelect(value)}
                   >
                     {String(value)}
                   </Text>

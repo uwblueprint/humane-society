@@ -188,7 +188,6 @@ const UserManagementPage = (): React.ReactElement => {
             colours={animalTagColors}
             label="Animal Tags"
             maxHeight="180px"
-            maxVisibleTags={3}
           />
         </Box>
       </Flex>
