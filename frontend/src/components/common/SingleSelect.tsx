@@ -75,7 +75,7 @@ const SingleSelect = <T extends string | number>({
           mb="8px"
           fontSize="14px"
           fontWeight="500"
-          color={error ? "red.500" : "gray.700"}
+          color={error ? "red.500" : "gray.600"}
         >
           {label}
           {required && (
