@@ -59,6 +59,14 @@ export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
 export type PetStatus = (typeof petStatusValues)[number];
 
+export enum AnimalTagEnum {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat",
+  DOG = "Dog",
+  SMALL = "Small Animal",
+}
+
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
   BLUE = "Blue", // 5
@@ -76,48 +84,48 @@ export enum UserStatus {
 
 export enum InteractionTypeEnum {
   // Task Status
-  TASK_ASSIGNED = "Task Assigned",
-  TASK_SELF_ASSIGNED = "Task Self-Assigned",
-  TASK_UNASSIGNED = "Task Unassigned",
-  TASK_STARTED = "Task Started",
-  TASK_RESTARTED = "Task Restarted",
-  TASK_COMPLETED = "Task Completed",
-  TASK_INCOMPLETE = "Task Incomplete",
-  TASK_INACTIVE = "Task Inactive",
+  ASSIGNED_TASK = "Assigned Task",
+  SELF_ASSIGNED_TASK = "Self-Assigned Task",
+  UNASSIGNED_TASK = "Unassigned Task",
+  STARTED_TASK = "Started Task",
+  RESTARTED_TASK = "Restarted Task",
+  COMPLETED_TASK = "Completed Task",
+  MARKED_TASK_INCOMPLETE = "Incomplete Task",
+  MARKED_TASK_INACTIVE = "Inactive Task",
 
   // Task Details
-  TASK_DELETED = "Task Deleted",
-  TASK_ASSIGNEE_CHANGED = "Task Assignee Changed",
-  TASK_INSTRUCTIONS_CHANGED = "Task Instructions Changed",
-  TASK_START_DATE_CHANGED = "Task Start Date Changed",
-  TASK_END_DATE_CHANGED = "Task End Date Changed",
-  RECURRING_TASK_DELETED = "Recurring Task Deleted",
-  RECURRING_TASK_NAME_CHANGED = "Recurring Task Name Changed",
-  RECURRING_TASK_DAYS_CHANGED = "Recurring Task Days Changed",
-  RECURRING_TASK_CADENCE_CHANGED = "Recurring Task Cadence Changed",
+  DELETED_TASK = "Deleted Task",
+  CHANGED_TASK_ASSIGNEE = "Changed Task Assignee",
+  CHANGED_TASK_INSTRUCTIONS = "Changed Task Instructions",
+  CHANGED_TASK_START_DATE = "Changed Task Start Date",
+  CHANGED_TASK_END_DATE = "Changed Task End Date",
+  DELETED_RECURRING_TASK = "Deleted Recurring Task",
+  CHANGED_RECURRING_TASK_NAME = "Changed Recurring Task Name",
+  CHANGED_RECURRING_TASK_DAYS = "Changed Recurring Task Days",
+  CHANGED_RECURRING_TASK_CADENCE = "Changed Recurring Task Cadence",
 
   // Personal Details
-  USER_NAME_CHANGED = "User Name Changed",
-  USER_COLOR_LEVEL_CHANGED = "User Color Level Changed",
-  USER_ROLE_CHANGED = "User Role Changed",
+  CHANGED_USER_NAME = "Changed User Name",
+  CHANGED_USER_COLOR_LEVEL = "Changed User Color Level",
+  CHANGED_USER_ROLE = "Changed User Role",
 
   // User Details
-  USER_INVITED = "User Invited",
-  USER_DELETED = "User Deleted",
+  INVITED_USER = "Invited User",
+  DELETED_USER = "Deleted User",
 
   // Pet Details
-  PET_DELETED = "Pet Deleted",
-  PET_NAME_CHANGED = "Pet Name Changed",
-  PET_COLOR_LEVEL_CHANGED = "Pet Color Level Changed",
-  PET_NEUTER_STATUS_CHANGED = "Pet Neuter Status Changed",
-  PET_SAFETY_INFO_CHANGED = "Pet Safety Info Changed",
-  PET_MEDICAL_INFO_CHANGED = "Pet Medical Info Changed",
-  PET_MANAGEMENT_INFO_CHANGED = "Pet Management Info Changed",
+  DELETED_PET = "Deleted Pet",
+  CHANGED_PET_NAME = "Changed Pet Name",
+  CHANGED_PET_COLOR_LEVEL = "Changed Pet Color Level",
+  CHANGED_PET_NEUTER_STATUS = "Changed Pet Neuter Status",
+  CHANGED_PET_SAFETY_INFO = "Changed Pet Safety Info",
+  CHANGED_PET_MEDICAL_INFO = "Changed Pet Medical Info",
+  CHANGED_PET_MANAGEMENT_INFO = "Changed Pet Management Info",
 
   // Task Template Details
-  TASK_TEMPLATE_DELETED = "Task Template Deleted",
-  TASK_TEMPLATE_NAME_CHANGED = "Task Template Name Changed",
-  TASK_TEMPLATE_INSTRUCTIONS_CHANGED = "Task Template Instructions Changed",
+  DELETED_TASK_TEMPLATE = "Deleted Task Template",
+  CHANGED_TASK_TEMPLATE_NAME = "Changed Task Template Name",
+  CHANGED_TASK_TEMPLATE_INSTRUCTIONS = "Changed Task Template Instructions",
 }
 
 export enum Category {
