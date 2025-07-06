@@ -14,6 +14,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - FAST_REFRESH=false
+      - DISABLE_ESLINT_PLUGIN=true
     env_file:
       - ./frontend/.env
   ts-backend:

@@ -78,7 +78,7 @@ class AuthService implements IAuthService {
       const authId = await this.userService.getAuthIdById(userId);
 
       await firebaseAdmin.auth().revokeRefreshTokens(authId);
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage = [
         "Failed to revoke refresh tokens of user with id",
         `${userId}.`,
@@ -160,28 +160,37 @@ class AuthService implements IAuthService {
     }
   }
 
-  async resetPassword(email: string): Promise<void> {
+  async sendPasswordResetEmail(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
-        "Attempted to call resetPassword but this instance of AuthService does not have an EmailService instance";
+        "Attempted to call sendPasswordResetEmail but this instance of AuthService does not have an EmailService instance";
       Logger.error(errorMessage);
       throw new Error(errorMessage);
     }
-
     try {
-      const resetLink = await firebaseAdmin
+      const firebaseLink = await firebaseAdmin
         .auth()
         .generatePasswordResetLink(email);
+      const url = new URL(firebaseLink);
+      const oobCode = url.searchParams.get("oobCode");
+      if (!oobCode) {
+        throw new Error("oobCode not found in Firebase reset link");
+      }
+      const customResetLink = `http://localhost:3000/reset-password?oobCode=${oobCode}`;
       const emailBody = `
-      Hello,
-      <br><br>
-      We have received a password reset request for your account.
-      Please click the following link to reset it.
-      <strong>This link is only valid for 1 hour.</strong>
-      <br><br>
-      <a href=${resetLink}>Reset Password</a>`;
-
-      this.emailService.sendEmail(email, "Your Password Reset Link", emailBody);
+        Hello,
+        <br><br>
+        We have received a password reset request for your account.
+        Please click the following link to reset it.
+        <strong>This link is only valid for 1 hour.</strong>
+        <br><br>
+        <a href="${customResetLink}">Reset Password</a>
+      `;
+      await this.emailService.sendEmail(
+        email,
+        "Your Password Reset Link",
+        emailBody,
+      );
     } catch (error) {
       Logger.error(
         `Failed to generate password reset link for user with email ${email}`,
@@ -189,7 +198,6 @@ class AuthService implements IAuthService {
       throw error;
     }
   }
-
   /* async sendEmailVerificationLink(email: string): Promise<void> {
     if (!this.emailService) {
       const errorMessage =
@@ -228,9 +236,8 @@ class AuthService implements IAuthService {
     roles: Set<Role>,
   ): Promise<boolean> {
     try {
-      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
-        .auth()
-        .verifyIdToken(accessToken, true);
+      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken =
+        await firebaseAdmin.auth().verifyIdToken(accessToken, true);
       const userRole = await this.userService.getUserRoleByAuthId(
         decodedIdToken.uid,
       );
@@ -248,9 +255,8 @@ class AuthService implements IAuthService {
     requestedUserId: string,
   ): Promise<boolean> {
     try {
-      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
-        .auth()
-        .verifyIdToken(accessToken, true);
+      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken =
+        await firebaseAdmin.auth().verifyIdToken(accessToken, true);
       const tokenUserId = await this.userService.getUserIdByAuthId(
         decodedIdToken.uid,
       );
@@ -273,9 +279,8 @@ class AuthService implements IAuthService {
     requestedEmail: string,
   ): Promise<boolean> {
     try {
-      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken = await firebaseAdmin
-        .auth()
-        .verifyIdToken(accessToken, true);
+      const decodedIdToken: firebaseAdmin.auth.DecodedIdToken =
+        await firebaseAdmin.auth().verifyIdToken(accessToken, true);
 
       const firebaseUser = await firebaseAdmin
         .auth()
@@ -300,13 +305,21 @@ class AuthService implements IAuthService {
         password: newPassword,
       });
       return { success: true } as ResponseSuccessDTO;
-    } catch (error: any) {
-      Logger.error(`Failed to update password. Error: ${error}`);
-      if (error.code === "auth/invalid-password") {
-        errorMessage =
-          "Password is too weak! Make sure it matches the password policy in Firebase.";
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage = "No user found with the provided email!";
+    } catch (error) {
+      Logger.error(
+        `Failed to update password. Error: ${getErrorMessage(error)}`,
+      );
+      if (error instanceof Error && "code" in error) {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        if ((error as any).code === "auth/invalid-password") {
+          errorMessage =
+            "Password is too weak! Make sure it matches the password policy in Firebase.";
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        } else if ((error as any).code === "auth/user-not-found") {
+          errorMessage = "No user found with the provided email!";
+        }
+      } else {
+        errorMessage = "Unknown error occurred.";
       }
       return { success: false, errorMessage };
     }

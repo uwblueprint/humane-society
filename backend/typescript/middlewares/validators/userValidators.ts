@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import {
   getApiValidationError,
+  getConstraintError,
   validatePrimitive,
   validateEnumArray,
+  validateNumberConstraint,
 } from "./util";
-import { AnimalTagEnum } from "../../types";
+import { AnimalTag } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createUserDtoValidator = async (
@@ -96,14 +98,17 @@ export const updateUserDtoValidator = async (
   ) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
+  if (!validateNumberConstraint(req.body.colorLevel, 1, 5)) {
+    return res.status(400).send(getConstraintError("colorLevel", 1, 5));
+  }
   if (
     req.body.animalTags !== undefined &&
     req.body.animalTags !== null &&
-    !validateEnumArray(req.body.animalTags, AnimalTagEnum)
+    !validateEnumArray(req.body.animalTags, AnimalTag)
   ) {
     return res
       .status(400)
-      .send(getApiValidationError("animalTags", "AnimalTagEnum", true));
+      .send(getApiValidationError("animalTags", "AnimalTag", true));
   }
   if (
     req.body.profilePhoto !== undefined &&

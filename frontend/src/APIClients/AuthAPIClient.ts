@@ -41,7 +41,7 @@ const loginWithSignInLink = async (
     );
     localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(data));
     return data;
-  } catch (error: unknown) {
+  } catch (error) {
     if (error instanceof FirebaseError) {
       if (
         error.code === "auth/invalid-action-code" ||
@@ -108,17 +108,11 @@ const register = async (
   }
 };
 
-const resetPassword = async (email: string | undefined): Promise<boolean> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
+const sendPasswordResetEmail = async (
+  email: string | undefined,
+): Promise<boolean> => {
   try {
-    await baseAPIClient.post(
-      `/auth/resetPassword/${email}`,
-      {},
-      { headers: { Authorization: bearerToken } },
-    );
+    await baseAPIClient.post(`/auth/send-password-reset-email/${email}`);
     return true;
   } catch (error) {
     return false;
@@ -179,7 +173,7 @@ export default {
   logout,
   loginWithGoogle,
   register,
-  resetPassword,
+  sendPasswordResetEmail,
   refresh,
   setPassword,
   getEmailOfCurrentUser,

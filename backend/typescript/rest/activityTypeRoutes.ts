@@ -40,8 +40,13 @@ activityTypeRouter.post(
 /* Get all ActivityTypes */
 activityTypeRouter.get("/", async (req, res) => {
   const contentType = req.headers["content-type"];
+  const limit = Number(req.query.limit); // retrieving limit (component) from the database for the page
+  const page = Number(req.query.page); // the actual page we ar on.
   try {
-    const activityTypes = await activityTypeService.getActivityTypes();
+    const activityTypes = await activityTypeService.getActivityTypes(
+      page,
+      limit,
+    );
     await sendResponseByMimeType<ActivityTypeResponseDTO>(
       res,
       200,

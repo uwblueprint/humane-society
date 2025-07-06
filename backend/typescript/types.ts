@@ -18,7 +18,7 @@ export type UserDTO = {
   role: Role;
   status: UserStatus;
   colorLevel: number;
-  animalTags: [AnimalTagEnum];
+  animalTags: AnimalTag[];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
@@ -50,8 +50,7 @@ export const sexEnum: Sex[] = [...sexValues];
 export type Sex = (typeof sexValues)[number];
 
 const petStatusValues = [
-  "Assigned", // Assigned to me
-  "Active", // Occupied
+  "Occupied",
   "Needs Care",
   "Does Not Need Care",
 ] as const;
@@ -59,14 +58,6 @@ const petStatusValues = [
 export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
 export type PetStatus = (typeof petStatusValues)[number];
-
-export enum AnimalTagEnum {
-  BIRD = "Bird",
-  BUNNY = "Bunny",
-  CAT = "Cat",
-  DOG = "Dog",
-  SMALL = "Small Animal",
-}
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
@@ -136,6 +127,14 @@ export enum Category {
   TRAINING = "Training",
   WALK = "Walk",
   MISC = "Misc.",
+}
+
+export enum AnimalTag {
+  BIRD = "Bird",
+  BUNNY = "Bunny",
+  CAT = "Cat",
+  DOG = "Dog",
+  SMALL_ANIMAL = "Small Animal",
 }
 
 export type NodemailerConfig = {

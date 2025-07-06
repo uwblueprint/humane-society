@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 
+import Button from "../common/Button";
 import authAPIClient from "../../APIClients/AuthAPIClient";
 import AuthContext from "../../contexts/AuthContext";
 
@@ -14,9 +15,9 @@ const Logout = (): React.ReactElement => {
   };
 
   return (
-    <button type="button" className="btn btn-primary" onClick={onLogOutClick}>
+    <Button variant="red" width="100%" size="medium" onClick={onLogOutClick}>
       Log Out
-    </button>
+    </Button>
   );
 };
 
