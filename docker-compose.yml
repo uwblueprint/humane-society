@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
   frontend:
     # TODO: rename container for your project
@@ -51,5 +53,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
 volumes:
   postgres_data:
