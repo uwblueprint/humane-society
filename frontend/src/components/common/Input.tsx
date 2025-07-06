@@ -1,19 +1,64 @@
 import React from "react";
-import { Input as ChakraInput, InputProps } from "@chakra-ui/react";
+import {
+  FormControl,
+  FormLabel,
+  Input as ChakraInput,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => (
-  <ChakraInput
-    ref={ref}
-    borderRadius="md"
-    borderColor="gray.400"
-    bg="white.default"
-    _placeholder={{ color: "gray.400" }}
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    {...props}
-    size="lg"
-  />
-));
+interface InputProps {
+  label?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  type?: string;
+}
 
-Input.displayName = "Input";
+const Input = ({
+  label,
+  placeholder,
+  value,
+  onChange,
+  error,
+  required = false,
+  disabled = false,
+  type = "text",
+}: InputProps): React.ReactElement => {
+  return (
+    <FormControl isInvalid={!!error} isRequired={required}>
+      {label && (
+        <FormLabel
+          mb="8px"
+          fontSize="14px"
+          fontWeight="500"
+          color={error ? "red.500" : "gray.600"}
+        >
+          {label}
+        </FormLabel>
+      )}
+      <ChakraInput
+        size="lg"
+        borderRadius="md"
+        borderColor={error ? "red.500" : "gray.400"}
+        bg={disabled ? "gray.100" : "white.default"}
+        _placeholder={{ color: "gray.400" }}
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        _disabled={{
+          bg: "gray.100",
+          color: "gray.500",
+          cursor: "not-allowed",
+        }}
+      />
+      {error && <FormErrorMessage fontSize="12px">{error}</FormErrorMessage>}
+    </FormControl>
+  );
+};
 
 export default Input;
