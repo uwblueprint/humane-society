@@ -3,7 +3,7 @@
 import React from "react";
 import { Flex } from "@chakra-ui/react";
 
-const ResponsivePawprintBackground = (): React.ReactElement => {
+const PawprintBackground = (): React.ReactElement => {
   return (
     <Flex
       position="absolute"
@@ -43,4 +43,4 @@ const ResponsivePawprintBackground = (): React.ReactElement => {
   );
 };
 
-export default ResponsivePawprintBackground;
+export default PawprintBackground;
