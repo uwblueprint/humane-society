@@ -1,8 +1,9 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
+import { User } from "../models";
 
 export const up: Migration = async ({ context: sequelize }) => {
-  await sequelize.getQueryInterface().createTable("interaction_type", {
+  await sequelize.getQueryInterface().createTable("interaction_types", {
     id: {
       type: DataType.INTEGER,
       allowNull: false,
@@ -10,14 +11,6 @@ export const up: Migration = async ({ context: sequelize }) => {
       autoIncrement: true,
     },
     action_type: {
-      type: DataType.STRING,
-      allowNull: false,
-    },
-    short_description: {
-      type: DataType.STRING,
-      allowNull: false,
-    },
-    detailed_description: {
       type: DataType.STRING,
       allowNull: false,
     },
@@ -41,19 +34,52 @@ export const up: Migration = async ({ context: sequelize }) => {
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    target_type: {
-      type: DataType.ENUM("users", "pets"),
-      allowNull: false,
-    },
-    target_id: {
+    target_user_id: {
       type: DataType.INTEGER,
-      allowNull: false,
+      allowNull: true,
+      references: {
+        model: "users",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
+    target_pet_id: {
+      type: DataType.INTEGER,
+      allowNull: true,
+      references: {
+        model: "pets",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    target_task_id: {
+      type: DataType.INTEGER,
+      allowNull: true,
+      references: {
+        model: "activities",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    target_task_template_id: {
+      type: DataType.INTEGER,
+      allowNull: true,
+      references: {
+        model: "activity_types",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+
     interaction_type_id: {
       type: DataType.INTEGER,
       allowNull: false,
       references: {
-        model: "interaction_type",
+        model: "interaction_types",
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -65,21 +91,21 @@ export const up: Migration = async ({ context: sequelize }) => {
       defaultValue: DataType.NOW,
     },
     metadata: {
-      type: DataType.JSON,
+      type: DataType.ARRAY(DataType.STRING),
+      allowNull: false,
+    },
+    short_description: {
+      type: DataType.STRING,
+      allowNull: false,
+    },
+    detailed_description: {
+      type: DataType.STRING,
       allowNull: false,
     },
   });
-
-  await sequelize.getQueryInterface().addIndex("interaction_log", ["actor_id"]);
-  await sequelize
-    .getQueryInterface()
-    .addIndex("interaction_log", ["target_type", "target_id"]);
-  await sequelize
-    .getQueryInterface()
-    .addIndex("interaction_log", ["interaction_type_id"]);
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().dropTable("interaction_log");
-  await sequelize.getQueryInterface().dropTable("interaction_type");
+  await sequelize.getQueryInterface().dropTable("interaction_types");
 };

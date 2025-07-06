@@ -8,11 +8,13 @@ import {
   Index,
 } from "sequelize-typescript";
 import User from "./user.model";
-import Pets from "./pet.model";
 import InteractionType from "./interactionType.model";
+import Pet from "./pet.model";
+import Activity from "./activity.model";
+import ActivityType from "./activityType.model";
 
 export type TargetType = "users" | "pets";
-export type TargetModel = User | Pets;
+export type TargetModel = User | Pet;
 
 interface PolymorphicTarget {
   target_type: TargetType;
@@ -29,14 +31,38 @@ export default class Interaction extends Model {
   @Column({ allowNull: false })
   actor_id!: number;
 
-  @BelongsTo(() => User, { foreignKey: "actor_id" })
+  @BelongsTo(() => User)
   actor?: User;
 
+  @ForeignKey(() => Pet)
   @Column({
-    type: DataType.ENUM("users", "pets"),
-    allowNull: false,
+    type: DataType.INTEGER,
+    allowNull: true,
   })
-  target_type!: "users" | "pets";
+  target_pet_id!: number;
+
+  @BelongsTo(() => Pet)
+  pet?: Pet;
+
+  @ForeignKey(() => Activity)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  target_task_id!: number;
+
+  @BelongsTo(() => Activity)
+  task?: Activity;
+
+  @ForeignKey(() => ActivityType)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  target_activity_type_id!: number;
+
+  @BelongsTo(() => ActivityType)
+  activity_type?: ActivityType;
 
   @ForeignKey(() => InteractionType)
   @Column({
@@ -48,34 +74,17 @@ export default class Interaction extends Model {
   @BelongsTo(() => InteractionType)
   interaction_type?: InteractionType;
 
-  @Column({ type: DataType.JSON, allowNull: false })
-  metadata!: JSON;
+  //Used to store the different filters
+  @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false })
+  metadata!: Array<string>;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  short_description!: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  detailed_description!: string;
 
   @Index
   @Column({ allowNull: false })
   target_id!: number;
-
-  @BelongsTo(() => User, {
-    foreignKey: "target_id",
-    constraints: false,
-    as: "target_user",
-  })
-  target_user?: User;
-
-  @BelongsTo(() => Pets, {
-    foreignKey: "target_id",
-    constraints: false,
-    as: "target_pet",
-  })
-  target_pet?: Pets;
-
-  get target(): User | Pets | null {
-    if (this.target_type === "users") {
-      return this.target_user || null;
-    }
-    if (this.target_type === "pets") {
-      return this.target_pet || null;
-    }
-    return null;
-  }
 }
