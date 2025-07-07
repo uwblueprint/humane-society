@@ -31,7 +31,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     target_user_id: {
       type: DataType.INTEGER,
@@ -41,7 +40,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     target_pet_id: {
       type: DataType.INTEGER,
@@ -51,7 +49,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     target_task_id: {
       type: DataType.INTEGER,
@@ -61,7 +58,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     target_task_template_id: {
       type: DataType.INTEGER,
@@ -71,7 +67,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
 
     interaction_type_id: {
@@ -82,7 +77,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     created_at: {
       type: DataType.DATE,
