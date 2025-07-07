@@ -127,14 +127,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                   >
                     Email Address:
                   </FormLabel>
-                  <Input
-                    textColor="gray.400"
-                    textStyle="bodyMobile"
-                    height="2.4rem"
-                    placeholder={email}
-                    isDisabled
-                    bg="gray.200"
-                  />
+                  <Input value={email} placeholder={email} disabled />
                 </Flex>
                 <Flex direction="column" gap="0.375rem">
                   <FormLabel

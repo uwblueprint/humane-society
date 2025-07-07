@@ -202,7 +202,7 @@ const LoginPage = (): React.ReactElement => {
                       <FormControl
                         isInvalid={!!passwordError || !!errorMessage}
                       >
-                        <PasswordInput 
+                        <PasswordInput
                           value={password}
                           onChange={handlePasswordChange}
                         />

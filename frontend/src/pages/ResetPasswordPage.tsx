@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Text,
-  Button,
-  FormControl,
-  Flex,
-  FormLabel,
-} from "@chakra-ui/react";
+import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
 

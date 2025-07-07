@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import {
   FormControl,
   FormLabel,
@@ -6,26 +6,24 @@ import {
   FormErrorMessage,
 } from "@chakra-ui/react";
 
-interface InputProps {
+interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: string;
-  placeholder?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   required?: boolean;
   disabled?: boolean;
-  type?: string;
 }
 
 const Input = ({
   label,
-  placeholder,
   value,
   onChange,
   error,
   required = false,
   disabled = false,
-  type = "text",
+  ...props
 }: InputProps): React.ReactElement => {
   return (
     <FormControl isInvalid={!!error} isRequired={required}>
@@ -45,16 +43,15 @@ const Input = ({
         borderColor={error ? "red.500" : "gray.400"}
         bg={disabled ? "gray.100" : "white.default"}
         _placeholder={{ color: "gray.400" }}
-        type={type}
         value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
+        onChange={onChange}
         _disabled={{
           bg: "gray.100",
           color: "gray.500",
           cursor: "not-allowed",
         }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...props}
       />
       {error && <FormErrorMessage fontSize="12px">{error}</FormErrorMessage>}
     </FormControl>
