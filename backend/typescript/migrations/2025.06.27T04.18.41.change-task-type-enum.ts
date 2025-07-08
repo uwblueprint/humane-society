@@ -2,16 +2,6 @@ import { Migration } from '../umzug';
 import { TaskType } from "../types";
 import { DataType } from "sequelize-typescript";
 
-
-enum Category {
-  GAMES = "Games",
-  HUSBANDRY = "Husbandry",
-  PEN_TIME = "Pen Time",
-  TRAINING = "Training",
-  WALK = "Walk",
-  MISC = "Misc.",
-}
-
 const TASKTEMPLATES_TABLE = 'task_templates'
 const TASK_TYPE = 'task_type'
 
@@ -25,9 +15,9 @@ export const up: Migration = async ({ context: sequelize }) => {
 
     //make sure this type does not already exist
 
-     await queryinterface.sequelize.query(
-        'DROP TYPE IF EXISTS "enum_task_templates_task_type";'
-    );
+    //    await queryinterface.sequelize.query(
+    //      'DROP TYPE IF EXISTS "enum_task_templates_task_type";'
+    //);
 
     // add column with updated tasktype defintion
     await queryinterface.addColumn(
@@ -62,9 +52,9 @@ export const down: Migration = async ({ context: sequelize })  => {
         TASKTEMPLATES_TABLE, 
         TASK_TYPE, 
         {
-            type: DataType.ENUM(...Object.values(Category)), 
+            type: DataType.ENUM(...Object.values(TaskType)), 
             allowNull: false, 
-            defaultValue: Category.MISC
+            defaultValue: TaskType.MISC
         }
     );
 
