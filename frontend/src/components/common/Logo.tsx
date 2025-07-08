@@ -1,15 +1,19 @@
 import React from "react";
-import { Center, Image } from "@chakra-ui/react";
+import { Flex, Image } from "@chakra-ui/react";
 
-const ResponsiveLogo = (): React.ReactElement => {
+// This logo
+const Logo = (): React.ReactElement => {
   return (
-    <Center
-      height={{ base: "8rem", md: "10.85rem" }}
+    <Flex
+      height={{ base: "8rem", md: "13.9375rem" }}
       aspectRatio="27.3/14"
       bg="blue.700"
       borderRadius="2.6875rem"
       border="1px solid"
       borderColor="gray.200"
+      mx="0.75rem"
+      justifyContent="center"
+      alignItems="center"
     >
       <Image
         src="/images/humane_society_logo_text.png"
@@ -18,8 +22,8 @@ const ResponsiveLogo = (): React.ReactElement => {
         aspectRatio="27.3/14"
         objectFit="cover"
       />
-    </Center>
+    </Flex>
   );
 };
 
-export default ResponsiveLogo;
+export default Logo;
