@@ -51,6 +51,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "User Management";
       case ROUTES.TASK_MANAGEMENT_PAGE:
         return "Task Management";
+      case ROUTES.ADD_TASK_TEMPLATE_PAGE:
+        return "Add Task Template";
       case ROUTES.ADMIN_PAGE:
         return "Admin Dashboard";
       default:
