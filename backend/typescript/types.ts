@@ -47,7 +47,7 @@ const sexValues = ["M", "F"] as const;
 
 export const sexEnum: Sex[] = [...sexValues];
 
-export type Sex = (typeof sexValues)[number];
+export type Sex = typeof sexValues[number];
 
 const petStatusValues = [
   "Occupied",
@@ -57,15 +57,7 @@ const petStatusValues = [
 
 export const petStatusEnum: PetStatus[] = [...petStatusValues];
 
-export type PetStatus = (typeof petStatusValues)[number];
-
-export enum AnimalTagEnum {
-  BIRD = "Bird",
-  BUNNY = "Bunny",
-  CAT = "Cat",
-  DOG = "Dog",
-  SMALL = "Small Animal",
-}
+export type PetStatus = typeof petStatusValues[number];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {

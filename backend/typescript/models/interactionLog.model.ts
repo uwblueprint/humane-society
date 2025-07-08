@@ -16,11 +16,6 @@ import ActivityType from "./activityType.model";
 export type TargetType = "users" | "pets";
 export type TargetModel = User | Pet;
 
-interface PolymorphicTarget {
-  target_type: TargetType;
-  target_id: number;
-}
-
 @Table({
   tableName: "interaction_log",
   timestamps: true,
@@ -74,7 +69,7 @@ export default class Interaction extends Model {
   @BelongsTo(() => InteractionType)
   interaction_type?: InteractionType;
 
-  //Used to store the different filters
+  // Used to store the different filters
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false })
   metadata!: Array<string>;
 

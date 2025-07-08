@@ -1,6 +1,5 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
-import { User } from "../models";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable("interaction_types", {
