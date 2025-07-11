@@ -38,6 +38,7 @@ const TextArea = ({
         </FormLabel>
       )}
       <ChakraTextarea
+        minHeight="fit-content"
         size="lg"
         borderRadius="md"
         borderWidth="1px"

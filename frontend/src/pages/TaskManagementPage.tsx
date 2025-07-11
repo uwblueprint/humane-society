@@ -50,7 +50,7 @@ const TaskManagementPage = (): React.ReactElement => {
     <Flex direction="column" gap="2rem" pt="2rem">
       <Flex
         padding="0 2.5rem"
-        maxWidth="100vw"
+        maxWidth="100%"
         justifyContent="space-between"
         gap="1rem"
         alignItems="center"

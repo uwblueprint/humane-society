@@ -3,7 +3,6 @@ import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import { Task } from "../types/TaskTypes";
 
-
 const getPetTasks = async (petId: number): Promise<Task[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,

@@ -128,7 +128,7 @@ const UserManagementPage = (): React.ReactElement => {
   const colorLevelIcons = [StarIcon, StarIcon, StarIcon, StarIcon, StarIcon]; // Star icons for each color level
 
   return (
-    <Flex direction="column" gap="2rem" width="100%">
+    <Flex direction="column" gap="2rem" width="100%" pt="2rem">
       {errorMessage && (
         <Alert status="error" mb={4}>
           <AlertIcon />
