@@ -47,7 +47,7 @@ const TaskManagementPage = (): React.ReactElement => {
   }, [filters, search]);
 
   return (
-    <Flex direction="column" gap="2rem">
+    <Flex direction="column" gap="2rem" pt="2rem">
       <Flex
         padding="0 2.5rem"
         maxWidth="100vw"

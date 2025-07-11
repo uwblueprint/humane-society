@@ -182,9 +182,9 @@ const AddTaskTemplatePage = (): React.ReactElement => {
           _hover={{ opacity: 0.7 }}
           width="fit-content"
         >
-          <ChevronLeftIcon color="blue.500" boxSize="1.25rem" />
+          <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
           <Text
-            color="blue.500"
+            color="gray.600"
             fontSize="16px"
             fontWeight="500"
             lineHeight="1.25rem"

@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       case ROUTES.TASK_MANAGEMENT_PAGE:
         return "Task Management";
       case ROUTES.ADD_TASK_TEMPLATE_PAGE:
-        return "Add Task Template";
+        return "Task Management";
       case ROUTES.ADMIN_PAGE:
         return "Admin Dashboard";
       default:
@@ -71,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         pt={
           noPaddingPages.includes(getPageName())
             ? "0"
-            : { base: "7.375rem", md: "9.375rem" }
+            : { base: "6rem", md: "7rem" }
         }
       >
         {children}
