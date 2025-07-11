@@ -14,6 +14,7 @@ import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
+import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
@@ -190,6 +191,12 @@ const App = (): React.ReactElement => {
                     path={Routes.TASK_MANAGEMENT_PAGE}
                     component={TaskManagementPage}
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={Routes.ADD_TASK_TEMPLATE_PAGE}
+                    component={AddTaskTemplatePage}
+                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                   />
                   {/* Fallback Route */}
                   <Route path="*" component={NotFoundPage} />

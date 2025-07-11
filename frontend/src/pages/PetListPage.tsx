@@ -52,7 +52,7 @@ const PetListPage = (): React.ReactElement => {
   const petListFilterType = isVolunteer ? "petListVolunteer" : "petListAdmin";
 
   return (
-    <Flex direction="column" gap="2rem" width="100%">
+    <Flex direction="column" gap="2rem" width="100%" pt="2rem">
       <Flex
         padding="0 2.5rem"
         maxWidth="100vw"

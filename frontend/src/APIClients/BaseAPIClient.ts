@@ -12,6 +12,11 @@ const baseAPIClient = axios.create({
 baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
   const newConfig = { ...config };
 
+  // Ensure headers exist
+  if (!newConfig.headers) {
+    newConfig.headers = {};
+  }
+
   // if access token in header has expired, do a refresh
   const authHeader = config.headers?.Authorization;
   const authHeaderParts =

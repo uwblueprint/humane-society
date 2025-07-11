@@ -103,7 +103,7 @@ export const PetListTableSection = ({
             </Td>
             <Td padding="0" pr="2rem">
               {/* Task Categories */}
-              <Flex gap="2rem" minWidth="max-content">
+              <Flex gap="2rem" minWidth="max-content" alignItems="center">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
                     (category, index) => {
