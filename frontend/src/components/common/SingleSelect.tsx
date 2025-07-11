@@ -91,19 +91,21 @@ const SingleSelect = <T extends string | number>({
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor={error ? "red.300" : "gray.200"}
+        borderColor={error ? "red.500" : "gray.400"}
         borderRadius="8px"
         cursor="pointer"
         onClick={handleToggle}
         position="relative"
         _hover={{
-          borderColor: "gray.400",
+          borderColor: error ? "red.500" : "gray.400",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
         }}
         _focus={{
           outline: "none",
-          borderColor: "blue.400",
-          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+          borderColor: error ? "red.500" : "blue.400",
+          boxShadow: error
+            ? "0 0 0 1px red"
+            : "0 0 0 3px rgba(59, 130, 246, 0.1)",
         }}
         height="48px"
         transition="all 0.2s ease"
