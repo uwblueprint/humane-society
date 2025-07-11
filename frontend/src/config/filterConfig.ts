@@ -71,13 +71,6 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Array.from(STATUS),
     },
   ],
-  taskManagement: [
-    {
-      name: "Task Category",
-      value: "category",
-      options: Object.values(TaskCategory),
-    },
-  ],
 };
 
 export default filterConfig;

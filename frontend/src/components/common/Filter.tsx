@@ -15,11 +15,7 @@ import {
 import filterConfig from "../../config/filterConfig";
 import { CloseIcon, FilterOpenIcon } from "../../assets/icons";
 
-export type FilterType =
-  | "petListVolunteer"
-  | "petListAdmin"
-  | "userManagement"
-  | "taskManagement";
+export type FilterType = "petListVolunteer" | "petListAdmin" | "userManagement";
 
 type FilterProps = {
   type: FilterType;
@@ -100,9 +96,8 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   const handleClearFilter = (filterName: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
     if (selected[filterName]?.length) {
+      e.stopPropagation();
       const newFilters = { ...selected, [filterName]: [] };
       onChange(newFilters);
     }
@@ -158,21 +153,19 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                         }}
                       >
                         <Flex gap="0.75rem" align="center">
-                          <Box
+                          <Button
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
-                            cursor="pointer"
+                            minW="auto"
+                            height="auto"
+                            padding="0"
                             aria-label={
                               selectedValues.length > 0
                                 ? "Clear filter"
                                 : "Filter options"
                             }
-                            onClick={(e) => {
-                              if (selectedValues.length > 0) {
-                                handleClearFilter(filter.value, e);
-                              }
-                            }}
+                            onClick={(e) => handleClearFilter(filter.value, e)}
                           >
                             <img
                               style={{
@@ -185,7 +178,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                               src={FilterOpenIcon}
                               alt=""
                             />
-                          </Box>
+                          </Button>
                           <Flex gap="0.35rem" alignItems="center">
                             <Text
                               m={0}
@@ -239,23 +232,12 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                             <Text m={0} textStyle="bodyBold" color="gray.700">
                               Filter by {filter.name}
                             </Text>
-                            <Box
+                            <Image
                               onClick={onClose}
-                              cursor="pointer"
-                              padding="0.25rem"
-                              borderRadius="0.25rem"
-                              _hover={{
-                                backgroundColor: "gray.200",
-                                transform: "scale(1.1)",
-                              }}
-                              transition="all 0.2s"
-                            >
-                              <Image
-                                src={CloseIcon}
-                                alt="close"
-                                boxSize="1rem"
-                              />
-                            </Box>
+                              src={CloseIcon}
+                              alt="close"
+                              boxSize="1rem"
+                            />
                           </Flex>
                           <Flex direction="column" gap="0.5rem">
                             {filter.options.map((option) => (
@@ -268,14 +250,9 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                 <Checkbox
                                   m="0"
                                   size="lg"
-                                  borderRadius="sm"
                                   cursor="pointer"
-                                  overflow="hidden"
-                                  colorScheme="blue.700"
-                                  _checked={{
-                                    bg: "blue.700",
-                                    borderColor: "blue.700",
-                                  }}
+                                  borderRadius="lg"
+                                  colorScheme="blue"
                                   borderColor="gray.600"
                                   isChecked={selectedValues.includes(option)}
                                   onChange={() =>

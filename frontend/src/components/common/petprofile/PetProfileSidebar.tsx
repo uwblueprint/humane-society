@@ -68,7 +68,6 @@ function PetProfileSidebar({
   return (
     <VStack
       paddingInline={{ base: "1rem", lg: "1.5rem" }}
-      paddingTop="8.5rem"
       paddingBottom="1rem"
       width="28%"
       maxW="20rem"
@@ -98,7 +97,7 @@ function PetProfileSidebar({
         <Text margin="0" fontWeight="600" textStyle={{ base: "h3" }}>
           Colour Level
         </Text>
-        <ColourLevelBadge colourLevel={colourLevel} size="large" />
+        <ColourLevelBadge colourLevel={colourLevel} />
       </VStack>
 
       <VStack alignItems="start" gap="0.6rem" width="100%">
@@ -199,7 +198,7 @@ function PetProfileSidebar({
                 margin="0"
                 lineHeight="100%"
               >
-                {sex === SexEnum.MALE ? "Male" : "Female"}
+                {`${age} ${age === 1 ? "year" : "years"} old`}
               </Text>
             </VStack>
           </GridItem>

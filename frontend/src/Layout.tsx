@@ -12,14 +12,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const getPageName = () => {
-    // Special routes that have id's
-    if (location.pathname.startsWith(ROUTES.PROFILE_PAGE)) {
-      return "Profile";
-    }
-    if (location.pathname.startsWith(ROUTES.PET_PROFILE_PAGE)) {
-      return "Pet Profile";
-    }
-
     switch (location.pathname) {
       case ROUTES.HOME_PAGE:
         return "Pet List";
@@ -45,6 +37,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Hooks";
       case ROUTES.INTERACTION_LOG_PAGE:
         return "Interaction Log";
+      case ROUTES.PROFILE_PAGE:
+        return "Profile";
+      case ROUTES.PET_PROFILE_PAGE:
+        return "Pet Profile";
       case ROUTES.DEV_UTILITY_PAGE:
         return "Developer Utility";
       case ROUTES.USER_MANAGEMENT_PAGE:
@@ -58,18 +54,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   };
 
-  const noPaddingPages = ["Page", "Profile", "Pet Profile"];
-
   return (
     <Flex direction="column" minHeight="100vh">
       {getPageName() === "Page" ? null : <NavBar pageName={getPageName()} />}
 
       <Flex
-        minHeight="100dvh"
+        height="100dvh"
         pt={
-          noPaddingPages.includes(getPageName())
-            ? "0"
-            : { base: "7.375rem", md: "9.375rem" }
+          getPageName() === "Page" ? "0" : { base: "7.375rem", md: "9.375rem" }
         }
       >
         {children}
