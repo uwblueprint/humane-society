@@ -22,8 +22,6 @@ import FemaleIcon from "./female.svg";
 import AlertCircleIcon from "./alert-circle.svg";
 import DonateHeartIcon from "./donate-heart.svg";
 import MedicalServicesIcon from "./medical-services.svg";
-import MailIcon from "./mail.svg";
-import PhoneIcon from "./phone.svg";
 
 export {
   LogIcon,
@@ -50,6 +48,4 @@ export {
   AlertCircleIcon,
   DonateHeartIcon,
   MedicalServicesIcon,
-  MailIcon,
-  PhoneIcon,
 };
