@@ -151,7 +151,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         <Flex
           flexDirection="column"
           width="100%"
-          maxWidth="600px"
+          maxWidth="85rem"
           mx="auto"
           p="1.5rem"
         >
