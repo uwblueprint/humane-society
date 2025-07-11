@@ -11,6 +11,7 @@ import UserAPIClient from "../APIClients/UserAPIClient";
 import { UserRoles } from "../constants/UserConstants";
 import { AnimalTag } from "../types/TaskTypes";
 import ColourStarIcon from "../components/common/ColourStarIcon";
+import NavBar from "../components/common/navbar/NavBar";
 
 interface FormData {
   firstName: string;
@@ -139,176 +140,186 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   return (
-    <Flex
-      flexDirection="column"
-      width="100%"
-      maxWidth="600px"
-      mx="auto"
-      p="1.5rem"
-    >
-      {/* Back Button */}
+    <>
+      <NavBar pageName="User Profile" />
       <Flex
-        display="flex"
-        alignItems="center"
-        gap="0.5rem"
-        mb="1.5rem"
-        cursor="pointer"
-        onClick={handleBackToProfile}
-        _hover={{ opacity: 0.7 }}
+        width="100%"
+        paddingTop="7.5rem"
+        backgroundColor="gray.50"
+        justifyContent="center"
       >
-        <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
-        <Text m={0} textStyle="Body" color="gray.600">
-          Back to Profile
-        </Text>
-      </Flex>
-
-      {/* Title */}
-      <Text textStyle="h2" mb="1.5rem">
-        Edit Profile
-      </Text>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Flex direction="column" gap="1.5rem">
-          {/* First Name and Last Name - Side by side */}
-          <Flex width="100%" gap="1.5rem">
-            <Controller
-              name="firstName"
-              control={control}
-              rules={{ required: "First name is required" }}
-              render={({ field }) => (
-                <Input
-                  label="First Name"
-                  placeholder="Enter first name"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.firstName?.message}
-                  required
-                />
-              )}
-            />
-            <Controller
-              name="lastName"
-              control={control}
-              rules={{ required: "Last name is required" }}
-              render={({ field }) => (
-                <Input
-                  label="Last Name"
-                  placeholder="Enter last name"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.lastName?.message}
-                  required
-                />
-              )}
-            />
+        <Flex
+          flexDirection="column"
+          width="100%"
+          maxWidth="600px"
+          mx="auto"
+          p="1.5rem"
+        >
+          {/* Back Button */}
+          <Flex
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
+            mb="1.5rem"
+            cursor="pointer"
+            onClick={handleBackToProfile}
+            _hover={{ opacity: 0.7 }}
+          >
+            <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
+            <Text m={0} textStyle="Body" color="gray.600">
+              Back to Profile
+            </Text>
           </Flex>
 
-          {/* Phone Number - Full width */}
-          <Controller
-            name="phoneNumber"
-            control={control}
-            render={({ field }) => (
-              <Input
-                label="Phone Number"
-                placeholder="Enter phone number"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.phoneNumber?.message}
-              />
-            )}
-          />
+          {/* Title */}
+          <Text textStyle="h2" mb="1.5rem">
+            Edit Profile
+          </Text>
 
-          {/* Email - Full width, disabled */}
-          <Controller
-            name="email"
-            control={control}
-            render={({ field }) => (
-              <Input
-                label="Email"
-                placeholder="Enter email"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.email?.message}
-                disabled
-                required
-              />
-            )}
-          />
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Flex direction="column" gap="1.5rem">
+              {/* First Name and Last Name - Side by side */}
+              <Flex width="100%" gap="1.5rem">
+                <Controller
+                  name="firstName"
+                  control={control}
+                  rules={{ required: "First name is required" }}
+                  render={({ field }) => (
+                    <Input
+                      label="First Name"
+                      placeholder="Enter first name"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.firstName?.message}
+                      required
+                    />
+                  )}
+                />
+                <Controller
+                  name="lastName"
+                  control={control}
+                  rules={{ required: "Last name is required" }}
+                  render={({ field }) => (
+                    <Input
+                      label="Last Name"
+                      placeholder="Enter last name"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.lastName?.message}
+                      required
+                    />
+                  )}
+                />
+              </Flex>
 
-          {/* Role - Full width */}
-          <Controller
-            name="role"
-            control={control}
-            rules={{ required: "Role is required" }}
-            render={({ field }) => (
-              <SingleSelect
-                label="Role"
-                values={roleOptions}
-                selected={field.value}
-                onSelect={field.onChange}
-                placeholder="Select a role"
-                error={!!errors.role}
-                required
+              {/* Phone Number - Full width */}
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    label="Phone Number"
+                    placeholder="Enter phone number"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.phoneNumber?.message}
+                  />
+                )}
               />
-            )}
-          />
 
-          {/* Colour Level - Full width */}
-          <Controller
-            name="colourLevel"
-            control={control}
-            rules={{ required: "Colour level is required" }}
-            render={({ field }) => (
-              <SingleSelect
-                label="Colour Level"
-                iconElements={colorLevelIcons}
-                values={colourLevelOptions}
-                selected={field.value}
-                onSelect={field.onChange}
-                placeholder="Select colour level"
-                error={!!errors.colourLevel}
-                required
+              {/* Email - Full width, disabled */}
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    label="Email"
+                    placeholder="Enter email"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.email?.message}
+                    disabled
+                    required
+                  />
+                )}
               />
-            )}
-          />
 
-          {/* Animal Tag - Full width */}
-          <Controller
-            name="animalTag"
-            control={control}
-            rules={{ required: "Animal tag is required" }}
-            render={({ field }) => (
-              <MultiSelect
-                label="Animal Tag"
-                values={animalTagOptions}
-                selected={field.value}
-                onSelect={field.onChange}
-                placeholder="Select animal tags"
-                colours={animalTagColors}
-                error={!!errors.animalTag}
-                required
+              {/* Role - Full width */}
+              <Controller
+                name="role"
+                control={control}
+                rules={{ required: "Role is required" }}
+                render={({ field }) => (
+                  <SingleSelect
+                    label="Role"
+                    values={roleOptions}
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    placeholder="Select a role"
+                    error={!!errors.role}
+                    required
+                  />
+                )}
               />
-            )}
-          />
 
-          {/* Buttons - Right aligned, side by side */}
-          <Flex justify="flex-end" gap="1.5rem" mt="1.5rem">
-            <Button
-              variant="red"
-              size="medium"
-              onClick={handleDeleteUser}
-              type="button"
-            >
-              Delete User
-            </Button>
-            <Button variant="green" size="medium" type="submit">
-              Save
-            </Button>
-          </Flex>
+              {/* Colour Level - Full width */}
+              <Controller
+                name="colourLevel"
+                control={control}
+                rules={{ required: "Colour level is required" }}
+                render={({ field }) => (
+                  <SingleSelect
+                    label="Colour Level"
+                    iconElements={colorLevelIcons}
+                    values={colourLevelOptions}
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    placeholder="Select colour level"
+                    error={!!errors.colourLevel}
+                    required
+                  />
+                )}
+              />
+
+              {/* Animal Tag - Full width */}
+              <Controller
+                name="animalTag"
+                control={control}
+                rules={{ required: "Animal tag is required" }}
+                render={({ field }) => (
+                  <MultiSelect
+                    label="Animal Tag"
+                    values={animalTagOptions}
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    placeholder="Select animal tags"
+                    colours={animalTagColors}
+                    error={!!errors.animalTag}
+                    required
+                  />
+                )}
+              />
+
+              {/* Buttons - Right aligned, side by side */}
+              <Flex justify="flex-end" gap="1.5rem" mt="1.5rem">
+                <Button
+                  variant="red"
+                  size="medium"
+                  onClick={handleDeleteUser}
+                  type="button"
+                >
+                  Delete User
+                </Button>
+                <Button variant="green" size="medium" type="submit">
+                  Save
+                </Button>
+              </Flex>
+            </Flex>
+          </form>
         </Flex>
-      </form>
-    </Flex>
+      </Flex>
+    </>
   );
 };
 
