@@ -1,14 +1,14 @@
 import { Router, Request } from "express";
 import { isAuthorizedByRole } from "../middlewares/auth";
 import {
-  activityEndTimePatchValidator,
-  activityNotesPatchValidator,
-  activityRequestDtoValidator,
-  activityScheduledTimePatchValidator,
-  activityStartTimePatchValidator,
-  activityUpdateDtoValidator,
-  activityUserPatchValidator,
-} from "../middlewares/validators/activityValidators";
+  taskEndTimePatchValidator,
+  taskNotesPatchValidator,
+  taskRequestDtoValidator,
+  taskScheduledTimePatchValidator,
+  taskStartTimePatchValidator,
+  taskUpdateDtoValidator,
+  taskUserPatchValidator,
+} from "../middlewares/validators/taskValidators";
 import ActivityService from "../services/implementations/activityService";
 import {
   ActivityResponseDTO,
@@ -107,7 +107,7 @@ activityRouter.get(
 activityRouter.post(
   "/",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
-  activityRequestDtoValidator,
+  taskRequestDtoValidator,
   async (req, res) => {
     try {
       const { body } = req;
@@ -135,7 +135,7 @@ activityRouter.post(
 activityRouter.patch(
   "/:id",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
-  activityUpdateDtoValidator,
+  taskUpdateDtoValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
@@ -160,7 +160,7 @@ activityRouter.patch(
 activityRouter.patch(
   "/:id/assign-user",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
-  activityUserPatchValidator,
+  taskUserPatchValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
@@ -179,7 +179,7 @@ activityRouter.patch(
 activityRouter.patch(
   "/:id/schedule",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
-  activityScheduledTimePatchValidator,
+  taskScheduledTimePatchValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
@@ -197,7 +197,7 @@ activityRouter.patch(
 /* Adds a start time to an Activity */
 activityRouter.patch(
   "/:id/start",
-  activityStartTimePatchValidator,
+  taskStartTimePatchValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
@@ -215,7 +215,7 @@ activityRouter.patch(
 /* Adds an end time to an Activity */
 activityRouter.patch(
   "/:id/end",
-  activityEndTimePatchValidator,
+  taskEndTimePatchValidator,
   async (req, res) => {
     const { id } = req.params;
     try {
@@ -233,7 +233,7 @@ activityRouter.patch(
 /* Updates/Adds notes to an Activity */
 activityRouter.patch(
   "/:id/notes",
-  activityNotesPatchValidator,
+  taskNotesPatchValidator,
   async (req, res) => {
     const { id } = req.params;
     try {

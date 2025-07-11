@@ -21,7 +21,7 @@ export interface ITaskTemplateService {
    * @returns Returns an array of TaskTemplates
    * @throws Error if retrieval fails
    */
-  getTaskTemplates(): Promise<TaskTemplateResponseDTO[]>;
+  getTaskTemplates(page: number, limit: number): Promise<TaskTemplateResponseDTO[]>;
 
   /**
    * Create an TaskTemplate with the fields given in the DTO, return created TaskTemplate

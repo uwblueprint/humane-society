@@ -43,16 +43,12 @@ taskTemplateRouter.get("/", async (req, res) => {
   const limit = Number(req.query.limit); // retrieving limit (component) from the database for the page
   const page = Number(req.query.page); // the actual page we ar on.
   try {
-<<<<<<< HEAD:backend/typescript/rest/activityTypeRoutes.ts
-    const activityTypes = await activityTypeService.getActivityTypes(
-      page,
-      limit,
+
+    const taskTemplates = await taskTemplateService.getTaskTemplates( 
+      page, 
+      limit
     );
-    await sendResponseByMimeType<ActivityTypeResponseDTO>(
-=======
-    const taskTemplates = await taskTemplateService.getTaskTemplates();
     await sendResponseByMimeType<TaskTemplateResponseDTO>(
->>>>>>> e4a3909d14e6100f60315f0391fa59a9cc9baa1c:backend/typescript/rest/taskTemplateRoutes.ts
       res,
       200,
       contentType,
