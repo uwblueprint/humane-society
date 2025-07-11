@@ -37,6 +37,7 @@ const ProfilePage = (): React.ReactElement => {
       {userData && (
         <Flex flex="1">
           <UserProfileSidebar
+            id={userData.id}
             firstName={userData.firstName}
             lastName={userData.lastName}
             profilePhoto={userData.profilePhoto}

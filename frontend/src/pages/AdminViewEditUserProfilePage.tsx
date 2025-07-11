@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Flex, Text, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
@@ -10,6 +10,7 @@ import Button from "../components/common/Button";
 import UserAPIClient from "../APIClients/UserAPIClient";
 import { UserRoles } from "../constants/UserConstants";
 import { AnimalTag } from "../types/TaskTypes";
+import ColourStarIcon from "../components/common/ColourStarIcon";
 
 interface FormData {
   firstName: string;
@@ -26,6 +27,17 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const history = useHistory();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
+
+  const colourLevelMap = useMemo<Record<number, string>>(
+    () => ({
+      1: "Green",
+      2: "Yellow",
+      3: "Orange",
+      4: "Red",
+      5: "Blue",
+    }),
+    [],
+  );
 
   const {
     control,
@@ -48,7 +60,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           phoneNumber: userData.phoneNumber || "",
           email: userData.email,
           role: userData.role,
-          colourLevel: userData.colorLevel.toString(),
+          colourLevel: colourLevelMap[userData.colorLevel],
           animalTag: userData.animalTags,
         });
       } catch (error) {
@@ -65,7 +77,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
     };
 
     fetchUser();
-  }, [userId, reset, toast]);
+  }, [userId, reset, toast, colourLevelMap]);
 
   const onSubmit = (data: FormData) => {
     const formattedData = {
@@ -107,7 +119,14 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   };
 
   const roleOptions = Object.values(UserRoles);
-  const colourLevelOptions = ["1", "2", "3", "4", "5"]; // Assuming 1-5 levels
+  const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
+  const colorLevelIcons = [
+    <ColourStarIcon key="green" colour="green.300" />,
+    <ColourStarIcon key="yellow" colour="yellow.800" />,
+    <ColourStarIcon key="orange" colour="orange.400" />,
+    <ColourStarIcon key="red" colour="red.600" />,
+    <ColourStarIcon key="blue" colour="blue.400" />,
+  ];
   const animalTagOptions = Object.values(AnimalTag);
   const animalTagColors = ["orange", "pink", "blue", "green", "purple"]; // Colors for animal tags
 
@@ -243,6 +262,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
             render={({ field }) => (
               <SingleSelect
                 label="Colour Level"
+                iconElements={colorLevelIcons}
                 values={colourLevelOptions}
                 selected={field.value}
                 onSelect={field.onChange}

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Box,
   Flex,
@@ -7,6 +8,7 @@ import {
   Spacer,
   Text,
   VStack,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import React from "react";
 import { MailIcon, PencilIcon, PhoneIcon } from "../../../assets/icons";
@@ -25,6 +27,7 @@ import Logout from "../../auth/Logout";
 import InviteUser from "./InviteUser";
 
 export interface UserProfileSidebarProps {
+  id: number;
   firstName: string;
   lastName: string;
   profilePhoto?: string;
@@ -37,6 +40,7 @@ export interface UserProfileSidebarProps {
 }
 
 function UserProfileSidebar({
+  id,
   firstName,
   lastName,
   profilePhoto,
@@ -76,7 +80,9 @@ function UserProfileSidebar({
           {firstName} {lastName}
         </Text>
         <Spacer />
-        <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
+        <ChakraLink as={Link} to={`/admin/edit-user-profile/${id}`}>
+          <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
+        </ChakraLink>
       </HStack>
 
       <VStack alignItems="start" gap="0.8rem" width="100%">
