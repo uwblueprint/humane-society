@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       return "Pet Profile";
     }
     if (location.pathname.startsWith(ROUTES.ADMIN_EDIT_USER_PROFILE_PAGE)) {
-      return "Edit User Profile";
+      return "User Profile";
     }
 
     switch (location.pathname) {
@@ -63,12 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   };
 
-  const noPaddingPages = [
-    "Page",
-    "Profile",
-    "Pet Profile",
-    "Edit User Profile",
-  ];
+  const noPaddingPages = ["Page", "Profile", "Pet Profile", "User Profile"];
 
   return (
     <Flex direction="column" minHeight="100vh">
