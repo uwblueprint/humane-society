@@ -13,6 +13,9 @@ const PageTitleUpdater: React.FC = () => {
     if (location.pathname.startsWith(ROUTES.PET_PROFILE_PAGE)) {
       return "Pet Profile | Humane Society";
     }
+    if (location.pathname.startsWith(ROUTES.ADMIN_EDIT_USER_PROFILE_PAGE)) {
+      return "Edit User Profile | Humane Society";
+    }
 
     switch (location.pathname) {
       case ROUTES.HOME_PAGE:

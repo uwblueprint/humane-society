@@ -2,17 +2,29 @@ import React, { useState, useRef, useEffect } from "react";
 import { Box, Flex, Text, FormLabel, Icon } from "@chakra-ui/react";
 import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
 
-interface SingleSelectProps<T> {
+interface BaseSingleSelectProps<T> {
   values: T[];
   onSelect: (value: T) => void;
   selected: T | null;
   placeholder?: string;
-  icons?: React.FC<React.SVGProps<SVGSVGElement>>[];
   label?: string;
   error?: boolean;
   required?: boolean;
   maxHeight?: string;
 }
+
+// Can possibly have no icons
+interface WithIcons<T> extends BaseSingleSelectProps<T> {
+  icons?: React.FC<React.SVGProps<SVGSVGElement>>[];
+  iconElements?: never;
+}
+
+interface WithIconElements<T> extends BaseSingleSelectProps<T> {
+  iconElements: React.ReactElement[];
+  icons?: never;
+}
+
+type SingleSelectProps<T> = WithIcons<T> | WithIconElements<T>;
 
 const SingleSelect = <T extends string | number>({
   values,
@@ -20,6 +32,7 @@ const SingleSelect = <T extends string | number>({
   selected,
   placeholder = "Click for options",
   icons,
+  iconElements,
   label,
   error = false,
   required = false,
@@ -75,7 +88,7 @@ const SingleSelect = <T extends string | number>({
           mb="8px"
           fontSize="14px"
           fontWeight="500"
-          color={error ? "red.500" : "gray.700"}
+          color={error ? "red.500" : "gray.600"}
         >
           {label}
           {required && (
@@ -119,8 +132,10 @@ const SingleSelect = <T extends string | number>({
           <Flex align="center" gap="8px" flex="1" minWidth="0" px="16px">
             {selected ? (
               <Flex align="center" gap="8px">
-                {icons && (
+                {icons ? (
                   <Icon as={icons[values.indexOf(selected)]} boxSize="16px" />
+                ) : (
+                  iconElements && iconElements[values.indexOf(selected)]
                 )}
                 <Text
                   m={0}
@@ -188,7 +203,8 @@ const SingleSelect = <T extends string | number>({
           px="0.5rem"
         >
           {values.map((value, index) => {
-            const IconComponent = icons?.[index];
+            const IconProp = icons?.[index];
+            const IconComponent = iconElements?.[index];
             const isLastItem = index === values.length - 1;
 
             return (
@@ -206,7 +222,11 @@ const SingleSelect = <T extends string | number>({
                   transition="all 0.2s ease"
                   borderRadius="md"
                 >
-                  {IconComponent && <Icon as={IconComponent} boxSize="18px" />}
+                  {IconProp ? (
+                    <Icon as={IconProp} boxSize="18px" />
+                  ) : (
+                    IconComponent && IconComponent
+                  )}
                   <Text
                     m={0}
                     textStyle="body"

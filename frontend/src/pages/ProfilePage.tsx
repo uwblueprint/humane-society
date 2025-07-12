@@ -32,11 +32,12 @@ const ProfilePage = (): React.ReactElement => {
 
   return (
     <>
-      <NavBar pageName="Profile" />
+      <NavBar pageName="User Profile" />
       {/* Only load the page once the data is loaded */}
       {userData && (
         <Flex flex="1">
           <UserProfileSidebar
+            id={userData.id}
             firstName={userData.firstName}
             lastName={userData.lastName}
             profilePhoto={userData.profilePhoto}

@@ -35,6 +35,7 @@ import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
+import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
@@ -184,6 +185,12 @@ const App = (): React.ReactElement => {
                     exact
                     path={Routes.USER_MANAGEMENT_PAGE}
                     component={UserManagementPage}
+                    allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={`${Routes.ADMIN_EDIT_USER_PROFILE_PAGE}/:userId`}
+                    component={AdminViewEditUserProfilePage}
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
                   />
                   <PrivateRoute
