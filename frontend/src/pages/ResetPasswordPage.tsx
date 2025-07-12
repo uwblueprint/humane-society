@@ -1,16 +1,11 @@
 import React, { useState } from "react";
-import {
-  Input,
-  Text,
-  Button,
-  FormControl,
-  Flex,
-  FormLabel,
-} from "@chakra-ui/react";
+import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
+
+import Input from "../components/common/Input";
 import { HOME_PAGE } from "../constants/Routes";
-import ResponsivePopupModal from "../components/common/PopupModal";
+import PopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 
@@ -149,12 +144,8 @@ const ResetPasswordPage = (): React.ReactElement => {
                 <Input
                   type="password"
                   placeholder="••••••••••"
-                  size="lg"
-                  _placeholder={{ color: "gray.400" }}
-                  bg="white.default"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  borderColor="gray.400"
                 />
               </Flex>
               <Flex direction="column" gap="0.375rem">
@@ -164,12 +155,8 @@ const ResetPasswordPage = (): React.ReactElement => {
                 <Input
                   type="password"
                   placeholder="••••••••••"
-                  size="lg"
-                  _placeholder={{ color: "gray.400" }}
-                  bg="white.default"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  borderColor="gray.400"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handlePasswordReset();
@@ -200,7 +187,7 @@ const ResetPasswordPage = (): React.ReactElement => {
         </form>
       </Flex>
       {success && (
-        <ResponsivePopupModal
+        <PopupModal
           open={success}
           title="Success!"
           message="Welcome to the Oakville & Milton Humane Society"

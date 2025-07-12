@@ -1,16 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
-import {
-  Button,
-  Flex,
-  Text,
-  FormLabel,
-  FormControl,
-  Input,
-} from "@chakra-ui/react";
+import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
+
+import Input from "../components/common/Input";
 import Logo from "../components/common/Logo";
-import ResponsivePasswordInput from "../components/common/PasswordInput";
+import PasswordInput from "../components/common/PasswordInput";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import auth from "../firebase/firebase";
@@ -22,7 +17,7 @@ import {
 } from "../constants/Routes";
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
-import ResponsivePopupModal from "../components/common/PopupModal";
+import PopupModal from "../components/common/PopupModal";
 
 const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -115,13 +110,13 @@ const LoginPage = (): React.ReactElement => {
 
   return (
     <>
-      <ResponsivePopupModal
+      <PopupModal
         open={status === "loading"}
         title="Loading"
         message="Loading, please wait..."
       />
 
-      <ResponsivePopupModal
+      <PopupModal
         open={status === "error"}
         title="Error"
         message="An error occurred. If your link is expired, ask an administrator for assistance."
@@ -180,11 +175,6 @@ const LoginPage = (): React.ReactElement => {
                       </FormLabel>
                       <FormControl isInvalid={!!emailError || !!errorMessage}>
                         <Input
-                          size="lg"
-                          borderRadius="md"
-                          borderColor="gray.400"
-                          bg="white.default"
-                          _placeholder={{ color: "gray.400" }}
                           placeholder="user@humanesociety.org"
                           value={email}
                           onChange={handleEmailChange}
@@ -212,7 +202,7 @@ const LoginPage = (): React.ReactElement => {
                       <FormControl
                         isInvalid={!!passwordError || !!errorMessage}
                       >
-                        <ResponsivePasswordInput
+                        <PasswordInput
                           value={password}
                           onChange={handlePasswordChange}
                         />
