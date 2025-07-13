@@ -75,7 +75,7 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Task Category",
       value: "category",
-      options: Object.values(TaskCategory),
+      options: Object.values(TaskType),
     },
   ],
 };
