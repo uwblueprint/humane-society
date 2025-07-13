@@ -14,7 +14,7 @@ export const colorLevelMap: Record<number, ColorLevel> = {
   5: ColorLevel.BLUE,
 };
 
-export enum TaskCategory {
+export enum TaskType {
   WALK = "Walk",
   GAMES = "Games",
   PEN_TIME = "Pen Time",

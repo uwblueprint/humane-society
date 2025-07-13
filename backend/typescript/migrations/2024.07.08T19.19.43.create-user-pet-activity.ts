@@ -2,7 +2,7 @@ import { DataType } from "sequelize-typescript";
 
 import { Migration } from "../umzug";
 
-const TABLE_NAME = "user_pet_activities";
+const TABLE_NAME = "user_pet_tasks";
 
 export const up: Migration = async ({ context: sequelize }) => {
   await sequelize.getQueryInterface().createTable(TABLE_NAME, {
@@ -28,11 +28,11 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
     },
-    activity_id: {
+    task_id: {
       type: DataType.INTEGER,
       allowNull: false,
       references: {
-        model: "activities",
+        model: "tasks",
         key: "id",
       },
     },

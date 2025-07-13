@@ -12,7 +12,7 @@ import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
-  TaskCategory,
+  TaskType,
   TaskStatus,
 } from "../../types/TaskTypes";
 import PetStatus from "../common/PetStatus";
@@ -22,7 +22,7 @@ export interface PetInfo {
   name: string;
   skill: ColorLevel;
   image: string;
-  taskCategories: TaskCategory[];
+  taskCategories: TaskType[];
   status: TaskStatus;
   lastCaredFor: string;
   allTasksAssigned: boolean;
@@ -40,18 +40,18 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
-    [TaskCategory.WALK]: WalkIcon,
-    [TaskCategory.GAMES]: GamesIcon,
-    [TaskCategory.PEN_TIME]: PenTimeIcon,
-    [TaskCategory.HUSBANDRY]: HusbandryIcon,
-    [TaskCategory.TRAINING]: TrainingIcon,
-    [TaskCategory.MISC]: MiscIcon,
+  const taskTypeIcons: Record<TaskType, React.ElementType> = {
+    [TaskType.WALK]: WalkIcon,
+    [TaskType.GAMES]: GamesIcon,
+    [TaskType.PEN_TIME]: PenTimeIcon,
+    [TaskType.HUSBANDRY]: HusbandryIcon,
+    [TaskType.TRAINING]: TrainingIcon,
+    [TaskType.MISC]: MiscIcon,
   };
 
-  const getDisplayedCategories = (taskCategories: TaskCategory[]) =>
+  const getDisplayedCategories = (taskCategories: TaskType[]) =>
     taskCategories.slice(0, 4);
-  const getExtraTasks = (taskCategories: TaskCategory[]) =>
+  const getExtraTasks = (taskCategories: TaskType[]) =>
     taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
 
   return (
@@ -106,7 +106,7 @@ export const PetListTableSection = ({
               <Flex gap="2rem" minWidth="max-content" alignItems="center">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
-                    (category, index) => {
+                    (taskType, index) => {
                       return (
                         <Flex
                           key={index}
@@ -114,12 +114,9 @@ export const PetListTableSection = ({
                           alignItems="center"
                           p={0}
                         >
-                          <Icon
-                            as={taskCategoryIcons[category]}
-                            boxSize="2.5rem"
-                          />
+                          <Icon as={taskTypeIcons[taskType]} boxSize="2.5rem" />
                           <Text textStyle="caption" m={0} color="gray.700">
-                            {category}
+                            {taskType}
                           </Text>
                         </Flex>
                       );
