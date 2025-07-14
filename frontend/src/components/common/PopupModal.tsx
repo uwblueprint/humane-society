@@ -1,11 +1,11 @@
-// Serves as a general component for a responsive popup that
+// Serves as a general component for a  popup that
 // works for mobile and tablet view. Supports up to 2 action buttons
 // with red/blue options for the primary button.
 
 import React from "react";
 import { Flex, Text, Button } from "@chakra-ui/react";
 
-interface ResponsivePopupModalProps {
+interface PopupModalProps {
   open: boolean; // Controls whether the modal is visible
   title: string; // Title displayed at the top of the modal
   message: string; // Main message or body text of the modal
@@ -18,7 +18,7 @@ interface ResponsivePopupModalProps {
   onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
 }
 
-const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
+const PopupModal: React.FC<PopupModalProps> = ({
   open,
   title,
   message,
@@ -135,4 +135,4 @@ const ResponsivePopupModal: React.FC<ResponsivePopupModalProps> = ({
   );
 };
 
-export default ResponsivePopupModal;
+export default PopupModal;

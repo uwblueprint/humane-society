@@ -96,7 +96,7 @@ const MultiSelect = <T extends string | number>({
           mb="8px"
           fontSize="14px"
           fontWeight="500"
-          color={error ? "red.500" : "gray.700"}
+          color={error ? "red.500" : "gray.600"}
         >
           {label}
           {required && (
@@ -112,7 +112,7 @@ const MultiSelect = <T extends string | number>({
         width="100%"
         bg="white"
         border="1px solid"
-        borderColor={error ? "red.300" : "gray.200"}
+        borderColor={error ? "red.500" : "gray.400"}
         borderRadius="8px"
         cursor="pointer"
         onClick={handleToggle}
@@ -173,13 +173,18 @@ const MultiSelect = <T extends string | number>({
                         {String(value)}
                       </TagLabel>
                       <TagCloseButton
-                        color="blue.700"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveTag(value);
                         }}
                         _hover={{
                           bg: "whiteAlpha.300",
+                        }}
+                        sx={{
+                          color: { color },
+                          "& svg": {
+                            color: { color },
+                          },
                         }}
                       />
                     </Tag>

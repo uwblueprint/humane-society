@@ -1,9 +1,7 @@
 import React from "react";
-import { Text, HStack, chakra } from "@chakra-ui/react";
+import { Text, HStack } from "@chakra-ui/react";
 import { ColorLevel } from "../../../types/TaskTypes";
-import { ReactComponent as StarSVG } from "../../../assets/icons/star.svg";
-
-const StarIcon = chakra(StarSVG);
+import ColourStarIcon from "../ColourStarIcon";
 
 const borderColour: Record<ColorLevel, string> = {
   [ColorLevel.GREEN]: "green.800",
@@ -40,10 +38,7 @@ const ColourLevelBadge = ({
     display="flex"
     gap="0.5rem"
   >
-    <StarIcon
-      fill={borderColour[colourLevel]}
-      color={borderColour[colourLevel]}
-    />
+    <ColourStarIcon colour={borderColour[colourLevel]} />
     <Text
       margin="0"
       color={borderColour[colourLevel]}
