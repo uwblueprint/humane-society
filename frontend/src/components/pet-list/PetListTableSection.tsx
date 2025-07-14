@@ -40,7 +40,7 @@ export const PetListTableSection = ({
 }: PetListTableSectionProps) => {
   const { isOpen, toggle } = useOpenController(true);
 
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
+  const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
     [TaskCategory.WALK]: WalkIcon,
     [TaskCategory.GAMES]: GamesIcon,
     [TaskCategory.PEN_TIME]: PenTimeIcon,
@@ -106,20 +106,15 @@ export const PetListTableSection = ({
               <Flex gap="2rem" minWidth="max-content" alignItems="center">
                 <SimpleGrid columns={2} rowGap="1rem" columnGap="2rem">
                   {getDisplayedCategories(pet.taskCategories).map(
-                    (category, index) => {
+                    (taskCategory, index) => {
                       return (
-                        <Flex
-                          key={index}
-                          gap="0.8125rem"
-                          alignItems="center"
-                          p={0}
-                        >
+                        <Flex align="center" key={index} gap="0.8125rem" p={0}>
                           <Icon
-                            as={taskCategoryIcons[category]}
+                            as={taskTypeIcons[taskCategory]}
                             boxSize="2.5rem"
                           />
-                          <Text textStyle="caption" m={0} color="gray.700">
-                            {category}
+                          <Text textStyle="caption" m={0}>
+                            {taskCategory}
                           </Text>
                         </Flex>
                       );

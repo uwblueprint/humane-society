@@ -46,6 +46,7 @@ const Input = ({
         _placeholder={{ color: "gray.400" }}
         value={value}
         onChange={onChange}
+        disabled={disabled}
         _focus={{
           borderColor: error ? "red.500" : "blue.500",
           boxShadow: error ? "0 0 0 1px red" : "0 0 0 1px blue",
