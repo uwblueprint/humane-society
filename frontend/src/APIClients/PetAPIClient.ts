@@ -1,5 +1,4 @@
 import baseAPIClient from "./BaseAPIClient";
-<<<<<<< HEAD
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { PetInfo } from "../components/pet-list/PetListTableSection";
@@ -21,19 +20,11 @@ function mapPetToPetInfo(pet: any): PetInfo {
 }
 
 const get = async (): Promise<PetInfo[]> => {
-=======
-import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
-import { Task } from "../types/TaskTypes";
-
-const getPetTasks = async (petId: number): Promise<Task[]> => {
->>>>>>> main
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
   try {
-<<<<<<< HEAD
     const { data } = await baseAPIClient.get("/pets", {
       headers: { Authorization: bearerToken },
     });
@@ -50,15 +41,3 @@ const getPetTasks = async (petId: number): Promise<Task[]> => {
 
 export default { get };
 
-=======
-    const { data } = await baseAPIClient.get(`/pets/${petId}/tasks`, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to fetch pet tasks: ${error}`);
-  }
-};
-
-export default { getPetTasks };
->>>>>>> main
