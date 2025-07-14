@@ -1,6 +1,7 @@
 import { Flex } from "@chakra-ui/react";
-import React, { useMemo, useState } from "react";
-import mockData from "../temp/mock/petlist/mockPetList.json";
+import React, { useMemo, useState, useEffect } from "react";
+// import mockData from "../temp/mock/petlist/mockPetList.json";
+import PetAPIClient from "../APIClients/PetAPIClient";
 import PetListTable from "../components/pet-list/PetListTable";
 import { PetInfo } from "../components/pet-list/PetListTableSection";
 import Search from "../components/common/Search";
@@ -12,6 +13,23 @@ import getCurrentUserRole from "../utils/CommonUtils";
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
+  const [pets, setPets] = useState<PetInfo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    PetAPIClient.get()
+      .then((data) => {
+        setPets(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load pets");
+        setLoading(false);
+      });
+  }, []);
 
   const handleClearFilters = () => {
     setFilters({});
@@ -27,12 +45,12 @@ const PetListPage = (): React.ReactElement => {
   };
 
   const filteredPets = useMemo(() => {
-    return mockData
-      .filter((prev) => {
+    return pets
+      .filter((prev: PetInfo) => {
         return Object.keys(filters).every((key) => {
           if (filters[key].length === 0) return true;
           if (Array.isArray(prev[key as keyof PetInfo])) {
-            return filters[key].some((filter) =>
+            return filters[key].some((filter: string) =>
               (
                 prev[key as keyof PetInfo] as (string | TaskCategory)[]
               ).includes(filter),
@@ -41,10 +59,10 @@ const PetListPage = (): React.ReactElement => {
           return filters[key].includes(prev[key as keyof PetInfo] as string);
         });
       })
-      .filter((prev) => {
+      .filter((prev: PetInfo) => {
         return prev.name.toLowerCase().includes(search.toLowerCase());
       });
-  }, [filters, search]);
+  }, [filters, search, pets]);
 
   const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(
     getCurrentUserRole() as string,
@@ -70,10 +88,20 @@ const PetListPage = (): React.ReactElement => {
           search={search}
         />
       </Flex>
-      <PetListTable
-        pets={filteredPets as PetInfo[]}
-        clearFilters={handleClearFilters}
-      />
+      {loading ? (
+        <Flex justify="center" align="center" minH="200px">
+          Loading pets...
+        </Flex>
+      ) : error ? (
+        <Flex justify="center" align="center" minH="200px" color="red.500">
+          {error}
+        </Flex>
+      ) : (
+        <PetListTable
+          pets={filteredPets as PetInfo[]}
+          clearFilters={handleClearFilters}
+        />
+      )}
     </Flex>
   );
 };
