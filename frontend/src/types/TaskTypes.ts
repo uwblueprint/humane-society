@@ -14,7 +14,7 @@ export const colorLevelMap: Record<number, ColorLevel> = {
   5: ColorLevel.BLUE,
 };
 
-export enum TaskType {
+export enum TaskCategory {
   WALK = "Walk",
   GAMES = "Games",
   PEN_TIME = "Pen Time",
@@ -40,7 +40,7 @@ export enum AnimalTag {
 export interface Task {
   id: number;
   name: string;
-  category: TaskType;
+  category: TaskCategory;
   instructions: string;
 }
 
@@ -48,40 +48,40 @@ export const mockTasks: Task[] = [
   {
     id: 1,
     name: "Morning walk",
-    category: TaskType.WALK,
+    category: TaskCategory.WALK,
     instructions:
       "Morning walks with the walker walkwalkwalkwalkwalkwalkwalkwalk…",
   },
   {
     id: 2,
     name: "Everything is Awesome!",
-    category: TaskType.GAMES,
+    category: TaskCategory.GAMES,
     instructions:
       "The focus of Everything is Awesome game is to make the dog feel appreciated and engaged.",
   },
   {
     id: 3,
     name: "Nap time",
-    category: TaskType.PEN_TIME,
+    category: TaskCategory.PEN_TIME,
     instructions: "Instructions here blablablabalbblablablablablablalbalb.",
   },
   {
     id: 4,
     name: "Feeding",
-    category: TaskType.HUSBANDRY,
+    category: TaskCategory.HUSBANDRY,
     instructions:
       "Feeding the pet instructions here filler text filler text filler text filler text.",
   },
   {
     id: 5,
     name: "Toilet training",
-    category: TaskType.TRAINING,
+    category: TaskCategory.TRAINING,
     instructions: "Step‐by‐step guide to toilet training your pet goes here.",
   },
   {
     id: 6,
     name: "blahblahblahblahblahbalhalhalblahblabla…",
-    category: TaskType.MISC,
+    category: TaskCategory.MISC,
     instructions: "Instructions here blablablabalbblablablablablablablblabb.",
   },
 ];

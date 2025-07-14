@@ -7,8 +7,6 @@ const NEW_TASKTEMPLATES_TABLE = "task_templates";
 
 const OLD_ID_COL = "activity_type_id";
 const NEW_ID_COL = "task_template_id";
-const OLD_TASK_TYPE = "category";
-const NEW_TASK_TYPE = "task_type";
 const OLD_TASK_NAME = "activity_name";
 const NEW_TASK_NAME = "task_name";
 
@@ -40,25 +38,11 @@ export const up: Migration = async ({ context: sequelize }) => {
     OLD_TASK_NAME,
     NEW_TASK_NAME,
   );
-
-  await queryinterface.renameColumn(
-    // rename category to task type
-    NEW_TASKTEMPLATES_TABLE,
-    OLD_TASK_TYPE,
-    NEW_TASK_TYPE,
-  );
 };
 
 export const down: Migration = async ({ context: sequelize }) => {
   // reverts migration
   const queryinterface = sequelize.getQueryInterface();
-
-  await queryinterface.renameColumn(
-    // rename task type back to category
-    NEW_TASKTEMPLATES_TABLE,
-    NEW_TASK_TYPE,
-    OLD_TASK_TYPE,
-  );
 
   await queryinterface.renameColumn(
     // rename task name to activity name
@@ -86,4 +70,3 @@ export const down: Migration = async ({ context: sequelize }) => {
     OLD_TASKS_TABLE,
   );
 };
-

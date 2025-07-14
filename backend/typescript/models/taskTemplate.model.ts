@@ -1,5 +1,5 @@
 import { Column, Model, Table, DataType } from "sequelize-typescript";
-import { TaskType } from "../types";
+import { TaskCategory } from "../types";
 
 @Table({ timestamps: false, tableName: "task_templates" })
 export default class TaskTemplate extends Model {
@@ -7,10 +7,10 @@ export default class TaskTemplate extends Model {
   task_name!: string;
 
   @Column({
-    type: DataType.ENUM(...Object.values(TaskType)),
+    type: DataType.ENUM(...Object.values(TaskCategory)),
     allowNull: false,
   })
-  taskType!: TaskType;
+  category!: TaskCategory;
 
   @Column({ type: DataType.TEXT, allowNull: true })
   instruction?: string;

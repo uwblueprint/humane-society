@@ -74,7 +74,7 @@ export enum UserStatus {
   INACTIVE = "Inactive",
 }
 
-export enum TaskType {
+export enum TaskCategory {
   GAMES = "Games",
   HUSBANDRY = "Husbandry",
   PEN_TIME = "Pen Time",
