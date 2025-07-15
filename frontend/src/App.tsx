@@ -14,6 +14,7 @@ import DisplayPage from "./pages/DisplayPage";
 import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
 import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
+import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
@@ -34,6 +35,7 @@ import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
+import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
@@ -187,9 +189,21 @@ const App = (): React.ReactElement => {
                   />
                   <PrivateRoute
                     exact
+                    path={`${Routes.ADMIN_EDIT_USER_PROFILE_PAGE}/:userId`}
+                    component={AdminViewEditUserProfilePage}
+                    allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                  />
+                  <PrivateRoute
+                    exact
                     path={Routes.TASK_MANAGEMENT_PAGE}
                     component={TaskManagementPage}
                     allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={Routes.ADD_TASK_TEMPLATE_PAGE}
+                    component={AddTaskTemplatePage}
+                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                   />
                   {/* Fallback Route */}
                   <Route path="*" component={NotFoundPage} />

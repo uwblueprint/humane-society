@@ -1,7 +1,7 @@
 import { Transaction } from "sequelize";
 import PgPet from "../../models/pet.model";
-// import PgActivity from "../../models/activity.model";
-// import PgActivityType from "../../models/activityType.model";
+// import PgTask from "../../models/task.model";
+// import PgTaskTemplate from "../../models/taskTemplate.model";
 import PgPetCareInfo from "../../models/petCareInfo.model";
 // import PgUser from "../../models/user.model";
 import {

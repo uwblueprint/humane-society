@@ -1,11 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import * as ROUTES from "../../constants/Routes";
 
 const PageTitleUpdater: React.FC = () => {
   const location = useLocation();
 
-  const getPageTitle = () => {
+  const getPageTitle = useCallback(() => {
+    // Special routes that have id's
+    if (location.pathname.startsWith(ROUTES.PROFILE_PAGE)) {
+      return "Profile | Humane Society";
+    }
+    if (location.pathname.startsWith(ROUTES.PET_PROFILE_PAGE)) {
+      return "Pet Profile | Humane Society";
+    }
+    if (location.pathname.startsWith(ROUTES.ADMIN_EDIT_USER_PROFILE_PAGE)) {
+      return "Edit User Profile | Humane Society";
+    }
+
     switch (location.pathname) {
       case ROUTES.HOME_PAGE:
         return "Pet List | Humane Society";
@@ -31,10 +42,6 @@ const PageTitleUpdater: React.FC = () => {
         return "Hooks | Humane Society";
       case ROUTES.INTERACTION_LOG_PAGE:
         return "Interaction Log | Humane Society";
-      case ROUTES.PROFILE_PAGE:
-        return "Profile | Humane Society";
-      case ROUTES.PET_PROFILE_PAGE:
-        return "Pet Profile | Humane Society";
       case ROUTES.DEV_UTILITY_PAGE:
         return "Developer Utility | Humane Society";
       case ROUTES.USER_MANAGEMENT_PAGE:
@@ -46,11 +53,11 @@ const PageTitleUpdater: React.FC = () => {
       default:
         return "Humane Society";
     }
-  };
+  }, [location.pathname]);
 
   useEffect(() => {
     document.title = getPageTitle();
-  }, [location.pathname, getPageTitle]);
+  }, [getPageTitle]);
 
   return null;
 };

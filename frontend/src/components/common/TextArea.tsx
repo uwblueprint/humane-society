@@ -2,21 +2,21 @@ import React, { ChangeEvent } from "react";
 import {
   FormControl,
   FormLabel,
-  Input as ChakraInput,
+  Textarea as ChakraTextarea,
   FormErrorMessage,
 } from "@chakra-ui/react";
 
-interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+interface TextAreaProps
+  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "size"> {
   label?: string;
   value: string;
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   error?: string;
   required?: boolean;
   disabled?: boolean;
 }
 
-const Input = ({
+const TextArea = ({
   label,
   value,
   onChange,
@@ -24,7 +24,7 @@ const Input = ({
   required = false,
   disabled = false,
   ...props
-}: InputProps): React.ReactElement => {
+}: TextAreaProps): React.ReactElement => {
   return (
     <FormControl isInvalid={!!error} isRequired={required}>
       {label && (
@@ -37,7 +37,8 @@ const Input = ({
           {label}
         </FormLabel>
       )}
-      <ChakraInput
+      <ChakraTextarea
+        minHeight="fit-content"
         size="lg"
         borderRadius="md"
         borderWidth="1px"
@@ -46,7 +47,8 @@ const Input = ({
         _placeholder={{ color: "gray.400" }}
         value={value}
         onChange={onChange}
-        disabled={disabled}
+        maxHeight="25rem"
+        resize="vertical"
         _focus={{
           borderColor: error ? "red.500" : "blue.500",
           boxShadow: error ? "0 0 0 1px red" : "0 0 0 1px blue",
@@ -64,4 +66,4 @@ const Input = ({
   );
 };
 
-export default Input;
+export default TextArea;

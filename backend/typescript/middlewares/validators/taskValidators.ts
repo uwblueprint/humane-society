@@ -3,7 +3,7 @@ import { getApiValidationError, validateDate, validatePrimitive } from "./util";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
-export const activityRequestDtoValidator = async (
+export const taskRequestDtoValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -22,10 +22,10 @@ export const activityRequestDtoValidator = async (
     return res.status(400).send(getApiValidationError("petId", "integer"));
   }
 
-  if (!validatePrimitive(body.activityTypeId, "integer")) {
+  if (!validatePrimitive(body.taskTemplateId, "integer")) {
     return res
       .status(400)
-      .send(getApiValidationError("activityTypeId", "integer"));
+      .send(getApiValidationError("taskTemplateId", "integer"));
   }
 
   if (
@@ -65,7 +65,7 @@ export const activityRequestDtoValidator = async (
   return next();
 };
 
-export const activityUpdateDtoValidator = async (
+export const taskUpdateDtoValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -89,13 +89,13 @@ export const activityUpdateDtoValidator = async (
   }
 
   if (
-    body.activityTypeId !== undefined &&
-    body.activityTypeId !== null &&
-    !validatePrimitive(body.activityTypeId, "integer")
+    body.taskTemplateId !== undefined &&
+    body.taskTemplateId !== null &&
+    !validatePrimitive(body.taskTemplateId, "integer")
   ) {
     return res
       .status(400)
-      .send(getApiValidationError("activityTypeId", "integer"));
+      .send(getApiValidationError("taskTemplateId", "integer"));
   }
 
   if (
@@ -135,7 +135,7 @@ export const activityUpdateDtoValidator = async (
   return next();
 };
 
-export const activityUserPatchValidator = async (
+export const taskUserPatchValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -149,7 +149,7 @@ export const activityUserPatchValidator = async (
   return next();
 };
 
-export const activityScheduledTimePatchValidator = async (
+export const taskScheduledTimePatchValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -165,7 +165,7 @@ export const activityScheduledTimePatchValidator = async (
   return next();
 };
 
-export const activityStartTimePatchValidator = async (
+export const taskStartTimePatchValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -179,7 +179,7 @@ export const activityStartTimePatchValidator = async (
   return next();
 };
 
-export const activityEndTimePatchValidator = async (
+export const taskEndTimePatchValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -193,7 +193,7 @@ export const activityEndTimePatchValidator = async (
   return next();
 };
 
-export const activityNotesPatchValidator = async (
+export const taskNotesPatchValidator = async (
   req: Request,
   res: Response,
   next: NextFunction,
