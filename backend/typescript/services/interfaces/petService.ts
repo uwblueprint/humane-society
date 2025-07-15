@@ -1,5 +1,4 @@
-import { PetStatus, Sex, AnimalTag } from "../../types";
-
+import { PetStatus, Sex, AnimalTag, UserDTO} from "../../types";
 export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
@@ -96,6 +95,14 @@ export interface IPetService {
    * @throws Error if deletion fails
    */
   deletePet(id: string): Promise<string>;
+  
+  /**
+   * get all users in which the pet can be taken care of
+   * @param petColorLevel pet's color level
+   * @returns list of users
+   * @throws Error if matching fails
+   */
+  getMatchingUsersForPet(petColorLevel: number): Promise<UserDTO[]>;
 
   /**
    * retrieve all Pets that match given filter criteria

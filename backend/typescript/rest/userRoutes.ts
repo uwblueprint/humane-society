@@ -325,4 +325,30 @@ userRouter.delete("/", async (req, res) => {
     .json({ error: "Must supply one of userId or email as query parameter." });
 });
 
+userRouter.get("/match/pets/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (userId) {
+    if (typeof userId !== "string") {
+      res
+        .status(400)
+        .json({ error: "userId query parameter must be a string." });
+    } else if (Number.isNaN(Number(userId))) {
+      res.status(400).json({ error: "Invalid user ID" });
+    } else {
+      try {
+        const user: UserDTO = await userService.getUserById(userId);
+        await userService.getMatchingPetsForUser(user.colorLevel);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
+      }
+    }
+    return;
+  }
+})
+
 export default userRouter;

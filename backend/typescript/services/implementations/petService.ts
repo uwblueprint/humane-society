@@ -13,14 +13,20 @@ import {
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { sequelize } from "../../models";
+import { sequelize, User } from "../../models";
 // import ActivityType from "../../models/activityType.model";
-// import { Role } from "../../types";
+import { UserDTO } from "../../types";
 
 const Logger = logger(__filename);
 
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
+  userService: IUserService;
+
+  constructor(userService: IUserService) {
+    this.userService = userService;
+  }
+
   getAgeFromBirthday(birthday: string): number {
     const parsedBirthday = Date.parse(birthday);
     const currentDate = new Date();
@@ -313,6 +319,21 @@ class PetService implements IPetService {
       throw error;
     }
     return id;
+  }
+
+  async getMatchingUsersForPet(petColorLevel: number): Promise<UserDTO[]> {
+    try {
+      const allUsers = await this.userService.getUsers();
+
+      return allUsers.filter((user: UserDTO) => user.colorLevel >= petColorLevel);
+    } catch (error) {
+      Logger.error(
+        `Failed to get matching users for pet. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
+      throw error;
+    }
   }
 }
 

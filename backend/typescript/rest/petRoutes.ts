@@ -140,4 +140,30 @@ petRouter.get("/:id", async (req, res) => {
   }
 });
 
+petRouter.get("/match/users/:petId", async (req, res) => {
+  const { petId } = req.params;
+
+  if (petId) {
+    if (typeof petId !== "string") {
+      res
+        .status(400)
+        .json({ error: "petId query parameter must be a string." });
+    } else if (Number.isNaN(Number(petId))) {
+      res.status(400).json({ error: "Invalid pet ID" });
+    } else {
+      try {
+        const pet: PetResponseDTO = await petService.getPet(petId);
+        await petService.getMatchingUsersForPet(pet.colorLevel);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
+      }
+    }
+    return;
+  }
+});
+
 export default petRouter;

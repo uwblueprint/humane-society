@@ -1,4 +1,5 @@
 import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
+import { PetResponseDTO } from "./petService";
 
 interface IUserService {
   /**
@@ -79,6 +80,14 @@ interface IUserService {
    * @throws Error if user deletion fails
    */
   deleteUserByEmail(email: string): Promise<void>;
+  
+  /**
+   * Get all pets that a user can take care of
+   * @param userColorLevel user's color level
+   * @returns list of pets
+   * @throws Error if failed to get matching pets
+   */
+  getMatchingPetsForUser(userColorLevel: number): Promise<PetResponseDTO[]>;
 }
 
 export default IUserService;

@@ -1,4 +1,5 @@
 import * as firebaseAdmin from "firebase-admin";
+import { Op } from "sequelize";
 import IUserService from "../interfaces/userService";
 import {
   CreateUserDTO,
@@ -7,6 +8,8 @@ import {
   UserDTO,
   UserStatus,
 } from "../../types";
+import { IPetService, PetResponseDTO } from "../interfaces/petService";
+import PgPet from "../../models/pet.model";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import PgUser from "../../models/user.model";
@@ -15,6 +18,12 @@ const Logger = logger(__filename);
 
 class UserService implements IUserService {
   /* eslint-disable class-methods-use-this */
+
+  petService: IPetService;
+
+  constructor(petService: IPetService) {
+    this.petService = petService;
+  }
 
   async getUserById(userId: string): Promise<UserDTO> {
     let user: PgUser | null;
@@ -438,6 +447,46 @@ class UserService implements IUserService {
       }
     } catch (error: unknown) {
       Logger.error(`Failed to delete user. Reason = ${getErrorMessage(error)}`);
+      throw error;
+    }
+  }
+
+  async getMatchingPetsForUser(userColorLevel: number): Promise<PetResponseDTO[]> {
+    try {
+      const matchingPets = await PgPet.findAll({
+        where: {
+          color_level: {
+            [Op.lte]: userColorLevel,
+          },
+        },
+      });
+
+      return matchingPets.map((pet) => ({
+        id: pet.id,
+        name: pet.name,
+        animalTag: pet.animal_tag,
+        colorLevel: pet.color_level,
+        status: pet.status,
+        breed: pet.breed,
+        age: pet.birthday
+          ? this.petService.getAgeFromBirthday(pet.birthday)
+          : undefined,
+        weight: pet.weight,
+        sex: pet.sex,
+        photo: pet.photo,
+        careInfo: {
+          id: pet.petCareInfo?.id,
+          safetyInfo: pet.petCareInfo?.safety_info,
+          medicalInfo: pet.petCareInfo?.medical_info,
+          managementInfo: pet.petCareInfo?.management_info,
+        },
+      }));
+    } catch (error) {
+      Logger.error(
+        `Failed to get matching pets for user. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
       throw error;
     }
   }
