@@ -451,7 +451,9 @@ class UserService implements IUserService {
     }
   }
 
-  async getMatchingPetsForUser(userColorLevel: number): Promise<PetResponseDTO[]> {
+  async getMatchingPetsForUser(
+    userColorLevel: number,
+  ): Promise<PetResponseDTO[]> {
     try {
       const matchingPets = await PgPet.findAll({
         where: {

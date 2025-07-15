@@ -80,7 +80,7 @@ interface IUserService {
    * @throws Error if user deletion fails
    */
   deleteUserByEmail(email: string): Promise<void>;
-  
+
   /**
    * Get all pets that a user can take care of
    * @param userColorLevel user's color level

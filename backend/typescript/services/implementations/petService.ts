@@ -13,7 +13,7 @@ import {
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { sequelize, User } from "../../models";
+import { sequelize } from "../../models";
 // import ActivityType from "../../models/activityType.model";
 import { UserDTO } from "../../types";
 
@@ -325,7 +325,9 @@ class PetService implements IPetService {
     try {
       const allUsers = await this.userService.getUsers();
 
-      return allUsers.filter((user: UserDTO) => user.colorLevel >= petColorLevel);
+      return allUsers.filter(
+        (user: UserDTO) => user.colorLevel >= petColorLevel,
+      );
     } catch (error) {
       Logger.error(
         `Failed to get matching users for pet. Reason = ${getErrorMessage(

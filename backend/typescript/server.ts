@@ -13,7 +13,6 @@ import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 import taskRouter from "./rest/taskRoutes";
-import activityRouter from "./rest/activityRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",

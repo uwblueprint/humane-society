@@ -347,8 +347,7 @@ userRouter.get("/match/pets/:userId", async (req, res) => {
         }
       }
     }
-    return;
   }
-})
+});
 
 export default userRouter;

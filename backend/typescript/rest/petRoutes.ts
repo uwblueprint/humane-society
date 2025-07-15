@@ -162,7 +162,6 @@ petRouter.get("/match/users/:petId", async (req, res) => {
         }
       }
     }
-    return;
   }
 });
 
