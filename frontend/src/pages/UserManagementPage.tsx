@@ -67,7 +67,8 @@ const UserManagementPage = (): React.ReactElement => {
           return filterVals.includes(value as string);
         });
       })
-      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
+      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
+      .splice(page, usersPerPage);
   }, [filters, search, users]);
 
   const getUsers = async () => {

@@ -1,6 +1,13 @@
-import React, { FC } from "react";
-import { Flex, Text, Input, IconButton, Box } from "@chakra-ui/react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import React, { FC, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Button,
+  Flex,
+  NumberInput,
+  NumberInputField,
+  Text,
+} from "@chakra-ui/react";
+import { floor } from "lodash";
 
 interface PaginationProps {
   value: number; // current page (1-based index)
@@ -17,86 +24,113 @@ const Pagination: FC<PaginationProps> = ({
   itemsPerPage,
   className = "",
 }) => {
-  const totalPages = Math.ceil(numberOfItems / itemsPerPage);
+  const [curPageNumber, setCurPageNumber] = useState(value);
+  const [isLeftButtonDisabled, setisLeftButtonDisabled] = useState(true);
+  const [isRightButtonDisabled, setisRightButtonDisabled] = useState(false);
+  const MAX_NUM_OF_PAGES = floor(numberOfItems / itemsPerPage);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = parseInt(event.target.value, 10);
-    if (Number.isNaN(inputValue)) return;
-
-    let newPage = inputValue;
-    if (newPage < 1) {
-      newPage = 1;
-    } else if (newPage > totalPages) {
-      newPage = totalPages;
-    }
-    onChange(newPage);
-  };
-
-  const handlePrevious = () => {
-    if (value > 1) {
-      onChange(value - 1);
+  const onButtonClick = (newPageNumber: number) => {
+    if (newPageNumber > 1 && newPageNumber < MAX_NUM_OF_PAGES) {
+      setisLeftButtonDisabled(false);
+      setisRightButtonDisabled(false);
     }
   };
 
-  const handleNext = () => {
-    if (value < totalPages) {
-      onChange(value + 1);
+  const onPageChange = (newPageNumber: number) => {
+    if (newPageNumber < 1) {
+      setCurPageNumber(1);
+      setisLeftButtonDisabled(true);
+    } else if (newPageNumber >= MAX_NUM_OF_PAGES) {
+      setCurPageNumber(MAX_NUM_OF_PAGES);
+      setisRightButtonDisabled(true);
+    } else {
+      setCurPageNumber(newPageNumber);
+      onButtonClick(newPageNumber);
     }
+    onChange(curPageNumber);
   };
 
-  if (totalPages <= 1) {
-    return null; // Don't show pagination if there's only one page or no items
-  }
+  const onPressPrevious = () => {
+    const newPageNumber = curPageNumber - 1;
+    onPageChange(newPageNumber);
+  };
+
+  const onPressNext = () => {
+    const newPageNumber = curPageNumber + 1;
+    onPageChange(newPageNumber);
+  };
+
+  const onInputChange = (newPageNumber: number) => {
+    setCurPageNumber(newPageNumber);
+    if (newPageNumber < 1) {
+      setisLeftButtonDisabled(true);
+    } else if (newPageNumber >= MAX_NUM_OF_PAGES) {
+      setisRightButtonDisabled(true);
+    } else {
+      onButtonClick(newPageNumber);
+    }
+    onChange(curPageNumber);
+  };
 
   return (
     <Flex
       alignItems="center"
-      gap="1rem"
-      className={className}
-      justifyContent="center"
+      gap="1.5rem"
+      justifyContent="space-between"
+      width="25rem"
+      alignSelf="center"
     >
-      <IconButton
-        aria-label="Previous page"
-        icon={<ChevronLeftIcon />}
-        onClick={handlePrevious}
-        isDisabled={value <= 1}
-        variant="outline"
-        size="sm"
-      />
-
-      <Flex alignItems="center" gap="0.5rem">
-        <Text textStyle="body" color="gray.600">
-          Page
-        </Text>
-        <Input
-          value={value}
-          onChange={handleInputChange}
-          width="4rem"
-          textAlign="center"
-          size="sm"
-          type="number"
-          min={1}
-          max={totalPages}
+      <Button
+        size="lg"
+        variant="unstyled"
+        disabled={isLeftButtonDisabled}
+        onClick={onPressPrevious}
+      >
+        <ChevronLeft
+          size={30}
+          color={isLeftButtonDisabled ? "gray.300" : "gray.700"}
         />
-        <Text textStyle="body" color="gray.600">
-          of {totalPages}
-        </Text>
-      </Flex>
-
-      <IconButton
-        aria-label="Next page"
-        icon={<ChevronRightIcon />}
-        onClick={handleNext}
-        isDisabled={value >= totalPages}
-        variant="outline"
+      </Button>
+      <Text m={0} fontSize="18px" color="gray.700" fontWeight="400">
+        Page
+      </Text>
+      <NumberInput
+        onChange={(val) => onInputChange(Number(val))}
+        inputMode="numeric"
+        value={curPageNumber}
+        max={MAX_NUM_OF_PAGES}
+        min={1}
+        clampValueOnBlur={true}
+        defaultValue={1}
         size="sm"
-      />
-
-      <Box ml="1rem">
-        <Text textStyle="bodyMobile" color="gray.500">
-          {numberOfItems} total items
-        </Text>
-      </Box>
+        focusBorderColor="gray.500"
+        textColor="gray.700"
+        fontWeight="400"
+      >
+        <NumberInputField
+          height="2.5rem"
+          padding="0.35rem"
+          maxW="3rem"
+          alignContent="center"
+          borderColor="gray.500"
+          borderRadius="0.35rem"
+          textAlign="center"
+        />
+      </NumberInput>
+      <Text m={0} fontSize="18px" color="gray.700" fontWeight="400">
+        of {MAX_NUM_OF_PAGES}
+      </Text>
+      <Button
+        size="lg"
+        variant="unstyled"
+        isDisabled={isRightButtonDisabled}
+        onClick={onPressNext}
+      >
+        <ChevronRight
+          size={30}
+          color={isRightButtonDisabled ? "gray.300" : "gray.700"}
+        />
+      </Button>
     </Flex>
   );
 };
