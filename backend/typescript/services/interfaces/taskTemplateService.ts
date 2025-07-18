@@ -1,10 +1,16 @@
+import { TaskCategory } from "../../types";
+
 export interface TaskTemplateRequestDTO {
   taskName: string;
+  category: TaskCategory;
+  instructions?: string;
 }
 
 export interface TaskTemplateResponseDTO {
   id: number;
   taskName: string;
+  category: TaskCategory;
+  instructions?: string;
 }
 
 export interface ITaskTemplateService {
