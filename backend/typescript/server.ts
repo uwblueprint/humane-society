@@ -41,8 +41,6 @@ app.use("/pets", petRouter);
 app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
-app.use("/activities", activityRouter);
-app.use("/matchmaking", matchmakingRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 sequelize.authenticate();
