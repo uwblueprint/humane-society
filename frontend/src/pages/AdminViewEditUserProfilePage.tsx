@@ -157,6 +157,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         >
           {/* Back Button */}
           <Flex
+            width="fit-content"
             display="flex"
             alignItems="center"
             gap="0.5rem"
@@ -166,7 +167,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
-            <Text m={0} textStyle="Body" color="gray.600">
+            <Text m={0} textStyle="body" color="gray.600">
               Back to Profile
             </Text>
           </Flex>

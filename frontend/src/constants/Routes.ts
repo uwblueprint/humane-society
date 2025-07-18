@@ -46,3 +46,5 @@ export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 export const HOOKS_PAGE = "/hooks";
 
 export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
+
+export const VOLUNTEER_EDIT_USER_PROFILE_PAGE = "/edit-user-profile";

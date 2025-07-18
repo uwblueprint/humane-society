@@ -6,11 +6,13 @@ import Input from "./Input";
 interface PasswordInputProps {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 const PasswordInput = ({
   value,
   onChange,
+  disabled = false,
 }: PasswordInputProps): React.ReactElement => {
   const [showPassword, setShowPassword] = React.useState(false);
   const handlePasswordClick = () => setShowPassword(!showPassword);
@@ -22,6 +24,7 @@ const PasswordInput = ({
         value={value}
         placeholder="••••••••••"
         onChange={onChange}
+        disabled={disabled}
       />
       <InputRightElement width="2rem" top="50%" transform="translateY(-50%)">
         {showPassword ? (
