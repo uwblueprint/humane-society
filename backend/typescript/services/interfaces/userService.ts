@@ -1,5 +1,4 @@
 import { CreateUserDTO, Role, UpdateUserDTO, UserDTO } from "../../types";
-import { PetResponseDTO } from "./petService";
 
 interface IUserService {
   /**
@@ -83,11 +82,11 @@ interface IUserService {
 
   /**
    * Get all pets that a user can take care of
-   * @param userColorLevel user's color level
-   * @returns list of pets
+   * @param petColorLevel pet's color level
+   * @returns list of users
    * @throws Error if failed to get matching pets
    */
-  getMatchingPetsForUser(userColorLevel: number): Promise<PetResponseDTO[]>;
+  getMatchingUsersForPet(petColorLevel: number): Promise<UserDTO[]>;
 }
 
 export default IUserService;

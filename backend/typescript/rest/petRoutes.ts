@@ -11,9 +11,13 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import IUserService from "../services/interfaces/userService";
+import UserService from "../services/implementations/userService";
+import { UserDTO } from "../types";
 
 const petRouter: Router = Router();
 const petService: IPetService = new PetService();
+const userService: IUserService = new UserService();
 
 /* Update Pet by id */
 petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
@@ -140,20 +144,20 @@ petRouter.get("/:id", async (req, res) => {
   }
 });
 
-petRouter.get("/match/users/:petId", async (req, res) => {
-  const { petId } = req.params;
+petRouter.get("/match/pets/:userId", async (req, res) => {
+  const { userId } = req.params;
 
-  if (petId) {
-    if (typeof petId !== "string") {
+  if (userId) {
+    if (typeof userId !== "string") {
       res
         .status(400)
-        .json({ error: "petId query parameter must be a string." });
-    } else if (Number.isNaN(Number(petId))) {
-      res.status(400).json({ error: "Invalid pet ID" });
+        .json({ error: "userId query parameter must be a string." });
+    } else if (Number.isNaN(Number(userId))) {
+      res.status(400).json({ error: "Invalid user ID" });
     } else {
       try {
-        const pet: PetResponseDTO = await petService.getPet(petId);
-        await petService.getMatchingUsersForPet(pet.colorLevel);
+        const user: UserDTO = await userService.getUserById(userId);
+        await petService.getMatchingPetsForUser(user.colorLevel);
       } catch (error: unknown) {
         if (error instanceof NotFoundError) {
           res.status(400).json({ error: getErrorMessage(error) });
