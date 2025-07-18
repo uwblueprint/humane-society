@@ -56,7 +56,7 @@ const UserManagementPage = (): React.ReactElement => {
   };
   const [page, setPage] = useState<number>(1);
 
-  const usersPerPage = 10; // You can adjust this value as needed
+  const numUsersPerPage = 10; // You can adjust this value as needed
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
@@ -198,14 +198,16 @@ const UserManagementPage = (): React.ReactElement => {
         </Box>
       </Flex>
       <UserManagementTable
-        users={filteredUsers.splice((page - 1) * usersPerPage, usersPerPage)}
+        users={filteredUsers
+          .splice((page - 1) * usersPerPage, usersPerPage)
+          .splice((page - 1) * numUsersPerPage, numUsersPerPage)}
         clearFilters={handleClearFilters}
       />
       <Pagination
         value={page}
         onChange={(newPage) => setPage(newPage)}
         numberOfItems={filteredUsersLength}
-        itemsPerPage={usersPerPage}
+        itemsPerPage={numUsersPerPage}
       />
     </Flex>
   );
