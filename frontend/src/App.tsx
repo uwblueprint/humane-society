@@ -43,6 +43,9 @@ import PageTitleUpdater from "./components/common/PageTitleUpdater";
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
 
+import { UserRoles } from "./constants/UserConstants";
+import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
+
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
     AUTHENTICATED_USER_KEY,
@@ -204,6 +207,12 @@ const App = (): React.ReactElement => {
                     path={Routes.ADD_TASK_TEMPLATE_PAGE}
                     component={AddTaskTemplatePage}
                     allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={Routes.VOLUNTEER_EDIT_USER_PROFILE_PAGE}
+                    component={VolunteerViewEditUserProfilePage}
+                    allowedRoles={AuthConstants.ALL_ROLES}
                   />
                   {/* Fallback Route */}
                   <Route path="*" component={NotFoundPage} />
