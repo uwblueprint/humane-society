@@ -1,13 +1,13 @@
 import React, { FC, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  Button,
   Flex,
   NumberInput,
   NumberInputField,
   Text,
+  useTheme,
 } from "@chakra-ui/react";
-import { floor } from "lodash";
+import { ceil } from "lodash";
 
 interface PaginationProps {
   value: number; // current page (1-based index)
@@ -25,51 +25,23 @@ const Pagination: FC<PaginationProps> = ({
   className = "",
 }) => {
   const [curPageNumber, setCurPageNumber] = useState(value);
-  const [isLeftButtonDisabled, setisLeftButtonDisabled] = useState(true);
-  const [isRightButtonDisabled, setisRightButtonDisabled] = useState(false);
-  const MAX_NUM_OF_PAGES = floor(numberOfItems / itemsPerPage);
-
-  const onButtonClick = (newPageNumber: number) => {
-    if (newPageNumber > 1 && newPageNumber < MAX_NUM_OF_PAGES) {
-      setisLeftButtonDisabled(false);
-      setisRightButtonDisabled(false);
-    }
-  };
+  const MAX_NUM_OF_PAGES = ceil(numberOfItems / itemsPerPage);
+  const theme = useTheme();
 
   const onPageChange = (newPageNumber: number) => {
     if (newPageNumber < 1) {
       setCurPageNumber(1);
-      setisLeftButtonDisabled(true);
-    } else if (newPageNumber >= MAX_NUM_OF_PAGES) {
+    } else if (newPageNumber > MAX_NUM_OF_PAGES) {
       setCurPageNumber(MAX_NUM_OF_PAGES);
-      setisRightButtonDisabled(true);
     } else {
       setCurPageNumber(newPageNumber);
-      onButtonClick(newPageNumber);
+      onChange(newPageNumber);
     }
-    onChange(curPageNumber);
-  };
-
-  const onPressPrevious = () => {
-    const newPageNumber = curPageNumber - 1;
-    onPageChange(newPageNumber);
-  };
-
-  const onPressNext = () => {
-    const newPageNumber = curPageNumber + 1;
-    onPageChange(newPageNumber);
   };
 
   const onInputChange = (newPageNumber: number) => {
     setCurPageNumber(newPageNumber);
-    if (newPageNumber < 1) {
-      setisLeftButtonDisabled(true);
-    } else if (newPageNumber >= MAX_NUM_OF_PAGES) {
-      setisRightButtonDisabled(true);
-    } else {
-      onButtonClick(newPageNumber);
-    }
-    onChange(curPageNumber);
+    onChange(newPageNumber);
   };
 
   return (
@@ -79,19 +51,21 @@ const Pagination: FC<PaginationProps> = ({
       justifyContent="space-between"
       width="25rem"
       alignSelf="center"
+      className={className}
     >
-      <Button
-        size="lg"
-        variant="unstyled"
-        disabled={isLeftButtonDisabled}
-        onClick={onPressPrevious}
+      <ChevronLeft
+        size={30}
+        color={
+          curPageNumber <= 1 ? theme.colors.gray[300] : theme.colors.gray[700]
+        }
+        onClick={() => onPageChange(curPageNumber - 1)}
+      />
+      <Text
+        m={0}
+        fontSize="18px"
+        color={theme.colors.gray[700]}
+        fontWeight="400"
       >
-        <ChevronLeft
-          size={30}
-          color={isLeftButtonDisabled ? "gray.300" : "gray.700"}
-        />
-      </Button>
-      <Text m={0} fontSize="18px" color="gray.700" fontWeight="400">
         Page
       </Text>
       <NumberInput
@@ -103,7 +77,7 @@ const Pagination: FC<PaginationProps> = ({
         clampValueOnBlur={true}
         defaultValue={1}
         size="sm"
-        focusBorderColor="gray.500"
+        focusBorderColor={theme.colors.gray[500]}
         textColor="gray.700"
         fontWeight="400"
       >
@@ -112,25 +86,28 @@ const Pagination: FC<PaginationProps> = ({
           padding="0.35rem"
           maxW="3rem"
           alignContent="center"
-          borderColor="gray.500"
+          borderColor={theme.colors.gray[500]}
           borderRadius="0.35rem"
           textAlign="center"
         />
       </NumberInput>
-      <Text m={0} fontSize="18px" color="gray.700" fontWeight="400">
+      <Text
+        m={0}
+        fontSize="18px"
+        color={theme.colors.gray[700]}
+        fontWeight="400"
+      >
         of {MAX_NUM_OF_PAGES}
       </Text>
-      <Button
-        size="lg"
-        variant="unstyled"
-        isDisabled={isRightButtonDisabled}
-        onClick={onPressNext}
-      >
-        <ChevronRight
-          size={30}
-          color={isRightButtonDisabled ? "gray.300" : "gray.700"}
-        />
-      </Button>
+      <ChevronRight
+        size={30}
+        onClick={() => onPageChange(curPageNumber + 1)}
+        color={
+          curPageNumber >= MAX_NUM_OF_PAGES
+            ? theme.colors.gray[300]
+            : theme.colors.gray[700]
+        }
+      />
     </Flex>
   );
 };
