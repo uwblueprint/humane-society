@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Flex, Text, FormLabel, Spinner, Icon, Image } from "@chakra-ui/react";
+import React, { useContext, useState } from "react";
+import { Flex, Text, FormLabel, Spinner, Image } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom";

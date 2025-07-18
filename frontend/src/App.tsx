@@ -43,7 +43,6 @@ import PageTitleUpdater from "./components/common/PageTitleUpdater";
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
 
-import { UserRoles } from "./constants/UserConstants";
 import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
 
 const App = (): React.ReactElement => {
