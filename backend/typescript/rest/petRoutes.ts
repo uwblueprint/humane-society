@@ -11,9 +11,13 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import IUserService from "../services/interfaces/userService";
+import UserService from "../services/implementations/userService";
+import { UserDTO } from "../types";
 
 const petRouter: Router = Router();
 const petService: IPetService = new PetService();
+const userService: IUserService = new UserService();
 
 /* Update Pet by id */
 petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
@@ -136,6 +140,31 @@ petRouter.get("/:id", async (req, res) => {
       res.status(404).send(getErrorMessage(e));
     } else {
       res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+    }
+  }
+});
+
+petRouter.get("/match/pets/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (userId) {
+    if (typeof userId !== "string") {
+      res
+        .status(400)
+        .json({ error: "userId query parameter must be a string." });
+    } else if (Number.isNaN(Number(userId))) {
+      res.status(400).json({ error: "Invalid user ID" });
+    } else {
+      try {
+        const user: UserDTO = await userService.getUserById(userId);
+        await petService.getMatchingPetsForUser(user.colorLevel);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
+      }
     }
   }
 });

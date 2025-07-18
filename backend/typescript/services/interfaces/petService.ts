@@ -98,6 +98,14 @@ export interface IPetService {
   deletePet(id: string): Promise<string>;
 
   /**
+   * get all users in which the pet can be taken care of
+   * @param userColorLevel user's color level
+   * @returns list of pets
+   * @throws Error if matching fails
+   */
+  getMatchingPetsForUser(userColorLevel: number): Promise<PetResponseDTO[]>;
+
+  /**
    * retrieve all Pets that match given filter criteria
    * @param query Pet queries
    * @returns returns array of Pets
