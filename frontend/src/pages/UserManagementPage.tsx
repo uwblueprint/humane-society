@@ -57,9 +57,6 @@ const UserManagementPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
 
   const numUsersPerPage = 10; // You can adjust this value as needed
-  const [page, setPage] = useState<number>(1);
-
-  const numUsersPerPage = 10; // You can adjust this value as needed
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
