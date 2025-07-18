@@ -198,9 +198,10 @@ const UserManagementPage = (): React.ReactElement => {
         </Box>
       </Flex>
       <UserManagementTable
-        users={filteredUsers
-          .splice((page - 1) * usersPerPage, usersPerPage)
-          .splice((page - 1) * numUsersPerPage, numUsersPerPage)}
+        users={filteredUsers.splice(
+          (page - 1) * numUsersPerPage,
+          numUsersPerPage,
+        )}
         clearFilters={handleClearFilters}
       />
       <Pagination
