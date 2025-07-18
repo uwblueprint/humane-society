@@ -28,6 +28,8 @@ class TaskTemplateService implements ITaskTemplateService {
     return {
       id: taskTemplate.id,
       taskName: taskTemplate.task_name,
+      category: taskTemplate.category,
+      instructions: taskTemplate.instruction,
     };
   }
 
@@ -41,6 +43,8 @@ class TaskTemplateService implements ITaskTemplateService {
       return taskTemplates.map((taskTemplate) => ({
         id: taskTemplate.id,
         taskName: taskTemplate.task_name,
+        category: taskTemplate.category,
+        instructions: taskTemplate.instruction,
       }));
     } catch (error) {
       Logger.error(
@@ -57,6 +61,8 @@ class TaskTemplateService implements ITaskTemplateService {
     try {
       newTaskTemplate = await PgTaskTemplate.create({
         task_name: taskTemplate.taskName,
+        category: taskTemplate.category,
+        instruction: taskTemplate.instructions,
       });
     } catch (error) {
       Logger.error(
@@ -67,6 +73,8 @@ class TaskTemplateService implements ITaskTemplateService {
     return {
       id: newTaskTemplate.id,
       taskName: newTaskTemplate.task_name,
+      category: newTaskTemplate.category,
+      instructions: newTaskTemplate.instruction,
     };
   }
 
@@ -80,6 +88,8 @@ class TaskTemplateService implements ITaskTemplateService {
       updateResult = await PgTaskTemplate.update(
         {
           task_name: taskTemplate.taskName,
+          category: taskTemplate.category,
+          instruction: taskTemplate.instructions,
         },
         { where: { id }, returning: true },
       );
@@ -97,6 +107,8 @@ class TaskTemplateService implements ITaskTemplateService {
     return {
       id: resultingTaskTemplate.id,
       taskName: resultingTaskTemplate?.task_name,
+      category: resultingTaskTemplate?.category,
+      instructions: resultingTaskTemplate?.instruction,
     };
   }
 

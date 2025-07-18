@@ -6,7 +6,8 @@ type Type =
   | "PetStatus"
   | "Sex"
   | "Date"
-  | "AnimalTag";
+  | "AnimalTag"
+  | "TaskCategory";
 
 const allowableContentTypes = new Set([
   "text/plain",

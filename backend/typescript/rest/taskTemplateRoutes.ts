@@ -25,6 +25,8 @@ taskTemplateRouter.post(
       const { body } = req;
       const newTaskTemplate = await taskTemplateService.createTaskTemplate({
         taskName: body.taskName,
+        category: body.category,
+        instructions: body.instructions,
       });
       res.status(201).json(newTaskTemplate);
     } catch (e: unknown) {
@@ -85,6 +87,8 @@ taskTemplateRouter.put(
       const { body } = req;
       const taskTemplate = await taskTemplateService.updateTaskTemplate(id, {
         taskName: body.taskName,
+        category: body.category,
+        instructions: body.instructions,
       });
       res.status(200).json(taskTemplate);
     } catch (e: unknown) {
