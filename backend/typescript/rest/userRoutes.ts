@@ -19,12 +19,15 @@ import {
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { IPetService, PetResponseDTO } from "../services/interfaces/petService";
+import PetService from "../services/implementations/petService";
 
 const userRouter: Router = Router();
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
 const authService: IAuthService = new AuthService(userService, emailService);
+const petService: IPetService = new PetService();
 
 /* Get all users, optionally filter by a userId or email query parameter to retrieve a single user */
 userRouter.get("/", async (req, res) => {
@@ -323,6 +326,31 @@ userRouter.delete("/", async (req, res) => {
   res
     .status(400)
     .json({ error: "Must supply one of userId or email as query parameter." });
+});
+
+userRouter.get("/match/users/:petId", async (req, res) => {
+  const { petId } = req.params;
+
+  if (petId) {
+    if (typeof petId !== "string") {
+      res
+        .status(400)
+        .json({ error: "petId query parameter must be a string." });
+    } else if (Number.isNaN(Number(petId))) {
+      res.status(400).json({ error: "Invalid pet ID" });
+    } else {
+      try {
+        const pet: PetResponseDTO = await petService.getPet(petId);
+        await userService.getMatchingUsersForPet(pet.colorLevel);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
+      }
+    }
+  }
 });
 
 export default userRouter;
