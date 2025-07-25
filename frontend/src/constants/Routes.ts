@@ -26,6 +26,8 @@ export const ADMIN_PAGE = "/admin";
 
 export const CREATE_PASSWORD_PAGE = "/create-password";
 
+export const INVITE_USER_PAGE = "/admin/invite-user";
+
 // STARTER CODE ROUTES
 export const SIGNUP_PAGE = "/signup";
 

@@ -50,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Interaction Log";
       case ROUTES.DEV_UTILITY_PAGE:
         return "Developer Utility";
-      case ROUTES.USER_MANAGEMENT_PAGE:
+      case ROUTES.USER_MANAGEMENT_PAGE || ROUTES.INVITE_USER_PAGE:
         return "User Management";
       case ROUTES.TASK_MANAGEMENT_PAGE:
         return "Task Management";

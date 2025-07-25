@@ -101,6 +101,8 @@ const PopupModal: React.FC<PopupModalProps> = ({
                 textStyle={{ base: "caption", md: "button" }}
                 _hover={{ bg: "gray.200" }}
                 height={{ base: "2rem", md: "3rem" }}
+                pl={ "2rem" }
+                pr={ "2rem" }
                 m={0}
               >
                 {secondaryButtonText}
@@ -124,6 +126,8 @@ const PopupModal: React.FC<PopupModalProps> = ({
                 flex={hasSecondaryButton ? "1" : "unset"}
                 textStyle={{ base: "caption", md: "button" }}
                 m={0}
+                pl={ "2rem" }
+                pr={ "2rem" }
               >
                 {primaryButtonText}
               </Button>

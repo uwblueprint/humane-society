@@ -42,6 +42,7 @@ import PageTitleUpdater from "./components/common/PageTitleUpdater";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
+import InviteUserPage from "./pages/InviteUserPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -203,6 +204,12 @@ const App = (): React.ReactElement => {
                     exact
                     path={Routes.ADD_TASK_TEMPLATE_PAGE}
                     component={AddTaskTemplatePage}
+                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={Routes.INVITE_USER_PAGE}
+                    component={InviteUserPage}
                     allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
                   />
                   {/* Fallback Route */}
