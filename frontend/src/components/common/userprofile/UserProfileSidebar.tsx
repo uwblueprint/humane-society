@@ -25,6 +25,7 @@ import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "./AnimalTagList";
 import Logout from "../../auth/Logout";
 import InviteUser from "./InviteUser";
+import getCurrentUserRole from "../../../utils/CommonUtils";
 
 export interface UserProfileSidebarProps {
   id: number;
@@ -52,6 +53,12 @@ function UserProfileSidebar({
   animalTags,
 }: UserProfileSidebarProps): React.ReactElement {
   const isInvited = status === "Invited";
+  const currentUserRole = getCurrentUserRole();
+  const isCurrentUserAdmin = currentUserRole === UserRoles.ADMIN;
+
+  const editUserProfilePath = isCurrentUserAdmin
+    ? `/admin/edit-user-profile/${id}`
+    : `/edit-user-profile/${id}`;
 
   const roleIcons: Record<UserRoles, React.ElementType> = {
     [UserRoles.ADMIN]: AdminTag,
@@ -80,7 +87,7 @@ function UserProfileSidebar({
           {firstName} {lastName}
         </Text>
         <Spacer />
-        <ChakraLink as={Link} to={`/admin/edit-user-profile/${id}`}>
+        <ChakraLink as={Link} to={editUserProfilePath}>
           <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
         </ChakraLink>
       </HStack>

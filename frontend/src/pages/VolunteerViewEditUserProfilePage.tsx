@@ -1,5 +1,12 @@
-import React, { useContext, useState } from "react";
-import { Flex, Text, FormLabel, Spinner, Image } from "@chakra-ui/react";
+import React, { useContext, useState, useEffect } from "react";
+import {
+  Flex,
+  Text,
+  FormLabel,
+  Spinner,
+  Image,
+  useToast,
+} from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom";
@@ -9,6 +16,7 @@ import Button from "../components/common/Button";
 import NavBar from "../components/common/navbar/NavBar";
 import ProfilePhoto from "../components/common/ProfilePhoto";
 import AuthContext from "../contexts/AuthContext";
+import UserAPIClient from "../APIClients/UserAPIClient";
 import PencilIcon from "../assets/icons/pencil.svg";
 
 interface FormData {
@@ -24,6 +32,8 @@ interface FormData {
 const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
+  const toast = useToast();
+  const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
   >(authenticatedUser?.profilePhoto || undefined);
@@ -33,6 +43,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -46,7 +57,46 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     },
   });
 
-  if (!authenticatedUser) {
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!authenticatedUser?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userData = await UserAPIClient.get(authenticatedUser.id);
+
+        // Update local profile photo state
+        setLocalProfilePhoto(userData.profilePhoto || undefined);
+
+        // Prepopulate form with fresh user data
+        reset({
+          userId: userData.id.toString(),
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          phoneNumber: userData.phoneNumber || "",
+          email: userData.email,
+          password: "",
+          profilePhoto: userData.profilePhoto || "",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch user data",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [authenticatedUser?.id, reset, toast]);
+
+  if (!authenticatedUser || loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
         <Spinner />
@@ -60,6 +110,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
       firstName: data.firstName,
       lastName: data.lastName,
       phoneNumber: data.phoneNumber,
+      email: data.email,
       profilePhoto: localProfilePhoto,
     });
   };
@@ -240,9 +291,11 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                     control={control}
                     render={({ field }) => (
                       <PasswordInput
+                        label="Password"
                         value={field.value}
                         onChange={field.onChange}
                         disabled
+                        showToggle
                       />
                     )}
                   />

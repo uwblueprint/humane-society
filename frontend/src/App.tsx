@@ -50,6 +50,7 @@ const App = (): React.ReactElement => {
     AUTHENTICATED_USER_KEY,
   );
 
+  console.log("Current User:", currentUser);
   const [authenticatedUser, setAuthenticatedUser] =
     useState<AuthenticatedUser>(currentUser);
 
@@ -209,7 +210,7 @@ const App = (): React.ReactElement => {
                   />
                   <PrivateRoute
                     exact
-                    path={Routes.VOLUNTEER_EDIT_USER_PROFILE_PAGE}
+                    path={`${Routes.VOLUNTEER_EDIT_USER_PROFILE_PAGE}/:userId`}
                     component={VolunteerViewEditUserProfilePage}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
