@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import {
   Button,
   Container,
@@ -8,219 +8,30 @@ import {
   Input,
   SimpleGrid,
   Text,
-  useToast,
-  Icon,
 } from "@chakra-ui/react";
-import { HiUpload, HiRefresh } from "react-icons/hi";
-import EntityAPIClient, { EntityResponse } from "../APIClients/EntityAPIClient";
-
-interface FileStatus {
-  id: string;
-  name: string;
-  status: "uploaded" | "error";
-  url?: string;
-}
+import { HiUpload } from "react-icons/hi";
+import {
+  FileStatus,
+  useFileUploadManager,
+} from "../hooks/useFileUploadManager";
 
 const DevFileStorageUpload: React.FC = () => {
-  const [uploadedFiles, setUploadedFiles] = useState<FileStatus[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const toast = useToast();
+  const {
+    uploadedFiles,
+    isUploading,
+    error,
+    handleUpload,
+    handleDelete,
+    fetchFileUrl,
+  } = useFileUploadManager(25);
 
-  const fetchFileUrl = useCallback(async (fileName: string) => {
-    try {
-      const fileUrl = await EntityAPIClient.getFile(fileName);
-      if (fileUrl) {
-        setUploadedFiles((prevFiles: FileStatus[]) =>
-          prevFiles.map((file: FileStatus) =>
-            file.name === fileName ? { ...file, url: fileUrl } : file,
-          ),
-        );
-      }
-    } catch (err) {
-      console.error("Failed to fetch file URL:", err);
-    }
-  }, []);
-
-  const fetchAllFiles = useCallback(async () => {
-    try {
-      // Clear existing files before fetching
-      setUploadedFiles([]);
-
-      const entities = await EntityAPIClient.get();
-
-      // If entities is null, undefined, or an error occurred, clear the files and return
-      if (!entities || !Array.isArray(entities)) {
-        setUploadedFiles([]);
-        setError("No files available or error occurred");
-        return;
-      }
-
-      const files: FileStatus[] = entities
-        .filter(
-          (
-            entity: EntityResponse,
-          ): entity is EntityResponse & { fileName: string } =>
-            // [Optional] Additional validation to ensure the entity has required properties
-            entity &&
-            typeof entity.fileName === "string" &&
-            typeof entity.id !== "undefined",
-        )
-        .map((entity) => ({
-          id: entity.id.toString(),
-          name: entity.fileName,
-          status: "uploaded",
-        }));
-
-      // Set the initial files first
-      setUploadedFiles(files);
-
-      // Fetch all URLs in parallel
-      const urlPromises = files.map(async (file) => {
-        try {
-          const fileUrl = await EntityAPIClient.getFile(file.name);
-          if (!fileUrl) {
-            throw new Error("File URL does not exist");
-          }
-          return { name: file.name, url: fileUrl };
-        } catch (err) {
-          console.error(`Failed to fetch URL for file ${file.name}:`, err);
-          return null;
-        }
-      });
-
-      // Wait for all URL fetches to complete
-      const results = await Promise.all(urlPromises);
-
-      // Update state once with all URLs
-      setUploadedFiles((prevFiles) =>
-        prevFiles.map((prevFile) => {
-          const result = results.find((r) => r?.name === prevFile.name);
-          return result?.url ? { ...prevFile, url: result.url } : prevFile;
-        }),
-      );
-    } catch (err) {
-      console.error("Failed to fetch files:", err);
-      setError("Failed to load existing files");
-      setUploadedFiles([]);
-    }
-  }, []);
-
-  // Add a refresh function
-  const handleRefresh = useCallback(() => {
-    fetchAllFiles();
-  }, [fetchAllFiles]);
-
-  useEffect(() => {
-    fetchAllFiles();
-  }, [fetchAllFiles]);
-
-  const handleUpload = async (files: FileList | null) => {
-    if (!files?.length) return;
-
-    const file = files[0];
-    // Check file size - 25MB in bytes
-    const MAX_FILE_SIZE = 25 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
-      setError("File size exceeds 25MB limit");
-      toast({
-        title: "File too large",
-        description: "Maximum file size is 25MB",
-        status: "error",
-        duration: 3000,
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    setError(null);
-
-    try {
-      const entityData = {
-        stringField: file.name,
-        intField: 0,
-        enumField: "A",
-        stringArrayField: [],
-        boolField: true,
-      };
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("body", JSON.stringify(entityData));
-
-      const response = await EntityAPIClient.create({ formData });
-      if (!response || !response.fileName) {
-        throw new Error("Upload failed - no response or fileName");
-      }
-
-      // Get the URL for the newly uploaded file
-      const fileUrl = await EntityAPIClient.getFile(response.fileName);
-
-      // Add only the new file to state
-      const newFile: FileStatus = {
-        id: response.id.toString(),
-        name: response.fileName,
-        status: "uploaded",
-        url: fileUrl || undefined,
-      };
-
-      setUploadedFiles((prev) => [...prev, newFile]);
-
-      toast({
-        title: "File uploaded successfully",
-        status: "success",
-        duration: 3000,
-      });
-    } catch (err) {
-      console.error("Upload failed:", err);
-      setError("Failed to upload file");
-      toast({
-        title: "Upload failed",
-        status: "error",
-        duration: 3000,
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleUpload(e.target.files);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await EntityAPIClient.deleteEntity(id);
-      setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
-      toast({
-        title: "File deleted successfully",
-        status: "success",
-        duration: 3000,
-      });
-    } catch (err) {
-      console.error("Delete failed:", err);
-      toast({
-        title: "Failed to delete file",
-        status: "error",
-        duration: 3000,
-      });
-    }
-  };
-
-  const FileGrid = ({ files }: { files: FileStatus[] }) => (
+  const FileGrid = ({ files }: { files: typeof uploadedFiles }) => (
     <Flex direction="column">
       <Flex justify="space-between" align="center" mb={4}>
         <Heading size="md">Uploaded Files</Heading>
-        <Button
-          size="sm"
-          leftIcon={<Icon as={HiRefresh} />}
-          onClick={handleRefresh}
-        >
-          Refresh All
-        </Button>
       </Flex>
       <SimpleGrid columns={[1, 2, 3]} spacing="4rem">
-        {files.map((file) => (
+        {files.map((file: FileStatus) => (
           <Flex
             key={file.id}
             borderWidth="1px"
@@ -311,7 +122,7 @@ const DevFileStorageUpload: React.FC = () => {
             aria-hidden="true"
             accept="image/*"
             disabled={isUploading}
-            onChange={handleFileChange}
+            onChange={(e) => handleUpload(e.target.files)}
             cursor="pointer"
           />
           <Flex direction="column" gap="2rem">
