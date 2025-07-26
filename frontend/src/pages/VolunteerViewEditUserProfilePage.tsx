@@ -284,7 +284,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                 )}
               />
 
-              <Flex width="100%" gap="1.5rem">
+              <Flex width="100%" gap="1.5rem" alignItems="end">
                 <Flex flex={1}>
                   <Controller
                     name="password"
@@ -295,7 +295,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                         value={field.value}
                         onChange={field.onChange}
                         disabled
-                        showToggle
+                        showToggle={false}
                       />
                     )}
                   />
