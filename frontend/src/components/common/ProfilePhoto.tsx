@@ -33,7 +33,6 @@ const ProfilePhoto = ({
   type,
 }: ProfilePhotoProps): React.ReactElement => {
   const isSmall = size === "small";
-  const containerSize = isSmall ? "2.625rem" : "8.69rem";
   const imageSize = isSmall ? "2.25rem" : "8.06rem";
 
   const fallbackImage = fallbackImages[type];
@@ -41,8 +40,7 @@ const ProfilePhoto = ({
     type === "invitedUser" ? "gray.300" : color && borderColor[color];
   return (
     <Flex
-      p="0.19rem"
-      boxSize={containerSize}
+      p="0rem"
       justify="center"
       align="center"
       borderRadius="full"
