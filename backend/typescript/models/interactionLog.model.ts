@@ -13,9 +13,6 @@ import Pet from "./pet.model";
 import Activity from "./activity.model";
 import ActivityType from "./activityType.model";
 
-export type TargetType = "users" | "pets";
-export type TargetModel = User | Pet;
-
 @Table({
   tableName: "interaction_log",
   timestamps: true,
@@ -27,7 +24,7 @@ export default class Interaction extends Model {
   actor_id!: number;
 
   @BelongsTo(() => User)
-  actor?: User;
+  actor!: User;
 
   @ForeignKey(() => Pet)
   @Column({
@@ -54,7 +51,7 @@ export default class Interaction extends Model {
     type: DataType.INTEGER,
     allowNull: true,
   })
-  target_activity_type_id!: number;
+  target_task_type_id!: number;
 
   @BelongsTo(() => ActivityType)
   activity_type?: ActivityType;

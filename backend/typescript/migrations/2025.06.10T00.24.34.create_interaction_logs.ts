@@ -68,7 +68,6 @@ export const up: Migration = async ({ context: sequelize }) => {
       },
       onUpdate: "CASCADE",
     },
-
     interaction_type_id: {
       type: DataType.INTEGER,
       allowNull: false,
@@ -77,11 +76,6 @@ export const up: Migration = async ({ context: sequelize }) => {
         key: "id",
       },
       onUpdate: "CASCADE",
-    },
-    created_at: {
-      type: DataType.DATE,
-      allowNull: false,
-      defaultValue: DataType.NOW,
     },
     metadata: {
       type: DataType.ARRAY(DataType.STRING),
@@ -94,6 +88,11 @@ export const up: Migration = async ({ context: sequelize }) => {
     detailed_description: {
       type: DataType.STRING,
       allowNull: false,
+    },
+    created_at: {
+      type: DataType.DATE,
+      allowNull: false,
+      defaultValue: DataType.NOW,
     },
   });
 };
