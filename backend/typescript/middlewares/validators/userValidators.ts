@@ -165,6 +165,6 @@ export const matchUsersValidator = async (
   if (Number.isNaN(Number(petId))) {
     return res.status(400).json({ error: "Invalid pet ID" });
   }
-  
+
   return next();
 };

@@ -180,15 +180,21 @@ export const matchPetsValidator = async (
   const { userId } = req.params;
 
   if (!userId) {
-    return res.status(400).json({ error: "userId parameter is required." });
+    return res
+      .status(400)
+      .json({ error: "userId parameter is required." });
   }
 
   if (typeof userId !== "string") {
-    return res.status(400).json({ error: "userId parameter must be a string." });
+    return res
+      .status(400)
+      .json({ error: "userId parameter must be a string." });
   }
 
   if (Number.isNaN(Number(userId))) {
-    return res.status(400).json({ error: "Invalid user ID" });
+    return res
+      .status(400)
+      .json({ error: "Invalid user ID" });
   }
 
   return next();
