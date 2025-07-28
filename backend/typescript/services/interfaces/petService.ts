@@ -98,7 +98,7 @@ export interface IPetService {
   deletePet(id: string): Promise<string>;
 
   /**
-   * get all users in which the pet can be taken care of
+   * get all pets the user can take care of
    * @param userColorLevel user's color level
    * @returns list of pets
    * @throws Error if matching fails

@@ -81,7 +81,7 @@ interface IUserService {
   deleteUserByEmail(email: string): Promise<void>;
 
   /**
-   * Get all pets that a user can take care of
+   * Get all users that a pet can take care of
    * @param petColorLevel pet's color level
    * @returns list of users
    * @throws Error if failed to get matching pets
