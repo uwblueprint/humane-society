@@ -184,7 +184,9 @@ export const matchPetsValidator = async (
   }
 
   if (typeof userId !== "string") {
-    return res.status(400).json({ error: "userId parameter must be a string." });
+    return res
+      .status(400)
+      .json({ error: "userId parameter must be a string." });
   }
 
   if (Number.isNaN(Number(userId))) {
