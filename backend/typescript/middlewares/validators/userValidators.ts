@@ -146,3 +146,25 @@ export const updateUserDtoValidator = async (
   }
   return next();
 };
+
+export const matchUsersValidator = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { petId } = req.params;
+
+  if (!petId) {
+    return res.status(400).json({ error: "petId parameter is required." });
+  }
+
+  if (typeof petId !== "string") {
+    return res.status(400).json({ error: "petId parameter must be a string." });
+  }
+
+  if (Number.isNaN(Number(petId))) {
+    return res.status(400).json({ error: "Invalid pet ID" });
+  }
+  
+  return next();
+};

@@ -4,6 +4,7 @@ import { getAccessToken } from "../middlewares/auth";
 import {
   createUserDtoValidator,
   updateUserDtoValidator,
+  matchUsersValidator,
 } from "../middlewares/validators/userValidators";
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
@@ -328,27 +329,27 @@ userRouter.delete("/", async (req, res) => {
     .json({ error: "Must supply one of userId or email as query parameter." });
 });
 
-userRouter.get("/match/users/:petId", async (req, res) => {
+userRouter.get("/match/users/:petId", matchUsersValidator, async (req, res) => {
   const { petId } = req.params;
+  const contentType = req.headers["content-type"];
 
-  if (petId) {
-    if (typeof petId !== "string") {
-      res
-        .status(400)
-        .json({ error: "petId query parameter must be a string." });
-    } else if (Number.isNaN(Number(petId))) {
-      res.status(400).json({ error: "Invalid pet ID" });
+  try {
+    const pet: PetResponseDTO = await petService.getPet(petId);
+    const matchingUsers = await userService.getMatchingUsersForPet(pet.colorLevel);
+    sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, matchingUsers);
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      sendResponseByMimeType(res, 400, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
     } else {
-      try {
-        const pet: PetResponseDTO = await petService.getPet(petId);
-        await userService.getMatchingUsersForPet(pet.colorLevel);
-      } catch (error: unknown) {
-        if (error instanceof NotFoundError) {
-          res.status(400).json({ error: getErrorMessage(error) });
-        } else {
-          res.status(500).json({ error: getErrorMessage(error) });
-        }
-      }
+      sendResponseByMimeType(res, 500, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
     }
   }
 });

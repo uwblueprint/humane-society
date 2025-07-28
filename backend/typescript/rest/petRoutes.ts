@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   petRequestDtoValidators,
+  matchPetsValidator,
   /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
@@ -144,27 +145,27 @@ petRouter.get("/:id", async (req, res) => {
   }
 });
 
-petRouter.get("/match/pets/:userId", async (req, res) => {
+petRouter.get("/match/pets/:userId", matchPetsValidator, async (req, res) => {
   const { userId } = req.params;
+  const contentType = req.headers["content-type"];
 
-  if (userId) {
-    if (typeof userId !== "string") {
-      res
-        .status(400)
-        .json({ error: "userId query parameter must be a string." });
-    } else if (Number.isNaN(Number(userId))) {
-      res.status(400).json({ error: "Invalid user ID" });
+  try {
+    const user: UserDTO = await userService.getUserById(userId);
+    const matchingPets = await petService.getMatchingPetsForUser(user.colorLevel);
+    sendResponseByMimeType<UserDTO>(res, 200, contentType, matchingPets);
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      sendResponseByMimeType(res, 400, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
     } else {
-      try {
-        const user: UserDTO = await userService.getUserById(userId);
-        await petService.getMatchingPetsForUser(user.colorLevel);
-      } catch (error: unknown) {
-        if (error instanceof NotFoundError) {
-          res.status(400).json({ error: getErrorMessage(error) });
-        } else {
-          res.status(500).json({ error: getErrorMessage(error) });
-        }
-      }
+      sendResponseByMimeType(res, 500, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
     }
   }
 });
