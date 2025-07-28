@@ -152,7 +152,7 @@ petRouter.get("/match/pets/:userId", matchPetsValidator, async (req, res) => {
   try {
     const user: UserDTO = await userService.getUserById(userId);
     const matchingPets = await petService.getMatchingPetsForUser(user.colorLevel);
-    sendResponseByMimeType<UserDTO>(res, 200, contentType, matchingPets);
+    sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, matchingPets);
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       sendResponseByMimeType(res, 400, contentType, [
