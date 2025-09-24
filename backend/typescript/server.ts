@@ -13,6 +13,7 @@ import petRouter from "./rest/petRoutes";
 import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 import taskRouter from "./rest/taskRoutes";
+import teamMemberRouter from "./rest/teamMemberRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -42,6 +43,7 @@ app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/team-member", teamMemberRouter);
 
 sequelize.authenticate();
 
@@ -60,3 +62,5 @@ app.listen({ port: process.env.PORT || 8080 }, () => {
   /* eslint-disable-next-line no-console */
   console.info(`Server is listening on port ${process.env.PORT || 8080}!`);
 });
+
+
