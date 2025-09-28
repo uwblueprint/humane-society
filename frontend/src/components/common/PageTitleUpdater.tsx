@@ -22,24 +22,6 @@ const PageTitleUpdater: React.FC = () => {
         return "Pet List | Humane Society";
       case ROUTES.LOGIN_PAGE:
         return "Login | Humane Society";
-      case ROUTES.SIGNUP_PAGE:
-        return "Sign Up | Humane Society";
-      case ROUTES.EDIT_TEAM_PAGE:
-        return "Edit Team | Humane Society";
-      case ROUTES.DISPLAY_ENTITY_PAGE:
-        return "Entity Details | Humane Society";
-      case ROUTES.CREATE_ENTITY_PAGE:
-        return "Create Entity | Humane Society";
-      case ROUTES.UPDATE_ENTITY_PAGE:
-        return "Update Entity | Humane Society";
-      case ROUTES.DISPLAY_SIMPLE_ENTITY_PAGE:
-        return "Simple Entity Details | Humane Society";
-      case ROUTES.CREATE_SIMPLE_ENTITY_PAGE:
-        return "Create Simple Entity | Humane Society";
-      case ROUTES.UPDATE_SIMPLE_ENTITY_PAGE:
-        return "Update Simple Entity | Humane Society";
-      case ROUTES.HOOKS_PAGE:
-        return "Hooks | Humane Society";
       case ROUTES.INTERACTION_LOG_PAGE:
         return "Interaction Log | Humane Society";
       case ROUTES.DEV_UTILITY_PAGE:

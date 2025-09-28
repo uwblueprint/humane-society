@@ -4,20 +4,13 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
-import Signup from "./components/auth/Signup";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import CreatePage from "./pages/CreatePage";
 import PetListPage from "./pages/PetListPage";
-import DisplayPage from "./pages/DisplayPage";
-import SimpleEntityCreatePage from "./pages/SimpleEntityCreatePage";
-import SimpleEntityDisplayPage from "./pages/SimpleEntityDisplayPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
 import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";
-import UpdatePage from "./pages/UpdatePage";
-import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
 import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
@@ -29,8 +22,6 @@ import SampleContext, {
 } from "./contexts/SampleContext";
 import sampleContextReducer from "./reducers/SampleContextReducer";
 import SampleContextDispatcherContext from "./contexts/SampleContextDispatcherContext";
-import EditTeamInfoPage from "./pages/EditTeamPage";
-import HooksDemo from "./pages/HooksDemo";
 import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
@@ -41,7 +32,6 @@ import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
-import DevFileStorageUpload from "./pages/DevFileStorageUpload";
 
 import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
 
@@ -73,7 +63,6 @@ const App = (): React.ReactElement => {
             <PageTitleUpdater />
             <Switch>
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
-              <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
               <Route
                 exact
                 path={Routes.FORGOT_PASSWORD_PAGE}
@@ -99,64 +88,11 @@ const App = (): React.ReactElement => {
                     component={PetListPage}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
-                  <PrivateRoute
-                    exact
-                    path={Routes.CREATE_ENTITY_PAGE}
-                    component={CreatePage}
-                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.UPDATE_ENTITY_PAGE}
-                    component={UpdatePage}
-                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.DISPLAY_ENTITY_PAGE}
-                    component={DisplayPage}
-                    allowedRoles={AuthConstants.ALL_ROLES}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.CREATE_SIMPLE_ENTITY_PAGE}
-                    component={SimpleEntityCreatePage}
-                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.UPDATE_SIMPLE_ENTITY_PAGE}
-                    component={SimpleEntityUpdatePage}
-                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.DISPLAY_SIMPLE_ENTITY_PAGE}
-                    component={SimpleEntityDisplayPage}
-                    allowedRoles={AuthConstants.ALL_ROLES}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.EDIT_TEAM_PAGE}
-                    component={EditTeamInfoPage}
-                    allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.HOOKS_PAGE}
-                    component={HooksDemo}
-                    allowedRoles={AuthConstants.ALL_ROLES}
-                  />
+                  {/* Starter Code Route */}
                   <PrivateRoute
                     exact
                     path={Routes.DEV_UTILITY_PAGE}
                     component={Default}
-                    allowedRoles={AuthConstants.ALL_ROLES}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={Routes.DEV_FILE_STORAGE_UPLOAD_PAGE}
-                    component={DevFileStorageUpload}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
                   <PrivateRoute
