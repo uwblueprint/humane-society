@@ -1,7 +1,7 @@
 import {
   SampleContextAction,
   SampleContextType,
-} from "../types/SampleContextTypes";
+} from "../../src/types/SampleContextTypes";
 
 // Using tools such as immer might help with this process.
 export default function sampleContextReducer(

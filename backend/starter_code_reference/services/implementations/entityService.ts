@@ -6,9 +6,9 @@ import {
   EntityRequestDTO,
   EntityResponseDTO,
 } from "../interfaces/IEntityService";
-import IFileStorageService from "../interfaces/fileStorageService";
-import { getErrorMessage } from "../../utilities/errorUtils";
-import logger from "../../utilities/logger";
+import IFileStorageService from "../../../typescript/services/interfaces/fileStorageService";
+import { getErrorMessage } from "../../../typescript/utilities/errorUtils";
+import logger from "../../../typescript/utilities/logger";
 
 const Logger = logger(__filename);
 

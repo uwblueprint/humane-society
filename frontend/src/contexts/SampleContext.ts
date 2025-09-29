@@ -1,6 +1,7 @@
 import { createContext } from "react";
-import { SampleContextType } from "../../starter_code_reference/types/SampleContextTypes";
+import { SampleContextType } from "../types/SampleContextTypes";
 
+/* Note: starter code file, active for development purposes */
 export const DEFAULT_SAMPLE_CONTEXT = {
   teamName: "Internal Tools",
   numTerms: 3,

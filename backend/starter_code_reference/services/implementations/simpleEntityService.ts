@@ -4,8 +4,8 @@ import {
   SimpleEntityRequestDTO,
   SimpleEntityResponseDTO,
 } from "../interfaces/simpleEntityService";
-import { getErrorMessage } from "../../utilities/errorUtils";
-import logger from "../../utilities/logger";
+import { getErrorMessage } from "../../../typescript/utilities/errorUtils";
+import logger from "../../../typescript/utilities/logger";
 
 const Logger = logger(__filename);
 

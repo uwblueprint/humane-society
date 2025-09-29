@@ -1,3 +1,4 @@
+/* Note: starter code file, active for development purposes */
 export type SampleContextType = {
   teamName: string;
   numTerms: number;

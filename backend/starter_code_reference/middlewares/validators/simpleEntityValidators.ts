@@ -3,7 +3,7 @@ import {
   getApiValidationError,
   validateArray,
   validatePrimitive,
-} from "./util";
+} from "../../../typescript/middlewares/validators/util";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
