@@ -19,7 +19,7 @@ import { ReactComponent as BehaviouristTag } from "../../../assets/icons/user-ro
 import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staff.svg";
 import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
 
-import { UserRoles } from "../../../constants/UserConstants";
+import UserRoles from "../../../constants/UserConstants";
 import ColourLevelBadge from "../petprofile/ColourLevelBadge";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "./AnimalTagList";

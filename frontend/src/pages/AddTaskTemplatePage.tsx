@@ -140,6 +140,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
 
     try {
       // Console log the form data as requested
+      /* eslint-disable-next-line no-console */
       console.log({
         taskName: formData.taskName,
         taskCategory: formData.taskCategory,
@@ -152,6 +153,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
       // Navigate back to task management page
       history.push(TASK_MANAGEMENT_PAGE);
     } catch (error) {
+      /* eslint-disable-next-line no-console */
       console.error("Error submitting form:", error);
     } finally {
       setIsSubmitting(false);

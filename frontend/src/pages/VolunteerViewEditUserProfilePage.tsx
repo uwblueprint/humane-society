@@ -105,6 +105,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   const onSubmit = (data: FormData) => {
+    /* eslint-disable-next-line no-console */
     console.log({
       userId: data.userId,
       firstName: data.firstName,
