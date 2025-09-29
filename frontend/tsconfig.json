@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-, "starter_code_reference/contexts/SampleContext.ts", "starter_code_reference/contexts/SampleContextDispatcherContext.ts"  ]
+]
 }
