@@ -3,12 +3,16 @@
 
 name: Deploy frontend to Firebase Hosting
 
+# Trigger only manually, never on push
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "frontend/**"
+  workflow_dispatch:
+
+# on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - "frontend/**"
 
 defaults:
   run:
@@ -16,6 +20,7 @@ defaults:
 
 jobs:
   build_and_deploy:
+    if: ${{ false }}  # job will never run
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

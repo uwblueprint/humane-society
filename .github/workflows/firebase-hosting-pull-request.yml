@@ -3,10 +3,14 @@
 
 name: Deploy frontend to Firebase Hosting preview
 
+# Trigger only manually, never on push
 on:
-  pull_request:
-    paths:
-      - "frontend/**"
+  workflow_dispatch:
+
+# on:
+#   pull_request:
+#     paths:
+#       - "frontend/**"
 
 defaults:
   run:
@@ -14,7 +18,8 @@ defaults:
 
 jobs:
   build_and_preview:
-    if: "${{ github.event.pull_request.head.repo.full_name == github.repository && github.base_ref == 'main' }}"
+    # job will never run because of false condition
+    if: "${{ false && github.event.pull_request.head.repo.full_name == github.repository && github.base_ref == 'main' }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
