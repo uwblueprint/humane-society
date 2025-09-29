@@ -157,7 +157,9 @@ const MultiSelect = <T extends string | number>({
                 }}
                 pb="2px"
               >
-                {selected.map((value) => {
+                {(Array.isArray(selected) ? selected : []).map((value) => {
+                  if (!value) return <></>; // skip null/undefined/empty
+
                   const color = getColorForValue(value);
 
                   return (
@@ -181,10 +183,8 @@ const MultiSelect = <T extends string | number>({
                           bg: "whiteAlpha.300",
                         }}
                         sx={{
-                          color: { color },
-                          "& svg": {
-                            color: { color },
-                          },
+                          color,
+                          "& svg": { color },
                         }}
                       />
                     </Tag>

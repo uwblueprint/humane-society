@@ -37,21 +37,24 @@ export interface ColourLevelProps {
 const AnimalTagList = ({
   isInvited,
   animalTags,
-}: ColourLevelProps): React.ReactElement => (
-  <HStack wrap="wrap">
-    {animalTags.map((tag) => {
-      const AnimalIcon = isInvited
-        ? invitedAnimalTagIcons[tag]
-        : animalTagIcons[tag];
-      return (
-        <Box key={tag}>
-          <HStack gap="0.5rem">
-            <Icon minWidth="max-content" boxSize="2rem" as={AnimalIcon} />
-          </HStack>
-        </Box>
-      );
-    })}
-  </HStack>
-);
+}: ColourLevelProps): React.ReactElement => {
+  const tags = Array.isArray(animalTags) ? animalTags : [];
+  return (
+    <HStack wrap="wrap">
+      {tags.map((tag) => {
+        const AnimalIcon = isInvited
+          ? invitedAnimalTagIcons[tag]
+          : animalTagIcons[tag];
+        return (
+          <Box key={tag}>
+            <HStack gap="0.5rem">
+              <Icon minWidth="max-content" boxSize="2rem" as={AnimalIcon} />
+            </HStack>
+          </Box>
+        );
+      })}
+    </HStack>
+  );
+};
 
 export default AnimalTagList;
