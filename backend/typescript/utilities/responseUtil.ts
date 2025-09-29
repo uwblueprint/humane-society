@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { Readable } from "stream";
-import { generateCSV } from "./CSVUtils";
+// import { generateCSV } from "./CSVUtils"; 
 
+// CSV functionality deprecated
 /* eslint-disable-next-line import/prefer-default-export */
 export const sendResponseByMimeType = async <T>(
   res: Response,
@@ -9,10 +10,12 @@ export const sendResponseByMimeType = async <T>(
   contentType: string | undefined,
   rawData: Readonly<T> | ReadonlyArray<T> | Readable,
 ): Promise<Response> => {
+  /*
   if (contentType === "text/csv") {
     const csvText = await generateCSV<T>({ data: rawData });
     return res.status(responseCode).type("text/csv").send(csvText);
   }
+  */
   if (contentType === "application/json" || contentType === undefined) {
     return res.status(responseCode).json(rawData);
   }

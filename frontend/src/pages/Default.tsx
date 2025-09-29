@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import * as Routes from "../constants/Routes";
-import SampleContext from "../contexts/SampleContext";
+import SampleContext from "../../starter_code_reference/contexts/SampleContext";
 
 import Logout from "../components/auth/Logout";
 import RefreshCredentials from "../components/auth/RefreshCredentials";
 import DefaultResetPassword from "../components/auth/DefaultResetPassword";
+/* Note: starter code page, only used for development */
 
 type ButtonProps = { text: string; path: string };
 

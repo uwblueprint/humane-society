@@ -17,11 +17,6 @@ import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
-import SampleContext, {
-  DEFAULT_SAMPLE_CONTEXT,
-} from "./contexts/SampleContext";
-import sampleContextReducer from "./reducers/SampleContextReducer";
-import SampleContextDispatcherContext from "./contexts/SampleContextDispatcherContext";
 import InteractionLogPage from "./pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
@@ -43,19 +38,7 @@ const App = (): React.ReactElement => {
   const [authenticatedUser, setAuthenticatedUser] =
     useState<AuthenticatedUser>(currentUser);
 
-  // Some sort of global state. Context API replaces redux.
-  // Split related states into different contexts as necessary.
-  // Split dispatcher and state into separate contexts as necessary.
-  const [sampleContext, dispatchSampleContextUpdate] = useReducer(
-    sampleContextReducer,
-    DEFAULT_SAMPLE_CONTEXT,
-  );
-
   return (
-    <SampleContext.Provider value={sampleContext}>
-      <SampleContextDispatcherContext.Provider
-        value={dispatchSampleContextUpdate}
-      >
         <AuthContext.Provider
           value={{ authenticatedUser, setAuthenticatedUser }}
         >
@@ -156,8 +139,6 @@ const App = (): React.ReactElement => {
             </Switch>
           </Router>
         </AuthContext.Provider>
-      </SampleContextDispatcherContext.Provider>
-    </SampleContext.Provider>
   );
 };
 
