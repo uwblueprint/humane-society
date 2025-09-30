@@ -18,6 +18,7 @@ import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import UpdatePage from "./pages/UpdatePage";
 import SimpleEntityUpdatePage from "./pages/SimpleEntityUpdatePage";
+import TeamMembersPage from "./pages/TeamMembersPage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
 import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
@@ -72,6 +73,7 @@ const App = (): React.ReactElement => {
           <Router>
             <PageTitleUpdater />
             <Switch>
+              <Route exact path={Routes.TEAM_MEMBERS} component={TeamMembersPage} />
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
               <Route
