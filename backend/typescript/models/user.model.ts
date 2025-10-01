@@ -29,10 +29,10 @@ export default class User extends Model {
   color_level!: number;
 
   @Column({
-    type: DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
+    type: DataType.ARRAY(DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal")),
     allowNull: false,
   })
-  animal_tags!: [AnimalTag];
+  animal_tags!: AnimalTag[];
 
   @Column({ type: DataType.BOOLEAN })
   can_see_all_logs?: boolean | null;

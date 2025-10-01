@@ -15,7 +15,7 @@ import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
 interface MultiSelectProps<T> {
   values: T[];
   onSelect: (values: T[]) => void;
-  selected: T[];
+  selected?: T[];
   placeholder?: string;
   label?: string;
   error?: boolean;
@@ -27,7 +27,7 @@ interface MultiSelectProps<T> {
 const MultiSelect = <T extends string | number>({
   values,
   onSelect,
-  selected,
+  selected = [],
   placeholder = "Click for options",
   label,
   error = false,
