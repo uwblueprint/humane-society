@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useReducer } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import TeamMembersPage from "./components/pages/TeamMembersPage";
 
 import Default from "./pages/Default";
 import LoginPage from "./pages/LoginPage";
@@ -211,6 +212,12 @@ const App = (): React.ReactElement => {
                     exact
                     path={`${Routes.VOLUNTEER_EDIT_USER_PROFILE_PAGE}/:userId`}
                     component={VolunteerViewEditUserProfilePage}
+                    allowedRoles={AuthConstants.ALL_ROLES}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={Routes.TEAM_MEMBERS}
+                    component={TeamMembersPage}
                     allowedRoles={AuthConstants.ALL_ROLES}
                   />
                   {/* Fallback Route */}

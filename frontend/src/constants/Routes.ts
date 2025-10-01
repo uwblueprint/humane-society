@@ -48,3 +48,5 @@ export const HOOKS_PAGE = "/hooks";
 export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
 
 export const VOLUNTEER_EDIT_USER_PROFILE_PAGE = "/edit-user-profile";
+
+export const TEAM_MEMBERS = "/team-members";
