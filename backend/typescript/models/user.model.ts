@@ -29,7 +29,9 @@ export default class User extends Model {
   color_level!: number;
 
   @Column({
-    type: DataType.ARRAY(DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal")),
+    type: DataType.ARRAY(
+      DataType.ENUM("Bird", "Bunny", "Cat", "Dog", "Small Animal"),
+    ),
     allowNull: false,
   })
   animal_tags!: AnimalTag[];
