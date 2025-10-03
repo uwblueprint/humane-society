@@ -4,14 +4,13 @@ import { Form } from "@rjsf/bootstrap-4";
 import EntityAPIClient, {
   EntityRequest,
   EntityResponse,
-} from "../../APIClients/EntityAPIClient";
+} from "../APIClients/EntityAPIClient";
 
 const schema: JSONSchema7 = {
-  title: "Update Entity",
-  description: "A simple form to test updating an entity",
+  title: "Create Entity",
+  description: "A simple form to test creating an entity",
   type: "object",
   required: [
-    "id",
     "stringField",
     "intField",
     "stringArrayField",
@@ -19,11 +18,6 @@ const schema: JSONSchema7 = {
     "boolField",
   ],
   properties: {
-    id: {
-      type: "string",
-      title: "entity id",
-      default: "123abc456def7890ghij1234",
-    },
     stringField: {
       type: "string",
       title: "String Field",
@@ -62,13 +56,13 @@ const uiSchema = {
   },
 };
 
-const UpdateForm = (): React.ReactElement => {
+const CreateForm = (): React.ReactElement => {
   const [data, setData] = useState<EntityResponse | null>(null);
   const [fileField, setFileField] = useState<File | null>(null);
   const [formFields, setFormFields] = useState<EntityRequest | null>(null);
 
   if (data) {
-    return <p>Updated! ✔️</p>;
+    return <p>Created! ✔️</p>;
   }
 
   const fileChanged = (e: { target: HTMLInputElement }) => {
@@ -83,16 +77,14 @@ const UpdateForm = (): React.ReactElement => {
     }
   };
 
-  const onSubmit = async ({ formData }: { formData: EntityResponse }) => {
-    const { id, ...entityData } = formData;
-
+  const onSubmit = async ({ formData }: { formData: EntityRequest }) => {
     const multipartFormData = new FormData();
-    multipartFormData.append("body", JSON.stringify(entityData));
+    multipartFormData.append("body", JSON.stringify(formData));
     if (fileField) {
       multipartFormData.append("file", fileField);
     }
-    const result = await EntityAPIClient.update(formData.id, {
-      entityData: multipartFormData,
+    const result = await EntityAPIClient.create({
+      formData: multipartFormData,
     });
     setData(result);
   };
@@ -112,4 +104,4 @@ const UpdateForm = (): React.ReactElement => {
   );
 };
 
-export default UpdateForm;
+export default CreateForm;

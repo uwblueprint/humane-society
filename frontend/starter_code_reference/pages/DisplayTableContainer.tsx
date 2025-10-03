@@ -5,9 +5,9 @@ import { HeaderGroup, useTable, Column } from "react-table";
 
 import EntityAPIClient, {
   EntityResponse,
-} from "../../APIClients/EntityAPIClient";
-import { downloadCSV } from "../../utils/CSVUtils";
-import { downloadFile } from "../../utils/FileUtils";
+} from "../APIClients/EntityAPIClient";
+import { downloadCSV } from "../utils/CSVUtils";
+import { downloadFile } from "../utils/FileUtils";
 
 type EntityData = Omit<EntityResponse, "boolField"> & { boolField: string };
 

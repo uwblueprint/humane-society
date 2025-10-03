@@ -1,18 +1,18 @@
 import { Router } from "express";
 import fs from "fs";
 import multer from "multer";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import { isAuthorizedByRole } from "../../typescript/middlewares/auth";
 import { entityRequestDtoValidator } from "../middlewares/validators/entityValidators";
 import EntityService from "../services/implementations/entityService";
-import FileStorageService from "../services/implementations/fileStorageService";
-import IFileStorageService from "../services/interfaces/fileStorageService";
+import FileStorageService from "../../typescript/services/implementations/fileStorageService";
+import IFileStorageService from "../../typescript/services/interfaces/fileStorageService";
 import {
   EntityResponseDTO,
   IEntityService,
 } from "../services/interfaces/IEntityService";
-import { getErrorMessage } from "../utilities/errorUtils";
-import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { Role } from "../types";
+import { getErrorMessage } from "../../typescript/utilities/errorUtils";
+import { sendResponseByMimeType } from "../../typescript/utilities/responseUtil";
+import { Role } from "../../typescript/types";
 
 const upload = multer({ dest: "uploads/" });
 

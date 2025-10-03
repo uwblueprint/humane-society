@@ -47,6 +47,8 @@ const loginWithSignInLink = async (
         error.code === "auth/invalid-action-code" ||
         error.code === "auth/expired-action-code"
       ) {
+        // TODO: deprecate console use in frontend
+        /* eslint-disable-next-line no-console */
         console.log(
           `Attempt to use invalidated sign-in link, ask administrator for new link: ${error.message}`,
         ); // link has already been used once or has expired

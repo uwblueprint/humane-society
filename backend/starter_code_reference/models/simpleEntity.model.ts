@@ -1,6 +1,6 @@
 import { Column, Model, Table, DataType } from "sequelize-typescript";
 
-import { Letters } from "../types";
+import { Letters } from "../../typescript/types";
 
 @Table({ tableName: "simple_entities" })
 export default class SimpleEntity extends Model {

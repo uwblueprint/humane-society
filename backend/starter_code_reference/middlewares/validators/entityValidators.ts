@@ -5,8 +5,8 @@ import {
   validateArray,
   validateFileType,
   validatePrimitive,
-} from "./util";
-import { getErrorMessage } from "../../utilities/errorUtils";
+} from "../../../typescript/middlewares/validators/util";
+import { getErrorMessage } from "../../../typescript/utilities/errorUtils";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */

@@ -1,4 +1,4 @@
-import { UserRoles } from "../constants/UserConstants";
+import UserRoles from "../constants/UserConstants";
 import { AnimalTag } from "./TaskTypes";
 
 export type User = {

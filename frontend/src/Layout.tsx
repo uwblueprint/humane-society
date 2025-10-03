@@ -28,24 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return "Pet List";
       case ROUTES.LOGIN_PAGE:
         return "Login";
-      case ROUTES.SIGNUP_PAGE:
-        return "Sign Up";
-      case ROUTES.EDIT_TEAM_PAGE:
-        return "Edit Team";
-      case ROUTES.DISPLAY_ENTITY_PAGE:
-        return "Entity Details";
-      case ROUTES.CREATE_ENTITY_PAGE:
-        return "Create Entity";
-      case ROUTES.UPDATE_ENTITY_PAGE:
-        return "Update Entity";
-      case ROUTES.DISPLAY_SIMPLE_ENTITY_PAGE:
-        return "Simple Entity Details";
-      case ROUTES.CREATE_SIMPLE_ENTITY_PAGE:
-        return "Create Simple Entity";
-      case ROUTES.UPDATE_SIMPLE_ENTITY_PAGE:
-        return "Update Simple Entity";
-      case ROUTES.HOOKS_PAGE:
-        return "Hooks";
       case ROUTES.INTERACTION_LOG_PAGE:
         return "Interaction Log";
       case ROUTES.DEV_UTILITY_PAGE:

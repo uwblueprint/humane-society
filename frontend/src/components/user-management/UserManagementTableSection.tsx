@@ -13,7 +13,7 @@ import { ReactComponent as InvitedBehaviouristTag } from "../../assets/icons/use
 import { ReactComponent as InvitedStaffTag } from "../../assets/icons/user-role/invited-staff.svg";
 import { ReactComponent as InvitedVolunteerTag } from "../../assets/icons/user-role/invited-volunteer.svg";
 
-import { UserRoles } from "../../constants/UserConstants";
+import UserRoles from "../../constants/UserConstants";
 import { colorLevelMap } from "../../types/TaskTypes";
 import { User } from "../../types/UserTypes";
 import AnimalTagList from "../common/userprofile/AnimalTagList";

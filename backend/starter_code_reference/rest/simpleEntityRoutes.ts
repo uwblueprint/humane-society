@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import { isAuthorizedByRole } from "../../typescript/middlewares/auth";
 import { simpleEntityRequestDtoValidator } from "../middlewares/validators/simpleEntityValidators";
 import SimpleEntityService from "../services/implementations/simpleEntityService";
 import {
   SimpleEntityResponseDTO,
   ISimpleEntityService,
 } from "../services/interfaces/simpleEntityService";
-import { getErrorMessage } from "../utilities/errorUtils";
-import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { Role } from "../types";
+import { getErrorMessage } from "../../typescript/utilities/errorUtils";
+import { sendResponseByMimeType } from "../../typescript/utilities/responseUtil";
+import { Role } from "../../typescript/types";
 
 const simpleEntityRouter: Router = Router();
 simpleEntityRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));

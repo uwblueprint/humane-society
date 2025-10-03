@@ -1,6 +1,6 @@
 import { DataType } from "sequelize-typescript";
 
-import { Migration } from "../umzug";
+import { Migration } from "../../typescript/umzug";
 
 const TABLE_NAME = "entities";
 
