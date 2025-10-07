@@ -46,6 +46,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
         );
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to fetch file URL:", err);
     }
   }, []);
@@ -67,6 +68,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
           if (!fileUrl) throw new Error("File URL does not exist");
           return { name: file.name, url: fileUrl };
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(`Failed to fetch URL for file ${file.name}:`, err);
           return null;
         }
@@ -79,6 +81,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
         }),
       );
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to fetch files:", err);
       setError("Failed to load existing files");
       setUploadedFiles([]);
@@ -127,6 +130,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
         duration: 3000,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Upload failed:", err);
       setError("Failed to upload file");
       toast({
@@ -149,6 +153,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
         duration: 3000,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Delete failed:", err);
       toast({
         title: "Failed to delete file",

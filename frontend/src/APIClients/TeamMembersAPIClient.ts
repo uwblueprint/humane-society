@@ -7,6 +7,7 @@ const get = async (): Promise<TeamMember[] | null> => {
     const { data } = await baseAPIClient.get("team-members/");
     return data;
   } catch (error: unknown) {
+    // eslint-disable-next-line no-console
     console.error("Error fetching team members:", error);
     return null;
   }
@@ -26,6 +27,7 @@ const create = async (
     });
     return data;
   } catch (error: unknown) {
+    // eslint-disable-next-line no-console
     console.error("Error creating team member:", error);
     return null;
   }

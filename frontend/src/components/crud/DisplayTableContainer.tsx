@@ -136,6 +136,7 @@ const DisplayTableContainer: React.FC = (): React.ReactElement | null => {
     if (data) {
       downloadFile(data, "file");
     } else {
+      // eslint-disable-next-line no-console
       console.error("Failed to download file: data is null");
     }
   };
@@ -146,6 +147,7 @@ const DisplayTableContainer: React.FC = (): React.ReactElement | null => {
       if (csvString) {
         downloadCSV(csvString, "export.csv");
       } else {
+        // eslint-disable-next-line no-console
         console.error("Failed to download CSV: csvString is null");
       }
       // Use the following lines to download CSV using frontend CSV generation instead of API
