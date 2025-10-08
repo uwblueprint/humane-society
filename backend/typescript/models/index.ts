@@ -1,6 +1,7 @@
 import * as path from "path";
 import { Sequelize } from "sequelize-typescript";
 import User from "./user.model";
+import TeamMember from "./teamMember.model";
 // import defineRelationships from "./modelRelationships";
 
 const DATABASE_URL =
@@ -14,8 +15,8 @@ const sequelize = new Sequelize(DATABASE_URL, {
   models: [path.join(__dirname, "/*.model.ts")],
 });
 
-sequelize.addModels([User]);
+sequelize.addModels([User, TeamMember]);
 
 // defineRelationships();
 
-export { sequelize, User };
+export { sequelize, User, TeamMember };

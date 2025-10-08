@@ -1,9 +1,25 @@
+// create custom type - team member roles, teamRoleValues is single source of truth 
+export const teamRoleValues = ["PM", "DESIGNER", "PL","DEVELOPER"] as const;
+export type TeamRole = typeof teamRoleValues[number]; //PM | DESIGNER | PL | DEVELOPER
+
 export enum Role {
   ADMINISTRATOR = "Administrator",
   ANIMAL_BEHAVIOURIST = "Animal Behaviourist",
   STAFF = "Staff",
   VOLUNTEER = "Volunteer",
 }
+
+// DTO (Data transfer object) = template for data moved between backend and frontend
+// backend -> frontend
+export type TeamMemberDTO = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  teamRole: TeamRole;
+};
+// same as above but without id
+// frontend -> backend 
+export type CreateTeamMemberDTO = Omit<TeamMemberDTO, "id"> // remove id
 
 export type Token = {
   accessToken: string;

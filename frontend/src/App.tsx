@@ -39,6 +39,8 @@ import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
+import TeamMembersPage from "./pages/TeamMembersPage";
+
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 import DevFileStorageUpload from "./pages/DevFileStorageUpload";
@@ -72,6 +74,7 @@ const App = (): React.ReactElement => {
           <Router>
             <PageTitleUpdater />
             <Switch>
+              <Route exact path={Routes.TEAM_MEMBERS} component={TeamMembersPage} />
               <Route exact path={Routes.LOGIN_PAGE} component={LoginPage} />
               <Route exact path={Routes.SIGNUP_PAGE} component={Signup} />
               <Route

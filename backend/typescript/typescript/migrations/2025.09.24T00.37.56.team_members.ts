@@ -1,0 +1,36 @@
+//migration file has up (what to build) and down (what to undo)
+//version control for database
+import { DataType } from "sequelize-typescript";
+import { Migration } from "../umzug";
+import { teamRoleValues } from "../types";
+
+const TABLE_NAME = "team_members";
+// up create team members table 
+export const up: Migration = async ({ context: sequelize}) =>{
+    await sequelize.getQueryInterface().createTable(TABLE_NAME, {
+        id: {
+            type: DataType.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        first_name: {
+            type: DataType.STRING,
+            allowNull: false,
+        },
+        last_name: {
+            type: DataType.STRING,
+            allowNull: false,
+        },
+        team_role: {
+            type: DataType.ENUM,
+            values: teamRoleValues,
+            allowNull: false,
+        }
+    });
+};
+
+// down drop team members table
+export const down: Migration = async ({ context: sequelize }) => {
+  await sequelize.getQueryInterface().dropTable(TABLE_NAME);
+};
