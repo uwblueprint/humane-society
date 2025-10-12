@@ -101,3 +101,6 @@ export type NodemailerConfig = {
     refreshToken: string;
   };
 };
+
+export const teamRoleValues = ["PM", "DESIGNER", "PL", "DEVELOPER"] as const;
+export type TeamRole = (typeof teamRoleValues)[number];
