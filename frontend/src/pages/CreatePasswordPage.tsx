@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
+import { Button, Flex, Text, FormLabel, FormControl, BoxProps } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 
 import Input from "../components/common/Input";
@@ -10,6 +10,7 @@ import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
 import { HOME_PAGE } from "../constants/Routes";
+import AuthContainer from "../components/auth/AuthContainer";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);
@@ -17,6 +18,18 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const [email, setEmail] = React.useState("Email not found.");
+
+  const authContainerProps: BoxProps = {
+    bg: "gray.100",
+    display: "flex",
+    flexDirection: "column",
+    width: { base: "21.5625", md: "28.875rem" },
+    height: { base: "21.8125", md: "30rem" },
+    px: { base: "2.5rem", md: "3.75rem" },
+    py: { base: "2.5rem", md: "4rem" },
+    gap: { base: "2.25rem", md: "2.25rem" },
+    borderRadius: { base: "0.375rem", md: "0.375rem" },
+  };
 
   const history = useHistory();
 
@@ -100,13 +113,7 @@ const CreatePasswordPage = (): React.ReactElement => {
           padding="1rem"
         >
           <Logo />
-          {/* Login container */}
-          <Flex
-            direction="column"
-            gap={{ base: "1.12rem", md: "1rem" }}
-            width={{ md: "28.875rem" }}
-            justifyContent="center"
-          >
+          <AuthContainer authContainerProps={authContainerProps}>
             {/* Login header */}
             <Text
               color="gray.600"
@@ -116,8 +123,9 @@ const CreatePasswordPage = (): React.ReactElement => {
             >
               Welcome!
             </Text>
-            {/* */}
+            {/* Input + button wrapper */}
             <Flex direction="column" gap="2.25rem">
+              {/* Input wrapper */}
               <Flex
                 direction="column"
                 gap={{ base: "1rem", md: "1.5rem" }}
@@ -146,10 +154,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     Create Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
-                    <PasswordInput
-                      value={password}
-                      onChange={handlePasswordChange}
-                    />
+                    <PasswordInput value={password} onChange={handlePasswordChange} />
                   </FormControl>
                 </Flex>
                 {/* Password confirmation input */}
@@ -163,13 +168,11 @@ const CreatePasswordPage = (): React.ReactElement => {
                     Confirm Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
-                    <PasswordInput
-                      value={confirmPassword}
-                      onChange={handleConfirmPasswordChange}
-                    />
+                    <PasswordInput value={confirmPassword} onChange={handleConfirmPasswordChange} />
                   </FormControl>
                 </Flex>
               </Flex>
+              {/* Button + error message */}
               <Flex direction="column">
                 {/* Create Account button */}
                 <Button
@@ -199,9 +202,8 @@ const CreatePasswordPage = (): React.ReactElement => {
                 )}
               </Flex>
             </Flex>
-          </Flex>
+          </AuthContainer>
         </Flex>
-      </Flex>
       {showModal && (
         <PopupModal
           open={showModal}
@@ -211,6 +213,7 @@ const CreatePasswordPage = (): React.ReactElement => {
           onPrimaryClick={handleGetStarted}
         />
       )}
+      </Flex>
     </Flex>
   );
 };
