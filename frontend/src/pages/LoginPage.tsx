@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
-import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
+import { Button, Flex, Text, FormLabel, FormControl, BoxProps } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
 
 import Input from "../components/common/Input";
@@ -18,6 +18,7 @@ import {
 import AuthContext from "../contexts/AuthContext";
 import { AuthenticatedUser } from "../types/AuthTypes";
 import PopupModal from "../components/common/PopupModal";
+import AuthContainer from "../components/auth/AuthContainer";
 
 const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
@@ -30,6 +31,17 @@ const LoginPage = (): React.ReactElement => {
   const [status, setStatus] = useState<"loading" | "error" | "default">(
     "default",
   );
+
+  const authContainerProps: BoxProps = {
+    bg: "gray.100",
+    display: "flex",
+    flexDirection: "column",
+    width: { base: "21.5625", md: "28.875rem" },
+    px: { base: "2.5rem", md: "3.75rem" },
+    py: { base: "2.5rem", md: "4rem" },
+    gap: { base: "2.25rem", md: "2.25rem" },
+    borderRadius: { base: "0.375rem", md: "0.375rem" },
+  };
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -149,16 +161,7 @@ const LoginPage = (): React.ReactElement => {
           {/* Logo + Login container */}
           <Flex margin="auto" gap="2.25rem" direction="column" padding="1rem">
             <Logo />
-            {/* Login container */}
-            <Flex
-              padding="3.75rem"
-              direction="column"
-              gap={{ base: "1.12rem", md: "1rem" }}
-              width={{ md: "28.875rem" }}
-              justifyContent="center"
-              background="gray.100"
-              borderRadius="0.375rem"
-            >
+            <AuthContainer authContainerProps={authContainerProps}>
               {/* Login header */}
               <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
                 Welcome Back!
@@ -264,7 +267,7 @@ const LoginPage = (): React.ReactElement => {
                   </Button>
                 </Flex>
               </form>
-            </Flex>
+            </AuthContainer>
           </Flex>
         </Flex>
       )}
