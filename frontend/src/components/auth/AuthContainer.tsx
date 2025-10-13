@@ -2,13 +2,13 @@ import React from "react";
 import { Flex, Box, Text, BoxProps } from "@chakra-ui/react";
 
 type AuthContainerProps = {
-    containerProps: BoxProps,
+    authContainerProps: BoxProps,
     children: React.ReactNode,
 };
 
-const AuthContainer = ({ containerProps, children }: AuthContainerProps): React.ReactElement => {
+const AuthContainer = ({ authContainerProps, children }: AuthContainerProps): React.ReactElement => {
     return (
-    <Flex direction="column" justifyContent="center" {...containerProps}>
+    <Flex direction="column" justifyContent="center" {...authContainerProps}>
         {children}
     </Flex>
     );
