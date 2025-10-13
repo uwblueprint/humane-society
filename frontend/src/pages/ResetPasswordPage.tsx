@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
+import { Text, Button, FormControl, Flex, FormLabel, BoxProps } from "@chakra-ui/react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -8,6 +8,7 @@ import { HOME_PAGE } from "../constants/Routes";
 import PopupModal from "../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
+import AuthContainer from "../components/auth/AuthContainer";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -20,6 +21,17 @@ const ResetPasswordPage = (): React.ReactElement => {
   const [success, setSuccess] = useState(false);
   const history = useHistory();
   const query = useQuery();
+
+  const authContainerProps: BoxProps = {
+    bg: "gray.50",
+    display: "flex",
+    flexDirection: "column",
+    width: { base: "21.5625", md: "28.875rem" },
+    px: { base: "2.5rem", md: "3.75rem" },
+    py: { base: "2.5rem", md: "4rem" },
+    gap: { base: "2.25rem", md: "2.25rem" },
+    borderRadius: { base: "0.375rem", md: "0.375rem" },
+  };
 
   const oobCode = query.get("oobCode");
 
@@ -112,16 +124,7 @@ const ResetPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <Flex
-        maxWidth="29.6875rem"
-        width="80vw"
-        padding={["2.375rem", "2.375rem", "2.375rem", "3.875rem 4rem"]}
-        borderRadius="6px"
-        backgroundColor="gray.50"
-        boxShadow="lg"
-        gap="2.25rem"
-        direction="column"
-      >
+      <AuthContainer authContainerProps={authContainerProps}>
         <Text m={0} color="gray.600" textStyle="h2" textAlign="center">
           Reset Password
         </Text>
@@ -185,7 +188,7 @@ const ResetPasswordPage = (): React.ReactElement => {
             Reset
           </Button>
         </form>
-      </Flex>
+      </AuthContainer>
       {success && (
         <PopupModal
           open={success}
