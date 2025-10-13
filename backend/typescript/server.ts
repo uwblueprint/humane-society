@@ -38,6 +38,7 @@ app.use("/task-templates", taskTemplateRouter);
 app.use("/pets", petRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
+app.use("/team-members", teamMemberRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 sequelize.authenticate();
@@ -57,5 +58,3 @@ app.listen({ port: process.env.PORT || 8080 }, () => {
   /* eslint-disable-next-line no-console */
   console.info(`Server is listening on port ${process.env.PORT || 8080}!`);
 });
-
-app.use("/team-members", teamMemberRouter);

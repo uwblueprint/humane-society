@@ -7,7 +7,7 @@ import {
   } from "sequelize-typescript";
 import { TeamRole, teamRoleValues } from "../types";
 
-@Table({ tableName: "team_members" })
+@Table({ tableName: "team_members", timestamps: false })
 export default class TeamMember extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   first_name!: string;

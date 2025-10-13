@@ -1,6 +1,7 @@
 import { TeamMemberDTO, CreateTeamMemberDTO } from "../../types";
 import PgTeamMember from "../../models/teamMember.model";
 import logger from "../../utilities/logger";
+import { getErrorMessage } from "../../utilities/errorUtils";
 import { ITeamMemberService } from "../interfaces/teamMemberService";
 
 const Logger = logger(__filename);
