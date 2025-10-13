@@ -72,6 +72,7 @@ const CreatePasswordPage = (): React.ReactElement => {
   };
 
   return (
+    /* Set Login page background */
     <Flex
       maxWidth="100vw"
       height="100vh"
@@ -89,6 +90,7 @@ const CreatePasswordPage = (): React.ReactElement => {
         },
       }}
     >
+      {/* Logo + Login container */}
       <Flex flex="1" justifyContent="center" alignItems="center">
         <Flex
           gap="2.2rem"
@@ -98,12 +100,14 @@ const CreatePasswordPage = (): React.ReactElement => {
           padding="1rem"
         >
           <Logo />
+          {/* Login container */}
           <Flex
             direction="column"
             gap={{ base: "1.12rem", md: "1rem" }}
             width={{ md: "28.875rem" }}
             justifyContent="center"
           >
+            {/* Login header */}
             <Text
               color="gray.600"
               textStyle={{ base: "h2Mobile", md: "h2" }}
@@ -112,12 +116,14 @@ const CreatePasswordPage = (): React.ReactElement => {
             >
               Welcome!
             </Text>
+            {/* */}
             <Flex direction="column" gap="2.25rem">
               <Flex
                 direction="column"
                 gap={{ base: "1rem", md: "1.5rem" }}
                 width="100%"
               >
+                {/* Email input */}
                 <Flex direction="column" gap="0.375rem">
                   <FormLabel
                     textStyle="bodyMobile"
@@ -129,6 +135,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                   </FormLabel>
                   <Input value={email} placeholder={email} disabled />
                 </Flex>
+                {/* Password input */}
                 <Flex direction="column" gap="0.375rem">
                   <FormLabel
                     textColor="gray.600"
@@ -145,6 +152,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                     />
                   </FormControl>
                 </Flex>
+                {/* Password confirmation input */}
                 <Flex direction="column" gap="0.375rem">
                   <FormLabel
                     textColor="gray.600"
@@ -163,6 +171,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 </Flex>
               </Flex>
               <Flex direction="column">
+                {/* Create Account button */}
                 <Button
                   type="submit"
                   textStyle="bodyMobile"
@@ -175,6 +184,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                 >
                   Create Account
                 </Button>
+                {/* General error message */}
                 {errorMessage && (
                   <Text
                     color="red.500"

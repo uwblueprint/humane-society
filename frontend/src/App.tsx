@@ -54,6 +54,7 @@ const App = (): React.ReactElement => {
             path={Routes.RESET_PASSWORD_PAGE}
             component={ResetPasswordPage}
           />
+          {/* why is this not wrapped in Layout */}
           <PrivateRoute
             exact
             path={Routes.CREATE_PASSWORD_PAGE}

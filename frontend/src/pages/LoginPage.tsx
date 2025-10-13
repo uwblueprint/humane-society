@@ -105,17 +105,19 @@ const LoginPage = (): React.ReactElement => {
   }
 
   if (authenticatedUser) {
-    return <Redirect to="/" />;
+    return <Redirect to={HOME_PAGE} />;
   }
 
   return (
     <>
+      {/* Set "loading" state while useEffect runs */}
       <PopupModal
         open={status === "loading"}
         title="Loading"
         message="Loading, please wait..."
       />
 
+      {/* Sign-in link fail error */}
       <PopupModal
         open={status === "error"}
         title="Error"
@@ -126,6 +128,7 @@ const LoginPage = (): React.ReactElement => {
       />
 
       {status === "default" && !redirectTo && (
+        /* Set Login page background */
         <Flex
           maxWidth="100vw"
           height="100vh"
@@ -143,8 +146,10 @@ const LoginPage = (): React.ReactElement => {
             },
           }}
         >
+          {/* Logo + Login container */}
           <Flex margin="auto" gap="2.25rem" direction="column" padding="1rem">
             <Logo />
+            {/* Login container */}
             <Flex
               padding="3.75rem"
               direction="column"
@@ -154,9 +159,11 @@ const LoginPage = (): React.ReactElement => {
               background="gray.100"
               borderRadius="0.375rem"
             >
+              {/* Login header */}
               <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
                 Welcome Back!
               </Text>
+              {/* Form begins */}
               <form
                 onSubmit={(e: React.FormEvent) => {
                   e.preventDefault();
@@ -165,6 +172,7 @@ const LoginPage = (): React.ReactElement => {
               >
                 <Flex direction="column" gap="2rem">
                   <Flex direction="column" gap="1rem">
+                    {/* Email input + error handling */}
                     <Flex direction="column" gap="0.375rem">
                       <FormLabel
                         m={0}
@@ -191,6 +199,7 @@ const LoginPage = (): React.ReactElement => {
                         )}
                       </FormControl>
                     </Flex>
+                    {/* Password input + error handling */}
                     <Flex direction="column" gap="0.375rem">
                       <FormLabel
                         m={0}
@@ -217,6 +226,7 @@ const LoginPage = (): React.ReactElement => {
                         )}
                       </FormControl>
                     </Flex>
+                    {/* General error message */}
                     {errorMessage && (
                       <Text
                         color="red.500"
@@ -227,6 +237,7 @@ const LoginPage = (): React.ReactElement => {
                         {errorMessage}
                       </Text>
                     )}
+                    {/* Forgot password link */}
                     <Text
                       m={0}
                       textStyle="bodyMobile"
@@ -239,7 +250,7 @@ const LoginPage = (): React.ReactElement => {
                       Forgot Password?
                     </Text>
                   </Flex>
-
+                  {/* Login button */}
                   <Button
                     type="submit"
                     textStyle="button"
