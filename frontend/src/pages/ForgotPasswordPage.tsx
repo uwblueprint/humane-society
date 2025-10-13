@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
+import { Text, Button, FormControl, Flex, FormLabel, BoxProps } from "@chakra-ui/react";
 
 import Input from "../components/common/Input";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/login_background_phone.png";
 import AuthAPIClient from "../APIClients/AuthAPIClient";
+import AuthContainer from "../components/auth/AuthContainer";
 
 type SentEmail = {
   email: string;
@@ -16,6 +17,17 @@ const ForgotPasswordPage = (): React.ReactElement => {
   const [sentEmail, setSentEmail] = useState(false);
   const [sentEmailToUser, setSentEmailToUser] = useState(false);
   const [userEmailId, setUserEmaild] = useState("");
+
+  const authContainerProps: BoxProps = {
+    bg: "gray.50",
+    display: "flex",
+    flexDirection: "column",
+    width: { base: "21.5625", md: "28.875rem" },
+    px: { base: "2.5rem", md: "3.75rem" },
+    py: { base: "2.5rem", md: "4rem" },
+    gap: { base: "2.25rem", md: "2.25rem" },
+    borderRadius: { base: "0.375rem", md: "0.375rem" },
+  };
 
   const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
@@ -108,18 +120,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <Flex
-        width="100vw"
-        maxWidth="31.25rem"
-        padding={["2.25rem", "2.25rem", "2.25rem", "3.75rem 4rem"]}
-        borderRadius="6px"
-        backgroundColor="gray.50"
-        boxShadow="lg"
-        gap="2.25rem"
-        direction="column"
-        marginTop="1.25rem"
-        marginBottom="1.25rem"
-      >
+      <AuthContainer authContainerProps={authContainerProps}>
         <Text
           color="gray.600"
           textStyle="h2"
@@ -174,7 +175,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
             You have already sent an email to this user.{" "}
           </Text>
         )}
-      </Flex>
+      </AuthContainer>
     </Flex>
   );
 };
