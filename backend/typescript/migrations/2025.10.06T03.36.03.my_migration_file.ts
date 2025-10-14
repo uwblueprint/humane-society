@@ -4,7 +4,11 @@ import { teamRoleValues } from "../types";
 
 const TABLE_NAME = "team_members";
 
-export const up: Migration = async ({ context }: { context: { getQueryInterface: () => QueryInterface } }) => {
+export const up: Migration = async ({
+  context,
+}: {
+  context: { getQueryInterface: () => QueryInterface };
+}) => {
   await context.getQueryInterface().createTable(TABLE_NAME, {
     id: {
       type: DataTypes.INTEGER,
@@ -27,6 +31,10 @@ export const up: Migration = async ({ context }: { context: { getQueryInterface:
   });
 };
 
-export const down: Migration = async ({ context }: { context: { getQueryInterface: () => QueryInterface } }) => {
+export const down: Migration = async ({
+  context,
+}: {
+  context: { getQueryInterface: () => QueryInterface };
+}) => {
   await context.getQueryInterface().dropTable(TABLE_NAME);
 };
