@@ -15,4 +15,4 @@ export interface ITeamMemberService {
    * @throws Error if retrieval fails
    */
   createTeamMember(teamMember: CreateTeamMemberDTO): Promise<TeamMemberDTO>;
-
+}

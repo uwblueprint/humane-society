@@ -25,7 +25,7 @@ import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
-
+import TeamMembersPage from "./pages/TeamMembersPage";
 import { AuthenticatedUser } from "./types/AuthTypes";
 
 import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
@@ -129,6 +129,12 @@ const App = (): React.ReactElement => {
                 path={`${Routes.VOLUNTEER_EDIT_USER_PROFILE_PAGE}/:userId`}
                 component={VolunteerViewEditUserProfilePage}
                 allowedRoles={AuthConstants.ALL_ROLES}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.TEAM_MEMBERS}
+                component={TeamMembersPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               {/* Fallback Route */}
               <Route path="*" component={NotFoundPage} />
