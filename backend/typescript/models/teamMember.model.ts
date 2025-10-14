@@ -1,20 +1,19 @@
 import {
-    Column,
-    DataType,
-    Model,
-    Table,
-    AllowNull,
-  } from "sequelize-typescript";
+  Column,
+  DataType,
+  Model,
+  Table,
+} from "sequelize-typescript";
 import { TeamRole, teamRoleValues } from "../types";
 
 @Table({ tableName: "team_members", timestamps: false })
 export default class TeamMember extends Model {
-  @Column({ type: DataType.STRING, allowNull: false })
-  first_name!: string;
+  @Column({ field: "first_name", type: DataType.STRING, allowNull: false })
+  firstName!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
-  last_name!: string;
+  @Column({ field: "last_name", type: DataType.STRING, allowNull: false })
+  lastName!: string;
 
-  @Column({ type: DataType.ENUM(...teamRoleValues), allowNull: false })
-  team_role!: TeamRole;
+  @Column({ field: "team_role", type: DataType.ENUM(...teamRoleValues), allowNull: false })
+  teamRole!: TeamRole;
 }

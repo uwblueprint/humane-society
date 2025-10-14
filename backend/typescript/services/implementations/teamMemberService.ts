@@ -1,46 +1,44 @@
 import { TeamMemberDTO, CreateTeamMemberDTO } from "../../types";
-import PgTeamMember from "../../models/teamMember.model";
+import TeamMember from "../../models/teamMember.model";
 import logger from "../../utilities/logger";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import { ITeamMemberService } from "../interfaces/teamMemberService";
 
-const Logger = logger(__filename);
+// Node.js does not set __filename globally in ES modules, 
+// so we can use module.filename or a string fallback.
+const Logger = logger(module?.filename ?? "teamMemberService.ts");
 
 class TeamMemberService implements ITeamMemberService {
     async getTeamMembers(): Promise<Array<TeamMemberDTO>> {
-        let teamMembers: Array<PgTeamMember> = [];
+        let teamMembers: Array<TeamMember> = [];
 
         try {
-        teamMembers = await PgTeamMember.findAll({
-            attributes: ['id', 'first_name', 'last_name', 'team_role'],
-        });
+            teamMembers = await TeamMember.findAll({
+                attributes: ['id', 'firstName', 'lastName', 'teamRole'],
+            });
         } catch (error) {
             Logger.error(`Failed to get team members. Reason = ${getErrorMessage(error)}`);
             throw error;
         }
 
-        let teamMemberDTOs: Array<TeamMemberDTO> = [];
-
-        for (const teamMember of teamMembers) {
-            teamMemberDTOs.push({
-                id: teamMember.id,
-                firstName: teamMember.first_name,
-                lastName: teamMember.last_name,
-                teamRole: teamMember.team_role,
-            });
-        }
+        const teamMemberDTOs: Array<TeamMemberDTO> = teamMembers.map((teamMember) => ({
+            id: teamMember.id,
+            firstName: teamMember.firstName,
+            lastName: teamMember.lastName,
+            teamRole: teamMember.teamRole,
+        }));
 
         return teamMemberDTOs;
     }
 
     async createTeamMember(teamMember: CreateTeamMemberDTO): Promise<TeamMemberDTO> {
-        let newTeamMember: PgTeamMember | null;
+        let newTeamMember: TeamMember;
 
         try {
-            newTeamMember = await PgTeamMember.create({
-                first_name: teamMember.firstName,
-                last_name: teamMember.lastName,
-                team_role: teamMember.teamRole,
+            newTeamMember = await TeamMember.create({
+                firstName: teamMember.firstName,
+                lastName: teamMember.lastName,
+                teamRole: teamMember.teamRole,
             });
         } catch (error) {
             Logger.error(`Failed to create team member. Reason = ${getErrorMessage(error)}`);
@@ -49,9 +47,9 @@ class TeamMemberService implements ITeamMemberService {
 
         return {
             id: newTeamMember.id,
-            firstName: newTeamMember.first_name,
-            lastName: newTeamMember.last_name,
-            teamRole: newTeamMember.team_role,
+            firstName: newTeamMember.firstName,
+            lastName: newTeamMember.lastName,
+            teamRole: newTeamMember.teamRole,
         };
     }
 }
