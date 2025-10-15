@@ -20,14 +20,13 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [email, setEmail] = React.useState("Email not found.");
 
   const authContainerProps: BoxProps = {
-    bg: "gray.100",
+    bg: "gray.50",
     display: "flex",
     flexDirection: "column",
     width: { base: "21.5625", md: "28.875rem" },
-    height: { base: "21.8125", md: "30rem" },
-    px: { base: "2.5rem", md: "3.75rem" },
-    py: { base: "2.5rem", md: "4rem" },
-    gap: { base: "2.25rem", md: "2.25rem" },
+    px: { base: "2.25rem", md: "3.75rem" },
+    py: { base: "2.25rem", md: "4rem" },
+    gap: { base: "0.625rem", md: "0.625rem" },
     borderRadius: { base: "0.375rem", md: "0.375rem" },
   };
 
@@ -104,116 +103,105 @@ const CreatePasswordPage = (): React.ReactElement => {
       }}
     >
       {/* Logo + Login container */}
-      <Flex flex="1" justifyContent="center" alignItems="center">
-        <Flex
-          gap="2.2rem"
-          direction="column"
-          justify="center"
-          alignItems="center"
-          padding="1rem"
-        >
-          <Logo />
-          <AuthContainer authContainerProps={authContainerProps}>
+      <Flex flex="1" justifyContent="center" alignItems="center" gap="3.375rem" direction="column" padding="1rem">
+        <Logo />
+        <AuthContainer authContainerProps={authContainerProps}>
+          {/* Input + header + button wrapper */}
+          <Flex direction="column" gap="2.25rem">
             {/* Login header */}
             <Text
               color="gray.600"
-              textStyle={{ base: "h2Mobile", md: "h2" }}
+              textStyle={{ base: "h2", md: "h1" }}
               m={0}
               textAlign="center"
             >
               Welcome!
             </Text>
-            {/* Input + button wrapper */}
-            <Flex direction="column" gap="2.25rem">
-              {/* Input wrapper */}
-              <Flex
-                direction="column"
-                gap={{ base: "1rem", md: "1.5rem" }}
-                width="100%"
-              >
-                {/* Email input */}
-                <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textStyle="bodyMobile"
-                    textColor="gray.600"
-                    lineHeight="0.5rem"
-                    m={0}
-                  >
-                    Email Address:
-                  </FormLabel>
-                  <Input value={email} placeholder={email} disabled />
-                </Flex>
-                {/* Password input */}
-                <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textColor="gray.600"
-                    textStyle="bodyMobile"
-                    lineHeight="0.5rem"
-                    m={0}
-                  >
-                    Create Password:
-                  </FormLabel>
-                  <FormControl isInvalid={!!errorMessage}>
-                    <PasswordInput value={password} onChange={handlePasswordChange} />
-                  </FormControl>
-                </Flex>
-                {/* Password confirmation input */}
-                <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textColor="gray.600"
-                    textStyle="bodyMobile"
-                    lineHeight="0.5rem"
-                    m={0}
-                  >
-                    Confirm Password:
-                  </FormLabel>
-                  <FormControl isInvalid={!!errorMessage}>
-                    <PasswordInput value={confirmPassword} onChange={handleConfirmPasswordChange} />
-                  </FormControl>
-                </Flex>
-              </Flex>
-              {/* Button + error message */}
-              <Flex direction="column">
-                {/* Create Account button */}
-                <Button
-                  type="submit"
+            {/* Input wrapper */}
+            <Flex
+              direction="column"
+              gap={{ base: "1rem", md: "1rem" }}
+              width="100%"
+            >
+              {/* Email input */}
+              <Flex direction="column" gap="0.375rem">
+                <FormLabel
                   textStyle="bodyMobile"
-                  onClick={handleSubmitForm}
-                  color="white"
-                  h="2.4rem"
-                  width="100%"
-                  bg="blue.700"
+                  textColor="gray.600"
                   m={0}
                 >
-                  Create Account
-                </Button>
-                {/* General error message */}
-                {errorMessage && (
-                  <Text
-                    color="red.500"
-                    textStyle="bodyMobile"
-                    lineHeight="1"
-                    m={0}
-                    mt="1rem"
-                    textAlign="center"
-                  >
-                    {errorMessage}
-                  </Text>
-                )}
+                  Email Address:
+                </FormLabel>
+                <Input value={email} placeholder={email} disabled />
+              </Flex>
+              {/* Password input */}
+              <Flex direction="column" gap="0.375rem">
+                <FormLabel
+                  textColor="gray.600"
+                  textStyle="bodyMobile"
+                  m={0}
+                >
+                  Create Password:
+                </FormLabel>
+                <FormControl isInvalid={!!errorMessage}>
+                  <PasswordInput value={password} onChange={handlePasswordChange} />
+                </FormControl>
+              </Flex>
+              {/* Password confirmation input */}
+              <Flex direction="column" gap="0.375rem">
+                <FormLabel
+                  textColor="gray.600"
+                  textStyle="bodyMobile"
+                  m={0}
+                >
+                  Confirm Password:
+                </FormLabel>
+                <FormControl isInvalid={!!errorMessage}>
+                  <PasswordInput value={confirmPassword} onChange={handleConfirmPasswordChange} />
+                </FormControl>
               </Flex>
             </Flex>
-          </AuthContainer>
-        </Flex>
-      {showModal && (
-        <PopupModal
-          open={showModal}
-          title="Success!"
-          message="Welcome to the Oakville & Milton Humane Society"
-          primaryButtonText="Get Started"
-          onPrimaryClick={handleGetStarted}
-        />
-      )}
+            {/* Button */}
+            <Flex direction="column" gap="0.5rem">
+              {/* Create Account button */}
+              <Button
+                type="submit"
+                textStyle="button"
+                onClick={handleSubmitForm}
+                color="white"
+                h="3rem"
+                width="100%"
+                bg="blue.700"
+                m={0}
+              >
+                Create Account
+              </Button>
+              {/* General error message */}
+              {/* TODO: deprecate, error messages are displayed under individual inputs */}
+              {errorMessage && (
+                <Text
+                  color="red.500"
+                  textStyle="bodyMobile"
+                  lineHeight="1"
+                  m={0}
+                  textAlign="center"
+                >
+                  {errorMessage}
+                </Text>
+              )}
+            </Flex>
+          </Flex>
+        </AuthContainer>
       </Flex>
+    {showModal && (
+      <PopupModal
+        open={showModal}
+        title="Success!"
+        message="Welcome to the Oakville & Milton Humane Society"
+        primaryButtonText="Get Started"
+        onPrimaryClick={handleGetStarted}
+      />
+    )}
     </Flex>
   );
 };
