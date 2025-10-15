@@ -33,7 +33,7 @@ const LoginPage = (): React.ReactElement => {
   );
 
   const authContainerProps: BoxProps = {
-    bg: "gray.100",
+    bg: "gray.50",
     display: "flex",
     flexDirection: "column",
     width: { base: "21.5625", md: "28.875rem" },
@@ -159,114 +159,106 @@ const LoginPage = (): React.ReactElement => {
           }}
         >
           {/* Logo + Login container */}
-          <Flex margin="auto" gap="2.25rem" direction="column" padding="1rem">
+          <Flex flex="1" justifyContent="center" alignItems="center" gap="3.875rem" direction="column">
             <Logo />
             <AuthContainer authContainerProps={authContainerProps}>
               {/* Login header */}
               <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
                 Welcome Back!
               </Text>
-              {/* Form begins */}
-              <form
-                onSubmit={(e: React.FormEvent) => {
-                  e.preventDefault();
-                  handleLogin();
-                }}
-              >
-                <Flex direction="column" gap="2rem">
-                  <Flex direction="column" gap="1rem">
-                    {/* Email input + error handling */}
-                    <Flex direction="column" gap="0.375rem">
-                      <FormLabel
-                        m={0}
-                        textColor="gray.600"
-                        textStyle="bodyMobile"
-                      >
-                        Email:
-                      </FormLabel>
-                      <FormControl isInvalid={!!emailError || !!errorMessage}>
-                        <Input
-                          placeholder="user@humanesociety.org"
-                          value={email}
-                          onChange={handleEmailChange}
-                        />
-                        {emailError && (
-                          <Text
-                            textStyle="bodyMobile"
-                            color="red.500"
-                            m={0}
-                            mt="0.25rem"
-                          >
-                            {emailError}
-                          </Text>
-                        )}
-                      </FormControl>
-                    </Flex>
-                    {/* Password input + error handling */}
-                    <Flex direction="column" gap="0.375rem">
-                      <FormLabel
-                        m={0}
-                        textColor="gray.600"
-                        textStyle="bodyMobile"
-                      >
-                        Password:
-                      </FormLabel>
-                      <FormControl
-                        isInvalid={!!passwordError || !!errorMessage}
-                      >
-                        <PasswordInput
-                          value={password}
-                          onChange={handlePasswordChange}
-                        />
-                        {passwordError && (
-                          <Text
-                            textStyle="bodyMobile"
-                            color="red.500"
-                            mt="0.25rem"
-                          >
-                            {passwordError}
-                          </Text>
-                        )}
-                      </FormControl>
-                    </Flex>
-                    {/* General error message */}
-                    {errorMessage && (
+              {/* Inputs + Forgot Password wrapper */}
+              <Flex direction="column" gap="1rem">
+                {/* Email input + error handling */}
+                <Flex direction="column" gap="0.375rem">
+                  <FormLabel
+                    m={0}
+                    textColor="gray.600"
+                    textStyle="bodyMobile"
+                  >
+                    Email:
+                  </FormLabel>
+                  <FormControl isInvalid={!!emailError || !!errorMessage}>
+                    <Input
+                      placeholder="user@humanesociety.org"
+                      value={email}
+                      onChange={handleEmailChange}
+                    />
+                    {emailError && (
                       <Text
-                        color="red.500"
                         textStyle="bodyMobile"
-                        lineHeight="1"
+                        color="red.500"
                         m={0}
+                        mt="0.25rem"
                       >
-                        {errorMessage}
+                        {emailError}
                       </Text>
                     )}
-                    {/* Forgot password link */}
-                    <Text
-                      m={0}
-                      textStyle="bodyMobile"
-                      cursor="pointer"
-                      onClick={handleForgotPassword}
-                      color="gray.600"
-                      textAlign="center"
-                      _hover={{ textDecoration: "underline" }}
-                    >
-                      Forgot Password?
-                    </Text>
-                  </Flex>
-                  {/* Login button */}
-                  <Button
-                    type="submit"
-                    textStyle="button"
-                    size="lg"
-                    width="100%"
-                    variant="solid"
-                    color="white"
-                    bg="blue.700"
-                  >
-                    Login
-                  </Button>
+                  </FormControl>
                 </Flex>
-              </form>
+                {/* Password input + error handling */}
+                <Flex direction="column" gap="0.375rem">
+                  <FormLabel
+                    m={0}
+                    textColor="gray.600"
+                    textStyle="bodyMobile"
+                  >
+                    Password:
+                  </FormLabel>
+                  <FormControl
+                    isInvalid={!!passwordError || !!errorMessage}
+                  >
+                    <PasswordInput
+                      value={password}
+                      onChange={handlePasswordChange}
+                    />
+                    {passwordError && (
+                      <Text
+                        textStyle="bodyMobile"
+                        color="red.500"
+                        mt="0.25rem"
+                      >
+                        {passwordError}
+                      </Text>
+                    )}
+                  </FormControl>
+                </Flex>
+                {/* General error message */}
+                {errorMessage && (
+                  <Text
+                    color="red.500"
+                    textStyle="bodyMobile"
+                    lineHeight="1"
+                    m={0}
+                  >
+                    {errorMessage}
+                  </Text>
+                )}
+                {/* Forgot password link */}
+                <Text
+                  m={0}
+                  textStyle="bodyMobile"
+                  cursor="pointer"
+                  onClick={handleForgotPassword}
+                  color="gray.600"
+                  textAlign="center"
+                  _hover={{ textDecoration: "underline" }}
+                >
+                  Forgot Password?
+                </Text>
+              </Flex>
+              {/* Login button */}
+              <Button
+                type="submit"
+                textStyle="button"
+                onClick={handleLogin}
+                size="lg"
+                width="100%"
+                variant="solid"
+                color="white"
+                bg="blue.700"
+              >
+                Login
+              </Button>
             </AuthContainer>
           </Flex>
         </Flex>
