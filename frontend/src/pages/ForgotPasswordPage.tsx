@@ -18,17 +18,6 @@ const ForgotPasswordPage = (): React.ReactElement => {
   const [sentEmailToUser, setSentEmailToUser] = useState(false);
   const [userEmailId, setUserEmaild] = useState("");
 
-  const authContainerProps: BoxProps = {
-    bg: "gray.50",
-    display: "flex",
-    flexDirection: "column",
-    width: { base: "21.5625", md: "28.875rem" },
-    px: { base: "2.5rem", md: "3.75rem" },
-    py: { base: "2.5rem", md: "4rem" },
-    gap: { base: "2.25rem", md: "2.25rem" },
-    borderRadius: { base: "0.375rem", md: "0.375rem" },
-  };
-
   const handleUserAuth = async (userEmail: string) => {
     const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     const expiryTime = 60 * 1000; // 60 seconds
@@ -120,7 +109,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <AuthContainer authContainerProps={authContainerProps}>
+      <AuthContainer>
         <Text
           color="gray.600"
           textStyle="h2"

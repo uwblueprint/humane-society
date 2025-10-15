@@ -32,17 +32,6 @@ const LoginPage = (): React.ReactElement => {
     "default",
   );
 
-  const authContainerProps: BoxProps = {
-    bg: "gray.50",
-    display: "flex",
-    flexDirection: "column",
-    width: { base: "21.5625", md: "28.875rem" },
-    px: { base: "2.5rem", md: "3.75rem" },
-    py: { base: "2.5rem", md: "4rem" },
-    gap: { base: "2.25rem", md: "2.25rem" },
-    borderRadius: { base: "0.375rem", md: "0.375rem" },
-  };
-
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
@@ -161,7 +150,7 @@ const LoginPage = (): React.ReactElement => {
           {/* Logo + Login container */}
           <Flex flex="1" justifyContent="center" alignItems="center" gap="3.875rem" direction="column">
             <Logo />
-            <AuthContainer authContainerProps={authContainerProps}>
+            <AuthContainer>
               {/* Login header */}
               <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
                 Welcome Back!

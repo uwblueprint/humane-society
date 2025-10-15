@@ -22,17 +22,6 @@ const ResetPasswordPage = (): React.ReactElement => {
   const history = useHistory();
   const query = useQuery();
 
-  const authContainerProps: BoxProps = {
-    bg: "gray.50",
-    display: "flex",
-    flexDirection: "column",
-    width: { base: "21.5625", md: "28.875rem" },
-    px: { base: "2.5rem", md: "3.75rem" },
-    py: { base: "2.5rem", md: "4rem" },
-    gap: { base: "2.25rem", md: "2.25rem" },
-    borderRadius: { base: "0.375rem", md: "0.375rem" },
-  };
-
   const oobCode = query.get("oobCode");
 
   const handlePasswordReset = async () => {
@@ -124,7 +113,7 @@ const ResetPasswordPage = (): React.ReactElement => {
       align="center"
       overflow="auto"
     >
-      <AuthContainer authContainerProps={authContainerProps}>
+      <AuthContainer>
         <Text m={0} color="gray.600" textStyle="h2" textAlign="center">
           Reset Password
         </Text>

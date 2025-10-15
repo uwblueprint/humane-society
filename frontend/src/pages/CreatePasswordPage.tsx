@@ -19,17 +19,6 @@ const CreatePasswordPage = (): React.ReactElement => {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [email, setEmail] = React.useState("Email not found.");
 
-  const authContainerProps: BoxProps = {
-    bg: "gray.50",
-    display: "flex",
-    flexDirection: "column",
-    width: { base: "21.5625", md: "28.875rem" },
-    px: { base: "2.25rem", md: "3.75rem" },
-    py: { base: "2.25rem", md: "4rem" },
-    gap: { base: "0.625rem", md: "0.625rem" },
-    borderRadius: { base: "0.375rem", md: "0.375rem" },
-  };
-
   const history = useHistory();
 
   React.useEffect(() => {
@@ -105,7 +94,7 @@ const CreatePasswordPage = (): React.ReactElement => {
       {/* Logo + Login container */}
       <Flex flex="1" justifyContent="center" alignItems="center" gap="3.375rem" direction="column" padding="1rem">
         <Logo />
-        <AuthContainer authContainerProps={authContainerProps}>
+        <AuthContainer>
           {/* Input + header + button wrapper */}
           <Flex direction="column" gap="2.25rem">
             {/* Login header */}
