@@ -114,7 +114,6 @@ const ForgotPasswordPage = (): React.ReactElement => {
           color="gray.600"
           textStyle="h2"
           textAlign="center"
-          lineHeight="120%"
           m={0}
         >
           Forgot Password?
@@ -123,8 +122,8 @@ const ForgotPasswordPage = (): React.ReactElement => {
           Please enter the email address associated with your account to reset
           your password.
         </Text>
-        <FormControl isInvalid={!validUser}>
-          <Flex direction="column" gap="0.375rem">
+        <Flex direction="column" gap="0.375rem">
+          <FormControl isInvalid={!validUser}>
             <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
               Email:
             </FormLabel>
@@ -133,13 +132,14 @@ const ForgotPasswordPage = (): React.ReactElement => {
               value={userEmailId}
               onChange={handleInputChange}
             />
-          </Flex>
+          {/* TODO: Deprecate incorrect error message */}
           {!validUser && (
             <Text textStyle="bodyMobile" color="red.500" m={0} mt="0.25rem">
               Must be a valid humanesociety.org email
             </Text>
           )}
-        </FormControl>
+          </FormControl>
+        </Flex>
         <Button
           textStyle="button"
           size="lg"
@@ -153,7 +153,8 @@ const ForgotPasswordPage = (): React.ReactElement => {
         >
           Send
         </Button>
-
+        
+        {/* TODO: proper error handling + success message */}
         {sentEmail && (
           <Text textStyle="caption" color="blue.700" textAlign="center">
             A password reset link has been sent to your email!
