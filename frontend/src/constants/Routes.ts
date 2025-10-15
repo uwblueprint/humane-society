@@ -48,4 +48,7 @@ export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 export const HOOKS_PAGE = "/hooks";
 
 export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
+
+export const TEAM_MEMBERS = "/team-members";
+
 // END OF STARTER CODE ROUTES (DEPRECATED)

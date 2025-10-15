@@ -105,8 +105,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   const onSubmit = (data: FormData) => {
-    // TODO: deprecate console use in frontend
-    /* eslint-disable-next-line no-console */
     console.log({
       userId: data.userId,
       firstName: data.firstName,

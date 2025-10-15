@@ -4,11 +4,14 @@ import express from "express";
 import * as firebaseAdmin from "firebase-admin";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import teamMemberRouter from "./rest/teamMemberRoutes";
 
 import { sequelize } from "./models";
 import authRouter from "./rest/authRoutes";
 import taskTemplateRouter from "./rest/taskTemplateRoutes";
+import entityRouter from "./rest/entityRoutes";
 import petRouter from "./rest/petRoutes";
+import simpleEntityRouter from "./rest/simpleEntityRoutes";
 import userRouter from "./rest/userRoutes";
 import taskRouter from "./rest/taskRoutes";
 
@@ -34,10 +37,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
 app.use("/task-templates", taskTemplateRouter);
+app.use("/entities", entityRouter);
 app.use("/pets", petRouter);
+app.use("/simple-entities", simpleEntityRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/team-members", teamMemberRouter);
 
 sequelize.authenticate();
 

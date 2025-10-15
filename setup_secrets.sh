@@ -1,5 +1,4 @@
 #!/bin/bash
-# DEPRECATED
 
 # Login to Vault
 echo "Logging into Vault..."

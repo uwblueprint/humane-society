@@ -1,8 +1,8 @@
-enum UserRoles {
+export enum UserRoles {
   ADMIN = "Administrator",
   BEHAVIOURIST = "Animal Behaviourist",
   STAFF = "Staff",
   VOLUNTEER = "Volunteer",
 }
 
-export default UserRoles;
+export const temp = ""; // Temp export to make linter happy, remove once another constant is added

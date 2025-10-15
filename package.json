@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "sequelize-typescript": "^2.1.6"
+  },
+  "devDependencies": {
+    "@types/sequelize": "^6.12.0"
+  }
+}
