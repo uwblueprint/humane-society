@@ -6,7 +6,7 @@ lint:
 	docker exec -it humane_society_backend /bin/bash -c "yarn lint"
 	docker exec -it humane_society_frontend /bin/bash -c "yarn lint"
 
-format:
+fix:
 	docker exec -it humane_society_backend /bin/bash -c "yarn fix"
 	docker exec -it humane_society_frontend /bin/bash -c "yarn fix"
 
@@ -18,7 +18,7 @@ generate-migration:
 ifndef NAME
 	$(error NAME argument was not provided. Command should include a NAME parameter)
 endif
-	docker exec -it humane_society_backend /bin/bash -c "node migrate create --name $(name).ts"
+	docker exec -it humane_society_backend /bin/bash -c "node migrate create --name $(NAME).ts"
 
 # Docker Commands
 start-docker:
@@ -29,7 +29,7 @@ stop-docker:
 
 # Database Operations
 clean-db:
-	docker exec -it humane_society_backend /bin/bash -c "node migrate down && node migrate up"
+	docker exec -it humane_society_backend /bin/bash -c "node migrate down --to 0 && node migrate up"
 
 # Seeding script has not been created yet
 seed-db:

@@ -1,6 +1,8 @@
 import { Transaction, QueryTypes } from "sequelize";
 import { DateTime } from "luxon";
 import PgPet from "../../models/pet.model";
+// import PgTask from "../../models/task.model";
+// import PgTaskTemplate from "../../models/taskTemplate.model";
 import PgPetCareInfo from "../../models/petCareInfo.model";
 import PgUser from "../../models/user.model";
 import PgActivityType from "../../models/activityType.model";
@@ -15,6 +17,8 @@ import {
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { sequelize } from "../../models";
+// import TaskTemplate from "../../models/taskTemplate.model";
+// import { Role } from "../../types";
 import { PetStatus, ColorLevel } from "../../types";
 
 const Logger = logger(__filename);

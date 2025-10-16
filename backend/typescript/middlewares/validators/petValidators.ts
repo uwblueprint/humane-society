@@ -19,7 +19,9 @@ export const petRequestDtoValidators = async (
   const { body } = req;
 
   if (body.animalTag && !validateEnum(body.animalTag, AnimalTag)) {
-    return res.status(400).send(getApiValidationError("animaTag", "AnimalTag"));
+    return res
+      .status(400)
+      .send(getApiValidationError("animalTag", "AnimalTag"));
   }
 
   if (!validatePrimitive(body.name, "string")) {
@@ -27,13 +29,11 @@ export const petRequestDtoValidators = async (
   }
 
   if (!validatePrimitive(body.colorLevel, "integer")) {
-    return res
-      .status(400)
-      .send(getApiValidationError("color_level", "integer"));
+    return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
 
   if (!validateNumberConstraint(body.colorLevel, 1, 5)) {
-    return res.status(400).send(getConstraintError("color_level", 1, 5));
+    return res.status(400).send(getConstraintError("colorLevel", 1, 5));
   }
 
   if (!validateEnum(body.status, petStatusEnum)) {

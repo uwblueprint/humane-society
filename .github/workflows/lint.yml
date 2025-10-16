@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
       - name: Filter changed files
         uses: dorny/paths-filter@v2
         id: changes
@@ -34,11 +34,11 @@ jobs:
               - "backend/typescript/**"
             python-backend:
               - "backend/python/**"
-    
+
       - name: Get Yarn cache directory
         id: yarn-cache-dir
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-      
+
       - name: Cache Yarn dependencies
         uses: actions/cache@v3
         with:
@@ -46,12 +46,16 @@ jobs:
           key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock', 'backend/typescript/yarn.lock') }}
           restore-keys: |
             yarn-${{ runner.os }}-
-      
+
       - name: Set up Node.js
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "20.11.1"
+          cache: "yarn"
+          cache-dependency-path: |
+            frontend/yarn.lock
+            backend/typescript/yarn.lock
 
       - name: Install Node.js dependencies
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
@@ -66,7 +70,7 @@ jobs:
         if: steps.changes.outputs.typescript-backend == 'true'
         working-directory: ./backend/typescript
         run: yarn lint
-      
+
       - name: Lint Python backend
         if: steps.changes.outputs.python-backend == 'true'
         working-directory: ./backend/python

@@ -1,6 +1,6 @@
 import { signInWithEmailLink } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import auth from "../firebase/firebase";
+import auth from "../firebase";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { AuthenticatedUser, PasswordSetResponse } from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
@@ -41,32 +41,20 @@ const loginWithSignInLink = async (
     );
     localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(data));
     return data;
-  } catch (error: unknown) {
+  } catch (error) {
     if (error instanceof FirebaseError) {
       if (
         error.code === "auth/invalid-action-code" ||
         error.code === "auth/expired-action-code"
       ) {
+        // TODO: deprecate console use in frontend
+        /* eslint-disable-next-line no-console */
         console.log(
           `Attempt to use invalidated sign-in link, ask administrator for new link: ${error.message}`,
         ); // link has already been used once or has expired
       }
       // email has already been validated and user shouldn't be disabled, so auth/invalid-email and auth/user-disabled isn't checked
     }
-    return null;
-  }
-};
-
-const loginWithGoogle = async (idToken: string): Promise<AuthenticatedUser> => {
-  try {
-    const { data } = await baseAPIClient.post(
-      "/auth/login",
-      { idToken },
-      { withCredentials: true },
-    );
-    localStorage.setItem(AUTHENTICATED_USER_KEY, JSON.stringify(data));
-    return data;
-  } catch (error) {
     return null;
   }
 };
@@ -108,17 +96,11 @@ const register = async (
   }
 };
 
-const resetPassword = async (email: string | undefined): Promise<boolean> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
+const sendPasswordResetEmail = async (
+  email: string | undefined,
+): Promise<boolean> => {
   try {
-    await baseAPIClient.post(
-      `/auth/resetPassword/${email}`,
-      {},
-      { headers: { Authorization: bearerToken } },
-    );
+    await baseAPIClient.post(`/auth/send-password-reset-email/${email}`);
     return true;
   } catch (error) {
     return false;
@@ -177,9 +159,8 @@ export default {
   login,
   loginWithSignInLink,
   logout,
-  loginWithGoogle,
   register,
-  resetPassword,
+  sendPasswordResetEmail,
   refresh,
   setPassword,
   getEmailOfCurrentUser,

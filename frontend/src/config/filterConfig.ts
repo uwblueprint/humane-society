@@ -1,6 +1,6 @@
 import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
 import { FilterSection } from "../types/FilterTypes";
-import { AnimalTag, TaskCategory, SkillLevel } from "../types/TaskTypes";
+import { AnimalTag, TaskCategory, ColorLevel } from "../types/TaskTypes";
 
 const filterConfig: Record<string, FilterSection[]> = {
   petListAdmin: [
@@ -23,7 +23,7 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Colour Level",
       value: "skill",
-      options: Object.values(SkillLevel),
+      options: Object.values(ColorLevel),
     },
   ],
   petListVolunteer: [
@@ -46,10 +46,20 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Colour Level",
       value: "skill",
-      options: Object.values(SkillLevel),
+      options: Object.values(ColorLevel),
     },
   ],
   userManagement: [
+    {
+      name: "Animal Tag",
+      value: "animalTags",
+      options: Object.values(AnimalTag),
+    },
+    {
+      name: "Colour Level",
+      value: "colorLevel",
+      options: Object.values(ColorLevel),
+    },
     {
       name: "Role",
       value: "role",
@@ -59,6 +69,13 @@ const filterConfig: Record<string, FilterSection[]> = {
       name: "Status",
       value: "status",
       options: Array.from(STATUS),
+    },
+  ],
+  taskManagement: [
+    {
+      name: "Task Category",
+      value: "category",
+      options: Object.values(TaskCategory),
     },
   ],
 };

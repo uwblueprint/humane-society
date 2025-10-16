@@ -50,9 +50,6 @@ export const up: Migration = async ({ context: sequelize }) => {
     allowNull: true,
   });
 
-  /* rename skill_level */
-  await queryInterface.renameColumn(TABLE_NAME, "skill_level", "color_level");
-
   /* delete age, add birthday */
   await queryInterface.removeColumn(TABLE_NAME, "age");
   await queryInterface.addColumn(TABLE_NAME, "birthday", {
@@ -106,12 +103,22 @@ export const down: Migration = async ({ context: sequelize }) => {
   });
 
   /* turn columns mandatory */
+  // have to fill null values first bc defaultValue only applies after :(
+  // default pet photo is humane society logo (??)
+  await queryInterface.sequelize.query(`
+    UPDATE "pets" SET "photo" = 'https://postimg.cc/8fjrfbxK' WHERE "photo" IS NULL;
+  `);
   await queryInterface.changeColumn(TABLE_NAME, "photo", {
     type: DataType.STRING,
+    defaultValue: "https://postimg.cc/8fjrfbxK",
     allowNull: false,
   });
+  await queryInterface.sequelize.query(`
+    UPDATE "pets" SET "breed" = 'Unknown Breed' WHERE "breed" IS NULL;
+  `);
   await queryInterface.changeColumn(TABLE_NAME, "breed", {
     type: DataType.STRING,
+    defaultValue: "Unknown Breed",
     allowNull: false,
   });
   // manual bc sequelize will try to create a duplicate sex enum
@@ -129,14 +136,14 @@ export const down: Migration = async ({ context: sequelize }) => {
     defaultValue: false,
     allowNull: false,
   });
+  await queryInterface.sequelize.query(`
+    UPDATE "pets" SET "weight" = 0 WHERE "weight" IS NULL;
+  `);
   await queryInterface.changeColumn(TABLE_NAME, "weight", {
     type: DataType.FLOAT,
     defaultValue: 0,
     allowNull: false,
   });
-
-  /* rename color_level */
-  await queryInterface.renameColumn(TABLE_NAME, "color_level", "skill_level");
 
   /* delete birthday, add age */
   await queryInterface.addColumn(TABLE_NAME, "age", {

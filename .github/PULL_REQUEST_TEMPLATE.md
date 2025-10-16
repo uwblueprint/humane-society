@@ -1,6 +1,6 @@
 ## Notion ticket link
 <!-- Please replace with your ticket's URL -->
-[Ticket Name](https://www.notion.so/uwblueprintexecs/Task-Board-db95cd7b93f245f78ee85e3a8a6a316d)
+[Ticket Name](https://www.notion.so/uwblueprintexecs/aecc07aa87f4429dbd4b5c4287531731?v=1f810f3fb1dc80c4abe0000c9dba2893&source=copy_link)
 
 
 <!-- Give a quick summary of the implementation details, provide design justifications if necessary -->

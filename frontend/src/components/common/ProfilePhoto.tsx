@@ -1,34 +1,59 @@
 import React from "react";
 import { Flex, Image } from "@chakra-ui/react";
+import { ColorLevel } from "../../types/TaskTypes";
+import defaultUserProfile from "../../assets/icons/default-user-profile.svg";
+import defaultPetProfile from "../../assets/icons/default-pet-profile.svg";
+import invitedDefaultUserProfile from "../../assets/icons/invited-default-user-profile.svg";
 
 export interface ProfilePhotoProps {
-  name: string;
-  color: string;
-  image: string;
+  color?: ColorLevel;
+  image?: string;
+  size: "small" | "large";
+  type: "user" | "pet" | "invitedUser";
 }
 
+const borderColor: Record<ColorLevel, string> = {
+  [ColorLevel.GREEN]: "green.300",
+  [ColorLevel.YELLOW]: "yellow.400",
+  [ColorLevel.ORANGE]: "orange.400",
+  [ColorLevel.BLUE]: "blue.500",
+  [ColorLevel.RED]: "red.600",
+};
+
+const fallbackImages: Record<"user" | "pet" | "invitedUser", string> = {
+  user: defaultUserProfile,
+  pet: defaultPetProfile,
+  invitedUser: invitedDefaultUserProfile,
+};
+
 const ProfilePhoto = ({
-  name,
   color,
   image,
-}: ProfilePhotoProps): React.ReactElement => (
-  <Flex
-    padding="0.19rem"
-    height="8.69rem"
-    width="8.69rem"
-    justify="center"
-    align="center"
-    borderRadius="full"
-    backgroundColor={color}
-  >
-    <Image
-      src={image}
-      alt={name}
-      fit="cover"
+  size = "large",
+  type,
+}: ProfilePhotoProps): React.ReactElement => {
+  const isSmall = size === "small";
+  const imageSize = isSmall ? "2.25rem" : "8.06rem";
+
+  const fallbackImage = fallbackImages[type];
+  const bgColor =
+    type === "invitedUser" ? "gray.300" : color && borderColor[color];
+  return (
+    <Flex
+      p="0rem"
+      justify="center"
+      align="center"
       borderRadius="full"
-      boxSize="8.06rem"
-    />
-  </Flex>
-);
+      backgroundColor={bgColor}
+    >
+      <Image
+        src={image || fallbackImage}
+        fit="cover"
+        borderRadius="full"
+        boxSize={imageSize}
+      />
+    </Flex>
+  );
+};
 
 export default ProfilePhoto;

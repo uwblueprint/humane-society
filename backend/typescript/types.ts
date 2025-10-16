@@ -18,7 +18,7 @@ export type UserDTO = {
   role: Role;
   status: UserStatus;
   colorLevel: number;
-  animalTags: [AnimalTag];
+  animalTags: AnimalTag[];
   canSeeAllLogs?: boolean | null;
   canAssignUsersToTasks?: boolean | null;
   phoneNumber?: string | null;
@@ -47,7 +47,7 @@ const sexValues = ["M", "F"] as const;
 
 export const sexEnum: Sex[] = [...sexValues];
 
-export type Sex = typeof sexValues[number];
+export type Sex = (typeof sexValues)[number];
 
 export enum PetStatus {
   OCCUPIED = "Occupied",
@@ -72,7 +72,7 @@ export enum UserStatus {
   INACTIVE = "Inactive",
 }
 
-export enum Category {
+export enum TaskCategory {
   GAMES = "Games",
   HUSBANDRY = "Husbandry",
   PEN_TIME = "Pen Time",
