@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Flex, Icon, Image, Text } from "@chakra-ui/react";
 import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
-import useOpenController from "../pet-list/useOpenController";
+import useOpenController from "./useOpenController";
 
 export interface ArrowDropdownProps {
   headerText: string;
