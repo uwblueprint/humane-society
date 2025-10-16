@@ -17,7 +17,7 @@ import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
-import InteractionLogPage from "./pages/InteractionLogPage";
+import InteractionLogPage from "./features/interaction-log/pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
