@@ -1,21 +1,21 @@
 import React from "react";
 import { Flex, SimpleGrid, Text, Icon, Tbody, Tr, Td } from "@chakra-ui/react";
-import useOpenController from "./useOpenController";
-import ProfilePhoto from "../common/ProfilePhoto";
-import { ReactComponent as HusbandryIcon } from "../../assets/icons/husbandry.svg";
-import { ReactComponent as PenTimeIcon } from "../../assets/icons/pen_time.svg";
-import { ReactComponent as GamesIcon } from "../../assets/icons/games.svg";
-import { ReactComponent as TrainingIcon } from "../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../assets/icons/walk.svg";
-import { ReactComponent as MiscIcon } from "../../assets/icons/misc.svg";
-import { ReactComponent as ExpandIcon } from "../../assets/icons/expand.svg";
+import useOpenController from "../../../components/common/useOpenController";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
+import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
+import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
+import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
+import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
+import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import {
   AnimalTag,
   ColorLevel,
   TaskCategory,
   TaskStatus,
-} from "../../types/TaskTypes";
-import PetStatus from "../common/PetStatus";
+} from "../../../types/TaskTypes";
+import PetStatus from "../../../components/common/PetStatus";
 
 export interface PetInfo {
   id: number;

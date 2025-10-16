@@ -1,13 +1,13 @@
 import { Flex } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import mockData from "../temp/mock/petlist/mockPetList.json";
-import PetListTable from "../components/pet-list/PetListTable";
-import { PetInfo } from "../components/pet-list/PetListTableSection";
-import Search from "../components/common/Search";
-import Filter from "../components/common/Filter";
-import { TaskCategory } from "../types/TaskTypes";
-import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants";
-import getCurrentUserRole from "../utils/CommonUtils";
+import mockData from "../../../temp/mock/petlist/mockPetList.json";
+import PetListTable from "../components/PetListTable";
+import { PetInfo } from "../components/PetListTableSection";
+import Search from "../../../components/common/Search";
+import Filter from "../../../components/common/Filter";
+import { TaskCategory } from "../../../types/TaskTypes";
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
+import getCurrentUserRole from "../../../utils/CommonUtils";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});

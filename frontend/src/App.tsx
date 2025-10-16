@@ -7,7 +7,7 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import PetListPage from "./pages/PetListPage";
+import PetListPage from "./features/pet-list/pages/PetListPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
 import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";

@@ -1,8 +1,8 @@
 import React from "react";
 import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
-import { TaskStatus } from "../../types/TaskTypes";
+import { TaskStatus } from "../../../types/TaskTypes";
 import { PetListTableSection, PetInfo } from "./PetListTableSection";
-import getCurrentUserRole from "../../utils/CommonUtils";
+import getCurrentUserRole from "../../../utils/CommonUtils";
 
 export interface PetListTableProps {
   pets: PetInfo[];
