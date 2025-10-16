@@ -3,15 +3,15 @@ import { Flex, Text, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useParams, useHistory } from "react-router-dom";
-import Input from "../components/common/Input";
-import SingleSelect from "../components/common/SingleSelect";
-import MultiSelect from "../components/common/MultiSelect";
-import Button from "../components/common/Button";
-import UserAPIClient from "../APIClients/UserAPIClient";
-import UserRoles from "../constants/UserConstants";
-import { AnimalTag } from "../types/TaskTypes";
-import ColourStarIcon from "../components/common/ColourStarIcon";
-import NavBar from "../components/common/navbar/NavBar";
+import Input from "../../../components/common/Input";
+import SingleSelect from "../../../components/common/SingleSelect";
+import MultiSelect from "../../../components/common/MultiSelect";
+import Button from "../../../components/common/Button";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
+import UserRoles from "../../../constants/UserConstants";
+import { AnimalTag } from "../../../types/TaskTypes";
+import ColourStarIcon from "../../../components/common/ColourStarIcon";
+import NavBar from "../../../components/common/navbar/NavBar";
 
 interface FormData {
   firstName: string;

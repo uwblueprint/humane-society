@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { MailIcon, PencilIcon, PhoneIcon } from "../../../assets/icons";
-import ProfilePhoto from "../ProfilePhoto";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 import { ReactComponent as AdminTag } from "../../../assets/icons/user-role/admin.svg";
 import { ReactComponent as BehaviouristTag } from "../../../assets/icons/user-role/behaviourist.svg";
@@ -20,10 +20,10 @@ import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staf
 import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
 
 import UserRoles from "../../../constants/UserConstants";
-import ColourLevelBadge from "../ColourLevelBadge";
+import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "./AnimalTagList";
-import Logout from "../../auth/Logout";
+import Logout from "../../../components/auth/Logout";
 import InviteUser from "./InviteUser";
 import getCurrentUserRole from "../../../utils/CommonUtils";
 

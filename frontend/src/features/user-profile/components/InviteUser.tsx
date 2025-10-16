@@ -1,6 +1,6 @@
 import React from "react";
 
-import Button from "../Button";
+import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 
 export interface InviteUserProps {

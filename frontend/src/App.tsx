@@ -18,17 +18,17 @@ import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
 import InteractionLogPage from "./features/interaction-log/pages/InteractionLogPage";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "./features/user-profile/pages/UserProfilePage";
 import PetProfilePage from "./features/pet-profile/pages/PetProfilePage";
 import UserManagementPage from "./features/user-management/pages/UserManagementPage";
-import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
+import AdminViewEditUserProfilePage from "./features/user-profile/pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 
-import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
+import VolunteerViewEditUserProfilePage from "./features/user-profile/pages/VolunteerViewEditUserProfilePage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(

@@ -10,14 +10,14 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom";
-import Input from "../components/common/Input";
-import PasswordInput from "../components/common/PasswordInput";
-import Button from "../components/common/Button";
-import NavBar from "../components/common/navbar/NavBar";
-import ProfilePhoto from "../components/common/ProfilePhoto";
-import AuthContext from "../contexts/AuthContext";
-import UserAPIClient from "../APIClients/UserAPIClient";
-import PencilIcon from "../assets/icons/pencil.svg";
+import Input from "../../../components/common/Input";
+import PasswordInput from "../../../components/common/PasswordInput";
+import Button from "../../../components/common/Button";
+import NavBar from "../../../components/common/navbar/NavBar";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import AuthContext from "../../../contexts/AuthContext";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
+import PencilIcon from "../../../assets/icons/pencil.svg";
 
 interface FormData {
   userId: string;

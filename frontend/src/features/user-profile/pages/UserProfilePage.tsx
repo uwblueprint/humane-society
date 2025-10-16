@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
-import NavBar from "../components/common/navbar/NavBar";
-import { User } from "../types/UserTypes";
-import UserAPIClient from "../APIClients/UserAPIClient";
-import UserProfileSidebar from "../components/common/userprofile/UserProfileSidebar";
+import NavBar from "../../../components/common/navbar/NavBar";
+import { User } from "../../../types/UserTypes";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
+import UserProfileSidebar from "../components/UserProfileSidebar";
 
 const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
