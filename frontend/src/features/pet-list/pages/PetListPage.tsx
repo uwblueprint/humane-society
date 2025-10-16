@@ -1,6 +1,6 @@
 import { Flex } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import mockData from "../../../temp/mock/petlist/mockPetList.json";
+import mockData from "../temp/mock/petlist/mockPetList.json";
 import PetListTable from "../components/PetListTable";
 import { PetInfo } from "../components/PetListTableSection";
 import Search from "../../../components/common/Search";
