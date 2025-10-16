@@ -25,10 +25,7 @@ export type UserDTO = {
   profilePhoto?: string | null;
 };
 
-export type CreateUserDTO = Omit<
-  UserDTO,
-  "id" | "status" | "profilePhoto"
->;
+export type CreateUserDTO = Omit<UserDTO, "id" | "status" | "profilePhoto">;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
