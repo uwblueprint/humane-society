@@ -1,17 +1,17 @@
 import React from "react";
 import { HStack, Box, Icon } from "@chakra-ui/react";
-import { AnimalTag } from "../../../types/TaskTypes";
-import { ReactComponent as BirdTag } from "../../../assets/icons/animal-tag/bird.svg";
-import { ReactComponent as BunnyTag } from "../../../assets/icons/animal-tag/bunny.svg";
-import { ReactComponent as CatTag } from "../../../assets/icons/animal-tag/cat.svg";
-import { ReactComponent as DogTag } from "../../../assets/icons/animal-tag/dog.svg";
-import { ReactComponent as SmallAnimalTag } from "../../../assets/icons/animal-tag/small-animal.svg";
+import { AnimalTag } from "../../types/TaskTypes";
+import { ReactComponent as BirdTag } from "../../assets/icons/animal-tag/bird.svg";
+import { ReactComponent as BunnyTag } from "../../assets/icons/animal-tag/bunny.svg";
+import { ReactComponent as CatTag } from "../../assets/icons/animal-tag/cat.svg";
+import { ReactComponent as DogTag } from "../../assets/icons/animal-tag/dog.svg";
+import { ReactComponent as SmallAnimalTag } from "../../assets/icons/animal-tag/small-animal.svg";
 
-import { ReactComponent as InvitedBirdTag } from "../../../assets/icons/animal-tag/invited-bird.svg";
-import { ReactComponent as InvitedBunnyTag } from "../../../assets/icons/animal-tag/invited-bunny.svg";
-import { ReactComponent as InvitedCatTag } from "../../../assets/icons/animal-tag/invited-cat.svg";
-import { ReactComponent as InvitedDogTag } from "../../../assets/icons/animal-tag/invited-dog.svg";
-import { ReactComponent as InvitedSmallAnimalTag } from "../../../assets/icons/animal-tag/invited-small-animal.svg";
+import { ReactComponent as InvitedBirdTag } from "../../assets/icons/animal-tag/invited-bird.svg";
+import { ReactComponent as InvitedBunnyTag } from "../../assets/icons/animal-tag/invited-bunny.svg";
+import { ReactComponent as InvitedCatTag } from "../../assets/icons/animal-tag/invited-cat.svg";
+import { ReactComponent as InvitedDogTag } from "../../assets/icons/animal-tag/invited-dog.svg";
+import { ReactComponent as InvitedSmallAnimalTag } from "../../assets/icons/animal-tag/invited-small-animal.svg";
 
 const animalTagIcons: Record<AnimalTag, React.ElementType> = {
   [AnimalTag.BIRD]: BirdTag,

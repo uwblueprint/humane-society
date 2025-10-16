@@ -22,7 +22,7 @@ import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/
 import UserRoles from "../../../constants/UserConstants";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
-import AnimalTagList from "./AnimalTagList";
+import AnimalTagList from "../../../components/common/AnimalTagList";
 import Logout from "../../../components/auth/Logout";
 import InviteUser from "./InviteUser";
 import getCurrentUserRole from "../../../utils/CommonUtils";

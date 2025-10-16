@@ -16,7 +16,7 @@ import { ReactComponent as InvitedVolunteerTag } from "../../../assets/icons/use
 import UserRoles from "../../../constants/UserConstants";
 import { colorLevelMap } from "../../../types/TaskTypes";
 import { User } from "../../../types/UserTypes";
-import AnimalTagList from "../../user-profile/components/AnimalTagList";
+import AnimalTagList from "../../../components/common/AnimalTagList";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface UserListTableSectionProps {
