@@ -3,21 +3,21 @@ import { Redirect } from "react-router-dom";
 import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
 import { isSignInWithEmailLink } from "firebase/auth";
 
-import Input from "../components/common/Input";
-import Logo from "../components/common/Logo";
-import PasswordInput from "../components/common/PasswordInput";
+import Input from "../../../components/common/Input";
+import Logo from "../../../components/common/Logo";
+import PasswordInput from "../../../components/common/PasswordInput";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
-import auth from "../firebase/firebase";
-import authAPIClient from "../APIClients/AuthAPIClient";
+import auth from "../../../firebase/firebase";
+import authAPIClient from "../../../APIClients/AuthAPIClient";
 import {
   CREATE_PASSWORD_PAGE,
   FORGOT_PASSWORD_PAGE,
   HOME_PAGE,
-} from "../constants/Routes";
-import AuthContext from "../contexts/AuthContext";
-import { AuthenticatedUser } from "../types/AuthTypes";
-import PopupModal from "../components/common/PopupModal";
+} from "../../../constants/Routes";
+import AuthContext from "../../../contexts/AuthContext";
+import { AuthenticatedUser } from "../../../types/AuthTypes";
+import PopupModal from "../../../components/common/PopupModal";
 
 const LoginPage = (): React.ReactElement => {
   const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);

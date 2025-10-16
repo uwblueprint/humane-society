@@ -2,14 +2,14 @@ import React from "react";
 import { Button, Flex, Text, FormLabel, FormControl } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 
-import Input from "../components/common/Input";
-import Logo from "../components/common/Logo";
-import PasswordInput from "../components/common/PasswordInput";
-import PopupModal from "../components/common/PopupModal";
+import Input from "../../../components/common/Input";
+import Logo from "../../../components/common/Logo";
+import PasswordInput from "../../../components/common/PasswordInput";
+import PopupModal from "../../../components/common/PopupModal";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
-import AuthAPIClient from "../APIClients/AuthAPIClient";
-import { HOME_PAGE } from "../constants/Routes";
+import AuthAPIClient from "../../../APIClients/AuthAPIClient";
+import { HOME_PAGE } from "../../../constants/Routes";
 
 const CreatePasswordPage = (): React.ReactElement => {
   const [showModal, setShowModal] = React.useState(false);

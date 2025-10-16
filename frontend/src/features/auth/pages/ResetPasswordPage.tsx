@@ -3,11 +3,11 @@ import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useHistory, useLocation } from "react-router-dom";
 
-import Input from "../components/common/Input";
-import { HOME_PAGE } from "../constants/Routes";
-import PopupModal from "../components/common/PopupModal";
+import Input from "../../../components/common/Input";
+import { HOME_PAGE } from "../../../constants/Routes";
+import PopupModal from "../../../components/common/PopupModal";
 import background from "../assets/images/background.png";
-import backgroundMobile from "../assets/images/login_background_phone.png";
+import backgroundMobile from "../assets/images/background_mobile.png";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);

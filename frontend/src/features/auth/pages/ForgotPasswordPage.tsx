@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Text, Button, FormControl, Flex, FormLabel } from "@chakra-ui/react";
 
-import Input from "../components/common/Input";
+import Input from "../../../components/common/Input";
 import background from "../assets/images/background.png";
-import backgroundMobile from "../assets/images/login_background_phone.png";
-import AuthAPIClient from "../APIClients/AuthAPIClient";
+import backgroundMobile from "../assets/images/background_mobile.png";
+import AuthAPIClient from "../../../APIClients/AuthAPIClient";
 
 type SentEmail = {
   email: string;
