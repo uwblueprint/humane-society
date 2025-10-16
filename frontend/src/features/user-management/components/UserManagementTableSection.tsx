@@ -3,21 +3,21 @@ import { Flex, Icon, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 
 // TODO: move these into index.ts
 
-import { ReactComponent as AdminTag } from "../../assets/icons/user-role/admin.svg";
-import { ReactComponent as BehaviouristTag } from "../../assets/icons/user-role/behaviourist.svg";
-import { ReactComponent as StaffTag } from "../../assets/icons/user-role/staff.svg";
-import { ReactComponent as VolunteerTag } from "../../assets/icons/user-role/volunteer.svg";
+import { ReactComponent as AdminTag } from "../../../assets/icons/user-role/admin.svg";
+import { ReactComponent as BehaviouristTag } from "../../../assets/icons/user-role/behaviourist.svg";
+import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staff.svg";
+import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
 
-import { ReactComponent as InvitedAdminTag } from "../../assets/icons/user-role/invited-admin.svg";
-import { ReactComponent as InvitedBehaviouristTag } from "../../assets/icons/user-role/invited-behaviourist.svg";
-import { ReactComponent as InvitedStaffTag } from "../../assets/icons/user-role/invited-staff.svg";
-import { ReactComponent as InvitedVolunteerTag } from "../../assets/icons/user-role/invited-volunteer.svg";
+import { ReactComponent as InvitedAdminTag } from "../../../assets/icons/user-role/invited-admin.svg";
+import { ReactComponent as InvitedBehaviouristTag } from "../../../assets/icons/user-role/invited-behaviourist.svg";
+import { ReactComponent as InvitedStaffTag } from "../../../assets/icons/user-role/invited-staff.svg";
+import { ReactComponent as InvitedVolunteerTag } from "../../../assets/icons/user-role/invited-volunteer.svg";
 
-import UserRoles from "../../constants/UserConstants";
-import { colorLevelMap } from "../../types/TaskTypes";
-import { User } from "../../types/UserTypes";
-import AnimalTagList from "../common/userprofile/AnimalTagList";
-import ProfilePhoto from "../common/ProfilePhoto";
+import UserRoles from "../../../constants/UserConstants";
+import { colorLevelMap } from "../../../types/TaskTypes";
+import { User } from "../../../types/UserTypes";
+import AnimalTagList from "../../../components/common/userprofile/AnimalTagList";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface UserListTableSectionProps {
   users: User[];

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
-import UserAPIClient from "../APIClients/UserAPIClient";
-import { User } from "../types/UserTypes";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
+import { User } from "../../../types/UserTypes";
 
-import Filter from "../components/common/Filter";
-import Search from "../components/common/Search";
-import UserManagementTable from "../components/user-management/UserManagementTable";
+import Filter from "../../../components/common/Filter";
+import Search from "../../../components/common/Search";
+import UserManagementTable from "../components/UserManagementTable";
 
-import Pagination from "../components/common/Pagination";
+import Pagination from "../../../components/common/Pagination";
 
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
