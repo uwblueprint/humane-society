@@ -8,7 +8,7 @@ import Logo from "../../../components/common/Logo";
 import PasswordInput from "../../../components/common/PasswordInput";
 import background from "../assets/images/background.png";
 import backgroundMobile from "../assets/images/background_mobile.png";
-import auth from "../../../firebase/firebase";
+import auth from "../../../firebase";
 import authAPIClient from "../../../APIClients/AuthAPIClient";
 import {
   CREATE_PASSWORD_PAGE,
