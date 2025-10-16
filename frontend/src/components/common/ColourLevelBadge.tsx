@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, HStack } from "@chakra-ui/react";
-import { ColorLevel } from "../../../types/TaskTypes";
-import ColourStarIcon from "../ColourStarIcon";
+import { ColorLevel } from "../../types/TaskTypes";
+import ColourStarIcon from "./ColourStarIcon";
 
 const borderColour: Record<ColorLevel, string> = {
   [ColorLevel.GREEN]: "green.800",

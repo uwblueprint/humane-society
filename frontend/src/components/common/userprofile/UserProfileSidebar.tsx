@@ -20,7 +20,7 @@ import { ReactComponent as StaffTag } from "../../../assets/icons/user-role/staf
 import { ReactComponent as VolunteerTag } from "../../../assets/icons/user-role/volunteer.svg";
 
 import UserRoles from "../../../constants/UserConstants";
-import ColourLevelBadge from "../petprofile/ColourLevelBadge";
+import ColourLevelBadge from "../ColourLevelBadge";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "./AnimalTagList";
 import Logout from "../../auth/Logout";

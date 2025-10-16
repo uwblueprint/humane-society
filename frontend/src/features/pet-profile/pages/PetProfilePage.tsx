@@ -1,10 +1,10 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import React from "react";
 import { Flex } from "@chakra-ui/react";
-import NavBar from "../components/common/navbar/NavBar";
-import PetProfileSidebar from "../components/common/petprofile/PetProfileSidebar";
-import { ColorLevel, TaskStatus } from "../types/TaskTypes";
-import { SexEnum } from "../types/PetTypes";
+import NavBar from "../../../components/common/navbar/NavBar";
+import PetProfileSidebar from "../components/PetProfileSidebar";
+import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
+import { SexEnum } from "../../../types/PetTypes";
 
 const PetProfilePage = (): React.ReactElement => {
   // TODO: Connect endpoint

@@ -23,9 +23,9 @@ import {
 } from "../../../assets/icons";
 import { CareInfo, SexEnum } from "../../../types/PetTypes";
 import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
-import ArrowDropdown from "../ArrowDropdown";
-import PetStatus from "../PetStatus";
-import ColourLevelBadge from "./ColourLevelBadge";
+import ArrowDropdown from "../../../components/common/ArrowDropdown";
+import PetStatus from "../../../components/common/PetStatus";
+import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 
 export interface PetProfileSidebarProps {
   name: string;

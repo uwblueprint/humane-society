@@ -19,7 +19,7 @@ import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
 import InteractionLogPage from "./features/interaction-log/pages/InteractionLogPage";
 import ProfilePage from "./pages/ProfilePage";
-import PetProfilePage from "./pages/PetProfilePage";
+import PetProfilePage from "./features/pet-profile/pages/PetProfilePage";
 import UserManagementPage from "./pages/UserManagementPage";
 import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
