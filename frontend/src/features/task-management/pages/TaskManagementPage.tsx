@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { Flex } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
-import TaskManagementTable from "../components/common/task-management/TaskManagementTable";
-import Filter from "../components/common/Filter";
-import Search from "../components/common/Search";
-import { mockTasks } from "../types/TaskTypes";
-import Button from "../components/common/Button";
-import { ADD_TASK_TEMPLATE_PAGE } from "../constants/Routes";
+import TaskManagementTable from "../components/TaskManagementTable";
+import Filter from "../../../components/common/Filter";
+import Search from "../../../components/common/Search";
+import { mockTasks } from "../../../types/TaskTypes";
+import Button from "../../../components/common/Button";
+import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();

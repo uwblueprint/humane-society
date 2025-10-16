@@ -12,18 +12,18 @@ import {
 } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
-import Input from "../components/common/Input";
-import TextArea from "../components/common/TextArea";
-import SingleSelect from "../components/common/SingleSelect";
-import Button from "../components/common/Button";
-import { TaskCategory } from "../types/TaskTypes";
-import { TASK_MANAGEMENT_PAGE } from "../constants/Routes";
-import { ReactComponent as HusbandryIcon } from "../assets/icons/husbandry.svg";
-import { ReactComponent as PenTimeIcon } from "../assets/icons/pen_time.svg";
-import { ReactComponent as GamesIcon } from "../assets/icons/games.svg";
-import { ReactComponent as TrainingIcon } from "../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../assets/icons/walk.svg";
-import { ReactComponent as MiscIcon } from "../assets/icons/misc.svg";
+import Input from "../../../components/common/Input";
+import TextArea from "../../../components/common/TextArea";
+import SingleSelect from "../../../components/common/SingleSelect";
+import Button from "../../../components/common/Button";
+import { TaskCategory } from "../../../types/TaskTypes";
+import { TASK_MANAGEMENT_PAGE } from "../../../constants/Routes";
+import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
+import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
+import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
+import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
+import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 
 interface TaskTemplateForm {
   taskName: string;
