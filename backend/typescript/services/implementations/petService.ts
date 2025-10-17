@@ -329,10 +329,16 @@ class PetService implements IPetService {
   timeStringToDate(timeStr: string): DateTime {
     const currentTime = DateTime.now().setZone(TIME_ZONE);
     const fullDateString = `${currentTime.toFormat("DDDD")} ${timeStr}`;
-    return DateTime.fromFormat(fullDateString, "DDDD t");
+    
+    try {
+      return DateTime.fromFormat(fullDateString, "DDDD t");
+    } catch (error: unknown) {
+      Logger.error(`Failed to parse time string: ${timeStr}. Reason = ${getErrorMessage(error)}`);
+      throw error;
+    }
   }
 
-  colorLevelToColor(colorLevel: number): ColorLevel {
+  colorLevelToEnum(colorLevel: number): ColorLevel {
     // (values are in descending order)
     return Object.values(ColorLevel)[5 - colorLevel];
   }
@@ -352,7 +358,7 @@ class PetService implements IPetService {
 
   async getPetList(userId: number): Promise<PetListItemDTO[]> {
     const PET_TABLE_NAME = "pets";
-    const ACTIVITY_TABLE_NAME = "activities";
+    const TASK_TABLE_NAME = "tasks";
     const ONE_OR_MORE_DAYS_AGO = "One or more days ago";
 
     // date constants
@@ -372,35 +378,35 @@ class PetService implements IPetService {
       }
       const currUserId = user.id;
 
-      const petActivities = await sequelize.query<PetActivity>(
+      const petTasks = await sequelize.query<PetActivity>(
         `SELECT 
         ${PET_TABLE_NAME}.id AS pet_id,
         ${PET_TABLE_NAME}.name AS name,
         ${PET_TABLE_NAME}.status AS status,
         ${PET_TABLE_NAME}.photo AS photo,
         ${PET_TABLE_NAME}.color_level AS color_level,
-        ${ACTIVITY_TABLE_NAME}.user_id AS user_id,
-        ${ACTIVITY_TABLE_NAME}.activity_type_id AS activity_type_id,
-        ${ACTIVITY_TABLE_NAME}.start_time AS start_time,
-        ${ACTIVITY_TABLE_NAME}.end_time AS end_time
+        ${TASK_TABLE_NAME}.user_id AS user_id,
+        ${TASK_TABLE_NAME}.task_template_id AS task_template_id,
+        ${TASK_TABLE_NAME}.start_time AS start_time,
+        ${TASK_TABLE_NAME}.end_time AS end_time
         FROM ${PET_TABLE_NAME}
-        LEFT JOIN ${ACTIVITY_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${ACTIVITY_TABLE_NAME}.pet_id`,
+        LEFT JOIN ${TASK_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${TASK_TABLE_NAME}.pet_id`,
         { type: QueryTypes.SELECT },
       );
       const petIdToPetListItem: Record<string, PetListItemDTO> = {};
 
       // eslint-disable-next-line no-restricted-syntax
-      for (const petActivity of petActivities) {
-        // if there's no activity_type_id, that means this pet doesn't have any assigned activities
-        // (bc that's a mandatory column in activities)
-        if (!petActivity.activity_type_id) {
-          petIdToPetListItem[petActivity.pet_id] = {
-            id: petActivity.pet_id,
-            name: petActivity.name,
-            photo: petActivity.photo,
-            color: this.colorLevelToColor(petActivity.color_level),
+      for (const petTask of petTasks) {
+        // if there's no task_template_id, that means this pet doesn't have any assigned tasks
+        // (bc that's a mandatory column in tasks)
+        if (!petTask.task_template_id) {
+          petIdToPetListItem[petTask.pet_id] = {
+            id: petTask.pet_id,
+            name: petTask.name,
+            photo: petTask.photo,
+            color: this.colorLevelToEnum(petTask.color_level),
             taskCategories: [],
-            status: petActivity.status,
+            status: petTask.status,
             lastCaredFor: ONE_OR_MORE_DAYS_AGO,
             allTasksAssigned: null, // null if there are no tasks
             isAssignedToMe: false,
@@ -408,38 +414,38 @@ class PetService implements IPetService {
           // eslint-disable-next-line no-continue
           continue;
         }
-        const petData = petIdToPetListItem[petActivity.pet_id];
+        const petData = petIdToPetListItem[petTask.pet_id];
         // if the pet already exists in the hashMap
         if (petData) {
-          // exisiting entry in the hashMap, to compare times
-          if (!petActivity.end_time) {
-            // if the activity has not finished
-            if (petActivity.start_time) {
+          // existing entry in the hashMap, to compare times
+          if (!petTask.end_time) {
+            // if the task has not finished
+            if (petTask.start_time) {
               // if pet is currently occupied, last cared for is current time
               petData.lastCaredFor = this.dateToTimeString(currentTime);
             }
             // add task category
             // eslint-disable-next-line no-await-in-loop
-            const activityType = await TaskTemplate.findByPk(
-              petActivity.activity_type_id,
+            const taskTemplate = await TaskTemplate.findByPk(
+              petTask.task_template_id,
             );
-            if (activityType) {
-              petData.taskCategories.push(activityType.category);
+            if (taskTemplate) {
+              petData.taskCategories.push(taskTemplate.category);
             } else {
               Logger.error(
-                `Activity type with ID ${petActivity.activity_type_id} not found.`,
+                `Task template with ID ${petTask.task_template_id} not found.`,
               );
             }
-            if (!petActivity.user_id) {
+            if (!petTask.user_id) {
               // check if task has not been assigned
               petData.allTasksAssigned = false;
-            } else if (petActivity.user_id === currUserId) {
+            } else if (petTask.user_id === currUserId) {
               // if it is, check if task is assigned to user
               petData.isAssignedToMe = true;
             }
           } else {
-            // if activity has finished
-            const endTime = DateTime.fromJSDate(petActivity.end_time);
+            // if task has finished
+            const endTime = DateTime.fromJSDate(petTask.end_time);
             if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
               if (endTime > beginningOfToday) {
                 petData.lastCaredFor = this.dateToTimeString(endTime);
@@ -452,46 +458,46 @@ class PetService implements IPetService {
           // if the pet does not exist in the map
           let lastCaredFor;
           const taskCategories = [];
-          if (!petActivity.end_time) {
-            // if the activity has not finished
-            if (petActivity.start_time) {
+          if (!petTask.end_time) {
+            // if the task has not finished
+            if (petTask.start_time) {
               lastCaredFor = this.dateToTimeString(currentTime); // pet is currently occupied
             } else {
               lastCaredFor = ONE_OR_MORE_DAYS_AGO; // assume if a pet has never been cared for it should read 'One or more days ago'
             }
             // add task category
             // eslint-disable-next-line no-await-in-loop
-            const activityType = await TaskTemplate.findByPk(
-              petActivity.activity_type_id,
+            const taskTemplate = await TaskTemplate.findByPk(
+              petTask.task_template_id,
             );
-            if (activityType) {
-              taskCategories.push(activityType.category);
+            if (taskTemplate) {
+              taskCategories.push(taskTemplate.category);
             } else {
               Logger.error(
-                `Activity type with ID ${petActivity.activity_type_id} not found.`,
+                `Task template with ID ${petTask.task_template_id} not found.`,
               );
             }
           } else {
-            // if the activity has finished
-            const endTime = DateTime.fromJSDate(petActivity.end_time);
+            // if the task has finished
+            const endTime = DateTime.fromJSDate(petTask.end_time);
             if (endTime <= beginningOfToday) {
-              // activity has finished longer than a day ago
+              // task has finished longer than a day ago
               lastCaredFor = ONE_OR_MORE_DAYS_AGO;
             } else {
-              // activity has finished sooner than a day ago
+              // task has finished sooner than a day ago
               lastCaredFor = this.dateToTimeString(endTime);
             }
           }
-          petIdToPetListItem[petActivity.pet_id] = {
-            id: petActivity.pet_id,
-            name: petActivity.name,
-            photo: petActivity.photo,
-            color: this.colorLevelToColor(petActivity.color_level),
+          petIdToPetListItem[petTask.pet_id] = {
+            id: petTask.pet_id,
+            name: petTask.name,
+            photo: petTask.photo,
+            color: this.colorLevelToEnum(petTask.color_level),
             taskCategories,
-            status: petActivity.status,
+            status: petTask.status,
             lastCaredFor,
-            allTasksAssigned: !!petActivity.user_id, // if the activity has a user associated with it, it's assigned
-            isAssignedToMe: petActivity.user_id === currUserId,
+            allTasksAssigned: !!petTask.user_id, // if the task has a user associated with it, it's assigned
+            isAssignedToMe: petTask.user_id === currUserId,
           };
         }
       }
@@ -516,7 +522,7 @@ class PetService implements IPetService {
       return sortedPetList;
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));
-      return [];
+      throw error;
     }
   }
 }

@@ -68,7 +68,7 @@ export interface PetQuery {
   sex?: string;
 }
 
-// result of a join between pet and activity table
+// result of a join between pet and task table
 export interface PetActivity {
   pet_id: number;
   name: string;
@@ -76,7 +76,7 @@ export interface PetActivity {
   photo?: string;
   color_level: number;
   user_id?: number;
-  activity_type_id?: number;
+  task_template_id?: number;
   start_time?: Date;
   end_time?: Date;
 }
