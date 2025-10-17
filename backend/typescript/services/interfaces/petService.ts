@@ -1,4 +1,10 @@
-import { PetStatus, Sex, AnimalTag, ColorLevel, Category } from "../../types";
+import {
+  PetStatus,
+  Sex,
+  AnimalTag,
+  ColorLevel,
+  TaskCategory,
+} from "../../types";
 
 export interface PetRequestDTO {
   animalTag: AnimalTag;
@@ -42,7 +48,7 @@ export interface PetListItemDTO {
   id: number;
   name: string;
   color: ColorLevel;
-  taskCategories: Category[];
+  taskCategories: TaskCategory[];
   status: PetStatus;
   lastCaredFor: string; // will hold a time or 'One or more days ago'
   allTasksAssigned: boolean | null; // null if there are no tasks

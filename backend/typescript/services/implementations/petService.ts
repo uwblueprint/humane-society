@@ -5,7 +5,7 @@ import PgPet from "../../models/pet.model";
 // import PgTaskTemplate from "../../models/taskTemplate.model";
 import PgPetCareInfo from "../../models/petCareInfo.model";
 import PgUser from "../../models/user.model";
-import PgActivityType from "../../models/activityType.model";
+import TaskTemplate from "../../models/taskTemplate.model";
 import {
   IPetService,
   PetListItemDTO,
@@ -420,7 +420,7 @@ class PetService implements IPetService {
             }
             // add task category
             // eslint-disable-next-line no-await-in-loop
-            const activityType = await PgActivityType.findByPk(
+            const activityType = await TaskTemplate.findByPk(
               petActivity.activity_type_id,
             );
             if (activityType) {
@@ -461,7 +461,7 @@ class PetService implements IPetService {
             }
             // add task category
             // eslint-disable-next-line no-await-in-loop
-            const activityType = await PgActivityType.findByPk(
+            const activityType = await TaskTemplate.findByPk(
               petActivity.activity_type_id,
             );
             if (activityType) {
@@ -506,12 +506,10 @@ class PetService implements IPetService {
           notAssignedToUser.push(petItem);
         }
       });
-      const sortedAssignedPetList = this.sortPetItemListByStatus(
-        assignedToUser,
-      );
-      const sortedNotAssignedPetList = this.sortPetItemListByStatus(
-        notAssignedToUser,
-      );
+      const sortedAssignedPetList =
+        this.sortPetItemListByStatus(assignedToUser);
+      const sortedNotAssignedPetList =
+        this.sortPetItemListByStatus(notAssignedToUser);
       const sortedPetList = sortedAssignedPetList.concat(
         sortedNotAssignedPetList,
       );
