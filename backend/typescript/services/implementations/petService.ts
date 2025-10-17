@@ -329,11 +329,15 @@ class PetService implements IPetService {
   timeStringToDate(timeStr: string): DateTime {
     const currentTime = DateTime.now().setZone(TIME_ZONE);
     const fullDateString = `${currentTime.toFormat("DDDD")} ${timeStr}`;
-    
+
     try {
       return DateTime.fromFormat(fullDateString, "DDDD t");
     } catch (error: unknown) {
-      Logger.error(`Failed to parse time string: ${timeStr}. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to parse time string: ${timeStr}. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
       throw error;
     }
   }
