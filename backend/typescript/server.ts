@@ -11,6 +11,7 @@ import taskTemplateRouter from "./rest/taskTemplateRoutes";
 import petRouter from "./rest/petRoutes";
 import userRouter from "./rest/userRoutes";
 import taskRouter from "./rest/taskRoutes";
+import teamMemberRouter from "./rest/teamMemberRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -37,6 +38,7 @@ app.use("/task-templates", taskTemplateRouter);
 app.use("/pets", petRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
+app.use("/team-members", teamMemberRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 sequelize.authenticate();

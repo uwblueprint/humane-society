@@ -49,3 +49,5 @@ export const HOOKS_PAGE = "/hooks";
 
 export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
 // END OF STARTER CODE ROUTES (DEPRECATED)
+
+export const TEAM_MEMBERS = "/team-members";
