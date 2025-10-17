@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, Op } from "sequelize";
 import PgPet from "../../models/pet.model";
 // import PgTask from "../../models/task.model";
 // import PgTaskTemplate from "../../models/taskTemplate.model";
@@ -14,13 +14,13 @@ import {
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { sequelize } from "../../models";
-// import TaskTemplate from "../../models/taskTemplate.model";
-// import { Role } from "../../types";
+// import ActivityType from "../../models/activityType.model";
 
 const Logger = logger(__filename);
 
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
+
   getAgeFromBirthday(birthday: string): number {
     const parsedBirthday = Date.parse(birthday);
     const currentDate = new Date();
@@ -313,6 +313,46 @@ class PetService implements IPetService {
       throw error;
     }
     return id;
+  }
+
+  async getMatchingPetsForUser(
+    userColorLevel: number,
+  ): Promise<PetResponseDTO[]> {
+    try {
+      const matchingPets = await PgPet.findAll({
+        where: {
+          color_level: {
+            [Op.lte]: userColorLevel,
+          },
+        },
+      });
+
+      return matchingPets.map((pet) => ({
+        id: pet.id,
+        name: pet.name,
+        animalTag: pet.animal_tag,
+        colorLevel: pet.color_level,
+        status: pet.status,
+        breed: pet.breed,
+        age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : undefined,
+        weight: pet.weight,
+        sex: pet.sex,
+        photo: pet.photo,
+        careInfo: {
+          id: pet.petCareInfo?.id,
+          safetyInfo: pet.petCareInfo?.safety_info,
+          medicalInfo: pet.petCareInfo?.medical_info,
+          managementInfo: pet.petCareInfo?.management_info,
+        },
+      }));
+    } catch (error) {
+      Logger.error(
+        `Failed to get matching pets for user. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
+      throw error;
+    }
   }
 }
 

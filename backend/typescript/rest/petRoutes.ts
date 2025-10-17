@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   petRequestDtoValidators,
+  matchPetsValidator,
   /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
@@ -11,9 +12,13 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import IUserService from "../services/interfaces/userService";
+import UserService from "../services/implementations/userService";
+import { UserDTO } from "../types";
 
 const petRouter: Router = Router();
 const petService: IPetService = new PetService();
+const userService: IUserService = new UserService();
 
 /* Update Pet by id */
 petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
@@ -136,6 +141,33 @@ petRouter.get("/:id", async (req, res) => {
       res.status(404).send(getErrorMessage(e));
     } else {
       res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+    }
+  }
+});
+
+petRouter.get("/match/pets/:userId", matchPetsValidator, async (req, res) => {
+  const { userId } = req.params;
+  const contentType = req.headers["content-type"];
+
+  try {
+    const user: UserDTO = await userService.getUserById(userId);
+    const matchingPets = await petService.getMatchingPetsForUser(
+      user.colorLevel,
+    );
+    sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, matchingPets);
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      sendResponseByMimeType(res, 400, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
+    } else {
+      sendResponseByMimeType(res, 500, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
     }
   }
 });
