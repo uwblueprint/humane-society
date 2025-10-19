@@ -38,6 +38,11 @@ export interface PetResponseDTO {
   };
 }
 
+export interface PetResponseWithBirthdayDTO
+  extends Omit<PetResponseDTO, "age"> {
+  birthday?: string;
+}
+
 export interface PetQuery {
   animalTag?: string;
   name?: string;
@@ -62,7 +67,7 @@ export interface IPetService {
    * @returns requested Pet
    * @throws Error if retrieval fails
    */
-  getPet(id: string): Promise<PetResponseDTO>;
+  getPet(id: string): Promise<PetResponseWithBirthdayDTO>;
 
   /**
    * retrieve all Pets

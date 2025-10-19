@@ -10,6 +10,7 @@ import {
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
+  PetResponseWithBirthdayDTO,
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
@@ -30,7 +31,7 @@ class PetService implements IPetService {
     return age;
   }
 
-  async getPet(id: string): Promise<PetResponseDTO> {
+  async getPet(id: string): Promise<PetResponseWithBirthdayDTO> {
     let pet: PgPet | null;
     try {
       pet = await PgPet.findByPk(id, { include: PgPetCareInfo, plain: true });
@@ -49,7 +50,8 @@ class PetService implements IPetService {
       colorLevel: pet.color_level,
       status: pet.status,
       breed: pet.breed,
-      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : undefined,
+      neutered: pet.neutered,
+      birthday: pet.birthday,
       weight: pet.weight,
       sex: pet.sex,
       photo: pet.photo,

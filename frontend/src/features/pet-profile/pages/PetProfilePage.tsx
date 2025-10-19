@@ -21,11 +21,11 @@ const PetProfilePage = (): React.ReactElement => {
     weightKg: 25.5,
     spayedNeutered: true,
     sex: SexEnum.MALE,
-    avatarUrl: "/images/dog2.png",
+    photo: "/images/dog2.png",
     petCare: {
-      safety: "safety info",
-      management: "management info",
-      medical: "medical",
+      safetyInfo: "safety info",
+      managementInfo: "management info",
+      medicalInfo: "medical",
     },
   };
 

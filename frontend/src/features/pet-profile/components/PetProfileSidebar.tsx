@@ -1,10 +1,10 @@
-import { capitalize } from "lodash";
 import {
   Box,
   Grid,
   GridItem,
   HStack,
   Image,
+  Link,
   Spacer,
   Text,
   VStack,
@@ -21,39 +21,60 @@ import {
   PencilIcon,
   RulerIcon,
 } from "../../../assets/icons";
-import { CareInfo, SexEnum } from "../../../types/PetTypes";
+import { SexEnum } from "../../../types/PetTypes";
 import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
 import ArrowDropdown from "../../../components/common/ArrowDropdown";
 import PetStatus from "../../../components/common/PetStatus";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
+import { EDIT_PET_PROFILE_PAGE } from "../../../constants/Routes";
+import DefaultPetProfilePhoto from "../../../assets/icons/default-pet-profile.svg";
 
 export interface PetProfileSidebarProps {
+  id: number;
   name: string;
   status: TaskStatus;
   colourLevel: ColorLevel;
-  breed: string;
-  age: number;
-  weightKg: number;
-  spayedNeutered: boolean;
+  breed?: string;
+  age?: number;
+  weightKg?: number;
+  spayedNeutered?: boolean;
   sex: SexEnum;
-  avatarUrl: string;
-  petCare: CareInfo;
+  photo?: string;
+  petCare?: {
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
+  };
 }
+
+const CARE_INFO_KEY_TO_LABEL: Record<string, string> = {
+  safetyInfo: "Safety",
+  managementInfo: "Management",
+  medicalInfo: "Medical",
+};
 
 function getCareInfoIcon(key: string): string {
   switch (key) {
-    case "safety":
+    case "safetyInfo":
       return AlertCircleIcon;
-    case "management":
+    case "managementInfo":
       return DonateHeartIcon;
-    case "medical":
+    case "medicalInfo":
       return MedicalServicesIcon;
     default:
       return ""; // No image
   }
 }
 
+const getSpayStatusLabel = (spayedNeutered?: boolean) => {
+  if (spayedNeutered === undefined) return "Spay status unknown";
+  return spayedNeutered ? "Spayed" : "Not spayed";
+};
+
 function PetProfileSidebar({
+  id,
   name,
   status,
   colourLevel,
@@ -62,9 +83,13 @@ function PetProfileSidebar({
   weightKg,
   spayedNeutered,
   sex,
-  avatarUrl,
+  photo,
   petCare,
 }: PetProfileSidebarProps): React.ReactElement {
+  const role = getCurrentUserRole();
+  const isStaffAdminBehaviouralist =
+    role !== null && STAFF_BEHAVIOURISTS_ADMIN.has(role);
+
   return (
     <VStack
       paddingInline={{ base: "1rem", lg: "1.5rem" }}
@@ -79,7 +104,7 @@ function PetProfileSidebar({
       <VStack gap="0.6rem" alignItems="start" width="100%">
         <HStack gap="0.6rem" minWidth="max-content" width="100%">
           <Image
-            src={avatarUrl}
+            src={photo ?? DefaultPetProfilePhoto}
             alt={name}
             fit="cover"
             borderRadius="full"
@@ -89,7 +114,11 @@ function PetProfileSidebar({
             {name}
           </Text>
           <Spacer />
-          <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
+          {isStaffAdminBehaviouralist && (
+            <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`}>
+              <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
+            </Link>
+          )}
         </HStack>
         <PetStatus status={status} />
       </VStack>
@@ -116,7 +145,7 @@ function PetProfileSidebar({
               textStyle="body"
               fontSize="1rem"
             >
-              {breed}
+              {breed ?? "Unknown breed"}
             </Box>
           </GridItem>
 
@@ -136,8 +165,11 @@ function PetProfileSidebar({
                 fontSize="1rem"
                 margin="0"
                 lineHeight="100%"
+                textAlign="center"
               >
-                {`${age} ${age === 1 ? "year" : "years"} old`}
+                {age
+                  ? `${age} ${age === 1 ? "year" : "years"} old`
+                  : "Unknown age"}
               </Text>
             </VStack>
           </GridItem>
@@ -156,7 +188,10 @@ function PetProfileSidebar({
                 fontSize="1rem"
                 margin="0"
                 lineHeight="100%"
-              >{`${weightKg} kg`}</Text>
+                textAlign="center"
+              >
+                {weightKg ? `${weightKg} kg` : "Unknown weight"}
+              </Text>
             </VStack>
           </GridItem>
           <GridItem>
@@ -174,8 +209,9 @@ function PetProfileSidebar({
                 fontSize="1rem"
                 margin="0"
                 lineHeight="100%"
+                textAlign="center"
               >
-                {spayedNeutered ? "Spayed" : "Not spayed"}
+                {getSpayStatusLabel(spayedNeutered)}
               </Text>
             </VStack>
           </GridItem>
@@ -198,6 +234,7 @@ function PetProfileSidebar({
                 fontSize="1rem"
                 margin="0"
                 lineHeight="100%"
+                textAlign="center"
               >
                 {sex === SexEnum.MALE ? "Male" : "Female"}
               </Text>
@@ -211,14 +248,20 @@ function PetProfileSidebar({
           Care Info
         </Text>
 
-        {Object.entries(petCare).map(([key, description]) => (
-          <ArrowDropdown
-            key={key}
-            headerText={capitalize(key)}
-            iconSrc={getCareInfoIcon(key)}
-            bodyText={description}
-          />
-        ))}
+        {petCare ? (
+          Object.entries(petCare).map(([key, description]) => (
+            <ArrowDropdown
+              key={key}
+              headerText={CARE_INFO_KEY_TO_LABEL[key]}
+              iconSrc={getCareInfoIcon(key)}
+              bodyText={description}
+            />
+          ))
+        ) : (
+          <Text textStyle="body" fontSize="1rem" margin="0" lineHeight="100%">
+            No pet care info
+          </Text>
+        )}
       </VStack>
     </VStack>
   );
