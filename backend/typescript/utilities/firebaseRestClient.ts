@@ -11,6 +11,8 @@ const FIREBASE_REFRESH_TOKEN_URL =
   "https://securetoken.googleapis.com/v1/token";
 const FIREBASE_OAUTH_SIGN_IN_URL =
   "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp";
+const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY;
+const FIREBASE_REQUEST_URI = process.env.FIREBASE_REQUEST_URI;
 
 type PasswordSignInResponse = {
   idToken: string;
@@ -67,7 +69,7 @@ const FirebaseRestClient = {
     password: string,
   ): Promise<Token> => {
     const response: Response = await fetch(
-      `${FIREBASE_SIGN_IN_URL}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${FIREBASE_SIGN_IN_URL}?key=${FIREBASE_WEB_API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -107,7 +109,7 @@ const FirebaseRestClient = {
     idToken: string,
   ): Promise<OAuthSignInResponse> => {
     const response: Response = await fetch(
-      `${FIREBASE_OAUTH_SIGN_IN_URL}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${FIREBASE_OAUTH_SIGN_IN_URL}?key=${FIREBASE_WEB_API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -115,7 +117,7 @@ const FirebaseRestClient = {
         },
         body: JSON.stringify({
           postBody: `id_token=${idToken}&providerId=google.com`,
-          requestUri: process.env.FIREBASE_REQUEST_URI,
+          requestUri: FIREBASE_REQUEST_URI,
           returnIdpCredential: true,
           returnSecureToken: true,
         }),
@@ -143,7 +145,7 @@ const FirebaseRestClient = {
   // Docs: https://firebase.google.com/docs/reference/rest/auth/#section-refresh-token
   refreshToken: async (refreshToken: string): Promise<Token> => {
     const response: Response = await fetch(
-      `${FIREBASE_REFRESH_TOKEN_URL}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${FIREBASE_REFRESH_TOKEN_URL}?key=${FIREBASE_WEB_API_KEY}`,
       {
         method: "POST",
         headers: {

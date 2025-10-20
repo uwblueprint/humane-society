@@ -1,12 +1,10 @@
 import baseAPIClient from "./BaseAPIClient";
-import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 
-enum EnumField {
-  "A",
-  "B",
-  "C",
-  "D",
+export enum EnumField {
+  A = "A",
+  B = "B",
+  C = "C",
+  D = "D",
 }
 
 export type SimpleEntityRequest = {
@@ -17,91 +15,33 @@ export type SimpleEntityRequest = {
   boolField: boolean;
 };
 
-export type SimpleEntityResponse = {
+export type SimpleEntityResponse = SimpleEntityRequest & {
   id: string | number;
-  stringField: string;
-  intField: number;
-  stringArrayField: string[];
-  enumField: EnumField;
-  boolField: boolean;
 };
 
-const create = async ({
-  formData,
-}: {
-  formData: SimpleEntityRequest;
-}): Promise<SimpleEntityResponse> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.post("/simple-entities", formData, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to create entity: ${error}`);
-  }
+const create = async (formData: SimpleEntityRequest): Promise<SimpleEntityResponse> => {
+  const { data } = await baseAPIClient.post("/simple-entities", formData);
+  return data;
 };
 
-const get = async (): Promise<SimpleEntityResponse[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get("/simple-entities", {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to create entity: ${error}`);
-  }
+const getAll = async (): Promise<SimpleEntityResponse[]> => {
+  const { data } = await baseAPIClient.get("/simple-entities");
+  return data;
 };
 
 const getCSV = async (): Promise<string> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get("/simple-entities", {
-      // Following line is necessary to set the Content-Type header
-      // Reference: https://github.com/axios/axios/issues/86
-      data: null,
-      headers: { Authorization: bearerToken, "Content-Type": "text/csv" },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to create entity: ${error}`);
-  }
+  const { data } = await baseAPIClient.get("/simple-entities", {
+    headers: { "Content-Type": "text/csv" },
+  });
+  return data;
 };
 
 const update = async (
-  id: number | string,
-  {
-    entityData,
-  }: {
-    entityData: SimpleEntityRequest;
-  },
+  id: string | number,
+  entityData: SimpleEntityRequest
 ): Promise<SimpleEntityResponse> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.put(
-      `/simple-entities/${id}`,
-      entityData,
-      {
-        headers: { Authorization: bearerToken },
-      },
-    );
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to create entity: ${error}`);
-  }
+  const { data } = await baseAPIClient.put(`/simple-entities/${id}`, entityData);
+  return data;
 };
 
-export default { create, get, getCSV, update };
+export default { create, getAll, getCSV, update };

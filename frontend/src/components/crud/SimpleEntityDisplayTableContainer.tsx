@@ -117,7 +117,7 @@ const SimpleEntityDisplayTableContainer: React.FC =
 
     useEffect(() => {
       const retrieveAndUpdateData = async () => {
-        const result = await SimpleEntityAPIClient.get();
+        const result = await SimpleEntityAPIClient.getAll();
         if (result) {
           setEntities(result.map((r: SimpleEntityResponse) => convert(r)));
         }
