@@ -4,6 +4,7 @@ import { getAccessToken } from "../middlewares/auth";
 import {
   createUserDtoValidator,
   updateUserDtoValidator,
+  matchUsersValidator,
 } from "../middlewares/validators/userValidators";
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
@@ -19,12 +20,15 @@ import {
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { IPetService, PetResponseDTO } from "../services/interfaces/petService";
+import PetService from "../services/implementations/petService";
 
 const userRouter: Router = Router();
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
 const authService: IAuthService = new AuthService(userService, emailService);
+const petService: IPetService = new PetService();
 
 /* Get all users, optionally filter by a userId or email query parameter to retrieve a single user */
 userRouter.get("/", async (req, res) => {
@@ -323,6 +327,33 @@ userRouter.delete("/", async (req, res) => {
   res
     .status(400)
     .json({ error: "Must supply one of userId or email as query parameter." });
+});
+
+userRouter.get("/match/users/:petId", matchUsersValidator, async (req, res) => {
+  const { petId } = req.params;
+  const contentType = req.headers["content-type"];
+
+  try {
+    const pet: PetResponseDTO = await petService.getPet(petId);
+    const matchingUsers = await userService.getMatchingUsersForPet(
+      pet.colorLevel,
+    );
+    sendResponseByMimeType<UserDTO>(res, 200, contentType, matchingUsers);
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      sendResponseByMimeType(res, 400, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
+    } else {
+      sendResponseByMimeType(res, 500, contentType, [
+        {
+          error: getErrorMessage(error),
+        },
+      ]);
+    }
+  }
 });
 
 export default userRouter;

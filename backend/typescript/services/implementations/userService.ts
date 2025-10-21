@@ -441,6 +441,23 @@ class UserService implements IUserService {
       throw error;
     }
   }
+
+  async getMatchingUsersForPet(petColorLevel: number): Promise<UserDTO[]> {
+    try {
+      const allUsers = await this.getUsers();
+
+      return allUsers.filter(
+        (user: UserDTO) => user.colorLevel >= petColorLevel,
+      );
+    } catch (error) {
+      Logger.error(
+        `Failed to get matching users for pet. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
+      throw error;
+    }
+  }
 }
 
 export default UserService;
