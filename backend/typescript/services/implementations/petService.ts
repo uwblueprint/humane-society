@@ -411,7 +411,7 @@ class PetService implements IPetService {
             color: this.colorLevelToEnum(petTask.color_level),
             taskCategories: [],
             status: petTask.status,
-            lastCaredFor: ONE_OR_MORE_DAYS_AGO,
+            lastCaredFor: null,
             allTasksAssigned: null, // null if there are no tasks
             isAssignedToMe: false,
           };
@@ -454,7 +454,10 @@ class PetService implements IPetService {
               if (endTime > beginningOfToday) {
                 petData.lastCaredFor = this.dateToTimeString(endTime);
               }
-            } else if (endTime > this.timeStringToDate(petData.lastCaredFor)) {
+            } else if (
+              petData.lastCaredFor &&
+              endTime > this.timeStringToDate(petData.lastCaredFor)
+            ) {
               petData.lastCaredFor = this.dateToTimeString(endTime);
             }
           }
@@ -467,7 +470,7 @@ class PetService implements IPetService {
             if (petTask.start_time) {
               lastCaredFor = this.dateToTimeString(currentTime); // pet is currently occupied
             } else {
-              lastCaredFor = ONE_OR_MORE_DAYS_AGO; // assume if a pet has never been cared for it should read 'One or more days ago'
+              lastCaredFor = null; // assume if a pet has never been cared for it should be null
             }
             // add task category
             // eslint-disable-next-line no-await-in-loop

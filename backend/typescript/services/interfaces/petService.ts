@@ -50,7 +50,7 @@ export interface PetListItemDTO {
   color: ColorLevel;
   taskCategories: TaskCategory[];
   status: PetStatus;
-  lastCaredFor: string; // will hold a time or 'One or more days ago'
+  lastCaredFor: string | null; // will hold a time, 'One or more days ago' or null
   allTasksAssigned: boolean | null; // null if there are no tasks
   isAssignedToMe: boolean;
   photo?: string;
