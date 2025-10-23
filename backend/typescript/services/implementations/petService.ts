@@ -12,14 +12,19 @@ import {
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
-  PetActivity,
+  PetTask,
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
+import {
+  dateToTimeString,
+  timeStringToDate,
+  colorLevelToEnum,
+} from "../../utilities/common";
 import { sequelize } from "../../models";
 // import TaskTemplate from "../../models/taskTemplate.model";
 // import { Role } from "../../types";
-import { PetStatus, ColorLevel } from "../../types";
+import { PetStatus } from "../../types";
 
 const Logger = logger(__filename);
 
@@ -321,32 +326,6 @@ class PetService implements IPetService {
     return id;
   }
 
-  // petList helper functions
-  dateToTimeString(date: DateTime): string {
-    return date.setZone(TIME_ZONE).toFormat("t");
-  }
-
-  timeStringToDate(timeStr: string): DateTime {
-    const currentTime = DateTime.now().setZone(TIME_ZONE);
-    const fullDateString = `${currentTime.toFormat("DDDD")} ${timeStr}`;
-
-    try {
-      return DateTime.fromFormat(fullDateString, "DDDD t");
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to parse time string: ${timeStr}. Reason = ${getErrorMessage(
-          error,
-        )}`,
-      );
-      throw error;
-    }
-  }
-
-  colorLevelToEnum(colorLevel: number): ColorLevel {
-    // (values are in descending order)
-    return Object.values(ColorLevel)[5 - colorLevel];
-  }
-
   sortPetItemListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
     const statusToPriority: Record<PetStatus, number> = {
       [PetStatus.NEEDS_CARE]: 0,
@@ -358,6 +337,28 @@ class PetService implements IPetService {
       return statusToPriority[a.status] - statusToPriority[b.status];
     };
     return petList.sort(statusSortFunction);
+  }
+
+  private sortPetList(unsortedPetList: PetListItemDTO[]): PetListItemDTO[] {
+    // Separate pets into assigned and unassigned groups
+    const assignedToUser: PetListItemDTO[] = [];
+    const notAssignedToUser: PetListItemDTO[] = [];
+
+    unsortedPetList.forEach((petItem) => {
+      if (petItem.isAssignedToMe) {
+        assignedToUser.push(petItem);
+      } else {
+        notAssignedToUser.push(petItem);
+      }
+    });
+
+    // Sort each group by status/urgency
+    const sortedAssignedPetList = this.sortPetItemListByStatus(assignedToUser);
+    const sortedNotAssignedPetList =
+      this.sortPetItemListByStatus(notAssignedToUser);
+
+    // Return assigned pets first, then unassigned pets
+    return sortedAssignedPetList.concat(sortedNotAssignedPetList);
   }
 
   async getPetList(userId: number): Promise<PetListItemDTO[]> {
@@ -382,7 +383,7 @@ class PetService implements IPetService {
       }
       const currUserId = user.id;
 
-      const petTasks = await sequelize.query<PetActivity>(
+      const petTasks = await sequelize.query<PetTask>(
         `SELECT 
         ${PET_TABLE_NAME}.id AS pet_id,
         ${PET_TABLE_NAME}.name AS name,
@@ -399,134 +400,113 @@ class PetService implements IPetService {
       );
       const petIdToPetListItem: Record<string, PetListItemDTO> = {};
 
-      // eslint-disable-next-line no-restricted-syntax
-      for (const petTask of petTasks) {
-        // if there's no task_template_id, that means this pet doesn't have any assigned tasks
-        // (bc that's a mandatory column in tasks)
-        if (!petTask.task_template_id) {
-          petIdToPetListItem[petTask.pet_id] = {
-            id: petTask.pet_id,
-            name: petTask.name,
-            photo: petTask.photo,
-            color: this.colorLevelToEnum(petTask.color_level),
-            taskCategories: [],
-            status: petTask.status,
-            lastCaredFor: null,
-            allTasksAssigned: null, // null if there are no tasks
-            isAssignedToMe: false,
-          };
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-        const petData = petIdToPetListItem[petTask.pet_id];
-        // if the pet already exists in the hashMap
-        if (petData) {
-          // existing entry in the hashMap, to compare times
-          if (!petTask.end_time) {
-            // if the task has not finished
-            if (petTask.start_time) {
-              // if pet is currently occupied, last cared for is current time
-              petData.lastCaredFor = this.dateToTimeString(currentTime);
-            }
-            // add task category
-            // eslint-disable-next-line no-await-in-loop
-            const taskTemplate = await TaskTemplate.findByPk(
-              petTask.task_template_id,
-            );
-            if (taskTemplate) {
-              petData.taskCategories.push(taskTemplate.category);
-            } else {
-              Logger.error(
-                `Task template with ID ${petTask.task_template_id} not found.`,
-              );
-            }
-            if (!petTask.user_id) {
-              // check if task has not been assigned
-              petData.allTasksAssigned = false;
-            } else if (petTask.user_id === currUserId) {
-              // if it is, check if task is assigned to user
-              petData.isAssignedToMe = true;
-            }
-          } else {
-            // if task has finished
-            const endTime = DateTime.fromJSDate(petTask.end_time);
-            if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
-              if (endTime > beginningOfToday) {
-                petData.lastCaredFor = this.dateToTimeString(endTime);
+      // Build a map of pets and their associated task data.
+      await Promise.all(
+        petTasks.map(async (petTask) => {
+          // Handle pets with no tasks, create entry with empty task data
+          if (!petTask.task_template_id) {
+            petIdToPetListItem[petTask.pet_id] = {
+              id: petTask.pet_id,
+              name: petTask.name,
+              photo: petTask.photo,
+              color: colorLevelToEnum(petTask.color_level),
+              taskCategories: [],
+              status: petTask.status,
+              lastCaredFor: null,
+              allTasksAssigned: null, // null if there are no tasks
+              isAssignedToMe: false,
+            };
+            return;
+          }
+
+          const petData = petIdToPetListItem[petTask.pet_id];
+          // Pet already exists in map, update with additional task information
+          if (petData) {
+            if (!petTask.end_time) {
+              // This task is ongoing or not started
+              if (petTask.start_time) {
+                // if pet is currently occupied, last cared for is current time
+                petData.lastCaredFor = dateToTimeString(currentTime);
               }
-            } else if (
-              petData.lastCaredFor &&
-              endTime > this.timeStringToDate(petData.lastCaredFor)
-            ) {
-              petData.lastCaredFor = this.dateToTimeString(endTime);
-            }
-          }
-        } else {
-          // if the pet does not exist in the map
-          let lastCaredFor;
-          const taskCategories = [];
-          if (!petTask.end_time) {
-            // if the task has not finished
-            if (petTask.start_time) {
-              lastCaredFor = this.dateToTimeString(currentTime); // pet is currently occupied
-            } else {
-              lastCaredFor = null; // assume if a pet has never been cared for it should be null
-            }
-            // add task category
-            // eslint-disable-next-line no-await-in-loop
-            const taskTemplate = await TaskTemplate.findByPk(
-              petTask.task_template_id,
-            );
-            if (taskTemplate) {
-              taskCategories.push(taskTemplate.category);
-            } else {
-              Logger.error(
-                `Task template with ID ${petTask.task_template_id} not found.`,
+              // Add this task category to the pet's task list
+              const taskTemplate = await TaskTemplate.findByPk(
+                petTask.task_template_id,
               );
+              if (taskTemplate) {
+                petData.taskCategories.push(taskTemplate.category);
+              } else {
+                Logger.error(
+                  `Task template with ID ${petTask.task_template_id} not found.`,
+                );
+              }
+              // Update assignment status
+              if (!petTask.user_id) {
+                petData.allTasksAssigned = false;
+              } else if (petTask.user_id === currUserId) {
+                petData.isAssignedToMe = true;
+              }
+            } else {
+              // Task has finished, update lastCaredFor time
+              const endTime = DateTime.fromJSDate(petTask.end_time);
+              if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
+                if (endTime > beginningOfToday) {
+                  petData.lastCaredFor = dateToTimeString(endTime);
+                }
+              } else if (
+                petData.lastCaredFor &&
+                endTime > timeStringToDate(petData.lastCaredFor)
+              ) {
+                petData.lastCaredFor = dateToTimeString(endTime);
+              }
             }
           } else {
-            // if the task has finished
-            const endTime = DateTime.fromJSDate(petTask.end_time);
-            if (endTime <= beginningOfToday) {
-              // task has finished longer than a day ago
-              lastCaredFor = ONE_OR_MORE_DAYS_AGO;
+            // First time seeing this pet, create new entry with task information
+            let lastCaredFor;
+            const taskCategories = [];
+            if (!petTask.end_time) {
+              // Task is ongoing or not started
+              if (petTask.start_time) {
+                lastCaredFor = dateToTimeString(currentTime);
+              } else {
+                lastCaredFor = null; // assume if a pet has never been cared for it should be null
+              }
+              // Get task category
+              const taskTemplate = await TaskTemplate.findByPk(
+                petTask.task_template_id,
+              );
+              if (taskTemplate) {
+                taskCategories.push(taskTemplate.category);
+              } else {
+                Logger.error(
+                  `Task template with ID ${petTask.task_template_id} not found.`,
+                );
+              }
             } else {
-              // task has finished sooner than a day ago
-              lastCaredFor = this.dateToTimeString(endTime);
+              // Task has finished, determine lastCaredFor based on end time
+              const endTime = DateTime.fromJSDate(petTask.end_time);
+              if (endTime <= beginningOfToday) {
+                lastCaredFor = ONE_OR_MORE_DAYS_AGO;
+              } else {
+                lastCaredFor = dateToTimeString(endTime);
+              }
             }
+            // Create new pet entry
+            petIdToPetListItem[petTask.pet_id] = {
+              id: petTask.pet_id,
+              name: petTask.name,
+              photo: petTask.photo,
+              color: colorLevelToEnum(petTask.color_level),
+              taskCategories,
+              status: petTask.status,
+              lastCaredFor,
+              allTasksAssigned: !!petTask.user_id, // if the task has a user associated with it, it's assigned
+              isAssignedToMe: petTask.user_id === currUserId,
+            };
           }
-          petIdToPetListItem[petTask.pet_id] = {
-            id: petTask.pet_id,
-            name: petTask.name,
-            photo: petTask.photo,
-            color: this.colorLevelToEnum(petTask.color_level),
-            taskCategories,
-            status: petTask.status,
-            lastCaredFor,
-            allTasksAssigned: !!petTask.user_id, // if the task has a user associated with it, it's assigned
-            isAssignedToMe: petTask.user_id === currUserId,
-          };
-        }
-      }
-      const unsortedPetList = Object.values(petIdToPetListItem);
-      // SORT -- first put everything assigned to the user first, and then within each section, sort based on status/urgency
-      const assignedToUser: PetListItemDTO[] = [];
-      const notAssignedToUser: PetListItemDTO[] = [];
-      unsortedPetList.forEach((petItem) => {
-        if (petItem.isAssignedToMe) {
-          assignedToUser.push(petItem);
-        } else {
-          notAssignedToUser.push(petItem);
-        }
-      });
-      const sortedAssignedPetList =
-        this.sortPetItemListByStatus(assignedToUser);
-      const sortedNotAssignedPetList =
-        this.sortPetItemListByStatus(notAssignedToUser);
-      const sortedPetList = sortedAssignedPetList.concat(
-        sortedNotAssignedPetList,
+        }),
       );
-      return sortedPetList;
+      const unsortedPetList = Object.values(petIdToPetListItem);
+      return this.sortPetList(unsortedPetList);
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));
       throw error;

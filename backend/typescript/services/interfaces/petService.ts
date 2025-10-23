@@ -69,7 +69,7 @@ export interface PetQuery {
 }
 
 // result of a join between pet and task table
-export interface PetActivity {
+export interface PetTask {
   pet_id: number;
   name: string;
   status: PetStatus;

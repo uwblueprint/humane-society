@@ -128,8 +128,8 @@ petRouter.get("/", async (req, res) => {
 petRouter.get("/list/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
-    const pet = await petService.getPetList(parseInt(userId, 10));
-    res.status(200).json(pet);
+    const petList = await petService.getPetList(parseInt(userId, 10));
+    res.status(200).json(petList);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
