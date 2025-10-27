@@ -3,14 +3,21 @@ import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import { Task } from "../types/TaskTypes";
 
-const getTask = async (taskId: number): Promise<Task> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+const getAuthHeader = () => ({
+  Authorization: `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
-  )}`;
+  )}`,
+});
+
+const getTask = async ({
+  taskId,
+}: {
+  taskId: number;
+}): Promise<Task> => {
   try {
     const { data } = await baseAPIClient.get(`/tasks/${taskId}`, {
-      headers: { Authorization: bearerToken },
+      headers: getAuthHeader(),
     });
     return data;
   } catch (error) {
@@ -19,13 +26,9 @@ const getTask = async (taskId: number): Promise<Task> => {
 };
 
 const getAllTasks = async (): Promise<Task[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
   try {
     const { data } = await baseAPIClient.get("/tasks", {
-      headers: { Authorization: bearerToken },
+      headers: getAuthHeader(),
     });
     return data;
   } catch (error) {
