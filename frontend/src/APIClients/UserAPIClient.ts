@@ -3,21 +3,22 @@ import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import baseAPIClient from "./BaseAPIClient";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 
+const getAuthHeader = () => ({
+  Authorization: `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`,
+});
+
 async function get(): Promise<User[]>;
 async function get(userId: number): Promise<User>;
 
 async function get(userId?: number): Promise<User | User[]> {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-
   try {
     const url = userId ? `/users?userId=${userId}` : "/users";
     const { data } = await baseAPIClient.get(url, {
-      headers: { Authorization: bearerToken },
+      headers: getAuthHeader(),
     });
-
     return data;
   } catch (error) {
     throw new Error(
@@ -28,14 +29,14 @@ async function get(userId?: number): Promise<User | User[]> {
   }
 }
 
-const create = async (formData: CreateUserDTO): Promise<CreateUserDTO> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
+const create = async ({
+  formData,
+}: {
+  formData: CreateUserDTO;
+}): Promise<CreateUserDTO> => {
   try {
     const { data } = await baseAPIClient.post("/users", formData, {
-      headers: { Authorization: bearerToken },
+      headers: getAuthHeader(),
     });
     return data;
   } catch (error) {
@@ -44,16 +45,12 @@ const create = async (formData: CreateUserDTO): Promise<CreateUserDTO> => {
 };
 
 const invite = async (email: string): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
   try {
     await baseAPIClient.post(
       "/auth/invite-user",
       { email },
       {
-        headers: { Authorization: bearerToken },
+        headers: getAuthHeader(),
       },
     );
   } catch (error) {
