@@ -1,10 +1,10 @@
 import baseAPIClient from "./BaseAPIClient";
 
-export enum EnumField {
-  A = "A",
-  B = "B",
-  C = "C",
-  D = "D",
+enum EnumField {
+  "A",
+  "B",
+  "C",
+  "D",
 }
 
 export type EntityRequest = {
@@ -25,50 +25,82 @@ export type EntityResponse = {
   fileName: string;
 };
 
-/** Create a new entity (supports FormData for file uploads) */
-export const create = async (formData: FormData): Promise<EntityResponse> => {
-  const { data } = await baseAPIClient.post("/entities", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data;
+/** Create a new entity */
+const create = async ({
+  formData,
+}: {
+  formData: FormData;
+}): Promise<EntityResponse | null> => {
+  try {
+    const { data } = await baseAPIClient.post("/entities", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  } catch (error) {
+    return null;
+  }
 };
 
-/** Fetch all entities */
-export const get = async (): Promise<EntityResponse[]> => {
-  const { data } = await baseAPIClient.get("/entities");
-  return data;
+/** Get all entities */
+const get = async (): Promise<EntityResponse[] | null> => {
+  try {
+    const { data } = await baseAPIClient.get("/entities");
+    return data;
+  } catch (error) {
+    return null;
+  }
 };
 
-/** Get file URL for a given entity UUID */
-export const getFile = async (uuid: string): Promise<string> => {
-  const { data } = await baseAPIClient.get(`/entities/files/${uuid}`);
-  return data.fileURL;
+/** Get a file URL for a specific entity UUID */
+const getFile = async (uuid: string): Promise<string | null> => {
+  try {
+    const { data } = await baseAPIClient.get(`/entities/files/${uuid}`);
+    return data.fileURL;
+  } catch (error) {
+    return null;
+  }
 };
 
 /** Download entities as CSV */
-export const getCSV = async (): Promise<string> => {
-  const { data } = await baseAPIClient.get("/entities", {
-    headers: { "Content-Type": "text/csv" },
-  });
-  return data;
+const getCSV = async (): Promise<string | null> => {
+  try {
+    const { data } = await baseAPIClient.get("/entities", {
+      headers: { "Content-Type": "text/csv" },
+    });
+    return data;
+  } catch (error) {
+    return null;
+  }
 };
 
 /** Update an entity */
-export const update = async (
+const update = async (
   id: number | string,
-  entityData: FormData,
-): Promise<EntityResponse> => {
-  const { data } = await baseAPIClient.put(`/entities/${id}`, entityData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data;
+  {
+    entityData,
+  }: {
+    entityData: FormData;
+  },
+): Promise<EntityResponse | null> => {
+  try {
+    const { data } = await baseAPIClient.put(`/entities/${id}`, entityData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  } catch (error) {
+    return null;
+  }
 };
 
 /** Delete an entity by UUID */
-export const deleteEntity = async (
+const deleteEntity = async (
   uuid: number | string,
 ): Promise<void> => {
-  await baseAPIClient.delete(`/entities/${uuid}`);
+  try {
+    await baseAPIClient.delete(`/entities/${uuid}`);
+  } catch (error) {
+    console.error("Failed to delete entity:", error);
+  }
 };
 
 export default { create, get, getFile, getCSV, update, deleteEntity };
