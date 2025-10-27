@@ -123,7 +123,7 @@ We have deployed our Postgres DB on Supabase which your local application to, wh
 NODE_ENV=production docker compose up
 ```
 
-> **Note:** Currently, the `humane_society_db` container is also run even when you run against Supabase. You should be able to stop it if the application is correctly connected to Supabase. Additional changes can be made to stop it from running when you want to run against Supabase, involving setting another environment variable (see this PR).
+> **Note:** Currently, the `humane_society_db` container is also run even when you run against Supabase. You should be able to stop it if the application is correctly connected to Supabase. Additional changes can be made to stop it from running when you want to run against Supabase, involving setting another environment variable (see this [PR](https://github.com/uwblueprint/humane-society/pull/152)).
 
 ## Version Control Guide
 
