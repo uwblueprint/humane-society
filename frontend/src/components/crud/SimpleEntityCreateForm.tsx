@@ -67,7 +67,7 @@ const SimpleEntityCreateForm = (): React.ReactElement => {
   }
 
   const onSubmit = async ({ formData }: { formData: SimpleEntityRequest }) => {
-    const result = await SimpleEntityAPIClient.create(formData);
+    const result = await SimpleEntityAPIClient.create({formData});
     setData(result);
   };
   return (

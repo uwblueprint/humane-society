@@ -75,7 +75,7 @@ const SimpleEntityUpdateForm = (): React.ReactElement => {
   const onSubmit = async ({ formData }: { formData: SimpleEntityResponse }) => {
     const { id, ...entityData } = formData;
 
-    const result = await SimpleEntityAPIClient.update(formData.id, entityData);
+    const result = await SimpleEntityAPIClient.update(formData.id, {entityData});
     setData(result);
   };
   return (
