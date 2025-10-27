@@ -83,9 +83,7 @@ const CreateForm = (): React.ReactElement => {
     if (fileField) {
       multipartFormData.append("file", fileField);
     }
-    const result = await EntityAPIClient.create({
-      formData: multipartFormData,
-    });
+    const result = await EntityAPIClient.create(multipartFormData);
     setData(result);
   };
   return (

@@ -107,7 +107,7 @@ export function useFileUploadManager(maxFileSizeMB: number = 25) {
     setError(null);
     try {
       const formData = buildFormData(file);
-      const response = await EntityAPIClient.create({ formData });
+      const response = await EntityAPIClient.create(formData);
       if (!response) {
         throw new Error("Upload failed - no response");
       }

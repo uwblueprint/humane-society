@@ -1,12 +1,10 @@
 import baseAPIClient from "./BaseAPIClient";
-import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 
-enum EnumField {
-  "A",
-  "B",
-  "C",
-  "D",
+export enum EnumField {
+  A = "A",
+  B = "B",
+  C = "C",
+  D = "D",
 }
 
 export type EntityRequest = {
@@ -27,112 +25,50 @@ export type EntityResponse = {
   fileName: string;
 };
 
-const create = async ({
-  formData,
-}: {
-  formData: FormData;
-}): Promise<EntityResponse | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.post("/entities", formData, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    return null;
-  }
+/** Create a new entity (supports FormData for file uploads) */
+export const create = async (formData: FormData): Promise<EntityResponse> => {
+  const { data } = await baseAPIClient.post("/entities", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
 };
 
-const get = async (): Promise<EntityResponse[] | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get("/entities", {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    return null;
-  }
+/** Fetch all entities */
+export const get = async (): Promise<EntityResponse[]> => {
+  const { data } = await baseAPIClient.get("/entities");
+  return data;
 };
 
-const getFile = async (uuid: string): Promise<string | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get(`/entities/files/${uuid}`, {
-      headers: { Authorization: bearerToken },
-    });
-
-    return data.fileURL;
-  } catch (error) {
-    return null;
-  }
+/** Get file URL for a given entity UUID */
+export const getFile = async (uuid: string): Promise<string> => {
+  const { data } = await baseAPIClient.get(`/entities/files/${uuid}`);
+  return data.fileURL;
 };
 
-const getCSV = async (): Promise<string | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get("/entities", {
-      // Following line is necessary to set the Content-Type header
-      // Reference: https://github.com/axios/axios/issues/86
-      data: null,
-      headers: { Authorization: bearerToken, "Content-Type": "text/csv" },
-    });
-
-    return data;
-  } catch (error) {
-    return null;
-  }
+/** Download entities as CSV */
+export const getCSV = async (): Promise<string> => {
+  const { data } = await baseAPIClient.get("/entities", {
+    headers: { "Content-Type": "text/csv" },
+  });
+  return data;
 };
 
-const update = async (
+/** Update an entity */
+export const update = async (
   id: number | string,
-  {
-    entityData,
-  }: {
-    entityData: FormData;
-  },
-): Promise<EntityResponse | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.put(`/entities/${id}`, entityData, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    return null;
-  }
+  entityData: FormData,
+): Promise<EntityResponse> => {
+  const { data } = await baseAPIClient.put(`/entities/${id}`, entityData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
 };
 
-const deleteEntity = async (
+/** Delete an entity by UUID */
+export const deleteEntity = async (
   uuid: number | string,
-): Promise<EntityResponse[] | null> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.delete(`/entities/${uuid}`, {
-      headers: { Authorization: bearerToken },
-    });
-    return data.fileURL;
-  } catch (error) {
-    return null;
-  }
+): Promise<void> => {
+  await baseAPIClient.delete(`/entities/${uuid}`);
 };
 
 export default { create, get, getFile, getCSV, update, deleteEntity };
