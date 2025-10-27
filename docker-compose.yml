@@ -35,6 +35,8 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
+    environment:
+      - NODE_ENV=${NODE_ENV}
   db:
     # TODO: rename container for your project
     container_name: humane_society_db
