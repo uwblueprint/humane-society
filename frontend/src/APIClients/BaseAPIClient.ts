@@ -36,7 +36,7 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
     if (
       decodedToken &&
       // If it a string (and not an object) then something went wrong
-      (typeof decodedToken === "string" ||
+      (typeof decodedToken === "string" || 
         // Checks the time of expiration in seconds (division by 1000 because its in ms)
         decodedToken.exp <= Math.round(new Date().getTime() / 1000))
     ) {
