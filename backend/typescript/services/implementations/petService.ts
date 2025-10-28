@@ -1,11 +1,15 @@
-import { Transaction, QueryTypes } from "sequelize";
 import { DateTime } from "luxon";
+import { QueryTypes, Transaction } from "sequelize";
 import PgPet from "../../models/pet.model";
 // import PgTask from "../../models/task.model";
 // import PgTaskTemplate from "../../models/taskTemplate.model";
+import { sequelize } from "../../models";
 import PgPetCareInfo from "../../models/petCareInfo.model";
-import PgUser from "../../models/user.model";
 import TaskTemplate from "../../models/taskTemplate.model";
+import PgUser from "../../models/user.model";
+import { colorLevelToEnum, dateToTimeString } from "../../utilities/common";
+import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
+import logger from "../../utilities/logger";
 import {
   IPetService,
   PetListItemDTO,
@@ -14,14 +18,6 @@ import {
   PetResponseDTO,
   PetTask,
 } from "../interfaces/petService";
-import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
-import logger from "../../utilities/logger";
-import {
-  dateToTimeString,
-  timeStringToDate,
-  colorLevelToEnum,
-} from "../../utilities/common";
-import { sequelize } from "../../models";
 // import TaskTemplate from "../../models/taskTemplate.model";
 // import { Role } from "../../types";
 import { PetStatus } from "../../types";
@@ -326,7 +322,7 @@ class PetService implements IPetService {
     return id;
   }
 
-  sortPetItemListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
+  sortPetListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
     const statusToPriority: Record<PetStatus, number> = {
       [PetStatus.NEEDS_CARE]: 0,
       [PetStatus.OCCUPIED]: 1,
@@ -353,9 +349,9 @@ class PetService implements IPetService {
     });
 
     // Sort each group by status/urgency
-    const sortedAssignedPetList = this.sortPetItemListByStatus(assignedToUser);
+    const sortedAssignedPetList = this.sortPetListByStatus(assignedToUser);
     const sortedNotAssignedPetList =
-      this.sortPetItemListByStatus(notAssignedToUser);
+      this.sortPetListByStatus(notAssignedToUser);
 
     // Return assigned pets first, then unassigned pets
     return sortedAssignedPetList.concat(sortedNotAssignedPetList);
@@ -419,89 +415,68 @@ class PetService implements IPetService {
             return;
           }
 
-          const petData = petIdToPetListItem[petTask.pet_id];
-          // Pet already exists in map, update with additional task information
-          if (petData) {
-            if (!petTask.end_time) {
-              // This task is ongoing or not started
-              if (petTask.start_time) {
-                // if pet is currently occupied, last cared for is current time
-                petData.lastCaredFor = dateToTimeString(currentTime);
-              }
-              // Add this task category to the pet's task list
-              const taskTemplate = await TaskTemplate.findByPk(
-                petTask.task_template_id,
-              );
-              if (taskTemplate) {
-                petData.taskCategories.push(taskTemplate.category);
-              } else {
-                Logger.error(
-                  `Task template with ID ${petTask.task_template_id} not found.`,
-                );
-              }
-              // Update assignment status
-              if (!petTask.user_id) {
-                petData.allTasksAssigned = false;
-              } else if (petTask.user_id === currUserId) {
-                petData.isAssignedToMe = true;
-              }
-            } else {
-              // Task has finished, update lastCaredFor time
-              const endTime = DateTime.fromJSDate(petTask.end_time);
-              if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
-                if (endTime > beginningOfToday) {
-                  petData.lastCaredFor = dateToTimeString(endTime);
-                }
-              } else if (
-                petData.lastCaredFor &&
-                endTime > timeStringToDate(petData.lastCaredFor)
-              ) {
-                petData.lastCaredFor = dateToTimeString(endTime);
-              }
-            }
-          } else {
-            // First time seeing this pet, create new entry with task information
-            let lastCaredFor;
-            const taskCategories = [];
-            if (!petTask.end_time) {
-              // Task is ongoing or not started
-              if (petTask.start_time) {
-                lastCaredFor = dateToTimeString(currentTime);
-              } else {
-                lastCaredFor = null; // assume if a pet has never been cared for it should be null
-              }
-              // Get task category
-              const taskTemplate = await TaskTemplate.findByPk(
-                petTask.task_template_id,
-              );
-              if (taskTemplate) {
-                taskCategories.push(taskTemplate.category);
-              } else {
-                Logger.error(
-                  `Task template with ID ${petTask.task_template_id} not found.`,
-                );
-              }
-            } else {
-              // Task has finished, determine lastCaredFor based on end time
-              const endTime = DateTime.fromJSDate(petTask.end_time);
-              if (endTime <= beginningOfToday) {
-                lastCaredFor = ONE_OR_MORE_DAYS_AGO;
-              } else {
-                lastCaredFor = dateToTimeString(endTime);
-              }
-            }
-            // Create new pet entry
-            petIdToPetListItem[petTask.pet_id] = {
+          // Get or create pet data
+          let petData = petIdToPetListItem[petTask.pet_id];
+          if (!petData) {
+            // If first time seeing this pet, create new entry
+            petData = {
               id: petTask.pet_id,
               name: petTask.name,
               photo: petTask.photo,
               color: colorLevelToEnum(petTask.color_level),
-              taskCategories,
+              taskCategories: [],
               status: petTask.status,
-              lastCaredFor,
-              allTasksAssigned: !!petTask.user_id, // if the task has a user associated with it, it's assigned
+              lastCaredFor: null,
+              allTasksAssigned: !!petTask.user_id,
               isAssignedToMe: petTask.user_id === currUserId,
             };
+            petIdToPetListItem[petTask.pet_id] = petData;
+          }
+
+          // Process task information
+          if (!petTask.end_time) {
+            // Task is ongoing or not started
+            if (petTask.start_time) {
+              petData.lastCaredFor = dateToTimeString(currentTime);
+            }
+            // Add task category
+            const taskTemplate = await TaskTemplate.findByPk(
+              petTask.task_template_id,
+            );
+            if (taskTemplate) {
+              petData.taskCategories.push(taskTemplate.category);
+            } else {
+              Logger.error(
+                `Task template with ID ${petTask.task_template_id} not found.`,
+              );
+            }
+            // Update assignment status
+            if (!petTask.user_id) {
+              petData.allTasksAssigned = false;
+            } else if (petTask.user_id === currUserId) {
+              petData.isAssignedToMe = true;
+            }
+          } else {
+            // Task has finished, update lastCaredFor if this is the most recent
+            const endTime = DateTime.fromJSDate(petTask.end_time);
+            if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
+              if (endTime > beginningOfToday) {
+                petData.lastCaredFor = dateToTimeString(endTime);
+              }
+            } else if (
+              petData.lastCaredFor &&
+              dateToTimeString(endTime) > petData.lastCaredFor
+            ) {
+              // if new end time is more recent than the last cared for time, update the last cared for time
+              petData.lastCaredFor = dateToTimeString(endTime);
+            } else if (!petData.lastCaredFor) {
+              // No previous lastCaredFor, set based on end time
+              if (endTime <= beginningOfToday) {
+                petData.lastCaredFor = ONE_OR_MORE_DAYS_AGO;
+              } else {
+                petData.lastCaredFor = dateToTimeString(endTime);
+              }
+            }
           }
         }),
       );
