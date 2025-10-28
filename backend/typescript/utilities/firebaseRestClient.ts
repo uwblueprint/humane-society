@@ -5,8 +5,9 @@ import logger from "./logger";
 
 const EMULATOR_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST; // e.g. "host.docker.internal:9099"
 const USING_EMULATOR = Boolean(EMULATOR_HOST);
-const API_KEY = USING_EMULATOR ? (process.env.FIREBASE_WEB_API_KEY || "fake-api-key")
-                               : (process.env.FIREBASE_WEB_API_KEY || "");
+const API_KEY = USING_EMULATOR
+  ? process.env.FIREBASE_WEB_API_KEY || "fake-api-key"
+  : process.env.FIREBASE_WEB_API_KEY || "";
 
 // Helper to build a full URL for emulator vs prod.
 // Pass only the path portion (starting with /...googleapis.com/....)
@@ -25,8 +26,7 @@ const IDENTITYTOOLKIT_PASSWORD_PATH =
   "/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword";
 const IDENTITYTOOLKIT_OAUTH_PATH =
   "/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp";
-const SECURETOKEN_REFRESH_PATH =
-  "/securetoken.googleapis.com/v1/token";
+const SECURETOKEN_REFRESH_PATH = "/securetoken.googleapis.com/v1/token";
 
 type PasswordSignInResponse = {
   idToken: string;
@@ -83,7 +83,9 @@ const FirebaseRestClient = {
     password: string,
   ): Promise<Token> => {
     const response: Response = await fetch(
-      `${buildUrl(IDENTITYTOOLKIT_PASSWORD_PATH)}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${buildUrl(IDENTITYTOOLKIT_PASSWORD_PATH)}?key=${
+        process.env.FIREBASE_WEB_API_KEY
+      }`,
       {
         method: "POST",
         headers: {
@@ -123,7 +125,9 @@ const FirebaseRestClient = {
     idToken: string,
   ): Promise<OAuthSignInResponse> => {
     const response: Response = await fetch(
-      `${buildUrl(IDENTITYTOOLKIT_OAUTH_PATH)}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${buildUrl(IDENTITYTOOLKIT_OAUTH_PATH)}?key=${
+        process.env.FIREBASE_WEB_API_KEY
+      }`,
       {
         method: "POST",
         headers: {
@@ -159,7 +163,9 @@ const FirebaseRestClient = {
   // Docs: https://firebase.google.com/docs/reference/rest/auth/#section-refresh-token
   refreshToken: async (refreshToken: string): Promise<Token> => {
     const response: Response = await fetch(
-      `${buildUrl(SECURETOKEN_REFRESH_PATH)}?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      `${buildUrl(SECURETOKEN_REFRESH_PATH)}?key=${
+        process.env.FIREBASE_WEB_API_KEY
+      }`,
       {
         method: "POST",
         headers: {

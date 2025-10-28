@@ -1,18 +1,32 @@
+/* eslint-disable */
 import type { QueryInterface } from "sequelize";
 
 export type Rec = Record<string, any>;
 
 export async function resolveTable(qi: QueryInterface, candidates: string[]) {
   for (const name of candidates) {
-    try { await qi.describeTable(name); return name; } catch {}
+    try {
+      await qi.describeTable(name);
+      return name;
+    } catch {}
   }
-  throw new Error(`None of the table candidates exist: ${candidates.join(", ")}`);
+  throw new Error(
+    `None of the table candidates exist: ${candidates.join(", ")}`,
+  );
 }
 
 export async function tsKeys(qi: QueryInterface, table: string) {
   const cols = await qi.describeTable(table);
-  const createdKey = cols["createdAt"] ? "createdAt" : (cols["created_at"] ? "created_at" : undefined);
-  const updatedKey = cols["updatedAt"] ? "updatedAt" : (cols["updated_at"] ? "updated_at" : undefined);
+  const createdKey = cols.createdAt
+    ? "createdAt"
+    : cols.created_at
+    ? "created_at"
+    : undefined;
+  const updatedKey = cols.updatedAt
+    ? "updatedAt"
+    : cols.updated_at
+    ? "updated_at"
+    : undefined;
   return { createdKey, updatedKey };
 }
 
