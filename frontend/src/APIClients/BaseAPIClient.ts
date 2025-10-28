@@ -30,7 +30,7 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
   ) {
     const decodedToken = jwtDecode(authHeaderParts[1]) as DecodedJWT;
 
-    // Check if the access_token is expired, if it is then request a refresh 
+    // Check if the access_token is expired, if it is then request a refresh
     if (!AuthAPIClient.validateAccessToken(decodedToken)) {
       const refreshCode = await AuthAPIClient.refresh();
 
@@ -38,9 +38,9 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
         newConfig.headers = {};
       }
 
-      if(refreshCode){
+      if (refreshCode) {
         const accessToken = AuthAPIClient.getAccessToken();
-        newConfig.headers.Authorization = "Bearer " + accessToken;
+        newConfig.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
   }

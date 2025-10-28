@@ -2,14 +2,17 @@ import { signInWithEmailLink } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import auth from "../firebase";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { AuthenticatedUser, PasswordSetResponse } from "../types/AuthTypes";
+import {
+  AuthenticatedUser,
+  PasswordSetResponse,
+  DecodedJWT,
+} from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
 import {
   getLocalStorageObjProperty,
   setLocalStorageObjProperty,
-  clearLocalStorageKey
+  clearLocalStorageKey,
 } from "../utils/LocalStorageUtils";
-import { DecodedJWT } from "../types/AuthTypes";
 
 const login = async (
   email: string,
@@ -111,16 +114,11 @@ const sendPasswordResetEmail = async (
 
 const refresh = async (): Promise<boolean> => {
   try {
-    console.log(AUTHENTICATED_USER_KEY);
     const { data } = await baseAPIClient.post(
       "/auth/refresh",
       {},
       { withCredentials: true },
     );
-
-    if(typeof data === "string") {
-      throw "error"
-    }
 
     // update stored access token
     setLocalStorageObjProperty(
@@ -168,25 +166,28 @@ const setPassword = async (
 };
 
 // Gets your access token from the cookies
-const getAccessToken = () : string | null => {
-  try{
-    const accessToken = String(getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "accessToken"));
+const getAccessToken = (): string | null => {
+  try {
+    const accessToken = String(
+      getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "accessToken"),
+    );
     return accessToken;
-  } catch(error){
+  } catch (error) {
     return null;
   }
-}
+};
 
 // Checks if the access token has expired or not
-const validateAccessToken = (decodedToken : DecodedJWT) : boolean => {
+const validateAccessToken = (decodedToken: DecodedJWT): boolean => {
   // Check if expired
-  const result = (decodedToken &&
+  const result =
+    decodedToken &&
     // If it a string (and not an object) then something went wrong
-    (typeof decodedToken === "string" || 
+    (typeof decodedToken === "string" ||
       // Checks the time of expiration in seconds (division by 1000 because its in ms)
-      decodedToken.exp <= Math.round(new Date().getTime() / 1000)))
-  return !Boolean(result);
-}
+      decodedToken.exp <= Math.round(new Date().getTime() / 1000));
+  return !result;
+};
 
 export default {
   login,
