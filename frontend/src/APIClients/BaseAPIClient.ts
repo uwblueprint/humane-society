@@ -21,7 +21,7 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
     newConfig.headers = {};
   }
 
-  // if access token in header has expired, do a refresh
+  // Get access token
   const authHeader = config.headers?.Authorization;
   const headerString = typeof authHeader === "string" ? authHeader : undefined;
   const authHeaderParts = headerString?.trim().split(/\s+/) ?? [];
@@ -37,10 +37,6 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
     // Check if the access_token is expired, if it is then request a refresh
     if (!validateAccessToken(decodedToken)) {
       const refreshCode = await refreshAccessToken();
-
-      if (!newConfig.headers) {
-        newConfig.headers = {};
-      }
 
       if (refreshCode) {
         const accessToken = getAccessToken();

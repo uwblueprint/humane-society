@@ -46,6 +46,8 @@ export const getAccessToken = (): string | null => {
   }
 };
 
+// TODO: Add a clearAccessToken here too
+
 // Checks if the access token has expired or not
 export const validateAccessToken = (decodedToken: DecodedJWT): boolean => {
   // Check if expired
@@ -57,3 +59,4 @@ export const validateAccessToken = (decodedToken: DecodedJWT): boolean => {
       decodedToken.exp <= Math.round(new Date().getTime() / 1000));
   return !result;
 };
+
