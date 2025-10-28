@@ -1,0 +1,56 @@
+import type { QueryInterface } from "sequelize";
+import { resolveTable, tsKeys, withTS, Rec } from "../utilities/_utils";
+
+module.exports = {
+  up: async (queryInterface: QueryInterface) => {
+    const Pets = await resolveTable(queryInterface, ["Pets", "pets"]);
+    const pTS = await tsKeys(queryInterface, Pets);
+
+    const pets: Rec[] = [
+      { animal_tag: "Dog", name: "Buddy",    status: "Needs Care",           breed: "Golden Retriever",  birthday: "2022-03-15", weight: 65, color_level: 2, sex: "M" },
+      { animal_tag: "Dog", name: "Luna",     status: "Does Not Need Care",   breed: "Labrador Mix",      birthday: "2021-07-22", weight: 55, color_level: 3, sex: "F" },
+      { animal_tag: "Dog", name: "Max",      status: "Occupied",             breed: "German Shepherd",   birthday: "2020-11-08", weight: 75, color_level: 4, sex: "M" },
+      { animal_tag: "Dog", name: "Bella",    status: "Needs Care",           breed: "Border Collie",     birthday: "2023-01-30", weight: 45, color_level: 1, sex: "F" },
+      { animal_tag: "Dog", name: "Charlie",  status: "Does Not Need Care",   breed: "Beagle",            birthday: "2022-09-12", weight: 25, color_level: 2, sex: "M" },
+
+      { animal_tag: "Cat", name: "Whiskers", status: "Needs Care",           breed: "Domestic Shorthair", birthday: "2022-05-20", weight: 10, color_level: 1, sex: "M" },
+      { animal_tag: "Cat", name: "Mittens",  status: "Does Not Need Care",   breed: "Persian",            birthday: "2021-12-03", weight: 12, color_level: 2, sex: "F" },
+      { animal_tag: "Cat", name: "Shadow",   status: "Occupied",             breed: "Maine Coon",         birthday: "2020-08-15", weight: 18, color_level: 3, sex: "M" },
+      { animal_tag: "Cat", name: "Princess", status: "Needs Care",           breed: "Siamese",            birthday: "2023-02-28", weight: 8,  color_level: 1, sex: "F" },
+      { animal_tag: "Cat", name: "Tiger",    status: "Does Not Need Care",   breed: "Tabby",              birthday: "2022-06-10", weight: 11, color_level: 2, sex: "M" },
+
+      { animal_tag: "Bird", name: "Polly",   status: "Needs Care",           breed: "African Grey Parrot", birthday: "2019-04-12", weight: 1.5, color_level: 4, sex: "F" },
+      { animal_tag: "Bird", name: "Rio",     status: "Does Not Need Care",   breed: "Cockatiel",           birthday: "2021-10-05", weight: 0.3, color_level: 2, sex: "M" },
+      { animal_tag: "Bird", name: "Sunny",   status: "Occupied",             breed: "Canary",              birthday: "2022-01-18", weight: 0.2, color_level: 1, sex: "F" },
+      { animal_tag: "Bird", name: "Kiwi",    status: "Needs Care",           breed: "Budgerigar",          birthday: "2023-03-22", weight: 0.15, color_level: 1, sex: "M" },
+      { animal_tag: "Bird", name: "Phoenix", status: "Does Not Need Care",   breed: "Lovebird",            birthday: "2022-07-14", weight: 0.25, color_level: 2, sex: "F" },
+
+      { animal_tag: "Bunny", name: "Snowball", status: "Needs Care",         breed: "Holland Lop",         birthday: "2022-04-25", weight: 3,   color_level: 1, sex: "F" },
+      { animal_tag: "Bunny", name: "Cocoa",    status: "Does Not Need Care", breed: "Netherland Dwarf",    birthday: "2021-11-30", weight: 2.5, color_level: 2, sex: "M" },
+      { animal_tag: "Bunny", name: "Pepper",   status: "Occupied",           breed: "Mini Rex",            birthday: "2023-01-08", weight: 4,   color_level: 1, sex: "F" },
+      { animal_tag: "Bunny", name: "Oreo",     status: "Does Not Need Care", breed: "English Angora",      birthday: "2022-08-17", weight: 5,   color_level: 3, sex: "M" },
+      { animal_tag: "Bunny", name: "Honey",    status: "Does Not Need Care", breed: "Flemish Giant",       birthday: "2021-06-03", weight: 12,  color_level: 2, sex: "F" },
+
+      { animal_tag: "Small Animal", name: "Peanut",  status: "Needs Care",         breed: "Guinea Pig",  birthday: "2022-12-12", weight: 1.2, color_level: 1, sex: "M" },
+      { animal_tag: "Small Animal", name: "Nibbles", status: "Does Not Need Care", breed: "Hamster",      birthday: "2023-04-08", weight: 0.15,color_level: 1, sex: "F" },
+      { animal_tag: "Small Animal", name: "Squeaky", status: "Occupied",           breed: "Rat",          birthday: "2022-10-20", weight: 0.5, color_level: 2, sex: "M" },
+      { animal_tag: "Small Animal", name: "Patches", status: "Needs Care",         breed: "Guinea Pig",   birthday: "2023-02-14", weight: 1.1, color_level: 1, sex: "F" },
+      { animal_tag: "Small Animal", name: "Gizmo",   status: "Does Not Need Care", breed: "Chinchilla",   birthday: "2021-09-25", weight: 0.8, color_level: 3, sex: "M" },
+    ].map(r => withTS(r, pTS.createdKey, pTS.updatedKey));
+
+    await queryInterface.bulkInsert(Pets, pets);
+  },
+
+  down: async (queryInterface: QueryInterface) => {
+    const Pets = await resolveTable(queryInterface, ["Pets", "pets"]);
+    await queryInterface.bulkDelete(Pets, {
+      name: [
+        "Buddy","Luna","Max","Bella","Charlie",
+        "Whiskers","Mittens","Shadow","Princess","Tiger",
+        "Polly","Rio","Sunny","Kiwi","Phoenix",
+        "Snowball","Cocoa","Pepper","Oreo","Honey",
+        "Peanut","Nibbles","Squeaky","Patches","Gizmo"
+      ],
+    } as any);
+  },
+};
