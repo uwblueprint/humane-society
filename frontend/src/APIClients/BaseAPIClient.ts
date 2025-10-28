@@ -1,7 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { jwtDecode } from "jwt-decode";
 import { DecodedJWT } from "../types/AuthTypes";
-import AuthAPIClient from "./AuthAPIClient";
+import {
+  refreshAccessToken,
+  validateAccessToken,
+  getAccessToken,
+} from "../utils/AuthUtils";
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || "";
 
@@ -31,15 +35,15 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
     const decodedToken = jwtDecode(authHeaderParts[1]) as DecodedJWT;
 
     // Check if the access_token is expired, if it is then request a refresh
-    if (!AuthAPIClient.validateAccessToken(decodedToken)) {
-      const refreshCode = await AuthAPIClient.refresh();
+    if (!validateAccessToken(decodedToken)) {
+      const refreshCode = await refreshAccessToken();
 
       if (!newConfig.headers) {
         newConfig.headers = {};
       }
 
       if (refreshCode) {
-        const accessToken = AuthAPIClient.getAccessToken();
+        const accessToken = getAccessToken();
         newConfig.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
