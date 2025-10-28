@@ -7,7 +7,9 @@ import baseAPIClient from "./BaseAPIClient";
 import {
   getLocalStorageObjProperty,
   setLocalStorageObjProperty,
+  clearLocalStorageKey
 } from "../utils/LocalStorageUtils";
+import { DecodedJWT } from "../types/AuthTypes";
 
 const login = async (
   email: string,
@@ -107,21 +109,31 @@ const sendPasswordResetEmail = async (
   }
 };
 
-// for testing only, refresh does not need to be exposed in the client
 const refresh = async (): Promise<boolean> => {
   try {
+    console.log(AUTHENTICATED_USER_KEY);
     const { data } = await baseAPIClient.post(
       "/auth/refresh",
       {},
       { withCredentials: true },
     );
+
+    if(typeof data === "string") {
+      throw "error"
+    }
+
+    // update stored access token
     setLocalStorageObjProperty(
       AUTHENTICATED_USER_KEY,
       "accessToken",
       data.accessToken,
     );
+
     return true;
   } catch (error) {
+    // refresh failed — clear context and local storage
+    console.log(AUTHENTICATED_USER_KEY);
+    clearLocalStorageKey(AUTHENTICATED_USER_KEY);
     return false;
   }
 };
@@ -155,6 +167,27 @@ const setPassword = async (
   }
 };
 
+// Gets your access token from the cookies
+const getAccessToken = () : string | null => {
+  try{
+    const accessToken = String(getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "accessToken"));
+    return accessToken;
+  } catch(error){
+    return null;
+  }
+}
+
+// Checks if the access token has expired or not
+const validateAccessToken = (decodedToken : DecodedJWT) : boolean => {
+  // Check if expired
+  const result = (decodedToken &&
+    // If it a string (and not an object) then something went wrong
+    (typeof decodedToken === "string" || 
+      // Checks the time of expiration in seconds (division by 1000 because its in ms)
+      decodedToken.exp <= Math.round(new Date().getTime() / 1000)))
+  return !Boolean(result);
+}
+
 export default {
   login,
   loginWithSignInLink,
@@ -164,4 +197,6 @@ export default {
   refresh,
   setPassword,
   getEmailOfCurrentUser,
+  getAccessToken,
+  validateAccessToken,
 };
