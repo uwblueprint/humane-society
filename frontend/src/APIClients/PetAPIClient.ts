@@ -32,7 +32,7 @@ const getPet = async (petId: number): Promise<Pet> => {
 
     return data;
   } catch (error) {
-    throw new Error(`Failed to get user(s). ${error}`);
+    throw new Error(`Failed to get pet. ${error}`);
   }
 };
 

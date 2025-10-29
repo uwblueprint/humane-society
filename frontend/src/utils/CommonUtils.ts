@@ -40,3 +40,11 @@ export const getDaysInMonth = (
   ).getDate();
   return daysInMonth;
 };
+
+export const getAge = (birthday: string): number => {
+  const parsedBirthday = Date.parse(birthday);
+  const currentDate = new Date();
+  const ageInMs = currentDate.valueOf() - parsedBirthday.valueOf();
+  const msInYear = 1000 * 60 * 60 * 24 * 365.25;
+  return ageInMs / msInYear;
+};

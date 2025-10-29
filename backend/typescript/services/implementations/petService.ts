@@ -10,7 +10,7 @@ import {
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
-  PetResponseWithBirthdayDTO,
+  PetRawDTO,
 } from "../interfaces/petService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
@@ -31,7 +31,7 @@ class PetService implements IPetService {
     return age;
   }
 
-  async getPet(id: string): Promise<PetResponseWithBirthdayDTO> {
+  async getPet(id: string): Promise<PetRawDTO> {
     let pet: PgPet | null;
     try {
       pet = await PgPet.findByPk(id, { include: PgPetCareInfo, plain: true });

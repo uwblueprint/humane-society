@@ -26,8 +26,8 @@ import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
 import ArrowDropdown from "../../../components/common/ArrowDropdown";
 import PetStatus from "../../../components/common/PetStatus";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
-import { getCurrentUserRole } from "../../../utils/CommonUtils";
-import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
+import { getAge, getCurrentUserRole } from "../../../utils/CommonUtils";
+import { ADMIN_AND_BEHAVIOURISTS } from "../../../constants/AuthConstants";
 import { EDIT_PET_PROFILE_PAGE } from "../../../constants/Routes";
 import DefaultPetProfilePhoto from "../../../assets/icons/default-pet-profile.svg";
 
@@ -37,7 +37,7 @@ export interface PetProfileSidebarProps {
   status: TaskStatus;
   colourLevel: ColorLevel;
   breed?: string;
-  age?: number;
+  birthday?: string;
   weightKg?: number;
   spayedNeutered?: boolean;
   sex: SexEnum;
@@ -73,13 +73,23 @@ const getSpayStatusLabel = (spayedNeutered?: boolean) => {
   return spayedNeutered ? "Spayed" : "Not spayed";
 };
 
+const getAgeLabel = (birthday: string) => {
+  const age = getAge(birthday);
+  if (age < 1) {
+    const ageDisplay = Math.floor(age * 12);
+    return `${ageDisplay} ${ageDisplay === 1 ? "month" : "months"} old`;
+  }
+  const ageDisplay = Math.floor(age);
+  return `${ageDisplay} ${ageDisplay === 1 ? "year" : "years"} old`;
+};
+
 function PetProfileSidebar({
   id,
   name,
   status,
   colourLevel,
   breed,
-  age,
+  birthday,
   weightKg,
   spayedNeutered,
   sex,
@@ -87,8 +97,8 @@ function PetProfileSidebar({
   petCare,
 }: PetProfileSidebarProps): React.ReactElement {
   const role = getCurrentUserRole();
-  const isStaffAdminBehaviouralist =
-    role !== null && STAFF_BEHAVIOURISTS_ADMIN.has(role);
+  const isAdminBehaviouralist =
+    role !== null && ADMIN_AND_BEHAVIOURISTS.has(role);
 
   return (
     <VStack
@@ -114,7 +124,7 @@ function PetProfileSidebar({
             {name}
           </Text>
           <Spacer />
-          {isStaffAdminBehaviouralist && (
+          {isAdminBehaviouralist && (
             <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`}>
               <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
             </Link>
@@ -167,9 +177,7 @@ function PetProfileSidebar({
                 lineHeight="100%"
                 textAlign="center"
               >
-                {age
-                  ? `${age} ${age === 1 ? "year" : "years"} old`
-                  : "Unknown age"}
+                {birthday ? getAgeLabel(birthday) : "Unknown age"}
               </Text>
             </VStack>
           </GridItem>

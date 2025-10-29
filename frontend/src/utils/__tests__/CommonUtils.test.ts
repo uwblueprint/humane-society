@@ -1,4 +1,4 @@
-import { getDaysInMonth } from "../CommonUtils";
+import { getDaysInMonth, getAge } from "../CommonUtils";
 
 describe("CommonUtils", () => {
   describe("getDaysInMonth", () => {
@@ -38,6 +38,46 @@ describe("CommonUtils", () => {
       it("should return 29 for February", () => {
         expect(getDaysInMonth("February")).toBe(29);
       });
+    });
+  });
+
+  describe("getAge", () => {
+    // Freeze current date to make test results deterministic
+    const mockToday = new Date("2025-10-29T00:00:00Z");
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(mockToday);
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it("returns 0 for a birthday today", () => {
+      expect(getAge("2025-10-29")).toBeCloseTo(0, 5);
+    });
+
+    it("returns approximately 1 for a birthday one year ago", () => {
+      expect(getAge("2024-10-29")).toBeCloseTo(1, 2);
+    });
+
+    it("returns about 0.5 for a birthday six months ago", () => {
+      expect(getAge("2025-04-29")).toBeCloseTo(0.5, 2);
+    });
+
+    it("returns about 25 for a 25-year-old birthday", () => {
+      expect(getAge("2000-10-29")).toBeCloseTo(25, 1);
+    });
+
+    it("handles leap years correctly", () => {
+      jest.setSystemTime(new Date("2025-02-28T00:00:00Z"));
+      expect(getAge("2004-02-29")).toBeCloseTo(21, 1);
+      jest.setSystemTime(mockToday);
+    });
+
+    it("returns fractional years for non-exact birthdays", () => {
+      expect(getAge("2015-06-10")).toBeCloseTo(10.38, 1);
     });
   });
 });

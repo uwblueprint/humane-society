@@ -567,7 +567,7 @@ const EditPetProfilePage = (): React.ReactElement => {
                           }}
                           render={({ field }) => (
                             <SingleSelect
-                              label="Birthday"
+                              label="Birthdate"
                               values={birthdayMonthOptions}
                               selected={field.value}
                               onSelect={(value) => {

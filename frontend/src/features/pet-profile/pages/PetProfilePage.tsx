@@ -17,7 +17,7 @@ const PetProfilePage = (): React.ReactElement => {
     status: TaskStatus.NEEDS_CARE,
     colourLevel: ColorLevel.YELLOW,
     breed: "Siberian Husky",
-    age: 1,
+    birthday: "2025-07-27",
     weightKg: 25.5,
     spayedNeutered: true,
     sex: SexEnum.MALE,

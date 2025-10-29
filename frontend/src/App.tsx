@@ -99,7 +99,7 @@ const App = (): React.ReactElement => {
                 exact
                 path={`${Routes.EDIT_PET_PROFILE_PAGE}/:id`}
                 component={EditPetProfilePage}
-                allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
