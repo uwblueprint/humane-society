@@ -6,8 +6,14 @@ import { User } from "../../../types/UserTypes";
 import Filter from "../../../components/common/Filter";
 import Search from "../../../components/common/Search";
 import UserManagementTable from "../components/UserManagementTable";
+import AddUserFormModal, {
+  AddUserFormData,
+} from "../components/AddUserFormModal";
+import Button from "../../../components/common/Button";
 
 import Pagination from "../../../components/common/Pagination";
+import { colorLevelMap, AnimalTag } from "../../../types/TaskTypes";
+import UserRoles from "../../../constants/UserConstants";
 
 const UserManagementPage = (): React.ReactElement => {
   const [users, setUsers] = useState<User[]>([]);
@@ -15,6 +21,7 @@ const UserManagementPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const numUsersPerPage = 10; // You can adjust this value as needed
 
@@ -70,6 +77,39 @@ const UserManagementPage = (): React.ReactElement => {
     getUsers();
   }, []);
 
+  const handleInviteUser = async (formData: AddUserFormData) => {
+    try {
+      // Map ColorLevel enum to number (1-5)
+      const colorLevelNumber = formData.colorLevel
+        ? Object.entries(colorLevelMap).find(
+            ([, value]) => value === formData.colorLevel,
+          )?.[0]
+        : "1";
+
+      // Create the user with all the details
+      await UserAPIClient.create({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        role: formData.role as UserRoles,
+        phoneNumber: formData.phoneNumber || null,
+        canSeeAllLogs: null,
+        canAssignUsersToTasks: null,
+        name: `${formData.firstName} ${formData.lastName}`,
+        colorLevel: colorLevelNumber,
+        animalTags: formData.animalTags,
+      });
+
+      // Send the invite email
+      await UserAPIClient.invite(formData.email);
+
+      // Refresh the user list
+      await getUsers();
+    } catch (error) {
+      throw new Error(`Failed to invite user: ${error}`);
+    }
+  };
+
   return (
     <Flex direction="column" gap="2rem" width="100%" pt="2rem">
       {errorMessage && (
@@ -89,17 +129,27 @@ const UserManagementPage = (): React.ReactElement => {
         maxWidth="100vw"
         justifyContent="space-between"
         gap="1rem"
+        alignItems="center"
       >
         <Filter
           type="userManagement"
           onChange={handleFilterChange}
           selected={filters}
         />
-        <Search
-          placeholder="Search for a user..."
-          onChange={handleSearchChange}
-          search={search}
-        />
+        <Flex gap="1rem" alignItems="center">
+          <Search
+            placeholder="Search for a user..."
+            onChange={handleSearchChange}
+            search={search}
+          />
+          <Button
+            variant="dark-blue"
+            size="medium"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Invite User
+          </Button>
+        </Flex>
       </Flex>
       <UserManagementTable
         users={filteredUsers.slice(
@@ -113,6 +163,12 @@ const UserManagementPage = (): React.ReactElement => {
         onChange={(newPage) => setPage(newPage)}
         numberOfItems={filteredUsersLength}
         itemsPerPage={numUsersPerPage}
+      />
+
+      <AddUserFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleInviteUser}
       />
     </Flex>
   );
