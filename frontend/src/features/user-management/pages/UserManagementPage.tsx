@@ -12,7 +12,7 @@ import AddUserFormModal, {
 import Button from "../../../components/common/Button";
 
 import Pagination from "../../../components/common/Pagination";
-import { colorLevelMap, AnimalTag } from "../../../types/TaskTypes";
+import { colorLevelMap } from "../../../types/TaskTypes";
 import UserRoles from "../../../constants/UserConstants";
 
 const UserManagementPage = (): React.ReactElement => {
@@ -81,26 +81,33 @@ const UserManagementPage = (): React.ReactElement => {
     try {
       // Map ColorLevel enum to number (1-5)
       const colorLevelNumber = formData.colorLevel
-        ? Object.entries(colorLevelMap).find(
-            ([, value]) => value === formData.colorLevel,
-          )?.[0]
-        : "1";
+        ? parseInt(
+            Object.entries(colorLevelMap).find(
+              ([, value]) => value === formData.colorLevel,
+            )?.[0] || "1",
+            10,
+          )
+        : 1;
 
-      // Create the user with all the details
-      await UserAPIClient.create({
+      // Step 1: Create the user (CreateUserDTO doesn't include colorLevel and animalTags)
+      const newUser = await UserAPIClient.create({
         firstName: formData.firstName,
         lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         role: formData.role as UserRoles,
         phoneNumber: formData.phoneNumber || null,
         canSeeAllLogs: null,
         canAssignUsersToTasks: null,
-        name: `${formData.firstName} ${formData.lastName}`,
+      });
+
+      // Step 2: Update the user with colorLevel and animalTags
+      await UserAPIClient.update(newUser.id, {
         colorLevel: colorLevelNumber,
         animalTags: formData.animalTags,
       });
 
-      // Send the invite email
+      // Step 3: Send the invite email
       await UserAPIClient.invite(formData.email);
 
       // Refresh the user list
