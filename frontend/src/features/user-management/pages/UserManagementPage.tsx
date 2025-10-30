@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
@@ -6,22 +7,18 @@ import { User } from "../../../types/UserTypes";
 import Filter from "../../../components/common/Filter";
 import Search from "../../../components/common/Search";
 import UserManagementTable from "../components/UserManagementTable";
-import AddUserFormModal, {
-  AddUserFormData,
-} from "../components/AddUserFormModal";
 import Button from "../../../components/common/Button";
 
 import Pagination from "../../../components/common/Pagination";
-import { colorLevelMap } from "../../../types/TaskTypes";
-import UserRoles from "../../../constants/UserConstants";
+import * as Routes from "../../../constants/Routes";
 
 const UserManagementPage = (): React.ReactElement => {
+  const history = useHistory();
   const [users, setUsers] = useState<User[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const numUsersPerPage = 10; // You can adjust this value as needed
 
@@ -77,44 +74,8 @@ const UserManagementPage = (): React.ReactElement => {
     getUsers();
   }, []);
 
-  const handleInviteUser = async (formData: AddUserFormData) => {
-    try {
-      // Map ColorLevel enum to number (1-5)
-      const colorLevelNumber = formData.colorLevel
-        ? parseInt(
-            Object.entries(colorLevelMap).find(
-              ([, value]) => value === formData.colorLevel,
-            )?.[0] || "1",
-            10,
-          )
-        : 1;
-
-      // Step 1: Create the user (CreateUserDTO doesn't include colorLevel and animalTags)
-      const newUser = await UserAPIClient.create({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        role: formData.role as UserRoles,
-        phoneNumber: formData.phoneNumber || null,
-        canSeeAllLogs: null,
-        canAssignUsersToTasks: null,
-      });
-
-      // Step 2: Update the user with colorLevel and animalTags
-      await UserAPIClient.update(newUser.id, {
-        colorLevel: colorLevelNumber,
-        animalTags: formData.animalTags,
-      });
-
-      // Step 3: Send the invite email
-      await UserAPIClient.invite(formData.email);
-
-      // Refresh the user list
-      await getUsers();
-    } catch (error) {
-      throw new Error(`Failed to invite user: ${error}`);
-    }
+  const handleInviteUserClick = () => {
+    history.push(Routes.INVITE_USER_PAGE);
   };
 
   return (
@@ -152,7 +113,7 @@ const UserManagementPage = (): React.ReactElement => {
           <Button
             variant="dark-blue"
             size="medium"
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleInviteUserClick}
           >
             Invite User
           </Button>
@@ -170,12 +131,6 @@ const UserManagementPage = (): React.ReactElement => {
         onChange={(newPage) => setPage(newPage)}
         numberOfItems={filteredUsersLength}
         itemsPerPage={numUsersPerPage}
-      />
-
-      <AddUserFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleInviteUser}
       />
     </Flex>
   );
