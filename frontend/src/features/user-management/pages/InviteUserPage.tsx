@@ -4,14 +4,19 @@ import { Flex, Text } from "@chakra-ui/react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import Input from "../../../components/common/Input";
 import SingleSelect from "../../../components/common/SingleSelect";
-import ColorLevelSelect from "../../../components/common/ColorLevelSelect";
-import AnimalTagSelect from "../../../components/common/AnimalTagSelect";
+import MultiSelect from "../../../components/common/MultiSelect";
+import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 import Button from "../../../components/common/Button";
 import UserRoles from "../../../constants/UserConstants";
 import { ColorLevel, AnimalTag } from "../../../types/TaskTypes";
 import { colorLevelMap } from "../../../types/TaskTypes";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import * as Routes from "../../../constants/Routes";
+import { ReactComponent as BirdTag } from "../../../assets/icons/animal-tag/bird.svg";
+import { ReactComponent as BunnyTag } from "../../../assets/icons/animal-tag/bunny.svg";
+import { ReactComponent as CatTag } from "../../../assets/icons/animal-tag/cat.svg";
+import { ReactComponent as DogTag } from "../../../assets/icons/animal-tag/dog.svg";
+import { ReactComponent as SmallAnimalTag } from "../../../assets/icons/animal-tag/small-animal.svg";
 
 export interface InviteUserFormData {
   firstName: string;
@@ -153,6 +158,30 @@ const InviteUserPage = (): React.ReactElement => {
     UserRoles.VOLUNTEER,
   ];
 
+  const colorLevels = [
+    ColorLevel.GREEN,
+    ColorLevel.YELLOW,
+    ColorLevel.ORANGE,
+    ColorLevel.RED,
+    ColorLevel.BLUE,
+  ];
+
+  const colorLevelElements = colorLevels.map((level) => (
+    <ColourLevelBadge key={level} colourLevel={level} size="small" />
+  ));
+
+  const animalTags = [
+    AnimalTag.BIRD,
+    AnimalTag.BUNNY,
+    AnimalTag.CAT,
+    AnimalTag.DOG,
+    AnimalTag.SMALL_ANIMAL,
+  ];
+
+  const animalTagIcons = [BirdTag, BunnyTag, CatTag, DogTag, SmallAnimalTag];
+
+  const animalTagColors = ["purple", "pink", "orange", "teal", "blue"];
+
   return (
     <Flex direction="column" width="100%" minHeight="100vh" bg="gray.50">
       {/* Header */}
@@ -252,11 +281,13 @@ const InviteUserPage = (): React.ReactElement => {
             />
 
             {/* Colour Level */}
-            <ColorLevelSelect
+            <SingleSelect
+              values={colorLevels}
               selected={formData.colorLevel}
               onSelect={(level) =>
                 setFormData({ ...formData, colorLevel: level })
               }
+              iconElements={colorLevelElements}
               label="Colour Level"
               placeholder="Click for options"
               required
@@ -264,11 +295,14 @@ const InviteUserPage = (): React.ReactElement => {
             />
 
             {/* Animal Tag */}
-            <AnimalTagSelect
+            <MultiSelect
+              values={animalTags}
               selected={formData.animalTags}
               onSelect={(tags) =>
                 setFormData({ ...formData, animalTags: tags })
               }
+              icons={animalTagIcons}
+              colours={animalTagColors}
               label="Animal Tag"
               placeholder="Click for options"
               required

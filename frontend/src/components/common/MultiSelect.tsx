@@ -20,6 +20,7 @@ interface MultiSelectProps<T> {
   label?: string;
   error?: boolean;
   colours: string[];
+  icons?: React.FC<React.SVGProps<SVGSVGElement>>[];
   required?: boolean;
   maxHeight?: string;
 }
@@ -32,6 +33,7 @@ const MultiSelect = <T extends string | number>({
   label,
   error = false,
   colours,
+  icons,
   required = false,
   maxHeight = "200px",
 }: MultiSelectProps<T>): React.ReactElement => {
@@ -159,6 +161,7 @@ const MultiSelect = <T extends string | number>({
               >
                 {selected.map((value) => {
                   const color = getColorForValue(value);
+                  const IconComponent = icons?.[values.indexOf(value)];
 
                   return (
                     <Tag
@@ -168,7 +171,12 @@ const MultiSelect = <T extends string | number>({
                       flexShrink={0}
                       px="1.5rem"
                       py="0.25rem"
+                      display="flex"
+                      gap="0.25rem"
                     >
+                      {IconComponent && (
+                        <Icon as={IconComponent} boxSize="1rem" />
+                      )}
                       <TagLabel textStyle="button" m={0}>
                         {String(value)}
                       </TagLabel>
@@ -248,6 +256,7 @@ const MultiSelect = <T extends string | number>({
           {values.map((value, index) => {
             const isSelected = selected.includes(value);
             const isLastItem = index === values.length - 1;
+            const IconComponent = icons?.[index];
 
             return (
               <Box key={String(value)}>
@@ -278,6 +287,9 @@ const MultiSelect = <T extends string | number>({
                     isChecked={isSelected}
                     onChange={() => handleSelect(value)}
                   />
+                  {IconComponent && (
+                    <Icon as={IconComponent} boxSize="1.5rem" />
+                  )}
                   <Text
                     m={0}
                     textStyle="body"
