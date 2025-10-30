@@ -97,7 +97,7 @@ function PetProfileSidebar({
   petCare,
 }: PetProfileSidebarProps): React.ReactElement {
   const role = getCurrentUserRole();
-  const isAdminBehaviouralist =
+  const isAdminBehaviourist =
     role !== null && ADMIN_AND_BEHAVIOURISTS.has(role);
 
   return (
@@ -124,7 +124,7 @@ function PetProfileSidebar({
             {name}
           </Text>
           <Spacer />
-          {isAdminBehaviouralist && (
+          {isAdminBehaviourist && (
             <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`}>
               <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
             </Link>
