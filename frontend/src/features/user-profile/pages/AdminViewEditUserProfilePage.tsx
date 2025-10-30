@@ -12,7 +12,7 @@ import { UserRoles } from "../../../constants/UserConstants";
 import { AnimalTag } from "../../../types/TaskTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import NavBar from "../../../components/common/navbar/NavBar";
-import DeleteUserModal from "../../../components/crud/DeleteUserModal";
+import DeleteUserModal from "../../../../starter_code_reference/pages/DeleteUserModal";
 
 interface FormData {
   firstName: string;
