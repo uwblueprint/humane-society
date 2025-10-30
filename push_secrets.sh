@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED
 
 # Define input file
 ROOT_ENV_FILE=".env"

@@ -3,12 +3,16 @@
 
 name: Deploy frontend to Firebase Hosting
 
+# Trigger only manually, never on push
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "frontend/**"
+  workflow_dispatch:
+
+# on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - "frontend/**"
 
 defaults:
   run:
@@ -16,13 +20,12 @@ defaults:
 
 jobs:
   build_and_deploy:
+    if: ${{ false }}  # job will never run
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: echo "REACT_APP_BACKEND_URL=${{ secrets.DEV_BACKEND_URL }}" > .env
-      auth {
-      - run: echo "REACT_APP_OAUTH_CLIENT_ID=${{ secrets.DEV_OAUTH_CLIENT_ID }}" >> .env
-      } auth
+      - run: echo REACT_APP_BACKEND_URL=${{ secrets.DEV_BACKEND_URL }} > .env
+      - run: echo REACT_APP_OAUTH_CLIENT_ID=${{ secrets.DEV_OAUTH_CLIENT_ID }} >> .env
       - run: rm -rf node_modules && yarn install --frozen-lockfile && yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

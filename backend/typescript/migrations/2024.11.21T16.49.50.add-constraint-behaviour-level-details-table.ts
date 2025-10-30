@@ -1,4 +1,3 @@
-import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
 import { MIN_BEHAVIOUR_LEVEL, MAX_BEHAVIOUR_LEVEL } from "../constants";
 

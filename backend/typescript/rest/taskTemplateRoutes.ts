@@ -25,6 +25,8 @@ taskTemplateRouter.post(
       const { body } = req;
       const newTaskTemplate = await taskTemplateService.createTaskTemplate({
         taskName: body.taskName,
+        category: body.category,
+        instructions: body.instructions,
       });
       res.status(201).json(newTaskTemplate);
     } catch (e: unknown) {
@@ -40,8 +42,8 @@ taskTemplateRouter.post(
 /* Get all TaskTemplates */
 taskTemplateRouter.get("/", async (req, res) => {
   const contentType = req.headers["content-type"];
-  const limit = Number(req.query.limit); // retrieving limit (component) from the database for the page
-  const page = Number(req.query.page); // the actual page we ar on.
+  // const limit = Number(req.query.limit); // retrieving limit (component) from the database for the page
+  // const page = Number(req.query.page); // the actual page we ar on.
   try {
     const taskTemplates = await taskTemplateService.getTaskTemplates();
     await sendResponseByMimeType<TaskTemplateResponseDTO>(
@@ -85,6 +87,8 @@ taskTemplateRouter.put(
       const { body } = req;
       const taskTemplate = await taskTemplateService.updateTaskTemplate(id, {
         taskName: body.taskName,
+        category: body.category,
+        instructions: body.instructions,
       });
       res.status(200).json(taskTemplate);
     } catch (e: unknown) {

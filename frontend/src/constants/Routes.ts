@@ -12,8 +12,6 @@ export const PROFILE_PAGE = "/profile";
 
 export const PET_PROFILE_PAGE = "/pet-profile";
 
-export const DEV_UTILITY_PAGE = "/dev-utility"; // TODO: This is only here for development purposes
-
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
 export const ADMIN_EDIT_USER_PROFILE_PAGE = "/admin/edit-user-profile";
@@ -26,7 +24,11 @@ export const ADMIN_PAGE = "/admin";
 
 export const CREATE_PASSWORD_PAGE = "/create-password";
 
-// STARTER CODE ROUTES
+export const VOLUNTEER_EDIT_USER_PROFILE_PAGE = "/edit-user-profile";
+
+export const DEV_UTILITY_PAGE = "/dev-utility"; // This starter code route is still available for development purposes
+
+// STARTER CODE ROUTES (DEPRECATED)
 export const SIGNUP_PAGE = "/signup";
 
 export const EDIT_TEAM_PAGE = "/edit-team";
@@ -46,3 +48,4 @@ export const UPDATE_SIMPLE_ENTITY_PAGE = "/simpleEntity/update";
 export const HOOKS_PAGE = "/hooks";
 
 export const DEV_FILE_STORAGE_UPLOAD_PAGE = "/dev-file-upload";
+// END OF STARTER CODE ROUTES (DEPRECATED)

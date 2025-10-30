@@ -1,19 +1,17 @@
 # Oakville and Milton Humane Society 🐾
 The Oakville and Milton Humane Society is a non-profit organization dedicated to protecting and improving the life of animals within the community and connecting them to the communities that care about them in Oakville and Milton. We will be developing a web application that allows volunteers to sign up for pet-sitting tasks, enabling volunteers to efficiently care for multiple animals.
 
-## Summer 2025 Team 
-- **Tony Qiu** (Project Lead)
+## Fall 2025 Team 
 - **Sehshasayi Thuray** (Project Lead)
-- **Sophia Zhu** (Product Manager, Developer)
-- **Aiden Suh** (Developer)
-- **David Lu** (Developer)
+- **Matthew So** (Project Lead)
+- **Aashi Chaubey** (Developer)
+- **Artyom Gabtraupov** (Developer)
+- **Cindy Li** (Developer)
 - **Gateek Chandak** (Developer)
-- **Haresh Goyal** (Developer)
 - **Harry He** (Developer)
-- **Mehul Sharma** (Developer)
+- **Nathanael Ann** (Developer)
+- **Raj Shah** (Developer)
 - **Smeet Shah** (Developer)
-- **Surya Jammalamadaka** (Developer)
-- **Teresa Yu** (Developer)
 
 ## Stack Choices
 **Backend Language:** TypeScript (Express.js on Node.js) <br>
@@ -72,48 +70,7 @@ docker exec -it humane_society_backend /bin/bash -c "node migrate up"
 ```
 
 ### Secrets
-
-- Create A [HashiCorp Cloud Platform Account](https://portal.cloud.hashicorp.com/sign-in?ajs_aid=9085f07d-f411-42b4-855b-72795f4fdbcc&product_intent=vault)
-- Make sure you have been added to the [Humane Society HashiCorp Vault](https://github.com/uwblueprint/).
-- Install [HashiCorp Vault](https://developer.hashicorp.com/hcp/tutorials/get-started-hcp-vault-secrets/hcp-vault-secrets-install-cli#install-hcp-vault-secrets-cli) in order to pull secrets
-- In the folder where you cloned the Humane Society repository, log into Vault
-
-```bash
-hcp auth login
-```
-
-- Configure the Vault Command Line Interface
-
-```bash
-hcp profile init
-```
-
-- Select the `humane-society` Organization/Project/Application.
-
-```bash
-✔ Organization with name "humane-society" and ID "b357b214-2c48-4e87-b7b6-0e51f3902ac0" selected
-✔ Project with name "humane-society" and ID "e841cbab-9210-4fd8-8341-a07946852120" selected
-Use the arrow keys to navigate: ↓ ↑ → ←
-? Select an application name:
-  ▸ humane-society
-  ▸ humane-society-frontend
-```
-
-### Copying secrets from the vault to local
-
-- Copy secrets to a `.env` and `/frontend/.env` file
-
-```bash
-./setup_secrets.sh
-```
-
-### Sending all local secrets to the vault (warning: this overwrites all secrets)
-
-- Push secrets from `.env` and `/frontend/.env` file to HashiCorp Vault
-
-```bash
-./push_secrets.sh
-```
+- Ask Project Leads for environment secrets
 
 ## Useful Commands
 

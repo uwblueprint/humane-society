@@ -6,7 +6,7 @@ lint:
 	docker exec -it humane_society_backend /bin/bash -c "yarn lint"
 	docker exec -it humane_society_frontend /bin/bash -c "yarn lint"
 
-format:
+fix:
 	docker exec -it humane_society_backend /bin/bash -c "yarn fix"
 	docker exec -it humane_society_frontend /bin/bash -c "yarn fix"
 

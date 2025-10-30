@@ -6,6 +6,7 @@ import SampleContext from "../contexts/SampleContext";
 import Logout from "../components/auth/Logout";
 import RefreshCredentials from "../components/auth/RefreshCredentials";
 import DefaultResetPassword from "../components/auth/DefaultResetPassword";
+/* Note: starter code file, active for development purposes */
 
 type ButtonProps = { text: string; path: string };
 

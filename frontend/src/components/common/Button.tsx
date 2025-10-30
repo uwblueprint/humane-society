@@ -31,9 +31,9 @@ const SIZE_STYLES = {
     fontSize: "1.125rem",
   },
   large: {
-    paddingY: "0.625rem",
+    paddingY: "0.8rem",
     paddingX: "1.875rem",
-    fontSize: "1.5rem",
+    fontSize: "1.125rem",
   },
 };
 
