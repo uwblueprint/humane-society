@@ -344,4 +344,3 @@ const InviteUserPage = (): React.ReactElement => {
 };
 
 export default InviteUserPage;
-
