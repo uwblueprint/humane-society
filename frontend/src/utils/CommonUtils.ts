@@ -41,10 +41,26 @@ export const getDaysInMonth = (
   return daysInMonth;
 };
 
-export const getAge = (birthday: string): number => {
-  const parsedBirthday = Date.parse(birthday);
-  const currentDate = new Date();
-  const ageInMs = currentDate.valueOf() - parsedBirthday.valueOf();
-  const msInYear = 1000 * 60 * 60 * 24 * 365.25;
-  return ageInMs / msInYear;
+// Return the age in months floored
+// Ex. Birthday: 2025-07-30, Today: 2025-10-29 --> 2 months
+export const getAgeInMonths = (birthday: string): number => {
+  // Unfortunately, dates in the form of strings like YYYY-MM-DD are often interpreted as UTC
+  // so something like new Date("2024-01-01") will be interpreted as 2023-12-31 19:00 in EST
+
+  // We make an assumption that dates are returned in "YYYY-MM-DD" which should be true from sequelize
+  // To fix this, we instead use the year, month, and day
+  const [year, month, day] = birthday.split("-").map((str) => Number(str));
+  const birthDate = new Date(year, month - 1, day); // Months are 0 indexed
+  const now = new Date();
+
+  const years = now.getFullYear() - birthDate.getFullYear();
+  let months = now.getMonth() - birthDate.getMonth();
+
+  if (now.getDate() < birthDate.getDate()) {
+    months -= 1;
+  }
+
+  const totalMonths = years * 12 + months;
+
+  return totalMonths;
 };

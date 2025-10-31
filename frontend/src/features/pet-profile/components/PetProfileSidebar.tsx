@@ -26,7 +26,7 @@ import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
 import ArrowDropdown from "../../../components/common/ArrowDropdown";
 import PetStatus from "../../../components/common/PetStatus";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
-import { getAge, getCurrentUserRole } from "../../../utils/CommonUtils";
+import { getAgeInMonths, getCurrentUserRole } from "../../../utils/CommonUtils";
 import { ADMIN_AND_BEHAVIOURISTS } from "../../../constants/AuthConstants";
 import { EDIT_PET_PROFILE_PAGE } from "../../../constants/Routes";
 import DefaultPetProfilePhoto from "../../../assets/icons/default-pet-profile.svg";
@@ -74,13 +74,12 @@ const getSpayStatusLabel = (spayedNeutered?: boolean) => {
 };
 
 const getAgeLabel = (birthday: string) => {
-  const age = getAge(birthday);
-  if (age < 1) {
-    const ageDisplay = Math.floor(age * 12);
-    return `${ageDisplay} ${ageDisplay === 1 ? "month" : "months"} old`;
+  const ageInMonths = getAgeInMonths(birthday);
+  if (ageInMonths < 12) {
+    return `${ageInMonths} ${ageInMonths === 1 ? "month" : "months"} old`;
   }
-  const ageDisplay = Math.floor(age);
-  return `${ageDisplay} ${ageDisplay === 1 ? "year" : "years"} old`;
+  const age = Math.floor(ageInMonths / 12);
+  return `${age} ${age === 1 ? "year" : "years"} old`;
 };
 
 function PetProfileSidebar({
