@@ -7,7 +7,7 @@ import { sequelize } from "../../models";
 import PgPetCareInfo from "../../models/petCareInfo.model";
 import TaskTemplate from "../../models/taskTemplate.model";
 import PgUser from "../../models/user.model";
-import { colorLevelToEnum, dateToTimeString } from "../../utilities/common";
+import { colorLevelToEnum, isoStringToDateTime } from "../../utilities/common";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import {
@@ -361,16 +361,17 @@ class PetService implements IPetService {
     const PET_TABLE_NAME = "pets";
     const TASK_TABLE_NAME = "tasks";
     const ONE_OR_MORE_DAYS_AGO = "One or more days ago";
+    const OCCUPIED = "Occupied";
 
     // date constants
     const currentTime = DateTime.now().setZone(TIME_ZONE);
-
     const beginningOfToday = currentTime.set({
       hour: 0,
       minute: 0,
       second: 0,
       millisecond: 0,
     });
+
     try {
       // get the user's role
       const user = await PgUser.findByPk(userId);
@@ -379,6 +380,7 @@ class PetService implements IPetService {
       }
       const currUserId = user.id;
 
+      // Note: joins with ALL tasks (including complete ones), not just from TODAY
       const petTasks = await sequelize.query<PetTask>(
         `SELECT 
         ${PET_TABLE_NAME}.id AS pet_id,
@@ -417,8 +419,8 @@ class PetService implements IPetService {
 
           // Get or create pet data
           let petData = petIdToPetListItem[petTask.pet_id];
+          // If first time seeing this pet, create new entry
           if (!petData) {
-            // If first time seeing this pet, create new entry
             petData = {
               id: petTask.pet_id,
               name: petTask.name,
@@ -433,49 +435,54 @@ class PetService implements IPetService {
             petIdToPetListItem[petTask.pet_id] = petData;
           }
 
-          // Process task information
-          if (!petTask.end_time) {
-            // Task is ongoing or not started
-            if (petTask.start_time) {
-              petData.lastCaredFor = dateToTimeString(currentTime);
+          // Update lastCaredFor
+          // If task is ongoing / pet is occupied
+          if ((petData.status === PetStatus.OCCUPIED) || (petTask.start_time && !petTask.end_time)) {
+            petData.lastCaredFor = OCCUPIED;
+          
+          // If task has not started
+          } else if (!petTask.end_time && !petTask.start_time) {
+            // lastCaredFor stays the same
+          
+          // If task has ended
+          } else if (petTask.end_time) {
+            const endTime = DateTime.fromJSDate(petTask.end_time);
+
+            if (!petData.lastCaredFor) {
+              petData.lastCaredFor = endTime <= beginningOfToday ? ONE_OR_MORE_DAYS_AGO : endTime.toISO();
+            
+            } else if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
+              if (endTime > beginningOfToday) petData.lastCaredFor = endTime.toISO();
+
+            // If lastCaredFor is currently set to a timestamp today
+            } else if (petData.lastCaredFor !== OCCUPIED) {
+              const lastCaredForTime = isoStringToDateTime(petData.lastCaredFor)
+              if (endTime > lastCaredForTime) petData.lastCaredFor = endTime.toISO();
             }
+          }
+
+          // Update task information, ONLY if task is incomplete
+          if (!petTask.end_time) {
             // Add task category
             const taskTemplate = await TaskTemplate.findByPk(
               petTask.task_template_id,
             );
-            if (taskTemplate) {
-              petData.taskCategories.push(taskTemplate.category);
-            } else {
+            if (!taskTemplate) {
               Logger.error(
                 `Task template with ID ${petTask.task_template_id} not found.`,
               );
+              return;
             }
-            // Update assignment status
+            petData.taskCategories.push(taskTemplate.category);
+
+            // Update allTasksAssigned
             if (!petTask.user_id) {
               petData.allTasksAssigned = false;
-            } else if (petTask.user_id === currUserId) {
+            } 
+            
+            // Update isAssignedToMe
+            if (petTask.user_id && petTask.user_id === currUserId) {
               petData.isAssignedToMe = true;
-            }
-          } else {
-            // Task has finished, update lastCaredFor if this is the most recent
-            const endTime = DateTime.fromJSDate(petTask.end_time);
-            if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
-              if (endTime > beginningOfToday) {
-                petData.lastCaredFor = dateToTimeString(endTime);
-              }
-            } else if (
-              petData.lastCaredFor &&
-              dateToTimeString(endTime) > petData.lastCaredFor
-            ) {
-              // if new end time is more recent than the last cared for time, update the last cared for time
-              petData.lastCaredFor = dateToTimeString(endTime);
-            } else if (!petData.lastCaredFor) {
-              // No previous lastCaredFor, set based on end time
-              if (endTime <= beginningOfToday) {
-                petData.lastCaredFor = ONE_OR_MORE_DAYS_AGO;
-              } else {
-                petData.lastCaredFor = dateToTimeString(endTime);
-              }
             }
           }
         }),
