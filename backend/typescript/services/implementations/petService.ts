@@ -435,27 +435,37 @@ class PetService implements IPetService {
 
           // Update lastCaredFor
           // If task is ongoing / pet is occupied
-          if ((petData.status === PetStatus.OCCUPIED) || (petTask.start_time && !petTask.end_time)) {
+          if (
+            petData.status === PetStatus.OCCUPIED ||
+            (petTask.start_time && !petTask.end_time)
+          ) {
             petData.lastCaredFor = LastCaredFor.OCCUPIED;
-          
-          // If task has not started
+
+            // If task has not started
           } else if (!petTask.end_time && !petTask.start_time) {
             // lastCaredFor stays the same
-          
-          // If task has ended
+            // If task has ended
           } else if (petTask.end_time) {
             const endTime = DateTime.fromJSDate(petTask.end_time);
 
             if (!petData.lastCaredFor) {
-              petData.lastCaredFor = endTime <= beginningOfToday ? LastCaredFor.ONE_OR_MORE_DAYS_AGO : endTime.toISO();
-            
-            } else if (petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO) {
-              if (endTime > beginningOfToday) petData.lastCaredFor = endTime.toISO();
+              petData.lastCaredFor =
+                endTime <= beginningOfToday
+                  ? LastCaredFor.ONE_OR_MORE_DAYS_AGO
+                  : endTime.toISO();
+            } else if (
+              petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO
+            ) {
+              if (endTime > beginningOfToday)
+                petData.lastCaredFor = endTime.toISO();
 
-            // If lastCaredFor is currently set to a timestamp today
+              // If lastCaredFor is currently set to a timestamp today
             } else if (petData.lastCaredFor !== LastCaredFor.OCCUPIED) {
-              const lastCaredForTime = isoStringToDateTime(petData.lastCaredFor)
-              if (endTime > lastCaredForTime) petData.lastCaredFor = endTime.toISO();
+              const lastCaredForTime = isoStringToDateTime(
+                petData.lastCaredFor,
+              );
+              if (endTime > lastCaredForTime)
+                petData.lastCaredFor = endTime.toISO();
             }
           }
 
@@ -476,8 +486,8 @@ class PetService implements IPetService {
             // Update allTasksAssigned
             if (!petTask.user_id) {
               petData.allTasksAssigned = false;
-            } 
-            
+            }
+
             // Update isAssignedToMe
             if (petTask.user_id && petTask.user_id === currUserId) {
               petData.isAssignedToMe = true;
