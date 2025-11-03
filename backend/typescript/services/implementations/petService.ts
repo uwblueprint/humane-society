@@ -20,7 +20,7 @@ import {
 } from "../interfaces/petService";
 // import TaskTemplate from "../../models/taskTemplate.model";
 // import { Role } from "../../types";
-import { PetStatus } from "../../types";
+import { LastCaredFor, PetStatus } from "../../types";
 
 const Logger = logger(__filename);
 
@@ -360,8 +360,6 @@ class PetService implements IPetService {
   async getPetList(userId: number): Promise<PetListItemDTO[]> {
     const PET_TABLE_NAME = "pets";
     const TASK_TABLE_NAME = "tasks";
-    const ONE_OR_MORE_DAYS_AGO = "One or more days ago";
-    const OCCUPIED = "Occupied";
 
     // date constants
     const currentTime = DateTime.now().setZone(TIME_ZONE);
@@ -438,7 +436,7 @@ class PetService implements IPetService {
           // Update lastCaredFor
           // If task is ongoing / pet is occupied
           if ((petData.status === PetStatus.OCCUPIED) || (petTask.start_time && !petTask.end_time)) {
-            petData.lastCaredFor = OCCUPIED;
+            petData.lastCaredFor = LastCaredFor.OCCUPIED;
           
           // If task has not started
           } else if (!petTask.end_time && !petTask.start_time) {
@@ -449,13 +447,13 @@ class PetService implements IPetService {
             const endTime = DateTime.fromJSDate(petTask.end_time);
 
             if (!petData.lastCaredFor) {
-              petData.lastCaredFor = endTime <= beginningOfToday ? ONE_OR_MORE_DAYS_AGO : endTime.toISO();
+              petData.lastCaredFor = endTime <= beginningOfToday ? LastCaredFor.ONE_OR_MORE_DAYS_AGO : endTime.toISO();
             
-            } else if (petData.lastCaredFor === ONE_OR_MORE_DAYS_AGO) {
+            } else if (petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO) {
               if (endTime > beginningOfToday) petData.lastCaredFor = endTime.toISO();
 
             // If lastCaredFor is currently set to a timestamp today
-            } else if (petData.lastCaredFor !== OCCUPIED) {
+            } else if (petData.lastCaredFor !== LastCaredFor.OCCUPIED) {
               const lastCaredForTime = isoStringToDateTime(petData.lastCaredFor)
               if (endTime > lastCaredForTime) petData.lastCaredFor = endTime.toISO();
             }
