@@ -23,39 +23,39 @@ export default class Interaction extends Model {
   @Column({ allowNull: false })
   actor_id!: number;
 
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, { foreignKey: "actor_id", onDelete: "SET NULL" })
   actor!: User;
 
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  target_user_id!: number;
+
+  @BelongsTo(() => User, { foreignKey: "target_user_id", onDelete: "SET NULL" })
+  target_user?: User;
+
   @ForeignKey(() => Pet)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   target_pet_id!: number;
 
-  @BelongsTo(() => Pet)
-  pet?: Pet;
+  @BelongsTo(() => Pet, { foreignKey: "target_pet_id", onDelete: "SET NULL" })
+  target_pet?: Pet;
 
   @ForeignKey(() => Activity)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   target_task_id!: number;
 
-  @BelongsTo(() => Activity)
-  task?: Activity;
+  @BelongsTo(() => Activity, { foreignKey: "target_task_id", onDelete: "SET NULL" })
+  target_task?: Activity;
 
   @ForeignKey(() => ActivityType)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  target_task_template_id!: number;
+
+  @BelongsTo(() => ActivityType, {
+    foreignKey: "target_task_template_id",
+    onDelete: "SET NULL",
   })
-  target_task_type_id!: number;
-
-  @BelongsTo(() => ActivityType)
-  activity_type?: ActivityType;
-
+  target_task_template?: ActivityType;
   @ForeignKey(() => InteractionType)
   @Column({
     type: DataType.INTEGER,
@@ -70,13 +70,9 @@ export default class Interaction extends Model {
   @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: false })
   metadata!: Array<string>;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING(256), allowNull: false })
   short_description!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   detailed_description!: string;
-
-  @Index
-  @Column({ allowNull: false })
-  target_id!: number;
 }
