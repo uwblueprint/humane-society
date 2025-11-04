@@ -49,15 +49,18 @@ export const sexEnum: Sex[] = [...sexValues];
 
 export type Sex = (typeof sexValues)[number];
 
-const petStatusValues = [
-  "Occupied",
-  "Needs Care",
-  "Does Not Need Care",
-] as const;
+export enum PetStatus {
+  OCCUPIED = "Occupied",
+  NEEDS_CARE = "Needs Care",
+  DOES_NOT_NEED_CARE = "Does Not Need Care",
+}
 
-export const petStatusEnum: PetStatus[] = [...petStatusValues];
+export enum LastCaredFor {
+  OCCUPIED = "Occupied",
+  ONE_OR_MORE_DAYS_AGO = "One or more days ago",
+}
 
-export type PetStatus = (typeof petStatusValues)[number];
+export const petStatusEnum: PetStatus[] = [...Object.values(PetStatus)];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
