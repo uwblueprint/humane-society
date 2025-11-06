@@ -2,6 +2,9 @@ import * as path from "path";
 import { Sequelize } from "sequelize-typescript";
 import User from "./user.model";
 // import defineRelationships from "./modelRelationships";
+import InteractionTypeModel from "./interactionType";
+import InteractionModel from "./interaction";
+import { DataTypes } from "sequelize";
 
 const DATABASE_URL =
   process.env.NODE_ENV === "production"
@@ -18,4 +21,13 @@ sequelize.addModels([User]);
 
 // defineRelationships();
 
+const InteractionType = InteractionTypeModel(sequelize, DataTypes);
+sequelize.models.InteractionType = InteractionType;
+
+const Interaction = InteractionModel(sequelize, DataTypes);
+sequelize.models.Interaction = Interaction;
+
+
 export { sequelize, User };
+
+
