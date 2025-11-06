@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   frontend:
     # TODO: rename container for your project

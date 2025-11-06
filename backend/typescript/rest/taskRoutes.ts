@@ -17,6 +17,9 @@ import {
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
+import { logInteraction } from "../middlewares/logInteraction";
+
+
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
@@ -145,6 +148,7 @@ taskRouter.patch(
       const Task = await taskService.assignUser(id, {
         userId: body.userId,
       });
+      await logInteraction(req, res);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
