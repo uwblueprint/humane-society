@@ -118,3 +118,15 @@ export enum Cadence {
   MONTHLY = "Monthly",
   ANNUALLY = "Annually",
 }
+
+export enum InteractionTypeEnum {
+  TASK_ASSIGNED = "TASK_ASSIGNED",
+  TASK_SELF_ASSIGNED = "TASK_SELF_ASSIGNED",
+  TASK_UNASSIGNED = "TASK_UNASSIGNED",
+  TASK_STARTED = "TASK_STARTED",
+  TASK_COMPLETED = "TASK_COMPLETED",
+  TASK_ASSIGNEE_CHANGED = "TASK_ASSIGNEE_CHANGED",
+  USER_ROLE_CHANGED = "USER_ROLE_CHANGED",
+  PET_NAME_CHANGED = "PET_NAME_CHANGED",
+  // ... you can fill in the rest later from that big list/table
+}
