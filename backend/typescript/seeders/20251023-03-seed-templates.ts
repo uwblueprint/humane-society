@@ -12,35 +12,16 @@ module.exports = {
     ]);
     const ttTS = await tsKeys(queryInterface, Templates);
 
-    const templates: Rec[] = [
-      {
-        task_name: "Morning Dog Walk",
-        category: "Walk",
-        instruction: "Take the dog for a 30-minute walk around the grounds.",
-      },
-      {
-        task_name: "Cage Cleaning",
-        category: "Husbandry",
-        instruction:
-          "Clean and disinfect living space; refresh bowls and bedding.",
-      },
-      {
-        task_name: "Basic Training Session",
-        category: "Training",
-        instruction: "15-minute obedience session: sit, stay, come.",
-      },
-      {
-        task_name: "Interactive Play Time",
-        category: "Games",
-        instruction: "20-minute enrichment with toys; monitor stress levels.",
-      },
-      {
-        task_name: "Socialization Activity",
-        category: "Pen Time",
-        instruction:
-          "30-minute supervised interaction with compatible animals.",
-      },
-    ].map((r) => withTS(r, ttTS.createdKey, ttTS.updatedKey));
+    // Load template fixtures
+    const FIXTURES: Array<{
+      task_name: string;
+      category: string;
+      instruction: string;
+    }> = require("./mockData/templates.json");
+
+    const templates: Rec[] = FIXTURES.map((r) =>
+      withTS(r, ttTS.createdKey, ttTS.updatedKey)
+    );
 
     await queryInterface.bulkInsert(Templates, templates);
   },
@@ -52,14 +33,9 @@ module.exports = {
       "Task_Templates",
       "taskTemplates",
     ]);
+    const FIXTURES: Array<{ task_name: string }> = require("./mockData/templates.json");
     await queryInterface.bulkDelete(Templates, {
-      task_name: [
-        "Morning Dog Walk",
-        "Cage Cleaning",
-        "Basic Training Session",
-        "Interactive Play Time",
-        "Socialization Activity",
-      ],
+      task_name: FIXTURES.map((f) => f.task_name),
     } as any);
   },
 };

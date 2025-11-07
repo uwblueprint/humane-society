@@ -24,22 +24,36 @@ module.exports = {
     const Tasks = await resolveTable(queryInterface, ["tasks", "Tasks"]);
     const tkTS = await tsKeys(queryInterface, Tasks);
 
+    // Load task fixtures
+    const FIXTURES: Array<{
+      userLabel: string | null;
+      petName: string;
+      templateName: string;
+      offsetHours?: number;
+      startNow?: boolean;
+      notes: string;
+    }> = require("./mockData/tasks.json");
+
     // Look up FK IDs dynamically (no hardcoded numbers)
+    const userAuthIds: string[] = Array.from(
+      new Set(
+        FIXTURES
+          .map((f) => f.userLabel)
+          .filter((x): x is string => Boolean(x))
+          .map((label) => uidMap[label])
+      )
+    );
+    const petNames: string[] = Array.from(
+      new Set(FIXTURES.map((f) => f.petName))
+    );
+
     const [userRows]: any = await queryInterface.sequelize.query(
       `SELECT id, auth_id FROM "${Users}" WHERE auth_id IN (:ids)`,
-      {
-        replacements: {
-          ids: [
-            uidMap.volunteer_001,
-            uidMap.staff_001,
-            uidMap.behaviourist_001,
-            uidMap.volunteer_002,
-          ],
-        },
-      },
+      { replacements: { ids: userAuthIds } },
     );
     const [petRows]: any = await queryInterface.sequelize.query(
-      `SELECT id, name FROM "${Pets}" WHERE name IN ('Buddy','Whiskers','Bella','Polly','Snowball')`,
+      `SELECT id, name FROM "${Pets}" WHERE name IN (:names)`,
+      { replacements: { names: petNames } },
     );
     const [tmplRows]: any = await queryInterface.sequelize.query(
       `SELECT id, task_name FROM "${Templates}"`,
@@ -48,44 +62,20 @@ module.exports = {
     const idOf = (arr: any[], key: string, val: string) =>
       (arr.find((x) => x[key] === val) || {}).id ?? null;
 
-    const tasks: Rec[] = [
-      {
-        user_id: idOf(userRows, "auth_id", uidMap.volunteer_001),
-        pet_id: idOf(petRows, "name", "Buddy"),
-        task_template_id: idOf(tmplRows, "task_name", "Morning Dog Walk"),
-        scheduled_start_time: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        notes: "seed_Morning Dog Walk_Buddy",
-      },
-      {
-        user_id: idOf(userRows, "auth_id", uidMap.staff_001),
-        pet_id: idOf(petRows, "name", "Whiskers"),
-        task_template_id: idOf(tmplRows, "task_name", "Cage Cleaning"),
-        scheduled_start_time: new Date(Date.now() + 2 * 60 * 60 * 1000),
-        start_time: new Date(),
-        notes: "seed_Cage Cleaning_Whiskers",
-      },
-      {
-        user_id: idOf(userRows, "auth_id", uidMap.behaviourist_001),
-        pet_id: idOf(petRows, "name", "Bella"),
-        task_template_id: idOf(tmplRows, "task_name", "Basic Training Session"),
-        scheduled_start_time: new Date(Date.now() + 4 * 60 * 60 * 1000),
-        notes: "seed_Basic Training Session_Bella",
-      },
-      {
-        user_id: null,
-        pet_id: idOf(petRows, "name", "Polly"),
-        task_template_id: idOf(tmplRows, "task_name", "Interactive Play Time"),
-        scheduled_start_time: new Date(Date.now() + 6 * 60 * 60 * 1000),
-        notes: "seed_Interactive Play Time_Polly",
-      },
-      {
-        user_id: idOf(userRows, "auth_id", uidMap.volunteer_002),
-        pet_id: idOf(petRows, "name", "Snowball"),
-        task_template_id: idOf(tmplRows, "task_name", "Socialization Activity"),
-        scheduled_start_time: new Date(Date.now() + 8 * 60 * 60 * 1000),
-        notes: "seed_Socialization Activity_Snowball",
-      },
-    ].map((r) => withTS(r, tkTS.createdKey, tkTS.updatedKey));
+    const tasks: Rec[] = FIXTURES.map((f) => {
+      const scheduled = new Date(
+        Date.now() + ((f.offsetHours ?? 0) * 60 * 60 * 1000)
+      );
+      const base: any = {
+        user_id: f.userLabel ? idOf(userRows, "auth_id", uidMap[f.userLabel]) : null,
+        pet_id: idOf(petRows, "name", f.petName),
+        task_template_id: idOf(tmplRows, "task_name", f.templateName),
+        scheduled_start_time: scheduled,
+        notes: f.notes,
+      };
+      if (f.startNow) base.start_time = new Date();
+      return base;
+    }).map((r) => withTS(r, tkTS.createdKey, tkTS.updatedKey));
 
     await queryInterface.bulkInsert(Tasks, tasks);
   },
