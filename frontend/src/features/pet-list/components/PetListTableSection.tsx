@@ -9,25 +9,9 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
-import {
-  AnimalTag,
-  ColorLevel,
-  TaskCategory,
-  TaskStatus,
-} from "../../../types/TaskTypes";
+import { TaskCategory } from "../../../types/TaskTypes";
 import PetStatus from "../../../components/common/PetStatus";
-
-export interface PetInfo {
-  id: number;
-  name: string;
-  skill: ColorLevel;
-  image: string;
-  taskCategories: TaskCategory[];
-  status: TaskStatus;
-  lastCaredFor: string;
-  allTasksAssigned: boolean;
-  animalTag: AnimalTag;
-}
+import { PetInfo } from "../../../types/PetTypes";
 
 interface PetListTableSectionProps {
   pets: PetInfo[];
@@ -92,6 +76,7 @@ export const PetListTableSection = ({
                   image={pet.image}
                   size="large"
                   type="pet"
+                  showColorBorder
                 />
                 <Flex direction="column" justify="center" gap="0.5rem">
                   <Text textStyle="h3" m={0} color="gray.700">
@@ -147,3 +132,5 @@ export const PetListTableSection = ({
     </Tbody>
   );
 };
+
+export default PetListTableSection;

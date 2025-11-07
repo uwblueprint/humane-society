@@ -1,0 +1,63 @@
+{
+    "Has Unassigned Tasks": [
+        {
+            "id": 3,
+            "name": "Pillie",
+            "skill": "Red",
+            "image": "/images/dog1.png",
+            "taskCategories": ["Training", "Games", "Husbandry", "Misc."],
+            "status": "Assigned to You",
+            "lastCaredFor": "10:33 am",
+            "allTasksAssigned": false, 
+            "animalTag": "Dog"
+        },
+        {
+            "id": 6,
+            "name": "Sillie",
+            "skill": "Yellow",
+            "image": "/images/dog1.png",
+            "taskCategories": ["Walk", "Pen Time", "Training", "Games", "Husbandry", "Misc."],
+            "status": "Assigned to You",
+            "lastCaredFor": "10:33 am",
+            "allTasksAssigned": false,
+            "animalTag": "Dog"
+        }
+    ],
+    "All Tasks Assigned": [
+        {
+            "id": 2,
+            "name": "Lillie",
+            "skill": "Green",
+            "image": "/images/cat.png",
+            "taskCategories": ["Walk", "Pen Time", "Training", "Games", "Husbandry"],
+            "status": "Assigned to You",
+            "lastCaredFor": "Occupied",
+            "allTasksAssigned": true,
+            "animalTag": "Cat"
+        },
+        {
+            "id": 4,
+            "name": "Benji",
+            "skill": "Blue",
+            "image": "/images/dog2.png",
+            "taskCategories": ["Walk", "Pen Time"],
+            "status": "Needs Care",
+            "lastCaredFor": "One or more days ago",
+            "allTasksAssigned": true,
+            "animalTag": "Dog"
+        }
+    ],
+    "No Tasks": [
+        {
+            "id": 5,
+            "name": "Billie",
+            "skill": "Orange",
+            "image": "/images/dog1.png",
+            "taskCategories": ["Games"],
+            "status": "Does Not Need Care",
+            "lastCaredFor": "10:33 am",
+            "allTasksAssigned": true,
+            "animalTag": "Dog"
+        }
+    ]
+}
