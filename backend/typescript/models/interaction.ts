@@ -53,7 +53,7 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
     },
     {
       tableName: "interactions",
-      timestamps: true,
+      timestamps: false,
       createdAt: "created_at",
       updatedAt: "updated_at",
     }

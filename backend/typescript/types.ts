@@ -111,5 +111,5 @@ export enum InteractionTypeEnum {
   TASK_ASSIGNEE_CHANGED = "TASK_ASSIGNEE_CHANGED",
   USER_ROLE_CHANGED = "USER_ROLE_CHANGED",
   PET_NAME_CHANGED = "PET_NAME_CHANGED",
-  // ... you can fill in the rest later from that big list/table
+  //fill in rest from table
 }
