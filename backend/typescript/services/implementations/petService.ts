@@ -398,6 +398,7 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
+    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     const sections: PetListSections = {
       "Assigned to You": [],
@@ -426,6 +427,9 @@ class PetService implements IPetService {
           petColorLevelMap[pet.id],
         );
         if (!canCare) return false;
+
+        // Only show pets with tasks scheduled for today
+        if (!petsWithTasksScheduledToday.has(pet.id)) return false;
 
         // If assigned to me, always include (even if occupied)
         if (pet.isAssignedToMe) return true;
@@ -534,6 +538,7 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
+    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     if (user.role === Role.VOLUNTEER) {
       return this.buildSectionsVolunteer(
@@ -541,6 +546,7 @@ class PetService implements IPetService {
         user,
         petColorLevelMap,
         petAnimalTagMap,
+        petsWithTasksScheduledToday,
       );
     }
 
@@ -585,6 +591,8 @@ class PetService implements IPetService {
       // Keep raw maps for volunteer gating
       const petIdToColorLevel: Record<number, number> = {};
       const petIdToAnimalTag: Record<number, AnimalTag> = {};
+      // Track pets with tasks scheduled for today (for volunteer filtering)
+      const petsWithTasksScheduledToday = new Set<number>();
 
       // Preload all task templates to avoid multiple queries
       const uniqueTaskTemplateIds = [
@@ -620,6 +628,11 @@ class PetService implements IPetService {
             !!scheduledTime &&
             scheduledTime >= beginningOfToday &&
             scheduledTime < endOfToday;
+
+          // Track pets with tasks scheduled for today
+          if (isToday) {
+            petsWithTasksScheduledToday.add(petTask.pet_id);
+          }
 
           // Get or create pet data
           let petData = petIdToPetListItem[petTask.pet_id];
@@ -716,6 +729,7 @@ class PetService implements IPetService {
         user,
         petIdToColorLevel,
         petIdToAnimalTag,
+        petsWithTasksScheduledToday,
       );
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));
