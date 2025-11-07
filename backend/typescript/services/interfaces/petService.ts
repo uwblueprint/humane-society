@@ -81,7 +81,7 @@ export interface PetTask {
   animal_tag?: AnimalTag;
   user_id?: number;
   task_template_id?: number;
-  scheduled_start_time?: Date;
+  scheduled_start_time: Date;
   start_time?: Date;
   end_time?: Date;
 }

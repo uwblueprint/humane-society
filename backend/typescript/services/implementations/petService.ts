@@ -7,11 +7,7 @@ import { sequelize } from "../../models";
 import PgPetCareInfo from "../../models/petCareInfo.model";
 import TaskTemplate from "../../models/taskTemplate.model";
 import PgUser from "../../models/user.model";
-import {
-  colorLevelToEnum,
-  dateToTimeString,
-  timeStringToDateTime,
-} from "../../utilities/common";
+import { colorLevelToEnum, dateToISOString } from "../../utilities/common";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import {
@@ -346,18 +342,43 @@ class PetService implements IPetService {
   }
 
   // Within section order by care urgency
-  private sortPetListByCareUrgency(pets: PetListItemDTO[]): PetListItemDTO[] {
-    // Lower number means higher priority
-    const score = (p: PetListItemDTO): number => {
-      if (p.status === PetStatus.NEEDS_CARE) {
-        if (p.lastCaredFor === "One or more days ago") return 0;
-        if (p.lastCaredFor === null) return 1; // never cared for
-        return 2; // cared for today (time string)
+  private sortPetListByCareUrgency(
+    pets: PetListItemDTO[],
+    beginningOfTodayISO: string,
+  ): PetListItemDTO[] {
+    pets.sort((a, b) => {
+      // Never Cared For - highest priority
+      if (a.lastCaredFor === null) return -1;
+      if (b.lastCaredFor === null) return 1;
+
+      // Occupied - lowest priority
+      if (a.lastCaredFor === LastCaredFor.OCCUPIED) return 1;
+      if (b.lastCaredFor === LastCaredFor.OCCUPIED) return -1;
+
+      // Both are non-null, non-occupied strings
+      // Compare directly (older - higher priority)
+      if (a.lastCaredFor && b.lastCaredFor) {
+        return a.lastCaredFor.localeCompare(b.lastCaredFor);
       }
-      if (p.status === PetStatus.OCCUPIED) return 3;
-      return 4; // DOES_NOT_NEED_CARE
-    };
-    return pets.sort((a, b) => score(a) - score(b));
+
+      return 0;
+    });
+
+    // Convert old dates to One or more days ago for display
+    return pets.map((pet) => {
+      if (
+        pet.lastCaredFor &&
+        pet.lastCaredFor !== LastCaredFor.OCCUPIED &&
+        pet.lastCaredFor !== LastCaredFor.ONE_OR_MORE_DAYS_AGO &&
+        pet.lastCaredFor < beginningOfTodayISO
+      ) {
+        return {
+          ...pet,
+          lastCaredFor: LastCaredFor.ONE_OR_MORE_DAYS_AGO,
+        };
+      }
+      return pet;
+    });
   }
 
   // Volunteer eligibility check (tags + color level)
@@ -371,77 +392,98 @@ class PetService implements IPetService {
     return hasTag && colorOk; // both conditions must be true
   }
 
-  // Build sections per role and sort each section by care urgency
-  private buildSectionsByRole(
+  // Build sections for volunteer view
+  private buildSectionsVolunteer(
     allPets: PetListItemDTO[],
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
   ): PetListSections {
-    const sections: PetListSections = {};
-
-    // Add a pet to the section if it hasn't been added yet
-    const pushOnce = (
-      target: string, // section name
-      pet: PetListItemDTO,
-      added: Set<number>, // track added pets to avoid duplicates
-    ) => {
-      if (!sections[target]) sections[target] = [];
-      if (!added.has(pet.id)) {
-        sections[target].push(pet);
-        added.add(pet.id);
-      }
+    const sections: PetListSections = {
+      "Assigned to You": [],
+      "Other Pets": [],
     };
 
     const added = new Set<number>();
 
-    const isVolunteer = user.role === Role.VOLUNTEER;
+    const pushOnce = (
+      target: string,
+      pet: PetListItemDTO,
+      addedSet: Set<number>,
+    ) => {
+      if (!sections[target]) sections[target] = [];
+      if (!addedSet.has(pet.id)) {
+        sections[target].push(pet);
+        addedSet.add(pet.id);
+      }
+    };
+
+    allPets
+      .filter((pet) => {
+        const canCare = this.canVolunteerCareToday(
+          user,
+          petAnimalTagMap[pet.id],
+          petColorLevelMap[pet.id],
+        );
+        if (!canCare) return false;
+
+        // If assigned to me, always include (even if occupied)
+        if (pet.isAssignedToMe) return true;
+
+        // Include if pet needs care or is occupied but has tasks that still need to be assigned
+        return (
+          pet.status === PetStatus.NEEDS_CARE ||
+          (pet.status === PetStatus.OCCUPIED && pet.allTasksAssigned === false)
+        );
+      })
+      .forEach((pet) => {
+        if (pet.isAssignedToMe) {
+          pushOnce("Assigned to You", pet, added);
+        } else {
+          pushOnce("Other Pets", pet, added);
+        }
+      });
+
+    // Sort each section by care urgency
+    const beginningOfTodayISO = dateToISOString(
+      DateTime.now().setZone(TIME_ZONE).startOf("day"),
+    );
+    sections["Assigned to You"] = this.sortPetListByCareUrgency(
+      sections["Assigned to You"],
+      beginningOfTodayISO,
+    );
+    sections["Other Pets"] = this.sortPetListByCareUrgency(
+      sections["Other Pets"],
+      beginningOfTodayISO,
+    );
+
+    return sections;
+  }
+
+  // Build sections for admin view (Staff/AB/Admin)
+  private buildSectionsAdmin(
+    allPets: PetListItemDTO[],
+    user: PgUser,
+  ): PetListSections {
+    const sections: PetListSections = {};
+    const added = new Set<number>();
+
+    const pushOnce = (
+      target: string,
+      pet: PetListItemDTO,
+      addedSet: Set<number>,
+    ) => {
+      if (!sections[target]) sections[target] = [];
+      if (!addedSet.has(pet.id)) {
+        sections[target].push(pet);
+        addedSet.add(pet.id);
+      }
+    };
+
     const isStaff = user.role === Role.STAFF;
     const isAB = user.role === Role.ANIMAL_BEHAVIOURIST;
 
-    // Show pets assigned to me in "Assigned to You" and other eligible pets in "Other Pets" if they need care or are occupied with unassigned tasks
-    if (isVolunteer) {
-      sections["Assigned to You"] = [];
-      sections["Other Pets"] = [];
-
-      allPets
-        .filter((pet) => {
-          const canCare = this.canVolunteerCareToday(
-            user,
-            petAnimalTagMap[pet.id],
-            petColorLevelMap[pet.id],
-          );
-          if (!canCare) return false;
-
-          // If assigned to me, always include (even if occupied)
-          if (pet.isAssignedToMe) return true;
-
-          // Include if pet needs care or is occupied but has tasks that still need to be assigned
-          return (
-            pet.status === PetStatus.NEEDS_CARE ||
-            (pet.status === PetStatus.OCCUPIED &&
-              pet.allTasksAssigned === false)
-          );
-        })
-        .forEach((pet) => {
-          if (pet.isAssignedToMe) {
-            pushOnce("Assigned to You", pet, added);
-          } else {
-            pushOnce("Other Pets", pet, added);
-          }
-        });
-
-      // Sort each section by care urgency
-      sections["Assigned to You"] = this.sortPetListByCareUrgency(
-        sections["Assigned to You"],
-      );
-      sections["Other Pets"] = this.sortPetListByCareUrgency(
-        sections["Other Pets"],
-      );
-      return sections;
-    }
-
-    // ADMIN VIEW (Staff/AB/Admin share Admin View, but only Staff/AB have Assigned to You section)
+    // Staff/AB have "Assigned to You" section
     if (isStaff || isAB) {
       sections["Assigned to You"] = [];
     }
@@ -473,11 +515,37 @@ class PetService implements IPetService {
     });
 
     // Sort each section by care urgency
+    const beginningOfTodayISO = dateToISOString(
+      DateTime.now().setZone(TIME_ZONE).startOf("day"),
+    );
     Object.keys(sections).forEach((k) => {
-      sections[k] = this.sortPetListByCareUrgency(sections[k]);
+      sections[k] = this.sortPetListByCareUrgency(
+        sections[k],
+        beginningOfTodayISO,
+      );
     });
 
     return sections;
+  }
+
+  // Build sections per role and sort each section by care urgency
+  private buildSectionsByRole(
+    allPets: PetListItemDTO[],
+    user: PgUser,
+    petColorLevelMap: Record<number, number>,
+    petAnimalTagMap: Record<number, AnimalTag>,
+  ): PetListSections {
+    if (user.role === Role.VOLUNTEER) {
+      return this.buildSectionsVolunteer(
+        allPets,
+        user,
+        petColorLevelMap,
+        petAnimalTagMap,
+      );
+    }
+
+    // Admin view for Staff/AB/Admin
+    return this.buildSectionsAdmin(allPets, user);
   }
 
   async getPetList(userId: number): Promise<PetListSections> {
@@ -494,10 +562,8 @@ class PetService implements IPetService {
       const user = await PgUser.findByPk(userId);
       if (!user) return {};
 
-      // Include animal_tag for volunteer gating (MINIMAL SQL change)
-      const petTasks = await sequelize.query<
-        PetTask & { animal_tag: AnimalTag }
-      >(
+      // Include animal_tag for volunteer gating
+      const petTasks = await sequelize.query<PetTask>(
         `SELECT 
           ${PET_TABLE_NAME}.id AS pet_id,
           ${PET_TABLE_NAME}.name AS name,
@@ -541,9 +607,7 @@ class PetService implements IPetService {
         petTasks.map(async (petTask) => {
           // Store pet color level and animal tag for volunteer eligibility checks
           petIdToColorLevel[petTask.pet_id] = petTask.color_level;
-          if (petTask.animal_tag) {
-            petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
-          }
+          petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
 
           // Check if task is scheduled for today or started today
           const scheduledTime = petTask.scheduled_start_time
@@ -551,19 +615,11 @@ class PetService implements IPetService {
                 TIME_ZONE,
               )
             : null;
-          const startTime = petTask.start_time
-            ? DateTime.fromJSDate(petTask.start_time).setZone(TIME_ZONE)
-            : null;
 
-          const isScheduledToday =
+          const isToday =
             !!scheduledTime &&
             scheduledTime >= beginningOfToday &&
             scheduledTime < endOfToday;
-          const isStartedToday =
-            !!startTime &&
-            startTime >= beginningOfToday &&
-            startTime < endOfToday;
-          const isToday = isScheduledToday || isStartedToday;
 
           // Get or create pet data
           let petData = petIdToPetListItem[petTask.pet_id];
@@ -599,23 +655,13 @@ class PetService implements IPetService {
               TIME_ZONE,
             );
 
-            if (!petData.lastCaredFor) {
-              petData.lastCaredFor =
-                endTime <= beginningOfToday
-                  ? LastCaredFor.ONE_OR_MORE_DAYS_AGO
-                  : dateToTimeString(endTime);
-            } else if (
-              petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO
+            const endTimeISO = dateToISOString(endTime);
+            if (
+              !petData.lastCaredFor ||
+              petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO ||
+              endTimeISO > petData.lastCaredFor
             ) {
-              if (endTime > beginningOfToday)
-                petData.lastCaredFor = dateToTimeString(endTime);
-            } else if (petData.lastCaredFor !== LastCaredFor.OCCUPIED) {
-              // convert lastCaredFor to a DateTime for comparison
-              const lastCaredForTime = timeStringToDateTime(
-                petData.lastCaredFor,
-              );
-              if (endTime > lastCaredForTime)
-                petData.lastCaredFor = dateToTimeString(endTime);
+              petData.lastCaredFor = endTimeISO;
             }
           }
 
@@ -635,12 +681,13 @@ class PetService implements IPetService {
             petData.taskCategories.push(taskCategory);
 
             // Update allTasksAssigned for today's tasks
+            // Initialize to true when we first see a task, then set to false if any task is unassigned
+            if (petData.allTasksAssigned === null) {
+              petData.allTasksAssigned = true;
+            }
             if (!petTask.user_id) {
               // If ANY today task is unassigned -> overall false
               petData.allTasksAssigned = false;
-            } else if (petData.allTasksAssigned !== false) {
-              // Only set true if we never saw a false (all tasks assigned so far)
-              petData.allTasksAssigned = true;
             }
 
             // Update isAssignedToMe for today's tasks
@@ -652,11 +699,13 @@ class PetService implements IPetService {
       );
 
       // Set allTasksAssigned to null for pets with no tasks today
+      // NOTE: While technically "all tasks are assigned" when there are no tasks,
+      // we use null to distinguish pets with no tasks from pets with tasks for the
+      // buildSectionsByRole function. null = No Tasks section, true/false = task-based sections.
       const allPets = Object.values(petIdToPetListItem).map((pet) => {
         const hasActiveTasks = pet.taskCategories.length > 0;
         return {
           ...pet,
-          // Pets with no tasks today should have allTasksAssigned = null
           allTasksAssigned: hasActiveTasks ? pet.allTasksAssigned : null,
         };
       });
