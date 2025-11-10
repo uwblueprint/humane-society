@@ -56,7 +56,7 @@ const TaskManagementPage = (): React.ReactElement => {
           task.taskName.toLowerCase().includes(search.toLowerCase()) ||
           task.instructions?.toLowerCase().includes(search.toLowerCase()),
       );
-  }, [filters, search]);
+  }, [filters, search, tasks]);
 
   const getTasks = async () => {
     try {
