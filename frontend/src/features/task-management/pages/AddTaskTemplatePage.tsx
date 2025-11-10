@@ -144,10 +144,9 @@ const AddTaskTemplatePage = (): React.ReactElement => {
         taskInstructions: formData.instructions,
       });
 
-      // Simulate API call delay
+      // Call the API endpoint
       try {
         const postTask = await TaskTemplateAPIClient.createTaskTemplate(formData);
-
       } catch (error) {
         console.log(`${error}`);
       }

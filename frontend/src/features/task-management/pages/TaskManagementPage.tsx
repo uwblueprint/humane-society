@@ -32,6 +32,14 @@ const TaskManagementPage = (): React.ReactElement => {
   };
 
   const filteredTasks = useMemo(() => {
+    const hasActiveFilters = Object.values(filters).some(
+      (vals) => vals && vals.length > 0,
+    );
+    const hasSearch = search.trim() !== "";
+
+    // If no filters and no search, just return everything
+    if (!hasActiveFilters && !hasSearch) return tasks;
+
     return tasks
       .filter((task: Task) => {
         return Object.keys(filters).every((key) => {
@@ -43,9 +51,9 @@ const TaskManagementPage = (): React.ReactElement => {
       .filter(
         (task: Task) =>
           task.name.toLowerCase().includes(search.toLowerCase()) ||
-          task.instructions.toLowerCase().includes(search.toLowerCase()),
+          task.instructions?.toLowerCase().includes(search.toLowerCase()),
       );
-  }, [filters, search]);
+  }, [filters, search, tasks]);
 
   const getTasks = async () => {
     try {
