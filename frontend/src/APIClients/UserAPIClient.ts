@@ -4,7 +4,7 @@ import baseAPIClient from "./BaseAPIClient";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 
 async function get(): Promise<User[]>;
-async function get(userId: number): Promise<User>;
+async function get(userId: number): Promise<User>; 
 
 async function get(userId?: number): Promise<User | User[]> {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(

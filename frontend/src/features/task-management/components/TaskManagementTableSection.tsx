@@ -30,7 +30,7 @@ const TaskManagementTableSection = ({
         <Tr key={task.id}>
           <Td width="20%" py="1rem" px="2.5rem">
             <Text textStyle="body" m={0} noOfLines={1}>
-              {task.name}
+              {task.taskName}
             </Text>
           </Td>
           <Td width="20%" py="1rem" px="0">

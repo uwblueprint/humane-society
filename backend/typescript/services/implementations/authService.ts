@@ -34,7 +34,7 @@ class AuthService implements IAuthService {
       const user = await this.userService.getUserByEmail(email);
       return { ...token, ...user };
     } catch (error) {
-      Logger.error(`Failed to generate token for user with email ${email}`);
+      Logger.error(`Failed to generate token for user with email ${email}, error ${error}`);
       throw error;
     }
   }
