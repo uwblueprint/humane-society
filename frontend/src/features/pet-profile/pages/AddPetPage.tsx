@@ -21,11 +21,7 @@ import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { AnimalTag } from "../../../types/TaskTypes";
 import SingleSelect from "../../../components/common/SingleSelect";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
-import { SexEnum } from "../../../types/PetTypes";
-import {
-  getDaysInMonth,
-  MONTH_NUMBER_TO_NAME,
-} from "../../../utils/CommonUtils";
+import { getDaysInMonth } from "../../../utils/CommonUtils";
 import PopupModal from "../../../components/common/PopupModal";
 import TextArea from "../../../components/common/TextArea";
 import { PencilIcon } from "../../../assets/icons";
