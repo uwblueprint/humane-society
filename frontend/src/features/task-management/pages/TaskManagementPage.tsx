@@ -9,7 +9,6 @@ import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
@@ -63,7 +62,10 @@ const TaskManagementPage = (): React.ReactElement => {
         setTasks(fetchedTasks);
       }
     } catch (error) {
-      setErrorMessage(`${error}`);
+      setTasks([]);
+      // TODO: deprecate console use in frontend
+      /* eslint-disable-next-line no-console */
+      console.error("Could not fetch tasks");
     }
   };
 
