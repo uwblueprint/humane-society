@@ -611,105 +611,102 @@ class PetService implements IPetService {
         taskTemplateIdToCategory.set(tt.id, tt.category);
       });
 
-      await Promise.all(
-        petTasks.map(async (petTask) => {
-          // Store pet color level and animal tag for volunteer eligibility checks
-          petIdToColorLevel[petTask.pet_id] = petTask.color_level;
-          petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
+      // Build a map of pets and their associated task data.
+      petTasks.forEach((petTask) => {
+        // Store pet color level and animal tag for volunteer eligibility checks
+        petIdToColorLevel[petTask.pet_id] = petTask.color_level;
+        petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
 
-          // Check if task is scheduled for today or started today
-          const scheduledTime = petTask.scheduled_start_time
-            ? DateTime.fromJSDate(petTask.scheduled_start_time).setZone(
-                TIME_ZONE,
-              )
-            : null;
+        // Check if task is scheduled for today or started today
+        const scheduledTime = petTask.scheduled_start_time
+          ? DateTime.fromJSDate(petTask.scheduled_start_time).setZone(TIME_ZONE)
+          : null;
 
-          const isToday =
-            !!scheduledTime &&
-            scheduledTime >= beginningOfToday &&
-            scheduledTime < endOfToday;
+        const isToday =
+          !!scheduledTime &&
+          scheduledTime >= beginningOfToday &&
+          scheduledTime < endOfToday;
 
-          // Track pets with tasks scheduled for today
-          if (isToday) {
-            petsWithTasksScheduledToday.add(petTask.pet_id);
-          }
+        // Track pets with tasks scheduled for today
+        if (isToday) {
+          petsWithTasksScheduledToday.add(petTask.pet_id);
+        }
 
-          // Get or create pet data
-          let petData = petIdToPetListItem[petTask.pet_id];
-          if (!petData) {
-            petData = {
-              id: petTask.pet_id,
-              name: petTask.name,
-              photo: petTask.photo,
-              color: colorLevelToEnum(petTask.color_level),
-              taskCategories: [],
-              status: petTask.status,
-              lastCaredFor: null,
-              allTasksAssigned: null,
-              isAssignedToMe: false,
-            };
-            petIdToPetListItem[petTask.pet_id] = petData;
-          }
+        // Get or create pet data
+        let petData = petIdToPetListItem[petTask.pet_id];
+        if (!petData) {
+          petData = {
+            id: petTask.pet_id,
+            name: petTask.name,
+            photo: petTask.photo,
+            color: colorLevelToEnum(petTask.color_level),
+            taskCategories: [],
+            status: petTask.status,
+            lastCaredFor: null,
+            allTasksAssigned: null,
+            isAssignedToMe: false,
+          };
+          petIdToPetListItem[petTask.pet_id] = petData;
+        }
 
-          // Update lastCaredFor
-          // If task is ongoing / pet is occupied
+        // Update lastCaredFor
+        // If task is ongoing / pet is occupied
+        if (
+          petData.status === PetStatus.OCCUPIED ||
+          (petTask.start_time && !petTask.end_time)
+        ) {
+          petData.lastCaredFor = LastCaredFor.OCCUPIED;
+
+          // If task has not started
+        } else if (!petTask.end_time && !petTask.start_time) {
+          // lastCaredFor stays the same
+          // If task has ended
+        } else if (petTask.end_time) {
+          const endTime = DateTime.fromJSDate(petTask.end_time).setZone(
+            TIME_ZONE,
+          );
+
+          const endTimeISO = dateToISOString(endTime);
           if (
-            petData.status === PetStatus.OCCUPIED ||
-            (petTask.start_time && !petTask.end_time)
+            !petData.lastCaredFor ||
+            petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO ||
+            endTimeISO > petData.lastCaredFor
           ) {
-            petData.lastCaredFor = LastCaredFor.OCCUPIED;
+            petData.lastCaredFor = endTimeISO;
+          }
+        }
 
-            // If task has not started
-          } else if (!petTask.end_time && !petTask.start_time) {
-            // lastCaredFor stays the same
-            // If task has ended
-          } else if (petTask.end_time) {
-            const endTime = DateTime.fromJSDate(petTask.end_time).setZone(
-              TIME_ZONE,
+        // Update task information, ONLY for TODAY's incomplete tasks
+        if (isToday && !petTask.end_time && petTask.task_template_id) {
+          // Get task category from map
+          const taskCategory = taskTemplateIdToCategory.get(
+            petTask.task_template_id,
+          );
+          if (!taskCategory) {
+            Logger.error(
+              `Task template with ID ${petTask.task_template_id} not found.`,
             );
+            return;
+          }
+          // Add task category
+          petData.taskCategories.push(taskCategory);
 
-            const endTimeISO = dateToISOString(endTime);
-            if (
-              !petData.lastCaredFor ||
-              petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO ||
-              endTimeISO > petData.lastCaredFor
-            ) {
-              petData.lastCaredFor = endTimeISO;
-            }
+          // Update allTasksAssigned for today's tasks
+          // Initialize to true when we first see a task, then set to false if any task is unassigned
+          if (petData.allTasksAssigned === null) {
+            petData.allTasksAssigned = true;
+          }
+          if (!petTask.user_id) {
+            // If ANY today task is unassigned -> overall false
+            petData.allTasksAssigned = false;
           }
 
-          // Update task information, ONLY for TODAY's incomplete tasks
-          if (isToday && !petTask.end_time && petTask.task_template_id) {
-            // Get task category from map
-            const taskCategory = taskTemplateIdToCategory.get(
-              petTask.task_template_id,
-            );
-            if (!taskCategory) {
-              Logger.error(
-                `Task template with ID ${petTask.task_template_id} not found.`,
-              );
-              return;
-            }
-            // Add task category
-            petData.taskCategories.push(taskCategory);
-
-            // Update allTasksAssigned for today's tasks
-            // Initialize to true when we first see a task, then set to false if any task is unassigned
-            if (petData.allTasksAssigned === null) {
-              petData.allTasksAssigned = true;
-            }
-            if (!petTask.user_id) {
-              // If ANY today task is unassigned -> overall false
-              petData.allTasksAssigned = false;
-            }
-
-            // Update isAssignedToMe for today's tasks
-            if (petTask.user_id === user.id) {
-              petData.isAssignedToMe = true;
-            }
+          // Update isAssignedToMe for today's tasks
+          if (petTask.user_id === user.id) {
+            petData.isAssignedToMe = true;
           }
-        }),
-      );
+        }
+      });
 
       // Set allTasksAssigned to null for pets with no tasks today
       // NOTE: While technically "all tasks are assigned" when there are no tasks,
