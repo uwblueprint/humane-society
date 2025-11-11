@@ -114,9 +114,9 @@ docker exec -it humane_society_backend /bin/bash -c "yarn test"
 ```
 
 ## Running against Supabase DB
-We have deployed our Postgres DB on Supabase which your local application to, which can be useful for testing.
+We have deployed our Postgres DB on Supabase which you can connect your local application to, which can be useful for testing.
 
-1. Ask your Project Lead for the `DATABASE_URL` environment variable which stores our Supabase connection URL and at it to `.env` at the root of this project.
+1. Ask your Project Lead for the `DATABASE_URL` environment variable which stores our Supabase connection URL and add it to `.env` at the root of this project.
     - Optionally, you can also be added to the OMHS organization on Supabase if you need to do some admin work on the deployed DB.
 2. Run the app against the Supabase DB
 ```bash
