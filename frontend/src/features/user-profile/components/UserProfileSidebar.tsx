@@ -25,7 +25,7 @@ import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "../../../components/common/AnimalTagList";
 import Logout from "../../../components/auth/Logout";
 import InviteUser from "./InviteUser";
-import getCurrentUserRole from "../../../utils/CommonUtils";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
 
 export interface UserProfileSidebarProps {
   id: number;
