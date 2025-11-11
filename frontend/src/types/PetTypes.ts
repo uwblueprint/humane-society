@@ -12,7 +12,7 @@ export type CareInfo = {
 };
 
 export type PetListSectionKey =
-  | "Assigned To You"
+  | "Assigned to You"
   | "Other Pets"
   | "Has Unassigned Tasks"
   | "All Tasks Assigned"
@@ -21,11 +21,11 @@ export type PetListSectionKey =
 export interface PetInfo {
   id: number;
   name: string;
-  skill: ColorLevel;
+  color: ColorLevel;
   image: string;
   taskCategories: TaskCategory[];
   status: TaskStatus;
-  lastCaredFor: string;
+  lastCaredFor: string | null;
   allTasksAssigned: boolean;
   animalTag: AnimalTag;
 }

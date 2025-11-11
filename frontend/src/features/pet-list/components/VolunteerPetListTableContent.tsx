@@ -12,7 +12,7 @@ const VolunteerPetListTableContent = ({
   return (
     <>
       <PetListTableSection
-        pets={petsRecord["Assigned To You"] ?? []}
+        pets={petsRecord["Assigned to You"] ?? []}
         sectionTitle="Assigned to You"
       />
       <PetListTableSection

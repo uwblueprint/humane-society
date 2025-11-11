@@ -3,7 +3,7 @@
         {
             "id": 3,
             "name": "Pillie",
-            "skill": "Red",
+            "color": "Red",
             "image": "/images/dog1.png",
             "taskCategories": ["Training", "Games", "Husbandry", "Misc."],
             "status": "Assigned to You",
@@ -14,7 +14,7 @@
         {
             "id": 6,
             "name": "Sillie",
-            "skill": "Yellow",
+            "color": "Yellow",
             "image": "/images/dog1.png",
             "taskCategories": ["Walk", "Pen Time", "Training", "Games", "Husbandry", "Misc."],
             "status": "Assigned to You",
@@ -27,7 +27,7 @@
         {
             "id": 2,
             "name": "Lillie",
-            "skill": "Green",
+            "color": "Green",
             "image": "/images/cat.png",
             "taskCategories": ["Walk", "Pen Time", "Training", "Games", "Husbandry"],
             "status": "Assigned to You",
@@ -38,7 +38,7 @@
         {
             "id": 4,
             "name": "Benji",
-            "skill": "Blue",
+            "color": "Blue",
             "image": "/images/dog2.png",
             "taskCategories": ["Walk", "Pen Time"],
             "status": "Needs Care",
@@ -51,7 +51,7 @@
         {
             "id": 5,
             "name": "Billie",
-            "skill": "Orange",
+            "color": "Orange",
             "image": "/images/dog1.png",
             "taskCategories": [],
             "status": "Does Not Need Care",

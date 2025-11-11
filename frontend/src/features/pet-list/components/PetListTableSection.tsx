@@ -72,7 +72,7 @@ export const PetListTableSection = ({
               <Flex gap="3rem" minWidth="max-content">
                 <ProfilePhoto
                   // name={pet.name}
-                  color={pet.skill}
+                  color={pet.color}
                   image={pet.image}
                   size="large"
                   type="pet"

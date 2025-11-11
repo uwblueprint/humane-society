@@ -19,8 +19,8 @@ const AdminPetListTableContent = ({
     <>
       {isStaffBehaviourist && (
         <PetListTableSection
-          pets={petsRecord["Assigned To You"] ?? []}
-          sectionTitle="Assigned To You"
+          pets={petsRecord["Assigned to You"] ?? []}
+          sectionTitle="Assigned to You"
         />
       )}
       <PetListTableSection
