@@ -89,7 +89,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
   };
 
   const handleCategoryChange = (category: TaskCategory) => {
-    setFormData({ ...formData, category: category });
+    setFormData({ ...formData, category });
     setHasChanges(true);
     if (errors.taskCategory) {
       setErrors({ ...errors, taskCategory: undefined });
@@ -146,9 +146,11 @@ const AddTaskTemplatePage = (): React.ReactElement => {
 
       // Call the API endpoint
       try {
-        const postTask = await TaskTemplateAPIClient.createTaskTemplate(formData);
+        await TaskTemplateAPIClient.createTaskTemplate(formData);
       } catch (error) {
-        console.log(`${error}`);
+        // TODO: deprecate console use in frontend
+        /* eslint-disable-next-line no-console */
+        console.error("Could not post task template: ", error);
       }
 
       // Navigate back to task management page
