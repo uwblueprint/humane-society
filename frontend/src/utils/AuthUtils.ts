@@ -46,8 +46,6 @@ export const getAccessToken = (): string | null => {
   }
 };
 
-// TODO: Add a clearAccessToken here too
-
 // Checks if the access token has expired or not
 export const validateAccessToken = (decodedToken: DecodedJWT): boolean => {
   // Check if expired
@@ -60,3 +58,7 @@ export const validateAccessToken = (decodedToken: DecodedJWT): boolean => {
   return !result;
 };
 
+// Removes the access token
+export const clearAccessToken = (): void => {
+  clearLocalStorageKey(AUTHENTICATED_USER_KEY);
+};

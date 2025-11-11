@@ -1,10 +1,15 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosError,
+} from "axios";
 import { jwtDecode } from "jwt-decode";
 import { DecodedJWT } from "../types/AuthTypes";
 import {
   refreshAccessToken,
   validateAccessToken,
   getAccessToken,
+  clearAccessToken,
 } from "../utils/AuthUtils";
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || "";
@@ -47,5 +52,22 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
   return newConfig;
 });
+
+// If the user tries to access restricted endpoints then redirect them
+// We should be careful with the error codes since now 401 and 403 will cause redirects
+// TODO: Handle permissions
+baseAPIClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // clear user data
+      clearAccessToken();
+
+      // redirect to login page
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  },
+);
 
 export default baseAPIClient;
