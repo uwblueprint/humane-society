@@ -48,7 +48,7 @@ export interface ITaskTemplateService {
    */
   updateTaskTemplate(
     id: string,
-    task: TaskTemplateRequestDTO,
+    task: Partial<TaskTemplateRequestDTO>,
   ): Promise<TaskTemplateResponseDTO | null>;
 
   /**

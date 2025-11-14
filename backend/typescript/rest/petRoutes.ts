@@ -11,6 +11,9 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import { PetRequestDTO } from "../services/interfaces/petService";
+import { Role } from "../types";
+import { logInteraction } from "../middlewares/logInteraction";
 
 const petRouter: Router = Router();
 const petService: IPetService = new PetService();
@@ -139,5 +142,97 @@ petRouter.get("/:id", async (req, res) => {
     }
   }
 });
+
+
+/* Change pet color-level by id */
+petRouter.patch("/:id/color-level", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      colorLevel: req.body.colorLevel,
+    } as Partial<PetRequestDTO>
+  );
+    await logInteraction(req, res);
+    res.status(200).json(updated);
+  } catch (e: unknown){
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+/* Change pet neuter status by id */
+petRouter.patch("/:id/neuter-status", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      neutered: req.body.neutered, 
+    } as Partial<PetRequestDTO>);
+    await logInteraction(req, res);
+    res.status(200).json(updated);
+  } catch (e: unknown){
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+
+/* Change pet safety-info by id */
+petRouter.patch("/:id/safety-info", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      careInfo: {
+        safetyInfo: req.body.safetyInfo,
+      },
+    } as Partial<PetRequestDTO>
+  );
+
+    await logInteraction(req, res);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+
+/* Change pet medical-info by id */
+petRouter.patch("/:id/medical-info", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      careInfo: {
+        medicalInfo: req.body.medicalInfo,
+      },
+    } as Partial<PetRequestDTO>
+  ) ;
+
+    await logInteraction(req, res);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+/* Change pet management-info by id */
+petRouter.patch("/:id/management-info", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      careInfo: {
+        managementInfo: req.body.managementInfo,
+      },
+    } as Partial<PetRequestDTO>
+  );
+
+    await logInteraction(req, res);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
 
 export default petRouter;

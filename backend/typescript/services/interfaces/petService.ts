@@ -87,7 +87,7 @@ export interface IPetService {
    * @returns the updated Pet
    * @throws Error if update fails
    */
-  updatePet(id: string, pet: PetRequestDTO): Promise<PetResponseDTO>;
+  updatePet(id: string, pet: Partial<PetRequestDTO>): Promise<PetResponseDTO>;
 
   /**
    * delete the Pet with the given id
