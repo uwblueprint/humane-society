@@ -3,32 +3,32 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import Default from "./pages/Default";
-import LoginPage from "./pages/LoginPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+import LoginPage from "./features/auth/pages/LoginPage";
+import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import PetListPage from "./pages/PetListPage";
-import TaskManagementPage from "./pages/TaskManagementPage";
-import AddTaskTemplatePage from "./pages/AddTaskTemplatePage";
+import PetListPage from "./features/pet-list/pages/PetListPage";
+import TaskManagementPage from "./features/task-management/pages/TaskManagementPage";
+import AddTaskTemplatePage from "./features/task-management/pages/AddTaskTemplatePage";
 import NotFoundPage from "./pages/NotFoundPage";
-import CreatePasswordPage from "./pages/CreatePasswordPage";
+import CreatePasswordPage from "./features/auth/pages/CreatePasswordPage";
 import * as Routes from "./constants/Routes";
 import * as AuthConstants from "./constants/AuthConstants";
 import AUTHENTICATED_USER_KEY from "./constants/AuthConstants";
 import AuthContext from "./contexts/AuthContext";
 import { getLocalStorageObj } from "./utils/LocalStorageUtils";
-import InteractionLogPage from "./pages/InteractionLogPage";
-import ProfilePage from "./pages/ProfilePage";
-import PetProfilePage from "./pages/PetProfilePage";
-import UserManagementPage from "./pages/UserManagementPage";
-import AdminViewEditUserProfilePage from "./pages/AdminViewEditUserProfilePage";
+import InteractionLogPage from "./features/interaction-log/pages/InteractionLogPage";
+import ProfilePage from "./features/user-profile/pages/UserProfilePage";
+import PetProfilePage from "./features/pet-profile/pages/PetProfilePage";
+import UserManagementPage from "./features/user-management/pages/UserManagementPage";
+import AdminViewEditUserProfilePage from "./features/user-profile/pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
 import PageTitleUpdater from "./components/common/PageTitleUpdater";
 
 import { AuthenticatedUser } from "./types/AuthTypes";
 
-import VolunteerViewEditUserProfilePage from "./pages/VolunteerViewEditUserProfilePage";
+import VolunteerViewEditUserProfilePage from "./features/user-profile/pages/VolunteerViewEditUserProfilePage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(

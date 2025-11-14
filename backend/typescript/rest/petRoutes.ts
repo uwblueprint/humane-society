@@ -124,6 +124,21 @@ petRouter.get("/", async (req, res) => {
   }
 });
 
+/* Get PetList by userId */
+petRouter.get("/list/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const petList = await petService.getPetList(parseInt(userId, 10));
+    res.status(200).json(petList);
+  } catch (e: unknown) {
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+    }
+  }
+});
+
 /* Get Pet by id */
 petRouter.get("/:id", async (req, res) => {
   const { id } = req.params;

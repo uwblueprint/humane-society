@@ -44,6 +44,16 @@ export interface Task {
   instructions: string;
 }
 
+export type CreateTaskDTO = {
+  taskName: string;
+  category: TaskCategory;
+  instructions?: string;
+};
+// Allow instructions to be null to set database value to null
+export type EditTaskDTO = Omit<CreateTaskDTO, "instructions"> & {
+  instructions?: string | null;
+};
+
 export const mockTasks: Task[] = [
   {
     id: 1,
