@@ -73,7 +73,7 @@ export const PetListTableSection = ({
                 <ProfilePhoto
                   // name={pet.name}
                   color={pet.color}
-                  image={pet.image}
+                  image={pet.photo}
                   size="large"
                   type="pet"
                   showColorBorder

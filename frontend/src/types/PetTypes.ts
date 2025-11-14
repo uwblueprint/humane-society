@@ -22,7 +22,7 @@ export interface PetInfo {
   id: number;
   name: string;
   color: ColorLevel;
-  image: string;
+  photo?: string;
   taskCategories: TaskCategory[];
   status: TaskStatus;
   lastCaredFor: string | null;
