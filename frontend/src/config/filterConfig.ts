@@ -10,9 +10,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategories",
-      options: Object.values(TaskCategory),
+      name: "Colour Level",
+      value: "skill",
+      options: Object.values(ColorLevel),
     },
     {
       name: "Status",
@@ -21,9 +21,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: ["Needs Care", "Does Not Need Care"],
     },
     {
-      name: "Colour Level",
-      value: "skill",
-      options: Object.values(ColorLevel),
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory),
     },
   ],
   petListVolunteer: [
@@ -33,9 +33,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategories",
-      options: Object.values(TaskCategory),
+      name: "Colour Level",
+      value: "skill",
+      options: Object.values(ColorLevel),
     },
     {
       name: "Status",
@@ -44,9 +44,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: ["Needs Care", "Assigned to You"],
     },
     {
-      name: "Colour Level",
-      value: "skill",
-      options: Object.values(ColorLevel),
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory),
     },
   ],
   userManagement: [

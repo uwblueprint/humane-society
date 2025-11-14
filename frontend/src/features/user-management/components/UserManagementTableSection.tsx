@@ -65,6 +65,7 @@ const UserListTableSection = ({
                   color={colorLevelMap[user.colorLevel || 1]}
                   size="small"
                   type={imageType}
+                  showColorBorder
                 />
                 <Text textStyle="body" m={0} color={textColor}>
                   {user.name}
