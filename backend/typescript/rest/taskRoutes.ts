@@ -156,6 +156,8 @@ taskRouter.patch(
   },
 );
 
+
+// TO DO - MUST RENAME TO START DATE
 /* Updates/Sets a scheduled start time to an Task */
 taskRouter.patch(
   "/:id/schedule",
@@ -186,6 +188,7 @@ taskRouter.patch(
       const Task = await taskService.startTask(id, {
         time: body.startTime,
       });
+      await logInteraction(req, res);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -201,6 +204,7 @@ taskRouter.patch("/:id/end", taskEndTimePatchValidator, async (req, res) => {
     const Task = await taskService.endTask(id, {
       time: body.endTime,
     });
+    await logInteraction(req, res);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -215,6 +219,7 @@ taskRouter.patch("/:id/notes", taskNotesPatchValidator, async (req, res) => {
     const Task = await taskService.updateTaskNotes(id, {
       notes: body.notes,
     });
+    await logInteraction(req, res);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -230,11 +235,15 @@ taskRouter.delete(
 
     try {
       const deletedId = await taskService.deleteTask(id);
+      await logInteraction(req, res);
       res.status(200).json({ id: deletedId });
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
     }
   },
 );
+
+
+
 
 export default taskRouter;
