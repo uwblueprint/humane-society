@@ -1,15 +1,24 @@
-import { Flex } from "@chakra-ui/react";
-import React, { useMemo, useState } from "react";
-import mockData from "../temp/mock/petlist/mockPetList.json";
-import PetListTable from "../components/PetListTable";
-import { PetInfo } from "../components/PetListTableSection";
-import Search from "../../../components/common/Search";
-import Filter from "../../../components/common/Filter";
-import { TaskCategory } from "../../../types/TaskTypes";
-import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
-import getCurrentUserRole from "../../../utils/CommonUtils";
+import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
+import React, { useEffect, useMemo, useState } from "react";
+import PetAPIClient from "../APIClients/PetAPIClient";
+import Filter from "../components/common/Filter";
+import Search from "../components/common/Search";
+import PetListTable from "../components/pet-list/PetListTable";
+import { PetInfo } from "../components/pet-list/PetListTableSection";
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../constants/AuthConstants";
+import { Pet } from "../types/PetTypes";
+import {
+  AnimalTag,
+  ColorLevel,
+  colorLevelMap,
+  TaskCategory,
+  TaskStatus,
+} from "../types/TaskTypes";
+import getCurrentUserRole from "../utils/CommonUtils";
 
 const PetListPage = (): React.ReactElement => {
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
 
@@ -26,8 +35,37 @@ const PetListPage = (): React.ReactElement => {
     setSearch(value);
   };
 
+  const getPets = async () => {
+    try {
+      const fetchedPets = await PetAPIClient.getPets();
+
+      if (fetchedPets != null) {
+        setPets(fetchedPets);
+      }
+    } catch (error) {
+      setErrorMessage(`${error}`);
+    }
+  };
+
+  useEffect(() => {
+    getPets();
+  }, []);
+
+  // Convert Pet[] in backend to PetInfo[] in frontend for the table component
+  const convertedPets: PetInfo[] = pets.map((pet) => ({
+    id: pet.id,
+    name: pet.name,
+    skill: colorLevelMap[pet.colorLevel] || ColorLevel.GREEN,
+    image: pet.photo || "/images/cat.png",
+    taskCategories: [],
+    status: pet.status as TaskStatus,
+    lastCaredFor: "Unknown",
+    allTasksAssigned: false,
+    animalTag: pet.animalTag as AnimalTag,
+  }));
+
   const filteredPets = useMemo(() => {
-    return mockData
+    return convertedPets
       .filter((prev) => {
         return Object.keys(filters).every((key) => {
           if (filters[key].length === 0) return true;
@@ -44,7 +82,7 @@ const PetListPage = (): React.ReactElement => {
       .filter((prev) => {
         return prev.name.toLowerCase().includes(search.toLowerCase());
       });
-  }, [filters, search]);
+  }, [filters, search, convertedPets]);
 
   const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(
     getCurrentUserRole() as string,
@@ -53,6 +91,18 @@ const PetListPage = (): React.ReactElement => {
 
   return (
     <Flex direction="column" gap="2rem" width="100%" pt="2rem">
+      {errorMessage && (
+        <Alert status="error" mb={4}>
+          <AlertIcon />
+          {errorMessage}
+          <CloseButton
+            position="absolute"
+            right="8px"
+            top="8px"
+            onClick={() => setErrorMessage(null)}
+          />
+        </Alert>
+      )}
       <Flex
         padding="0 2.5rem"
         maxWidth="100vw"
