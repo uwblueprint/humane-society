@@ -156,11 +156,9 @@ taskRouter.patch(
   },
 );
 
-
-// TO DO - MUST RENAME TO START DATE
 /* Updates/Sets a scheduled start time to an Task */
 taskRouter.patch(
-  "/:id/schedule",
+  "/:id/start-date",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
   taskScheduledTimePatchValidator,
   async (req, res) => {
@@ -170,6 +168,7 @@ taskRouter.patch(
       const Task = await taskService.scheduleTask(id, {
         time: body.scheduledStartTime,
       });
+      await logInteraction(req, res);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
