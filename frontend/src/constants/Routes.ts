@@ -12,6 +12,8 @@ export const PROFILE_PAGE = "/profile";
 
 export const PET_PROFILE_PAGE = "/pet-profile";
 
+export const EDIT_PET_PROFILE_PAGE = "/edit-pet-profile";
+
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
 export const ADMIN_EDIT_USER_PROFILE_PAGE = "/admin/edit-user-profile";

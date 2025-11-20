@@ -7,7 +7,7 @@ import Search from "../../../components/common/Search";
 import Filter from "../../../components/common/Filter";
 import { TaskCategory } from "../../../types/TaskTypes";
 import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
-import getCurrentUserRole from "../../../utils/CommonUtils";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
