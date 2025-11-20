@@ -112,6 +112,7 @@ userRouter.get("/", async (req, res) => {
 /* Create a user */
 userRouter.post("/", createUserDtoValidator, async (req, res) => {
   try {
+    console.log("success!");
     const accessToken = getAccessToken(req);
     if (!accessToken) {
       res.status(404).json({ error: "Access token not found" });

@@ -67,7 +67,7 @@ const UserListTableSection = ({
                   type={imageType}
                 />
                 <Text textStyle="body" m={0} color={textColor}>
-                  {user.name}
+                  {user.firstName} {user.lastName}
                 </Text>
               </Flex>
             </Td>

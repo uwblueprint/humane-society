@@ -5,7 +5,7 @@ export type User = {
   id: number;
   firstName: string;
   lastName: string;
-  name: string;
+  //name: string;
   email: string;
   role: UserRoles;
   status: string;

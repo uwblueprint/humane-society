@@ -116,12 +116,11 @@ const InviteUserPage = (): React.ReactElement => {
       const newUser = await UserAPIClient.create({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         role: formData.role as UserRoles,
-        phoneNumber: formData.phoneNumber || null,
-        canSeeAllLogs: null,
-        canAssignUsersToTasks: null,
+        phoneNumber: formData.phoneNumber,
+        canSeeAllLogs: false,
+        canAssignUsersToTasks: false,
       });
 
       // Step 2: Update the user with colorLevel and animalTags
@@ -134,7 +133,7 @@ const InviteUserPage = (): React.ReactElement => {
       await UserAPIClient.invite(formData.email);
 
       // Navigate back to user management page
-      history.push(Routes.USER_MANAGEMENT_PAGE);
+      handleBack();
     } catch (err) {
       setSubmitError(
         err instanceof Error
@@ -147,7 +146,7 @@ const InviteUserPage = (): React.ReactElement => {
   };
 
   const handleBack = () => {
-    history.push(Routes.USER_MANAGEMENT_PAGE);
+    history.push(Routes.USER_MANAGEMENT_PAGE); // Should this be history.back() ?
   };
 
   const roleValues = [
