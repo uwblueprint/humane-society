@@ -10,6 +10,7 @@ export interface ProfilePhotoProps {
   image?: string;
   size: "small" | "large";
   type: "user" | "pet" | "invitedUser";
+  showColorBorder?: boolean;
 }
 
 const borderColor: Record<ColorLevel, string> = {
@@ -31,8 +32,10 @@ const ProfilePhoto = ({
   image,
   size = "large",
   type,
+  showColorBorder,
 }: ProfilePhotoProps): React.ReactElement => {
   const isSmall = size === "small";
+  const containerSize = isSmall ? "2.625rem" : "8.69rem";
   const imageSize = isSmall ? "2.25rem" : "8.06rem";
 
   const fallbackImage = fallbackImages[type];
@@ -40,7 +43,8 @@ const ProfilePhoto = ({
     type === "invitedUser" ? "gray.300" : color && borderColor[color];
   return (
     <Flex
-      p="0rem"
+      p={showColorBorder ? "0.19rem" : "0rem"}
+      boxSize={showColorBorder ? containerSize : undefined}
       justify="center"
       align="center"
       borderRadius="full"

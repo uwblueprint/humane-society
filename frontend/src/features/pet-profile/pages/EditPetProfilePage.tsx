@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from "react";
+import { ChevronLeftIcon } from "@chakra-ui/icons";
 import {
   Flex,
-  Text,
-  FormLabel,
-  Spinner,
-  Image,
-  useToast,
-  Spacer,
-  useDisclosure,
   FormControl,
   FormErrorMessage,
+  FormLabel,
+  Image,
+  Spacer,
+  Spinner,
+  Text,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
-import { useForm, Controller } from "react-hook-form";
-import { ChevronLeftIcon } from "@chakra-ui/icons";
-import { useHistory, useParams } from "react-router-dom";
 import { ChevronRightIcon } from "lucide-react";
-import Input from "../../../components/common/Input";
-import Button from "../../../components/common/Button";
-import NavBar from "../../../components/common/navbar/NavBar";
-import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useHistory, useParams } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
-import SingleSelect from "../../../components/common/SingleSelect";
+import { PencilIcon } from "../../../assets/icons";
+import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
+import Input from "../../../components/common/Input";
+import NavBar from "../../../components/common/navbar/NavBar";
+import PopupModal from "../../../components/common/PopupModal";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import SingleSelect from "../../../components/common/SingleSelect";
+import TextArea from "../../../components/common/TextArea";
 import { SexEnum } from "../../../types/PetTypes";
+import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
   MONTH_NUMBER_TO_NAME,
 } from "../../../utils/CommonUtils";
-import PopupModal from "../../../components/common/PopupModal";
-import TextArea from "../../../components/common/TextArea";
-import { PencilIcon } from "../../../assets/icons";
 
 interface FormData {
   name: string;
@@ -721,7 +721,7 @@ const EditPetProfilePage = (): React.ReactElement => {
                     onClick={openDeleteConfirmModal}
                     type="button"
                   >
-                    Delete User
+                    Delete Pet
                   </Button>
                   <Button
                     as="button"

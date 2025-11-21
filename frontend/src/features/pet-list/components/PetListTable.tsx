@@ -1,34 +1,27 @@
-import React from "react";
-import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
-import { TaskStatus } from "../../../types/TaskTypes";
-import { PetListTableSection, PetInfo } from "./PetListTableSection";
+import { Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import React, { useMemo } from "react";
+import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
+import { PetListRecord } from "../../../types/PetTypes";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import AdminPetListTableContent from "./AdminPetListTableContent";
+import VolunteerPetListTableContent from "./VolunteerPetListTableContent";
 
 export interface PetListTableProps {
-  pets: PetInfo[];
+  petsRecord: PetListRecord;
   clearFilters: () => void;
 }
 
-const filterByStatus = (pets: PetInfo[], status: TaskStatus): PetInfo[] => {
-  return pets.filter((pet) => pet.status === status);
-};
-
-const filterByAllTasksAssigned = (
-  pets: PetInfo[],
-  allTasksAssigned: boolean,
-) => {
-  return pets.filter(
-    (pet) =>
-      pet.allTasksAssigned === allTasksAssigned &&
-      pet.status !== TaskStatus.DOES_NOT_NEED_CARE,
-  );
-};
-
 const PetListTable = ({
-  pets,
+  petsRecord,
   clearFilters,
 }: PetListTableProps): React.ReactElement => {
-  const isAdmin = getCurrentUserRole() === "Administrator";
+  const isStaffBehaviouristAdmin = STAFF_BEHAVIOURISTS_ADMIN.has(
+    getCurrentUserRole() ?? "",
+  );
+  const allSectionsEmpty = useMemo(
+    () => Object.values(petsRecord).every((pets) => pets.length === 0),
+    [petsRecord],
+  );
 
   return (
     <Table w="100%" textAlign="left">
@@ -57,7 +50,7 @@ const PetListTable = ({
         </Tr>
       </Thead>
 
-      {!pets.length ? (
+      {allSectionsEmpty ? (
         <Tbody>
           <Tr>
             <Td colSpan={3}>
@@ -81,32 +74,12 @@ const PetListTable = ({
         </Tbody>
       ) : null}
 
-      {!isAdmin && pets.length ? (
-        <>
-          <PetListTableSection
-            pets={filterByStatus(pets, TaskStatus.ASSIGNED)}
-          />
-          <PetListTableSection
-            pets={filterByStatus(pets, TaskStatus.NEEDS_CARE)}
-          />
-        </>
+      {!isStaffBehaviouristAdmin && !allSectionsEmpty ? (
+        <VolunteerPetListTableContent petsRecord={petsRecord} />
       ) : null}
 
-      {isAdmin && pets.length ? (
-        <>
-          <PetListTableSection
-            pets={filterByAllTasksAssigned(pets, false)}
-            sectionTitle="Unassigned Tasks"
-          />
-          <PetListTableSection
-            pets={filterByAllTasksAssigned(pets, true)}
-            sectionTitle="Assigned Tasks"
-          />
-          <PetListTableSection
-            pets={filterByStatus(pets, TaskStatus.DOES_NOT_NEED_CARE)}
-            sectionTitle="No Tasks"
-          />
-        </>
+      {isStaffBehaviouristAdmin && !allSectionsEmpty ? (
+        <AdminPetListTableContent petsRecord={petsRecord} />
       ) : null}
     </Table>
   );
