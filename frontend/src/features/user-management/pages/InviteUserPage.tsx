@@ -45,6 +45,10 @@ const InviteUserPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const handleBack = () => {
+    history.push(Routes.USER_MANAGEMENT_PAGE); // Should this be history.back() ?
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof InviteUserFormData, string>> = {};
 
@@ -143,10 +147,6 @@ const InviteUserPage = (): React.ReactElement => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleBack = () => {
-    history.push(Routes.USER_MANAGEMENT_PAGE); // Should this be history.back() ?
   };
 
   const roleValues = [
