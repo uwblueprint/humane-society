@@ -1,25 +1,25 @@
 import { Flex, useToast } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import volunteerMockData from "../temp/mock/petlist/volunteerMockPetList.json";
-import adminMockData from "../temp/mock/petlist/adminMockPetList.json";
-import staffMockData from "../temp/mock/petlist/staffMockPetList.json";
-import PetListTable from "../components/PetListTable";
-import Search from "../../../components/common/Search";
+import Button from "../../../components/common/Button";
 import Filter from "../../../components/common/Filter";
-import { TaskCategory } from "../../../types/TaskTypes";
+import Search from "../../../components/common/Search";
 import {
   ADMIN,
   BEHAVIOURIST,
   STAFF,
   STAFF_BEHAVIOURISTS_ADMIN,
 } from "../../../constants/AuthConstants";
-import getCurrentUserRole from "../../../utils/CommonUtils";
 import {
   PetInfo,
   PetListRecord,
   PetListSectionKey,
 } from "../../../types/PetTypes";
-import Button from "../../../components/common/Button";
+import { TaskCategory } from "../../../types/TaskTypes";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import PetListTable from "../components/PetListTable";
+import adminMockData from "../temp/mock/petlist/adminMockPetList.json";
+import staffMockData from "../temp/mock/petlist/staffMockPetList.json";
+import volunteerMockData from "../temp/mock/petlist/volunteerMockPetList.json";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});

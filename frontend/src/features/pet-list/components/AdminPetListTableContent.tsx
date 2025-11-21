@@ -1,8 +1,8 @@
 import React from "react";
-import { PetListTableSection } from "./PetListTableSection";
-import { PetListRecord } from "../../../types/PetTypes";
-import getCurrentUserRole from "../../../utils/CommonUtils";
 import { BEHAVIOURIST, STAFF } from "../../../constants/AuthConstants";
+import { PetListRecord } from "../../../types/PetTypes";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import { PetListTableSection } from "./PetListTableSection";
 
 export interface AdminPetListTableContentProps {
   petsRecord: PetListRecord;

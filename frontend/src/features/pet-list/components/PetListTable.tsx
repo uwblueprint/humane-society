@@ -1,10 +1,10 @@
+import { Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import React, { useMemo } from "react";
-import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
-import getCurrentUserRole from "../../../utils/CommonUtils";
-import VolunteerPetListTableContent from "./VolunteerPetListTableContent";
-import AdminPetListTableContent from "./AdminPetListTableContent";
-import { PetListRecord } from "../../../types/PetTypes";
 import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
+import { PetListRecord } from "../../../types/PetTypes";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import AdminPetListTableContent from "./AdminPetListTableContent";
+import VolunteerPetListTableContent from "./VolunteerPetListTableContent";
 
 export interface PetListTableProps {
   petsRecord: PetListRecord;
