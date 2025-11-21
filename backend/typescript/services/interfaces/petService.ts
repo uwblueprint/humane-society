@@ -60,6 +60,9 @@ export interface PetListItemDTO {
   photo?: string;
 }
 
+// Dictionary that maps section names to arrays of pets
+export type PetListSections = Record<string, PetListItemDTO[]>;
+
 export interface PetQuery {
   animalTag?: string;
   name?: string;
@@ -79,8 +82,10 @@ export interface PetTask {
   status: PetStatus;
   photo?: string;
   color_level: number;
+  animal_tag?: AnimalTag;
   user_id?: number;
   task_template_id?: number;
+  scheduled_start_time: Date;
   start_time?: Date;
   end_time?: Date;
 }
@@ -142,9 +147,9 @@ export interface IPetService {
 
   /**
    * get pets for pet list
-   * @param user_id
-   * @returns array of PetList results
+   * @param userId
+   * @returns dictionary of section name to PetList arrays
    * @throws Error if retrieval fails
    */
-  getPetList(userId: number): Promise<PetListItemDTO[]>;
+  getPetList(userId: number): Promise<PetListSections>;
 }
