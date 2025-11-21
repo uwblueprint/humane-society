@@ -54,6 +54,13 @@ export type EditTaskDTO = Omit<CreateTaskDTO, "instructions"> & {
   instructions?: string | null;
 };
 
+export interface TaskTemplateResponseDTO {
+  id: number;
+  taskName: string;
+  category: TaskCategory;
+  instructions?: string;
+}
+
 export const mockTasks: Task[] = [
   {
     id: 1,
