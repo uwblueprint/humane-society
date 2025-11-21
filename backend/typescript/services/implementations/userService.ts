@@ -181,7 +181,6 @@ class UserService implements IUserService {
   async createUser(user: CreateUserDTO): Promise<UserDTO> {
     let newUser: PgUser;
     let firebaseUser: firebaseAdmin.auth.UserRecord;
-
     try {
       firebaseUser = await firebaseAdmin.auth().createUser({
         email: user.email,
