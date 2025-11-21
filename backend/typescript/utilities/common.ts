@@ -1,8 +1,6 @@
 import { DateTime } from "luxon";
 import { ColorLevel } from "../types";
-import logger from "./logger";
 
-const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
 
 /**
