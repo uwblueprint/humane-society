@@ -21,20 +21,20 @@ import {
   PencilIcon,
   RulerIcon,
 } from "../../../assets/icons";
-import { SexEnum } from "../../../types/PetTypes";
-import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
+import DefaultPetProfilePhoto from "../../../assets/icons/default-pet-profile.svg";
 import ArrowDropdown from "../../../components/common/ArrowDropdown";
-import PetStatus from "../../../components/common/PetStatus";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
-import { getAgeInMonths, getCurrentUserRole } from "../../../utils/CommonUtils";
+import PetStatus from "../../../components/common/PetStatus";
 import { ADMIN_AND_BEHAVIOURISTS } from "../../../constants/AuthConstants";
 import { EDIT_PET_PROFILE_PAGE } from "../../../constants/Routes";
-import DefaultPetProfilePhoto from "../../../assets/icons/default-pet-profile.svg";
+import { PetStatus as PetStatusEnum, SexEnum } from "../../../types/PetTypes";
+import { ColorLevel } from "../../../types/TaskTypes";
+import { getAgeInMonths, getCurrentUserRole } from "../../../utils/CommonUtils";
 
 export interface PetProfileSidebarProps {
   id: number;
   name: string;
-  status: TaskStatus;
+  status: PetStatusEnum;
   colourLevel: ColorLevel;
   breed?: string;
   birthday?: string;
