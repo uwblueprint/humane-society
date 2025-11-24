@@ -1,17 +1,36 @@
-import { Flex } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
-import mockData from "../temp/mock/petlist/mockPetList.json";
-import PetListTable from "../components/PetListTable";
-import { PetInfo } from "../components/PetListTableSection";
-import Search from "../../../components/common/Search";
+import Button from "../../../components/common/Button";
 import Filter from "../../../components/common/Filter";
+import Search from "../../../components/common/Search";
+import {
+  ADMIN,
+  BEHAVIOURIST,
+  STAFF,
+  STAFF_BEHAVIOURISTS_ADMIN,
+} from "../../../constants/AuthConstants";
+import {
+  PetInfo,
+  PetListRecord,
+  PetListSectionKey,
+} from "../../../types/PetTypes";
 import { TaskCategory } from "../../../types/TaskTypes";
-import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
-import getCurrentUserRole from "../../../utils/CommonUtils";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import PetListTable from "../components/PetListTable";
+import adminMockData from "../temp/mock/petlist/adminMockPetList.json";
+import staffMockData from "../temp/mock/petlist/staffMockPetList.json";
+import volunteerMockData from "../temp/mock/petlist/volunteerMockPetList.json";
 
 const PetListPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
+
+  const currentUserRole = getCurrentUserRole();
+  const isAdmin = STAFF_BEHAVIOURISTS_ADMIN.has(currentUserRole as string);
+  const isStaff = currentUserRole === STAFF;
+  const petListFilterType = isAdmin ? "petListAdmin" : "petListVolunteer";
+
+  const toast = useToast();
 
   const handleClearFilters = () => {
     setFilters({});
@@ -26,30 +45,53 @@ const PetListPage = (): React.ReactElement => {
     setSearch(value);
   };
 
-  const filteredPets = useMemo(() => {
-    return mockData
-      .filter((prev) => {
-        return Object.keys(filters).every((key) => {
-          if (filters[key].length === 0) return true;
-          if (Array.isArray(prev[key as keyof PetInfo])) {
-            return filters[key].some((filter) =>
-              (
-                prev[key as keyof PetInfo] as (string | TaskCategory)[]
-              ).includes(filter),
-            );
-          }
-          return filters[key].includes(prev[key as keyof PetInfo] as string);
-        });
-      })
-      .filter((prev) => {
-        return prev.name.toLowerCase().includes(search.toLowerCase());
-      });
-  }, [filters, search]);
+  const handleAddPet = () => {
+    toast({
+      title: "Add Pet",
+      description: "Add pet functionality not implemented yet",
+      status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
 
-  const isVolunteer = !STAFF_BEHAVIOURISTS_ADMIN.has(
-    getCurrentUserRole() as string,
-  );
-  const petListFilterType = isVolunteer ? "petListVolunteer" : "petListAdmin";
+  const filteredPets = useMemo(() => {
+    let mockData;
+
+    switch (currentUserRole) {
+      case ADMIN:
+        mockData = adminMockData as PetListRecord;
+        break;
+      case STAFF:
+      case BEHAVIOURIST:
+        mockData = staffMockData as PetListRecord;
+        break;
+      default:
+        mockData = volunteerMockData as PetListRecord;
+    }
+
+    const result: PetListRecord = {};
+
+    Object.entries(mockData).forEach(([section, pets]) => {
+      result[section as PetListSectionKey] = pets
+        .filter((pet) =>
+          Object.keys(filters).every((key) => {
+            if (filters[key].length === 0) return true;
+            if (Array.isArray(pet[key as keyof PetInfo])) {
+              return filters[key].some((filter) =>
+                (
+                  pet[key as keyof PetInfo] as (string | TaskCategory)[]
+                ).includes(filter),
+              );
+            }
+            return filters[key].includes(pet[key as keyof PetInfo] as string);
+          }),
+        )
+        .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()));
+    });
+
+    return result;
+  }, [currentUserRole, filters, search]);
 
   return (
     <Flex direction="column" gap="2rem" width="100%" pt="2rem">
@@ -64,14 +106,26 @@ const PetListPage = (): React.ReactElement => {
           onChange={handleFilterChange}
           selected={filters}
         />
-        <Search
-          placeholder="Search for a pet..."
-          onChange={handleSearchChange}
-          search={search}
-        />
+        <Flex gap="1rem">
+          <Search
+            placeholder="Search for a pet..."
+            onChange={handleSearchChange}
+            search={search}
+          />
+          {isAdmin && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              onClick={handleAddPet}
+              disabled={isStaff}
+            >
+              Add Pet
+            </Button>
+          )}
+        </Flex>
       </Flex>
       <PetListTable
-        pets={filteredPets as PetInfo[]}
+        petsRecord={filteredPets}
         clearFilters={handleClearFilters}
       />
     </Flex>
