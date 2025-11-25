@@ -30,6 +30,7 @@ import { AuthenticatedUser } from "./types/AuthTypes";
 
 import VolunteerViewEditUserProfilePage from "./features/user-profile/pages/VolunteerViewEditUserProfilePage";
 import EditPetProfilePage from "./features/pet-profile/pages/EditPetProfilePage";
+import AddPetPage from "./features/pet-profile/pages/AddPetPage";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -99,6 +100,12 @@ const App = (): React.ReactElement => {
                 exact
                 path={`${Routes.EDIT_PET_PROFILE_PAGE}/:id`}
                 component={EditPetProfilePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.ADD_PET_PAGE}
+                component={AddPetPage}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
