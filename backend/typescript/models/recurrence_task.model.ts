@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import {
   Table,
   Column,
@@ -28,7 +29,7 @@ export default class RecurrenceTask extends Model {
 
   @Column({
     type: DataType.ARRAY(
-      DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+      DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
     ),
     allowNull: true,
   })

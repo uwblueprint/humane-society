@@ -1,6 +1,6 @@
-import { Migration } from "../umzug";
-
 import { DataType } from "sequelize-typescript";
+
+import { Migration } from "../umzug";
 
 const TABLE_NAME = "recurrence_tasks";
 
@@ -21,7 +21,7 @@ export const up: Migration = async ({ context: sequelize }) => {
 
     days: {
       type: DataType.ARRAY(
-        DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
       ),
       allowNull: true,
     },
@@ -60,11 +60,10 @@ export const down: Migration = async ({ context: sequelize }) => {
 
   await queryInterface.dropTable(TABLE_NAME);
 
-  // ENUM cleanup
   await queryInterface.sequelize.query(
-    `DROP TYPE IF EXISTS "enum_recurrence_tasks_days";`
+    `DROP TYPE IF EXISTS "enum_recurrence_tasks_days";`,
   );
   await queryInterface.sequelize.query(
-    `DROP TYPE IF EXISTS "enum_recurrence_tasks_cadence";`
+    `DROP TYPE IF EXISTS "enum_recurrence_tasks_cadence";`,
   );
 };
