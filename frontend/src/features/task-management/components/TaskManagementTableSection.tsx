@@ -1,12 +1,7 @@
+import { Box, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
-import { Text, Tbody, Tr, Td, Icon, HStack, Box } from "@chakra-ui/react";
-import { Task, TaskCategory } from "../../../types/TaskTypes";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
+import TaskCategoryBadge from "../../../components/common/TaskCategoryBadge";
+import { Task } from "../../../types/TaskTypes";
 
 interface TaskManagementTableSectionProps {
   tasks: Task[];
@@ -15,15 +10,6 @@ interface TaskManagementTableSectionProps {
 const TaskManagementTableSection = ({
   tasks,
 }: TaskManagementTableSectionProps): React.ReactElement => {
-  const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
-    [TaskCategory.WALK]: WalkIcon,
-    [TaskCategory.GAMES]: GamesIcon,
-    [TaskCategory.PEN_TIME]: PenTimeIcon,
-    [TaskCategory.HUSBANDRY]: HusbandryIcon,
-    [TaskCategory.TRAINING]: TrainingIcon,
-    [TaskCategory.MISC]: MiscIcon,
-  };
-
   return (
     <Tbody>
       {tasks.map((task) => (
@@ -34,12 +20,7 @@ const TaskManagementTableSection = ({
             </Text>
           </Td>
           <Td width="20%" py="1rem" px="0">
-            <HStack gap="0.8125rem" p={0}>
-              <Icon as={taskCategoryIcons[task.category]} boxSize="2.5rem" />
-              <Text textStyle="body" m={0}>
-                {task.category}
-              </Text>
-            </HStack>
+            <TaskCategoryBadge taskCategory={task.category} />
           </Td>
           <Td width="60%" py="1rem" pr="2.5rem" pl="4rem">
             <Box>
