@@ -21,9 +21,20 @@ const TableWrapper = ({
   return (
     <Flex direction="column" gap="2rem" width="100%" pt="2rem">
       {errorMessage && (
-        <TableErrorState errorMessage={errorMessage} onDismiss={onDismissError} />
+        <TableErrorState
+          errorMessage={errorMessage}
+          onDismiss={onDismissError}
+        />
       )}
-      <TableFilterBar {...filterBarProps} />
+      <TableFilterBar
+        filterType={filterBarProps.filterType}
+        filters={filterBarProps.filters}
+        onFilterChange={filterBarProps.onFilterChange}
+        search={filterBarProps.search}
+        onSearchChange={filterBarProps.onSearchChange}
+        searchPlaceholder={filterBarProps.searchPlaceholder}
+        actionButton={filterBarProps.actionButton}
+      />
       {children}
       {bottomContent}
     </Flex>

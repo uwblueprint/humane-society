@@ -172,7 +172,10 @@ const PetListPage = (): React.ReactElement => {
         ) : undefined,
       }}
     >
-      <PetListTable petsRecord={filteredPets} clearFilters={handleClearFilters} />
+      <PetListTable
+        petsRecord={filteredPets}
+        clearFilters={handleClearFilters}
+      />
     </TableWrapper>
   );
 };

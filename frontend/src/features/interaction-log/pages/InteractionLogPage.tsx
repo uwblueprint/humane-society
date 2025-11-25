@@ -105,7 +105,10 @@ const InteractionLogPage = (): React.ReactElement => {
       }}
     >
       <Flex direction="column" width="100%">
-        <TableHeader columns={columns} gridTemplateColumns={gridTemplateColumns} />
+        <TableHeader
+          columns={columns}
+          gridTemplateColumns={gridTemplateColumns}
+        />
         {isEmpty ? (
           <TableEmptyState
             message="No interactions currently match."

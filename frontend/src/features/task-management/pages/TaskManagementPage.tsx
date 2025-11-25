@@ -64,7 +64,10 @@ const TaskManagementPage = (): React.ReactElement => {
         ),
       }}
     >
-      <TaskManagementTable tasks={filteredTasks} clearFilters={handleClearFilters} />
+      <TaskManagementTable
+        tasks={filteredTasks}
+        clearFilters={handleClearFilters}
+      />
     </TableWrapper>
   );
 };

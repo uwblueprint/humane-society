@@ -32,4 +32,3 @@ const TableEmptyState = ({
 };
 
 export default TableEmptyState;
-
