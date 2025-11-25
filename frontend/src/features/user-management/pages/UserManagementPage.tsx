@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
@@ -6,10 +7,13 @@ import { User } from "../../../types/UserTypes";
 import Filter from "../../../components/common/Filter";
 import Search from "../../../components/common/Search";
 import UserManagementTable from "../components/UserManagementTable";
+import Button from "../../../components/common/Button";
 
 import Pagination from "../../../components/common/Pagination";
+import * as Routes from "../../../constants/Routes";
 
 const UserManagementPage = (): React.ReactElement => {
+  const history = useHistory();
   const [users, setUsers] = useState<User[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
@@ -49,7 +53,11 @@ const UserManagementPage = (): React.ReactElement => {
           return filterVals.includes(value as string);
         });
       })
-      .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
+      .filter(
+        (user) =>
+          user.firstName.toLowerCase().includes(search.toLowerCase()) ||
+          user.lastName.toLowerCase().includes(search.toLowerCase()),
+      );
   }, [filters, search, users]);
 
   const filteredUsersLength = filteredUsers.length;
@@ -70,6 +78,10 @@ const UserManagementPage = (): React.ReactElement => {
     getUsers();
   }, []);
 
+  const handleInviteUserClick = () => {
+    history.push(Routes.INVITE_USER_PAGE);
+  };
+
   return (
     <Flex direction="column" gap="2rem" width="100%" pt="2rem">
       {errorMessage && (
@@ -89,17 +101,27 @@ const UserManagementPage = (): React.ReactElement => {
         maxWidth="100vw"
         justifyContent="space-between"
         gap="1rem"
+        alignItems="center"
       >
         <Filter
           type="userManagement"
           onChange={handleFilterChange}
           selected={filters}
         />
-        <Search
-          placeholder="Search for a user..."
-          onChange={handleSearchChange}
-          search={search}
-        />
+        <Flex gap="1rem" alignItems="center">
+          <Search
+            placeholder="Search for a user..."
+            onChange={handleSearchChange}
+            search={search}
+          />
+          <Button
+            variant="dark-blue"
+            size="medium"
+            onClick={handleInviteUserClick}
+          >
+            Invite User
+          </Button>
+        </Flex>
       </Flex>
       <UserManagementTable
         users={filteredUsers.slice(

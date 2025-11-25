@@ -16,6 +16,8 @@ export const EDIT_PET_PROFILE_PAGE = "/edit-pet-profile";
 
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
+export const INVITE_USER_PAGE = "/admin/users/invite";
+
 export const ADMIN_EDIT_USER_PROFILE_PAGE = "/admin/edit-user-profile";
 
 export const TASK_MANAGEMENT_PAGE = "/admin/tasks";
