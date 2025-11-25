@@ -1,8 +1,7 @@
-import { Flex, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import React, { useMemo, useState } from "react";
 import Button from "../../../components/common/Button";
-import Filter from "../../../components/common/Filter";
-import Search from "../../../components/common/Search";
+import { TableWrapper } from "../../../components/common/table";
 import {
   ADMIN,
   BEHAVIOURIST,
@@ -94,41 +93,28 @@ const PetListPage = (): React.ReactElement => {
   }, [currentUserRole, filters, search]);
 
   return (
-    <Flex direction="column" gap="2rem" width="100%" pt="2rem">
-      <Flex
-        padding="0 2.5rem"
-        maxWidth="100vw"
-        justifyContent="space-between"
-        gap="1rem"
-      >
-        <Filter
-          type={petListFilterType}
-          onChange={handleFilterChange}
-          selected={filters}
-        />
-        <Flex gap="1rem">
-          <Search
-            placeholder="Search for a pet..."
-            onChange={handleSearchChange}
-            search={search}
-          />
-          {isAdmin && (
-            <Button
-              variant="dark-blue"
-              size="medium"
-              onClick={handleAddPet}
-              disabled={isStaff}
-            >
-              Add Pet
-            </Button>
-          )}
-        </Flex>
-      </Flex>
-      <PetListTable
-        petsRecord={filteredPets}
-        clearFilters={handleClearFilters}
-      />
-    </Flex>
+    <TableWrapper
+      filterBarProps={{
+        filterType: petListFilterType,
+        filters,
+        onFilterChange: handleFilterChange,
+        search,
+        onSearchChange: handleSearchChange,
+        searchPlaceholder: "Search for a pet...",
+        actionButton: isAdmin ? (
+          <Button
+            variant="dark-blue"
+            size="medium"
+            onClick={handleAddPet}
+            disabled={isStaff}
+          >
+            Add Pet
+          </Button>
+        ) : undefined,
+      }}
+    >
+      <PetListTable petsRecord={filteredPets} clearFilters={handleClearFilters} />
+    </TableWrapper>
   );
 };
 

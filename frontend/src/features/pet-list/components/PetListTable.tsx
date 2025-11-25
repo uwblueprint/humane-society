@@ -1,5 +1,6 @@
-import { Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import React, { useMemo } from "react";
+import { TableEmptyState } from "../../../components/common/table";
 import { STAFF_BEHAVIOURISTS_ADMIN } from "../../../constants/AuthConstants";
 import { PetListRecord } from "../../../types/PetTypes";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
@@ -54,21 +55,10 @@ const PetListTable = ({
         <Tbody>
           <Tr>
             <Td colSpan={3}>
-              <Flex direction="column" alignItems="center" gap="1rem" my="5rem">
-                <Text m="0" textStyle="subheading">
-                  No pets currently match.
-                </Text>
-                <Text
-                  m="0"
-                  textStyle="h3"
-                  color="blue.500"
-                  cursor="pointer"
-                  textDecoration="underline"
-                  onClick={() => clearFilters()}
-                >
-                  Clear all
-                </Text>
-              </Flex>
+              <TableEmptyState
+                message="No pets currently match."
+                onClearFilters={clearFilters}
+              />
             </Td>
           </Tr>
         </Tbody>

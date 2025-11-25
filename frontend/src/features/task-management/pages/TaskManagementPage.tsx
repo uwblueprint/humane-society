@@ -1,9 +1,7 @@
 import React, { useState, useMemo } from "react";
-import { Flex } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import TaskManagementTable from "../components/TaskManagementTable";
-import Filter from "../../../components/common/Filter";
-import Search from "../../../components/common/Search";
+import { TableWrapper } from "../../../components/common/table";
 import { mockTasks } from "../../../types/TaskTypes";
 import Button from "../../../components/common/Button";
 import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
@@ -47,25 +45,15 @@ const TaskManagementPage = (): React.ReactElement => {
   }, [filters, search]);
 
   return (
-    <Flex direction="column" gap="2rem" pt="2rem">
-      <Flex
-        padding="0 2.5rem"
-        maxWidth="100%"
-        justifyContent="space-between"
-        gap="1rem"
-        alignItems="center"
-      >
-        <Filter
-          type="taskManagement"
-          onChange={handleFilterChange}
-          selected={filters}
-        />
-        <Flex gap="1rem" alignItems="center">
-          <Search
-            placeholder="Search for a task..."
-            onChange={handleSearchChange}
-            search={search}
-          />
+    <TableWrapper
+      filterBarProps={{
+        filterType: "taskManagement",
+        filters,
+        onFilterChange: handleFilterChange,
+        search,
+        onSearchChange: handleSearchChange,
+        searchPlaceholder: "Search for a task...",
+        actionButton: (
           <Button
             variant="dark-blue"
             size="medium"
@@ -73,13 +61,11 @@ const TaskManagementPage = (): React.ReactElement => {
           >
             Add Task Template
           </Button>
-        </Flex>
-      </Flex>
-      <TaskManagementTable
-        tasks={filteredTasks}
-        clearFilters={handleClearFilters}
-      />
-    </Flex>
+        ),
+      }}
+    >
+      <TaskManagementTable tasks={filteredTasks} clearFilters={handleClearFilters} />
+    </TableWrapper>
   );
 };
 
