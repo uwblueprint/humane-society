@@ -5,7 +5,7 @@
  */
 const formatTimeFromISO = (isoString: string | null): string => {
   if (!isoString) {
-    return "Unknown";
+    return "";
   }
 
   // Check if it's a special status string
