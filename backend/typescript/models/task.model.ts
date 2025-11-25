@@ -5,10 +5,12 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasOne,
 } from "sequelize-typescript";
 import User from "./user.model";
 import Pet from "./pet.model";
 import TaskTemplate from "./taskTemplate.model";
+import RecurrenceTask from "./recurrence_task.model";
 
 @Table({
   tableName: "tasks",
@@ -37,6 +39,9 @@ export default class Task extends Model {
 
   @BelongsTo(() => TaskTemplate)
   task_template!: TaskTemplate;
+
+  @HasOne(() => RecurrenceTask)
+  recurrence?: RecurrenceTask;
 
   @Column({})
   scheduled_start_time?: Date;
