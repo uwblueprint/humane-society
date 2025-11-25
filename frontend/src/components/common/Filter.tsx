@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Button,
   Checkbox,
@@ -12,6 +12,7 @@ import {
   PopoverArrow,
   Image,
 } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import filterConfig from "../../config/filterConfig";
 import { CloseIcon, FilterOpenIcon } from "../../assets/icons";
 
@@ -19,7 +20,8 @@ export type FilterType =
   | "petListVolunteer"
   | "petListAdmin"
   | "userManagement"
-  | "taskManagement";
+  | "taskManagement"
+  | "interactionLog";
 
 type FilterProps = {
   type: FilterType;
@@ -30,28 +32,60 @@ type FilterProps = {
 const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   const filters = filterConfig[type];
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showGradient, setShowGradient] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [initialScrollLeft, setInitialScrollLeft] = useState(0);
   const [hasMoved, setHasMoved] = useState(false);
 
-  const checkScrollPosition = () => {
+  const checkScrollPosition = useCallback(() => {
     if (containerRef.current) {
       const { scrollWidth, clientWidth, scrollLeft } = containerRef.current;
       const hasOverflow = scrollWidth > clientWidth;
 
+      const atStart = scrollLeft <= 5;
       const atEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 5;
 
-      setShowGradient(hasOverflow && !atEnd);
+      setCanScrollLeft(hasOverflow && !atStart);
+      setCanScrollRight(hasOverflow && !atEnd);
+    }
+  }, []);
+
+  const scrollByAmount = (amount: number) => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: amount, behavior: "smooth" });
     }
   };
 
+  // Here we cHeck scroll position on mount, resize, and type change
   useEffect(() => {
     checkScrollPosition();
     window.addEventListener("resize", checkScrollPosition);
     return () => window.removeEventListener("resize", checkScrollPosition);
-  }, [type]);
+  }, [type, checkScrollPosition]);
+
+  // we use ResizeObserver to detect content size changes (e.g., when filters are selected/cleared)
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkScrollPosition();
+    });
+
+    resizeObserver.observe(contentRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [checkScrollPosition]);
+
+  // Also now check when selected filters change (with slight delay for DOM update)
+  useEffect(() => {
+    const timeoutId = setTimeout(checkScrollPosition, 50);
+    return () => clearTimeout(timeoutId);
+  }, [selected, checkScrollPosition]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -109,19 +143,42 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
   };
 
   return (
-    <Flex position="relative" minWidth="0" direction="column">
-      <Flex
-        ref={containerRef}
-        overflowX="auto"
-        className="no-scrollbar"
-        onMouseDown={handleMouseDown}
-        onMouseLeave={handleMouseLeave}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onScroll={handleScroll}
-      >
-        <Flex gap="1rem" flexShrink={0} userSelect="none">
-          {filters.map((filter) => {
+    <Flex position="relative" minWidth="0" alignItems="center" gap="0.5rem">
+      {canScrollLeft && (
+        <Flex
+          as="button"
+          alignItems="center"
+          justifyContent="center"
+          width="1.5rem"
+          height="1.5rem"
+          borderRadius="50%"
+          backgroundColor="gray.100"
+          border="1px solid"
+          borderColor="gray.300"
+          cursor="pointer"
+          flexShrink={0}
+          onClick={() => scrollByAmount(-200)}
+          _hover={{ backgroundColor: "gray.200" }}
+          transition="background-color 0.2s"
+          aria-label="Scroll filters left"
+        >
+          <ChevronLeftIcon color="gray.600" boxSize="1rem" />
+        </Flex>
+      )}
+
+      <Flex position="relative" minWidth="0" flex="1">
+        <Flex
+          ref={containerRef}
+          overflowX="auto"
+          className="no-scrollbar"
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onScroll={handleScroll}
+        >
+          <Flex ref={contentRef} gap="1rem" flexShrink={0} userSelect="none">
+            {filters.map((filter) => {
             const selectedValues = selected[filter.value] || [];
             const selectedLabels = filter.options
               .filter((option) => selectedValues.includes(option))
@@ -299,23 +356,64 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                 )}
               </Popover>
             );
-          })}
+            })}
+          </Flex>
         </Flex>
+
+        {/* Left gradient fade */}
+        {canScrollLeft && (
+          <Box
+            position="absolute"
+            left={0}
+            top={0}
+            bottom={0}
+            width="2.5rem"
+            height="100%"
+            pointerEvents="none"
+            zIndex={2}
+            backgroundColor="transparent"
+            backgroundImage="linear-gradient(270deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
+          />
+        )}
+
+        {/* Right gradient fade */}
+        {canScrollRight && (
+          <Box
+            position="absolute"
+            right={0}
+            top={0}
+            bottom={0}
+            width="2.5rem"
+            height="100%"
+            pointerEvents="none"
+            zIndex={2}
+            backgroundColor="transparent"
+            backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
+          />
+        )}
       </Flex>
 
-      {showGradient && (
-        <Box
-          position="absolute"
-          right={0}
-          top={0}
-          bottom={0}
-          width="60px"
-          height="100%"
-          pointerEvents="none"
-          zIndex={2}
-          backgroundColor="transparent"
-          backgroundImage="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 80%)"
-        />
+      {/* Right Chevron */}
+      {canScrollRight && (
+        <Flex
+          as="button"
+          alignItems="center"
+          justifyContent="center"
+          width="1.5rem"
+          height="1.5rem"
+          borderRadius="50%"
+          backgroundColor="gray.100"
+          border="1px solid"
+          borderColor="gray.300"
+          cursor="pointer"
+          flexShrink={0}
+          onClick={() => scrollByAmount(200)}
+          _hover={{ backgroundColor: "gray.200" }}
+          transition="background-color 0.2s"
+          aria-label="Scroll filters right"
+        >
+          <ChevronRightIcon color="gray.600" boxSize="1rem" />
+        </Flex>
       )}
     </Flex>
   );

@@ -1,47 +1,149 @@
-import React from "react";
-import { Text } from "@chakra-ui/react";
-import NavBar from "../../../components/common/navbar/NavBar";
+import React, { useState, useMemo } from "react";
+import { Flex, Grid, Text } from "@chakra-ui/react";
+import {
+  TableWrapper,
+  TableHeader,
+  TableEmptyState,
+  TableColumn,
+} from "../../../components/common/table";
+
+// this is fake data for boilerplate lol
+interface InteractionLog {
+  id: string;
+  petName: string;
+  volunteerName: string;
+  taskCategory: string;
+  date: string;
+  notes: string;
+}
+
+const mockInteractionLogs: InteractionLog[] = [
+  {
+    id: "1",
+    petName: "Buddy",
+    volunteerName: "Bam Bam",
+    taskCategory: "Walk",
+    date: "2024-01-15",
+    notes: "Great walk, very energetic",
+  },
+  {
+    id: "2",
+    petName: "Kobe",
+    volunteerName: "John Pork",
+    taskCategory: "Training",
+    date: "2024-01-14",
+    notes: "Practiced sit and stay commands",
+  },
+  {
+    id: "3",
+    petName: "Luka",
+    volunteerName: "LeBron James",
+    taskCategory: "Husbandry",
+    date: "2024-01-13",
+    notes: "Brushed coat and checked nails",
+  },
+];
+
+const columns: TableColumn[] = [
+  { label: "PET NAME" },
+  { label: "VOLUNTEER" },
+  { label: "TASK" },
+  { label: "DATE" },
+  { label: "NOTES" },
+];
+
+const gridTemplateColumns = "1fr 1fr 1fr 0.75fr 2fr";
 
 const InteractionLogPage = (): React.ReactElement => {
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [search, setSearch] = useState<string>("");
+
+  const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
+    setFilters(selectedFilters);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setSearch("");
+  };
+
+  const filteredLogs = useMemo(() => {
+    return mockInteractionLogs
+      .filter((log) => {
+        return Object.keys(filters).every((key) => {
+          const filterVals = filters[key];
+          if (!filterVals || filterVals.length === 0) return true;
+          if (key === "taskCategory") {
+            return filterVals.includes(log.taskCategory);
+          }
+          return true;
+        });
+      })
+      .filter(
+        (log) =>
+          log.petName.toLowerCase().includes(search.toLowerCase()) ||
+          log.volunteerName.toLowerCase().includes(search.toLowerCase()) ||
+          log.notes.toLowerCase().includes(search.toLowerCase()),
+      );
+  }, [filters, search]);
+
+  const isEmpty = filteredLogs.length === 0;
+
   return (
-    <div style={{ textAlign: "center" }}>
-      <NavBar pageName="Interaction Log" />
-      <Text textStyle="h3" mt={{ base: "6.375rem", md: "9.375rem" }}>
-        Interaction Log Page 🫨
-      </Text>
-      <Text>
-        Lorem ipsum odor amet, consectetuer adipiscing elit. Viverra efficitur
-        pellentesque integer ornare auctor porta sodales vivamus. Cubilia mus
-        maximus rhoncus tortor eros magnis porta. Auctor facilisis at habitant
-        curae, dapibus finibus purus. Mauris tristique velit praesent orci ut
-        parturient feugiat. Commodo molestie libero montes nec ornare commodo
-        natoque rutrum duis. Ex dictumst pharetra hendrerit nunc aliquet arcu
-        natoque. Netus consequat natoque leo eget egestas taciti feugiat. Fusce
-        nostra neque sollicitudin ultricies arcu accumsan mattis. Et rhoncus
-        rutrum vivamus augue himenaeos placerat imperdiet. Ultrices efficitur
-        egestas cubilia ante, nibh senectus duis. Magna placerat natoque felis
-        gravida purus semper tortor duis. Ornare semper per cursus suscipit
-        class. Lacus dictum faucibus purus facilisis torquent felis. Platea
-        penatibus sed aenean nunc suscipit suscipit; rutrum quis. Ad felis
-        natoque odio dolor nisl; commodo sagittis parturient nec. Euismod cras
-        consectetur ligula sagittis turpis eleifend morbi. Faucibus aliquam
-        interdum conubia ipsum dignissim. Sem facilisis potenti justo lacus
-        faucibus sagittis. Rutrum maecenas dapibus etiam ultricies est magnis
-        maximus. Non ullamcorper nascetur enim iaculis dui praesent. Feugiat
-        convallis morbi sit inceptos sodales malesuada in varius. Et pretium
-        metus imperdiet fusce vitae cras consequat. Nullam scelerisque quis est
-        lacinia ridiculus senectus. Penatibus lorem per id iaculis eros metus
-        enim lectus. Varius vehicula sit, sed ut lorem interdum. Odio quis eget
-        felis magna tellus; sollicitudin montes natoque. Ligula est pharetra;
-        hendrerit lectus urna ullamcorper. Elementum fermentum metus platea
-        facilisi ullamcorper velit ligula. Suscipit posuere finibus vestibulum
-        vel phasellus nec proin orci duis. Ligula metus donec dignissim leo
-        sagittis duis. Efficitur maximus molestie tristique placerat phasellus
-        curae. Sodales fringilla dolor primis nibh sem euismod proin. Commodo
-        molestie integer quis semper integer nisl. Iaculis euismod hendrerit
-        aptent ultricies placerat nam consequat.
-      </Text>
-    </div>
+    <TableWrapper
+      filterBarProps={{
+        filterType: "interactionLog",
+        filters,
+        onFilterChange: handleFilterChange,
+        search,
+        onSearchChange: handleSearchChange,
+        searchPlaceholder: "Search interactions...",
+      }}
+    >
+      <Flex direction="column" width="100%">
+        <TableHeader columns={columns} gridTemplateColumns={gridTemplateColumns} />
+        {isEmpty ? (
+          <TableEmptyState
+            message="No interactions currently match."
+            onClearFilters={handleClearFilters}
+          />
+        ) : (
+          <Flex direction="column" width="100%">
+            {filteredLogs.map((log) => (
+              <Grid
+                key={log.id}
+                gridTemplateColumns={gridTemplateColumns}
+                padding="1rem 2.5rem"
+                borderBottom="1px solid"
+                borderColor="gray.200"
+                alignItems="center"
+                _hover={{ backgroundColor: "gray.50" }}
+              >
+                <Text m={0} textStyle="body" color="gray.700">
+                  {log.petName}
+                </Text>
+                <Text m={0} textStyle="body" color="gray.700">
+                  {log.volunteerName}
+                </Text>
+                <Text m={0} textStyle="body" color="gray.700">
+                  {log.taskCategory}
+                </Text>
+                <Text m={0} textStyle="body" color="gray.700">
+                  {log.date}
+                </Text>
+                <Text m={0} textStyle="body" color="gray.700" noOfLines={2}>
+                  {log.notes}
+                </Text>
+              </Grid>
+            ))}
+          </Flex>
+        )}
+      </Flex>
+    </TableWrapper>
   );
 };
 
