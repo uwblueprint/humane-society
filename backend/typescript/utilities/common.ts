@@ -20,6 +20,7 @@ export function timeStringToDateTime(timeStr: string): DateTime {
   const fullDateString = `${today.toFormat("DDDD")} ${timeStr}`;
   const dt = DateTime.fromFormat(fullDateString, "DDDD t", { zone: TIME_ZONE });
   if (!dt.isValid) {
+    Logger.error(`Failed to parse time string: ${timeStr}`);
     throw new Error(`Failed to parse time string: ${timeStr}`);
   }
   return dt;
