@@ -44,4 +44,3 @@ const TableFilterBar = ({
 };
 
 export default TableFilterBar;
-
