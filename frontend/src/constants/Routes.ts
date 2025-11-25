@@ -22,6 +22,8 @@ export const TASK_MANAGEMENT_PAGE = "/admin/tasks";
 
 export const ADD_TASK_TEMPLATE_PAGE = "/admin/add-task-template";
 
+export const EDIT_TASK_TEMPLATE_PAGE = "/admin/tasks/edit";
+
 export const ADMIN_PAGE = "/admin";
 
 export const CREATE_PASSWORD_PAGE = "/create-password";

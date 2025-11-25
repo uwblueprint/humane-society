@@ -1,7 +1,21 @@
-import baseAPIClient from "./BaseAPIClient";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
+import {
+  CreateTaskDTO,
+  EditTaskDTO,
+  Task,
+  TaskTemplateResponseDTO,
+} from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
-import { CreateTaskDTO, EditTaskDTO, Task } from "../types/TaskTypes";
+import baseAPIClient from "./BaseAPIClient";
+
+function transformTaskTemplateResponse(dto: TaskTemplateResponseDTO): Task {
+  return {
+    id: dto.id,
+    name: dto.taskName,
+    category: dto.category,
+    instructions: dto.instructions ?? "",
+  };
+}
 
 const getTaskTemplate = async (taskTemplateId: number): Promise<Task> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -15,7 +29,7 @@ const getTaskTemplate = async (taskTemplateId: number): Promise<Task> => {
         headers: { Authorization: bearerToken },
       },
     );
-    return data;
+    return transformTaskTemplateResponse(data);
   } catch (error) {
     throw new Error(`Failed to fetch task template: ${error}`);
   }
@@ -30,7 +44,7 @@ const getAllTaskTemplates = async (): Promise<Task[]> => {
     const { data } = await baseAPIClient.get("/task-templates", {
       headers: { Authorization: bearerToken },
     });
-    return data;
+    return data.map(transformTaskTemplateResponse);
   } catch (error) {
     throw new Error(`Failed to fetch task templates: ${error}`);
   }
@@ -45,7 +59,7 @@ const createTaskTemplate = async (formData: CreateTaskDTO): Promise<Task> => {
     const { data } = await baseAPIClient.post("/task-templates", formData, {
       headers: { Authorization: bearerToken },
     });
-    return data;
+    return transformTaskTemplateResponse(data);
   } catch (error) {
     throw new Error(`Failed to create task template: ${error}`);
   }
@@ -67,7 +81,7 @@ const editTaskTemplate = async (
         headers: { Authorization: bearerToken },
       },
     );
-    return data;
+    return transformTaskTemplateResponse(data);
   } catch (error) {
     throw new Error(`Failed to edit task template: ${error}`);
   }
