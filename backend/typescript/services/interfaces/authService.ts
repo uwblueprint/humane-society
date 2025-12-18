@@ -18,7 +18,8 @@ interface IAuthService {
    * @returns AuthDTO object containing the access token, refresh token, and user info
    * @throws Error if token generation fails
    */
-  generateTokenOAuth(idToken: string): Promise<AuthDTO>;
+  // OAuth not in use
+  // generateTokenOAuth(idToken: string): Promise<AuthDTO>;
 
   /**
    * Revoke all refresh tokens of a user
