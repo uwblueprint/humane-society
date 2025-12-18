@@ -1,8 +1,8 @@
 import {
-  PetStatus,
-  Sex,
   AnimalTag,
   ColorLevel,
+  PetStatus,
+  Sex,
   TaskCategory,
 } from "../../types";
 
@@ -58,6 +58,7 @@ export interface PetListItemDTO {
   allTasksAssigned: boolean | null; // null if there are no tasks
   isAssignedToMe: boolean;
   photo?: string;
+  animalTag: AnimalTag;
 }
 
 // Dictionary that maps section names to arrays of pets

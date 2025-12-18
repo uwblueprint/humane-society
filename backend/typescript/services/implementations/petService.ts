@@ -13,19 +13,19 @@ import logger from "../../utilities/logger";
 import {
   IPetService,
   PetListItemDTO,
+  PetListSections,
+  PetRawDTO,
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
-  PetRawDTO,
   PetTask,
-  PetListSections,
 } from "../interfaces/petService";
 // import TaskTemplate from "../../models/taskTemplate.model";
 import {
-  PetStatus,
-  Role,
   AnimalTag,
   LastCaredFor,
+  PetStatus,
+  Role,
   TaskCategory,
 } from "../../types";
 
@@ -647,6 +647,7 @@ class PetService implements IPetService {
             lastCaredFor: null,
             allTasksAssigned: null,
             isAssignedToMe: false,
+            animalTag: petTask.animal_tag as AnimalTag,
           };
           petIdToPetListItem[petTask.pet_id] = petData;
         }
