@@ -555,7 +555,7 @@ class PetService implements IPetService {
     // Admin view for Staff/AB/Admin
     return this.buildSectionsAdmin(allPets, user);
   }
-  
+
   async getPetList(userId: number): Promise<PetListSections> {
     const PET_TABLE_NAME = "pets";
     const TASK_TABLE_NAME = "tasks";
