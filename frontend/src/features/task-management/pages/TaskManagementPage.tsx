@@ -1,15 +1,17 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Flex } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import TaskManagementTable from "../components/TaskManagementTable";
 import Filter from "../../../components/common/Filter";
 import Search from "../../../components/common/Search";
-import { mockTasks } from "../../../types/TaskTypes";
+import { type Task } from "../../../types/TaskTypes";
 import Button from "../../../components/common/Button";
 import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
+import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
 
@@ -31,8 +33,16 @@ const TaskManagementPage = (): React.ReactElement => {
   };
 
   const filteredTasks = useMemo(() => {
-    return mockTasks
-      .filter((task) => {
+    const hasActiveFilters = Object.values(filters).some(
+      (vals) => vals && vals.length > 0,
+    );
+    const hasSearch = search.trim() !== "";
+
+    // If no filters and no search, just return everything
+    if (!hasActiveFilters && !hasSearch) return tasks;
+
+    return tasks
+      .filter((task: Task) => {
         return Object.keys(filters).every((key) => {
           const filterVals = filters[key];
           if (!filterVals || filterVals.length === 0) return true;
@@ -40,11 +50,30 @@ const TaskManagementPage = (): React.ReactElement => {
         });
       })
       .filter(
-        (task) =>
-          task.name.toLowerCase().includes(search.toLowerCase()) ||
-          task.instructions.toLowerCase().includes(search.toLowerCase()),
+        (task: Task) =>
+          task.taskName.toLowerCase().includes(search.toLowerCase()) ||
+          task.instructions?.toLowerCase().includes(search.toLowerCase()),
       );
-  }, [filters, search]);
+  }, [filters, search, tasks]);
+
+  const getTasks = async () => {
+    try {
+      const fetchedTasks = await TaskTemplateAPIClient.getAllTaskTemplates();
+
+      if (fetchedTasks != null) {
+        setTasks(fetchedTasks);
+      }
+    } catch (error) {
+      setTasks([]);
+      // TODO: deprecate console use in frontend
+      /* eslint-disable-next-line no-console */
+      console.error("Could not fetch tasks");
+    }
+  };
+
+  useEffect(() => {
+    getTasks();
+  }, []);
 
   return (
     <Flex direction="column" gap="2rem" pt="2rem">
