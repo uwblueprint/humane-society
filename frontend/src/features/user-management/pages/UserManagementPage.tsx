@@ -156,17 +156,18 @@ const UserManagementPage = (): React.ReactElement => {
 
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />
-        <ModalContent maxW="600px">
+        <ModalContent maxW="600px" bg="white">
           <ModalHeader
             fontSize="24px"
             fontWeight="600"
             color="gray.800"
             pb="1rem"
+            bg="white"
           >
             Invite User
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb="2rem">
+          <ModalBody pb="2rem" bg="white">
             <AddUserFormModal onSubmit={handleInviteUser} onSuccess={onClose} />
           </ModalBody>
         </ModalContent>
