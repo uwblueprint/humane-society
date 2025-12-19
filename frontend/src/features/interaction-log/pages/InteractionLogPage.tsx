@@ -7,7 +7,6 @@ import {
   TableColumn,
 } from "../../../components/common/table";
 
-// this is fake data for boilerplate lol
 interface InteractionLog {
   id: string;
   petName: string;
