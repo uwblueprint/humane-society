@@ -1,10 +1,4 @@
-import {
-  Alert,
-  AlertIcon,
-  CloseButton,
-  Flex,
-  useToast,
-} from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import React, { useEffect, useMemo, useState } from "react";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import Button from "../../../components/common/Button";
@@ -27,6 +21,7 @@ import PetListTable from "../components/PetListTable";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");

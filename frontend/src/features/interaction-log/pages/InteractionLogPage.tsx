@@ -1,20 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { Flex, Grid, Text } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import {
   TableWrapper,
   TableHeader,
   TableEmptyState,
   TableColumn,
 } from "../../../components/common/table";
-
-interface InteractionLog {
-  id: string;
-  petName: string;
-  volunteerName: string;
-  taskCategory: string;
-  date: string;
-  notes: string;
-}
 
 const columns: TableColumn[] = [
   { label: "NAME" },
@@ -44,8 +35,8 @@ const InteractionLogPage = (): React.ReactElement => {
   };
 
   const filteredLogs = useMemo(() => {
-    return []
-  }, [filters, search]);
+    return [];
+  }, []);
 
   const isEmpty = filteredLogs.length === 0;
 
@@ -71,9 +62,7 @@ const InteractionLogPage = (): React.ReactElement => {
             onClearFilters={handleClearFilters}
           />
         ) : (
-          <Flex direction="column" width="100%">
-            
-          </Flex>
+          <Flex direction="column" width="100%" />
         )}
       </Flex>
     </TableWrapper>
