@@ -17,39 +17,12 @@ interface InteractionLog {
   notes: string;
 }
 
-const mockInteractionLogs: InteractionLog[] = [
-  {
-    id: "1",
-    petName: "Buddy",
-    volunteerName: "Bam Bam",
-    taskCategory: "Walk",
-    date: "2024-01-15",
-    notes: "Great walk, very energetic",
-  },
-  {
-    id: "2",
-    petName: "Kobe",
-    volunteerName: "John Pork",
-    taskCategory: "Training",
-    date: "2024-01-14",
-    notes: "Practiced sit and stay commands",
-  },
-  {
-    id: "3",
-    petName: "Luka",
-    volunteerName: "LeBron James",
-    taskCategory: "Husbandry",
-    date: "2024-01-13",
-    notes: "Brushed coat and checked nails",
-  },
-];
-
 const columns: TableColumn[] = [
-  { label: "PET NAME" },
-  { label: "VOLUNTEER" },
-  { label: "TASK" },
+  { label: "NAME" },
+  { label: "ROLE" },
+  { label: "INTERACTION" },
   { label: "DATE" },
-  { label: "NOTES" },
+  { label: "TIME" },
 ];
 
 const gridTemplateColumns = "1fr 1fr 1fr 0.75fr 2fr";
@@ -72,23 +45,7 @@ const InteractionLogPage = (): React.ReactElement => {
   };
 
   const filteredLogs = useMemo(() => {
-    return mockInteractionLogs
-      .filter((log) => {
-        return Object.keys(filters).every((key) => {
-          const filterVals = filters[key];
-          if (!filterVals || filterVals.length === 0) return true;
-          if (key === "taskCategory") {
-            return filterVals.includes(log.taskCategory);
-          }
-          return true;
-        });
-      })
-      .filter(
-        (log) =>
-          log.petName.toLowerCase().includes(search.toLowerCase()) ||
-          log.volunteerName.toLowerCase().includes(search.toLowerCase()) ||
-          log.notes.toLowerCase().includes(search.toLowerCase()),
-      );
+    return []
   }, [filters, search]);
 
   const isEmpty = filteredLogs.length === 0;
@@ -116,33 +73,7 @@ const InteractionLogPage = (): React.ReactElement => {
           />
         ) : (
           <Flex direction="column" width="100%">
-            {filteredLogs.map((log) => (
-              <Grid
-                key={log.id}
-                gridTemplateColumns={gridTemplateColumns}
-                padding="1rem 2.5rem"
-                borderBottom="1px solid"
-                borderColor="gray.200"
-                alignItems="center"
-                _hover={{ backgroundColor: "gray.50" }}
-              >
-                <Text m={0} textStyle="body" color="gray.700">
-                  {log.petName}
-                </Text>
-                <Text m={0} textStyle="body" color="gray.700">
-                  {log.volunteerName}
-                </Text>
-                <Text m={0} textStyle="body" color="gray.700">
-                  {log.taskCategory}
-                </Text>
-                <Text m={0} textStyle="body" color="gray.700">
-                  {log.date}
-                </Text>
-                <Text m={0} textStyle="body" color="gray.700" noOfLines={2}>
-                  {log.notes}
-                </Text>
-              </Grid>
-            ))}
+            
           </Flex>
         )}
       </Flex>
