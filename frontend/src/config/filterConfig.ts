@@ -78,6 +78,18 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Object.values(TaskCategory),
     },
   ],
+  interactionLog: [
+    {
+      name: "Animal Tag",
+      value: "animalTag",
+      options: Object.values(AnimalTag),
+    },
+    {
+      name: "Task Category",
+      value: "taskCategory",
+      options: Object.values(TaskCategory),
+    },
+  ],
 };
 
 export default filterConfig;
