@@ -1,9 +1,9 @@
 import React, { FC, useContext } from "react";
-import PopupModal from "../common/PopupModal";
-import UserAPIClient from "../../APIClients/UserAPIClient";
+import PopupModal from "../../../components/common/PopupModal";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { useToast } from "@chakra-ui/react";
-import AuthContext from "../../contexts/AuthContext";
-import AUTHENTICATED_USER_KEY from "../../constants/AuthConstants";
+import AuthContext from "../../../contexts/AuthContext";
+import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 interface DeleteUserModalProps {
   isOpen: boolean; // Whether the modal should be visible
