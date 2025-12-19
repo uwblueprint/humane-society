@@ -41,6 +41,7 @@ const ColourLevelSelect = ({
       required={required}
       iconElements={iconElements}
       maxHeight="300px"
+      hideValueText
     />
   );
 };
