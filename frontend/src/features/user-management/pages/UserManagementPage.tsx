@@ -1,9 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+} from "@chakra-ui/react";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
 
 import { TableWrapper } from "../../../components/common/table";
 import UserManagementTable from "../components/UserManagementTable";
+import AddUserFormModal, {
+  AddUserRequest,
+} from "../components/AddUserFormModal";
 
 import Pagination from "../../../components/common/Pagination";
 
@@ -13,6 +26,7 @@ const UserManagementPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const numUsersPerPage = 10; // You can adjust this value as needed
 
@@ -64,39 +78,81 @@ const UserManagementPage = (): React.ReactElement => {
     }
   };
 
+  const handleInviteUser = async (formData: AddUserRequest) => {
+    // TODO: Implement actual user invite API call
+    // eslint-disable-next-line no-console
+    console.log("Inviting user with data:", formData);
+    // await UserAPIClient.invite(formData);
+
+    // Refresh users list after successful invite
+    await getUsers();
+  };
+
   useEffect(() => {
     getUsers();
   }, []);
 
   return (
-    <TableWrapper
-      filterBarProps={{
-        filterType: "userManagement",
-        filters,
-        onFilterChange: handleFilterChange,
-        search,
-        onSearchChange: handleSearchChange,
-        searchPlaceholder: "Search for a user...",
-      }}
-      errorMessage={errorMessage}
-      onDismissError={() => setErrorMessage(null)}
-      bottomContent={
-        <Pagination
-          value={page}
-          onChange={(newPage) => setPage(newPage)}
-          numberOfItems={filteredUsersLength}
-          itemsPerPage={numUsersPerPage}
+    <>
+      <TableWrapper
+        filterBarProps={{
+          filterType: "userManagement",
+          filters,
+          onFilterChange: handleFilterChange,
+          search,
+          onSearchChange: handleSearchChange,
+          searchPlaceholder: "Search for a user...",
+          actionButton: (
+            <Button
+              colorScheme="blue"
+              size="lg"
+              onClick={onOpen}
+              px="2rem"
+              flexShrink={0}
+            >
+              Invite User
+            </Button>
+          ),
+        }}
+        errorMessage={errorMessage}
+        onDismissError={() => setErrorMessage(null)}
+        bottomContent={
+          <Pagination
+            value={page}
+            onChange={(newPage) => setPage(newPage)}
+            numberOfItems={filteredUsersLength}
+            itemsPerPage={numUsersPerPage}
+          />
+        }
+      >
+        <UserManagementTable
+          users={filteredUsers.slice(
+            (page - 1) * numUsersPerPage,
+            page * numUsersPerPage,
+          )}
+          clearFilters={handleClearFilters}
         />
-      }
-    >
-      <UserManagementTable
-        users={filteredUsers.slice(
-          (page - 1) * numUsersPerPage,
-          page * numUsersPerPage,
-        )}
-        clearFilters={handleClearFilters}
-      />
-    </TableWrapper>
+      </TableWrapper>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+        <ModalOverlay />
+        <ModalContent maxW="600px" bg="white">
+          <ModalHeader
+            fontSize="24px"
+            fontWeight="600"
+            color="gray.800"
+            pb="1rem"
+            bg="white"
+          >
+            Invite User
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb="2rem" bg="white">
+            <AddUserFormModal onSubmit={handleInviteUser} onSuccess={onClose} />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
