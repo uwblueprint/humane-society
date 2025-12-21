@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
+import { Table, Thead, Tr, Th, Td, Tbody, Text } from "@chakra-ui/react";
+import { TableEmptyState } from "../../../components/common/table";
 import UserListTableSection from "./UserManagementTableSection";
 import { User } from "../../../types/UserTypes";
 
@@ -38,21 +39,10 @@ const UserManagementTable = ({
         <Tbody>
           <Tr>
             <Td colSpan={3}>
-              <Flex direction="column" alignItems="center" gap="1rem" my="5rem">
-                <Text m="0" textStyle="subheading">
-                  No users currently match.
-                </Text>
-                <Text
-                  m="0"
-                  textStyle="h3"
-                  color="blue.500"
-                  cursor="pointer"
-                  textDecoration="underline"
-                  onClick={clearFilters}
-                >
-                  Clear all
-                </Text>
-              </Flex>
+              <TableEmptyState
+                message="No users currently match."
+                onClearFilters={clearFilters}
+              />
             </Td>
           </Tr>
         </Tbody>

@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  AlertIcon,
   Button,
-  CloseButton,
-  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,8 +12,7 @@ import {
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
 
-import Filter from "../../../components/common/Filter";
-import Search from "../../../components/common/Search";
+import { TableWrapper } from "../../../components/common/table";
 import UserManagementTable from "../components/UserManagementTable";
 import AddUserFormModal, {
   AddUserRequest,
@@ -98,61 +93,46 @@ const UserManagementPage = (): React.ReactElement => {
   }, []);
 
   return (
-    <Flex direction="column" gap="2rem" width="100%" pt="2rem">
-      {errorMessage && (
-        <Alert status="error" mb={4}>
-          <AlertIcon />
-          {errorMessage}
-          <CloseButton
-            position="absolute"
-            right="8px"
-            top="8px"
-            onClick={() => setErrorMessage(null)}
+    <>
+      <TableWrapper
+        filterBarProps={{
+          filterType: "userManagement",
+          filters,
+          onFilterChange: handleFilterChange,
+          search,
+          onSearchChange: handleSearchChange,
+          searchPlaceholder: "Search for a user...",
+          actionButton: (
+            <Button
+              colorScheme="blue"
+              size="lg"
+              onClick={onOpen}
+              px="2rem"
+              flexShrink={0}
+            >
+              Invite User
+            </Button>
+          ),
+        }}
+        errorMessage={errorMessage}
+        onDismissError={() => setErrorMessage(null)}
+        bottomContent={
+          <Pagination
+            value={page}
+            onChange={(newPage) => setPage(newPage)}
+            numberOfItems={filteredUsersLength}
+            itemsPerPage={numUsersPerPage}
           />
-        </Alert>
-      )}
-      <Flex
-        padding="0 2.5rem"
-        maxWidth="100vw"
-        justifyContent="space-between"
-        gap="1rem"
-        alignItems="center"
+        }
       >
-        <Flex gap="1rem" flex="1">
-          <Filter
-            type="userManagement"
-            onChange={handleFilterChange}
-            selected={filters}
-          />
-          <Search
-            placeholder="Search for a user..."
-            onChange={handleSearchChange}
-            search={search}
-          />
-        </Flex>
-        <Button
-          colorScheme="blue"
-          size="lg"
-          onClick={onOpen}
-          px="2rem"
-          flexShrink={0}
-        >
-          Invite User
-        </Button>
-      </Flex>
-      <UserManagementTable
-        users={filteredUsers.slice(
-          (page - 1) * numUsersPerPage,
-          page * numUsersPerPage,
-        )}
-        clearFilters={handleClearFilters}
-      />
-      <Pagination
-        value={page}
-        onChange={(newPage) => setPage(newPage)}
-        numberOfItems={filteredUsersLength}
-        itemsPerPage={numUsersPerPage}
-      />
+        <UserManagementTable
+          users={filteredUsers.slice(
+            (page - 1) * numUsersPerPage,
+            page * numUsersPerPage,
+          )}
+          clearFilters={handleClearFilters}
+        />
+      </TableWrapper>
 
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />
@@ -172,7 +152,7 @@ const UserManagementPage = (): React.ReactElement => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Flex>
+    </>
   );
 };
 

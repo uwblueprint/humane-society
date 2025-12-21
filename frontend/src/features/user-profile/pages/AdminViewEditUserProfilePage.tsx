@@ -12,6 +12,7 @@ import UserRoles from "../../../constants/UserConstants";
 import { AnimalTag } from "../../../types/TaskTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import NavBar from "../../../components/common/navbar/NavBar";
+import DeleteUserModal from "../components/DeleteUserModal";
 
 interface FormData {
   firstName: string;
@@ -28,6 +29,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const history = useHistory();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
+  const [isDeleteSelected, setIsDeleteSelected] = useState(false);
 
   const colourLevelMap = useMemo<Record<number, string>>(
     () => ({
@@ -104,15 +106,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   };
 
   const handleDeleteUser = () => {
-    // eslint-disable-next-line no-console
-    console.log("Delete user functionality not implemented yet");
-    toast({
-      title: "Delete User",
-      description: "Delete functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
+    setIsDeleteSelected(true);
+  };
+
+  const handleCancelDeleteUser = () => {
+    setIsDeleteSelected(false);
   };
 
   const handleBackToProfile = () => {
@@ -320,6 +318,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           </form>
         </Flex>
       </Flex>
+      <DeleteUserModal
+        isOpen={isDeleteSelected}
+        userId={userId}
+        handleSecondaryButtonClick={handleCancelDeleteUser}
+      />
     </>
   );
 };

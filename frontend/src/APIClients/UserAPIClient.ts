@@ -61,4 +61,20 @@ const invite = async (email: string): Promise<void> => {
   }
 };
 
-export default { get, create, invite };
+const deleteUser = async (userId: string): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const url = userId ? `/users?userId=${userId}` : "/users";
+
+  try {
+    await baseAPIClient.delete(url, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to delete user '${error}'`);
+  }
+};
+
+export default { get, create, invite, deleteUser };
