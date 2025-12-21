@@ -1,9 +1,9 @@
 import React, { FC, useContext } from "react";
-import PopupModal from "../common/PopupModal";
-import UserAPIClient from "../../APIClients/UserAPIClient";
 import { useToast } from "@chakra-ui/react";
-import AuthContext from "../../contexts/AuthContext";
-import AUTHENTICATED_USER_KEY from "../../constants/AuthConstants";
+import PopupModal from "../../../components/common/PopupModal";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
+import AuthContext from "../../../contexts/AuthContext";
+import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 interface DeleteUserModalProps {
   isOpen: boolean; // Whether the modal should be visible
@@ -50,14 +50,12 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
   return (
     <PopupModal
       open={isOpen}
-      title={"Delete User?"}
-      message={
-        "Are you sure you want to delete this user? This process cannot be undone."
-      }
-      primaryButtonText={"Delete"}
+      title="Delete User?"
+      message="Are you sure you want to delete this user? This process cannot be undone."
+      primaryButtonText="Delete"
       onPrimaryClick={handlePrimaryButtonClick}
-      primaryButtonColor={"red"}
-      secondaryButtonText={"Cancel"}
+      primaryButtonColor="red"
+      secondaryButtonText="Cancel"
       onSecondaryClick={handleSecondaryButtonClick}
     />
   );
