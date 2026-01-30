@@ -1,6 +1,8 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useDisclosure } from "@chakra-ui/react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import TaskManagementTable from "../components/TaskManagementTable";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import { TableWrapper } from "../../../components/common/table";
 import { type Task } from "../../../types/TaskTypes";
 import Button from "../../../components/common/Button";
@@ -12,6 +14,13 @@ const TaskManagementPage = (): React.ReactElement => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    onOpen();
+  };
 
   const handleClearFilters = () => {
     setFilters({});
@@ -96,7 +105,15 @@ const TaskManagementPage = (): React.ReactElement => {
       <TaskManagementTable
         tasks={filteredTasks}
         clearFilters={handleClearFilters}
+        onTaskClick={handleTaskClick}
       />
+      {selectedTask && (
+        <TaskDetailsModal
+          isOpen={isOpen}
+          onClose={onClose}
+          taskTemplateId={selectedTask.id}
+        />
+      )}
     </TableWrapper>
   );
 };

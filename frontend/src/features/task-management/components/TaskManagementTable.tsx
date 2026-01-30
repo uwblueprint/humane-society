@@ -7,11 +7,13 @@ import TaskManagementTableSection from "./TaskManagementTableSection";
 interface TaskManagementTableProps {
   tasks: Task[];
   clearFilters: () => void;
+  onTaskClick: (task: Task) => void;
 }
 
 const TaskManagementTable = ({
   tasks,
   clearFilters,
+  onTaskClick,
 }: TaskManagementTableProps): React.ReactElement => {
   return (
     <Flex width="100%" overflowX="auto">
@@ -48,7 +50,7 @@ const TaskManagementTable = ({
             </Tr>
           </Tbody>
         ) : (
-          <TaskManagementTableSection tasks={tasks} />
+          <TaskManagementTableSection tasks={tasks} onTaskClick={onTaskClick} />
         )}
       </Table>
     </Flex>
