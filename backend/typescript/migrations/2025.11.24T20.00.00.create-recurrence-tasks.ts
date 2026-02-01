@@ -1,6 +1,7 @@
 import { DataType } from "sequelize-typescript";
 
 import { Migration } from "../umzug";
+import { Cadence, Days } from "../types";
 
 const TABLE_NAME = "recurrence_tasks";
 
@@ -20,14 +21,12 @@ export const up: Migration = async ({ context: sequelize }) => {
     },
 
     days: {
-      type: DataType.ARRAY(
-        DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-      ),
+      type: DataType.ARRAY(DataType.ENUM(...Object.values(Days))),
       allowNull: true,
     },
 
     cadence: {
-      type: DataType.ENUM("Weekly", "Biweekly", "Monthly", "Annually"),
+      type: DataType.ENUM(...Object.values(Cadence)),
       allowNull: false,
     },
 
@@ -44,13 +43,11 @@ export const up: Migration = async ({ context: sequelize }) => {
     created_at: {
       type: DataType.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal("NOW()"),
     },
 
     updated_at: {
       type: DataType.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal("NOW()"),
+      allowNull: true,
     },
   });
 };
