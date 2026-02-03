@@ -1,10 +1,10 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
-import React from "react";
 import { Flex } from "@chakra-ui/react";
+import React from "react";
 import NavBar from "../../../components/common/navbar/NavBar";
+import { PetStatus, SexEnum } from "../../../types/PetTypes";
+import { ColorLevel } from "../../../types/TaskTypes";
 import PetProfileSidebar from "../components/PetProfileSidebar";
-import { ColorLevel, TaskStatus } from "../../../types/TaskTypes";
-import { SexEnum } from "../../../types/PetTypes";
 
 const PetProfilePage = (): React.ReactElement => {
   // TODO: Connect endpoint
@@ -14,18 +14,18 @@ const PetProfilePage = (): React.ReactElement => {
   const sampleProp = {
     id: 1,
     name: "Benji",
-    status: TaskStatus.NEEDS_CARE,
+    status: PetStatus.NEEDS_CARE,
     colourLevel: ColorLevel.YELLOW,
     breed: "Siberian Husky",
-    age: 1,
+    birthday: "2025-07-27",
     weightKg: 25.5,
     spayedNeutered: true,
     sex: SexEnum.MALE,
-    avatarUrl: "/images/dog2.png",
+    photo: "/images/dog2.png",
     petCare: {
-      safety: "safety info",
-      management: "management info",
-      medical: "medical",
+      safetyInfo: "safety info",
+      managementInfo: "management info",
+      medicalInfo: "medical",
     },
   };
 

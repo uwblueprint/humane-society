@@ -131,6 +131,8 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       lastName: req.body.lastName,
       email: req.body.email,
       role: req.body.role,
+      colorLevel: req.body.colorLevel,
+      animalTags: req.body.animalTags,
       canSeeAllLogs: req.body.canSeeAllLogs ?? null,
       canAssignUsersToTasks: req.body.canAssignUsersToTasks ?? null,
       phoneNumber: req.body.phoneNumber ?? null,

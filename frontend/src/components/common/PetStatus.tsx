@@ -1,15 +1,15 @@
+import { Box, Flex, Text } from "@chakra-ui/react";
 import React from "react";
-import { Text, Box, Flex } from "@chakra-ui/react";
-import { TaskStatus } from "../../types/TaskTypes";
+import { PetStatus as PetStatusEnum } from "../../types/PetTypes";
 
-const statusColor: Record<TaskStatus, string> = {
-  [TaskStatus.NEEDS_CARE]: "red.400",
-  [TaskStatus.DOES_NOT_NEED_CARE]: "gray.500",
-  [TaskStatus.ASSIGNED]: "blue.500",
+const statusColor: Record<PetStatusEnum, string> = {
+  [PetStatusEnum.NEEDS_CARE]: "red.400",
+  [PetStatusEnum.DOES_NOT_NEED_CARE]: "gray.500",
+  [PetStatusEnum.OCCUPIED]: "blue.500",
 };
 
 export interface PetStatusProps {
-  status: TaskStatus;
+  status: PetStatusEnum;
 }
 
 const PetStatus = ({ status }: PetStatusProps): React.ReactElement => (

@@ -40,6 +40,7 @@ services:
     environment:
       - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
       - FIREBASE_PROJECT_ID=uw-blueprint-starter-code
+      - NODE_ENV=${NODE_ENV}
   firebase-emulator:
     container_name: humane_society_firebase_emulator
     image: node:18-alpine

@@ -1,4 +1,10 @@
-import { PetStatus, Sex, AnimalTag } from "../../types";
+import {
+  AnimalTag,
+  ColorLevel,
+  PetStatus,
+  Sex,
+  TaskCategory,
+} from "../../types";
 
 export interface PetRequestDTO {
   animalTag: AnimalTag;
@@ -38,6 +44,26 @@ export interface PetResponseDTO {
   };
 }
 
+export interface PetRawDTO extends Omit<PetResponseDTO, "age"> {
+  birthday?: string;
+}
+
+export interface PetListItemDTO {
+  id: number;
+  name: string;
+  color: ColorLevel;
+  taskCategories: TaskCategory[];
+  status: PetStatus;
+  lastCaredFor: string | null; // will hold a time, 'One or more days ago' or null
+  allTasksAssigned: boolean | null; // null if there are no tasks
+  isAssignedToMe: boolean;
+  photo?: string;
+  animalTag: AnimalTag;
+}
+
+// Dictionary that maps section names to arrays of pets
+export type PetListSections = Record<string, PetListItemDTO[]>;
+
 export interface PetQuery {
   animalTag?: string;
   name?: string;
@@ -48,6 +74,21 @@ export interface PetQuery {
   weight?: string;
   neutered?: string;
   sex?: string;
+}
+
+// result of a join between pet and task table
+export interface PetTask {
+  pet_id: number;
+  name: string;
+  status: PetStatus;
+  photo?: string;
+  color_level: number;
+  animal_tag?: AnimalTag;
+  user_id?: number;
+  task_template_id?: number;
+  scheduled_start_time: Date;
+  start_time?: Date;
+  end_time?: Date;
 }
 
 export interface IPetService {
@@ -62,7 +103,7 @@ export interface IPetService {
    * @returns requested Pet
    * @throws Error if retrieval fails
    */
-  getPet(id: string): Promise<PetResponseDTO>;
+  getPet(id: string): Promise<PetRawDTO>;
 
   /**
    * retrieve all Pets
@@ -104,4 +145,12 @@ export interface IPetService {
    * @throws Error if retrieval fails
    */
   // filterPets(query: PetQuery): Promise<PetResponseDTO[]>;
+
+  /**
+   * get pets for pet list
+   * @param userId
+   * @returns dictionary of section name to PetList arrays
+   * @throws Error if retrieval fails
+   */
+  getPetList(userId: number): Promise<PetListSections>;
 }

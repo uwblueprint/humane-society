@@ -1,6 +1,7 @@
 import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
 import { FilterSection } from "../types/FilterTypes";
-import { AnimalTag, TaskCategory, ColorLevel } from "../types/TaskTypes";
+import { PetStatus } from "../types/PetTypes";
+import { AnimalTag, ColorLevel, TaskCategory } from "../types/TaskTypes";
 
 const filterConfig: Record<string, FilterSection[]> = {
   petListAdmin: [
@@ -10,20 +11,19 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategories",
-      options: Object.values(TaskCategory),
+      name: "Colour Level",
+      value: "color",
+      options: Object.values(ColorLevel),
     },
     {
       name: "Status",
       value: "status",
-      // TODO: how to handle dynamically
-      options: ["Needs Care", "Does Not Need Care"],
+      options: Object.values(PetStatus),
     },
     {
-      name: "Colour Level",
-      value: "skill",
-      options: Object.values(ColorLevel),
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory),
     },
   ],
   petListVolunteer: [
@@ -33,9 +33,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategories",
-      options: Object.values(TaskCategory),
+      name: "Colour Level",
+      value: "color",
+      options: Object.values(ColorLevel),
     },
     {
       name: "Status",
@@ -44,9 +44,9 @@ const filterConfig: Record<string, FilterSection[]> = {
       options: ["Needs Care", "Assigned to You"],
     },
     {
-      name: "Colour Level",
-      value: "skill",
-      options: Object.values(ColorLevel),
+      name: "Task Category",
+      value: "taskCategories",
+      options: Object.values(TaskCategory),
     },
   ],
   userManagement: [
@@ -75,6 +75,18 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Task Category",
       value: "category",
+      options: Object.values(TaskCategory),
+    },
+  ],
+  interactionLog: [
+    {
+      name: "Animal Tag",
+      value: "animalTag",
+      options: Object.values(AnimalTag),
+    },
+    {
+      name: "Task Category",
+      value: "taskCategory",
       options: Object.values(TaskCategory),
     },
   ],

@@ -10,7 +10,7 @@ import {
   HOME_PAGE,
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
-import getCurrentUserRole from "../../../utils/CommonUtils";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
 import {
   LogIcon,
   ProfileIcon,
