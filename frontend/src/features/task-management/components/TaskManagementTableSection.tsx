@@ -5,15 +5,22 @@ import { Task } from "../../../types/TaskTypes";
 
 interface TaskManagementTableSectionProps {
   tasks: Task[];
+  onRowClick?: (taskId: number) => void;
 }
 
 const TaskManagementTableSection = ({
   tasks,
+  onRowClick,
 }: TaskManagementTableSectionProps): React.ReactElement => {
   return (
     <Tbody>
       {tasks.map((task) => (
-        <Tr key={task.id}>
+        <Tr
+          key={task.id}
+          onClick={() => onRowClick?.(task.id)}
+          cursor={onRowClick ? "pointer" : "default"}
+          _hover={onRowClick ? {bg: "gray.50" }: undefined}
+        >
           <Td width="20%" py="1rem" px="2.5rem">
             <Text textStyle="body" m={0} noOfLines={1}>
               {task.name}
