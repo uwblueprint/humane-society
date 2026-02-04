@@ -91,7 +91,7 @@ const TaskManagementPage = (): React.ReactElement => {
 
   if (loading) {
     return (
-      <Flex justify="center" align="center" height="50vh" width="100%">
+      <Flex justify="center" align="center" height="31.25rem" width="100%">
         <Spinner size="xl" color="blue.500" />
       </Flex>
     );
