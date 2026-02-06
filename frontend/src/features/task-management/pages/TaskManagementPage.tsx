@@ -8,6 +8,7 @@ import { type Task } from "../../../types/TaskTypes";
 import Button from "../../../components/common/Button";
 import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import Pagination from "../../../components/common/Pagination";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();
@@ -16,6 +17,8 @@ const TaskManagementPage = (): React.ReactElement => {
   const [search, setSearch] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const numTasksPerPage = 10;
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
@@ -63,6 +66,8 @@ const TaskManagementPage = (): React.ReactElement => {
       );
   }, [filters, search, tasks]);
 
+  const filteredTasksLength = filteredTasks.length;
+
   const getTasks = async () => {
     try {
       const fetchedTasks = await TaskTemplateAPIClient.getAllTaskTemplates();
@@ -101,9 +106,20 @@ const TaskManagementPage = (): React.ReactElement => {
           </Button>
         ),
       }}
+      bottomContent={
+        <Pagination
+          value={page}
+          onChange={(newPage) => setPage(newPage)}
+          numberOfItems={filteredTasksLength}
+          itemsPerPage={numTasksPerPage}
+        />
+      }
     >
       <TaskManagementTable
-        tasks={filteredTasks}
+        tasks={filteredTasks.slice(
+          (page - 1) * numTasksPerPage,
+          page * numTasksPerPage,
+        )}
         clearFilters={handleClearFilters}
         onTaskClick={handleTaskClick}
       />
