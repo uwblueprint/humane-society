@@ -41,6 +41,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showQuitModal, setShowQuitModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     control,
@@ -74,13 +75,12 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   );
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchTask = async () => {
       if (!taskTemplateId) return;
 
       try {
-        const taskTemplateData = await TaskTemplateAPIClient.getTaskTemplate(
-          taskTemplateId,
-        );
+        const taskTemplateData =
+          await TaskTemplateAPIClient.getTaskTemplate(taskTemplateId);
 
         // Prepopulate form with task template data
         reset({
@@ -91,7 +91,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to fetch user data",
+          description: "Failed to fetch task",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -99,7 +99,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       }
     };
 
-    fetchUser();
+    fetchTask();
   }, [reset, taskTemplateId, toast]);
 
   const handleBackClick = () => {
@@ -119,15 +119,37 @@ const EditTaskTemplatePage = (): React.ReactElement => {
     setShowQuitModal(false);
   };
 
-  const handleDeleteTaskTemplate = () => {
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleOpenDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteTaskTemplate = async () => {
     // TODO: Open delete task template modal and remove toast
-    toast({
-      title: "Delete User",
-      description: "Delete functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
+
+    try {
+      await TaskTemplateAPIClient.deleteTaskTemplate(taskTemplateId);
+
+      toast({
+        title: "Success",
+        description: "Successfully deleted task",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      history.push(TASK_MANAGEMENT_PAGE);
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to edit task template",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const onSubmit = async (data: TaskTemplateFormData) => {
@@ -140,6 +162,14 @@ const EditTaskTemplatePage = (): React.ReactElement => {
         taskName: data.taskName,
         category: data.taskCategory as TaskCategory,
         instructions: data.taskInstructions,
+      });
+
+      toast({
+        title: "Success",
+        description: "Successfully updated task",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
       });
 
       // Navigate back to task management page
@@ -272,10 +302,10 @@ const EditTaskTemplatePage = (): React.ReactElement => {
               <Button
                 variant="red"
                 size="medium"
-                onClick={handleDeleteTaskTemplate}
+                onClick={handleOpenDeleteModal}
                 type="button"
               >
-                Delete User
+                Delete Task
               </Button>
               <Button
                 type="submit"
@@ -325,6 +355,54 @@ const EditTaskTemplatePage = (): React.ReactElement => {
             </Button>
             <Button variant="red" size="medium" onClick={handleQuitEditing}>
               Leave
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Delete Task Template Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        isCentered
+        closeOnOverlayClick={false}
+      >
+        <ModalOverlay bg="blackAlpha.500" zIndex={1400} />
+        <ModalContent
+          maxWidth="400px"
+          mx="1rem"
+          zIndex={1500}
+          bg="white"
+          borderRadius="8px"
+          boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
+        >
+          <ModalHeader
+            fontSize="20px"
+            fontWeight="600"
+            pb="1rem"
+            color="gray.800"
+          >
+            Delete Template?
+          </ModalHeader>
+          <ModalBody pb="1.5rem">
+            <Text fontSize="16px" color="gray.600">
+              You won't be able to undo this.
+            </Text>
+          </ModalBody>
+          <ModalFooter gap="1rem" pt="0">
+            <Button
+              variant="white"
+              size="medium"
+              onClick={handleDeleteTaskTemplate}
+            >
+              Confirm
+            </Button>
+            <Button
+              variant="red"
+              size="medium"
+              onClick={handleCloseDeleteModal}
+            >
+              Cancel
             </Button>
           </ModalFooter>
         </ModalContent>
