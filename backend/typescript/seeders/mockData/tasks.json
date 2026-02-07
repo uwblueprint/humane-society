@@ -1,0 +1,33 @@
+[
+  {
+    "userLabel": "volunteer_001",
+    "petName": "Buddy",
+    "templateName": "Morning Dog Walk",
+    "notes": "seed_Morning Dog Walk_Buddy"
+  },
+  {
+    "userLabel": "staff_001",
+    "petName": "Whiskers",
+    "templateName": "Cage Cleaning",
+    "notes": "seed_Cage Cleaning_Whiskers"
+  },
+  {
+    "userLabel": "behaviourist_001",
+    "petName": "Bella",
+    "templateName": "Basic Training Session",
+    "notes": "seed_Basic Training Session_Bella"
+  },
+  {
+    "userLabel": null,
+    "petName": "Polly",
+    "templateName": "Interactive Play Time",
+    "notes": "seed_Interactive Play Time_Polly"
+  },
+  {
+    "userLabel": "volunteer_002",
+    "petName": "Snowball",
+    "templateName": "Socialization Activity",
+    "notes": "seed_Socialization Activity_Snowball"
+  }
+]
+
