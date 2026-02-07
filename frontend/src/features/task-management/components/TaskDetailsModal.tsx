@@ -13,9 +13,11 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import Button from "../../../components/common/Button";
 import TaskCategoryBadge from "../../../components/common/TaskCategoryBadge";
+import { EDIT_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
 import { Task } from "../../../types/TaskTypes";
 
 interface TaskDetailsModelsProps {
@@ -30,6 +32,7 @@ const TaskDetailsModal = ({
   onClose,
 }: TaskDetailsModelsProps): React.ReactElement => {
   const toast = useToast();
+  const history = useHistory();
   const [taskTemplateData, setTaskTemplateData] = useState<Task | null>(null);
 
   useEffect(() => {
@@ -118,13 +121,7 @@ const TaskDetailsModal = ({
               variant="blue-outline"
               width="100%"
               onClick={() => {
-                toast({
-                  title: "Edit Task",
-                  description: "Edit task functionality not implemented yet",
-                  status: "info",
-                  duration: 3000,
-                  isClosable: true,
-                });
+                history.push(`${EDIT_TASK_TEMPLATE_PAGE}/${taskTemplateId}`);
               }}
             >
               Edit Task

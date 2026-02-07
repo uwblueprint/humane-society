@@ -74,7 +74,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   );
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchTaskTemplate = async () => {
       if (!taskTemplateId) return;
 
       try {
@@ -91,7 +91,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to fetch user data",
+          description: "Failed to fetch task template data",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -99,7 +99,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       }
     };
 
-    fetchUser();
+    fetchTaskTemplate();
   }, [reset, taskTemplateId, toast]);
 
   const handleBackClick = () => {
@@ -122,7 +122,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   const handleDeleteTaskTemplate = () => {
     // TODO: Open delete task template modal and remove toast
     toast({
-      title: "Delete User",
+      title: "Delete Task Template",
       description: "Delete functionality not implemented yet",
       status: "info",
       duration: 3000,
@@ -275,7 +275,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
                 onClick={handleDeleteTaskTemplate}
                 type="button"
               >
-                Delete User
+                Delete Task Template
               </Button>
               <Button
                 type="submit"
