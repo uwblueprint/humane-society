@@ -24,12 +24,8 @@ import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-
-interface TaskTemplateForm {
-  taskName: string;
-  taskCategory: TaskCategory | null;
-  taskInstructions: string;
-}
+import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import { type CreateTaskDTO } from "../../../types/TaskTypes";
 
 interface FormErrors {
   taskName?: string;
@@ -39,10 +35,10 @@ interface FormErrors {
 
 const AddTaskTemplatePage = (): React.ReactElement => {
   const history = useHistory();
-  const [formData, setFormData] = useState<TaskTemplateForm>({
+  const [formData, setFormData] = useState<CreateTaskDTO>({
     taskName: "",
-    taskCategory: null,
-    taskInstructions: "",
+    category: TaskCategory.MISC,
+    instructions: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +89,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
   };
 
   const handleCategoryChange = (category: TaskCategory) => {
-    setFormData({ ...formData, taskCategory: category });
+    setFormData({ ...formData, category });
     setHasChanges(true);
     if (errors.taskCategory) {
       setErrors({ ...errors, taskCategory: undefined });
@@ -103,7 +99,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
   const handleInstructionsChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    setFormData({ ...formData, taskInstructions: event.target.value });
+    setFormData({ ...formData, instructions: event.target.value });
     setHasChanges(true);
     if (errors.taskInstructions) {
       setErrors({ ...errors, taskInstructions: undefined });
@@ -117,11 +113,11 @@ const AddTaskTemplatePage = (): React.ReactElement => {
       newErrors.taskName = "Field is required.";
     }
 
-    if (!formData.taskCategory) {
+    if (!formData.category) {
       newErrors.taskCategory = "Please select an option from the dropdown.";
     }
 
-    if (!formData.taskInstructions.trim()) {
+    if (!formData.instructions?.trim()) {
       newErrors.taskInstructions = "Information must not exceed 10,000 words.";
     }
 
@@ -144,12 +140,18 @@ const AddTaskTemplatePage = (): React.ReactElement => {
       /* eslint-disable-next-line no-console */
       console.log({
         taskName: formData.taskName,
-        taskCategory: formData.taskCategory,
-        taskInstructions: formData.taskInstructions,
+        taskCategory: formData.category,
+        taskInstructions: formData.instructions,
       });
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Call the API endpoint
+      try {
+        await TaskTemplateAPIClient.createTaskTemplate(formData);
+      } catch (error) {
+        // TODO: deprecate console use in frontend
+        /* eslint-disable-next-line no-console */
+        console.error("Could not post task template: ", error);
+      }
 
       // Navigate back to task management page
       history.push(TASK_MANAGEMENT_PAGE);
@@ -217,7 +219,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
               <SingleSelect
                 label="Task Category"
                 values={taskCategories}
-                selected={formData.taskCategory}
+                selected={formData.category}
                 onSelect={handleCategoryChange}
                 placeholder="Click for options"
                 icons={taskCategoryIconsArray}
@@ -233,7 +235,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
 
             <TextArea
               label="Instructions"
-              value={formData.taskInstructions}
+              value={formData.instructions || ""}
               onChange={handleInstructionsChange}
               placeholder="Write task instructions here"
               error={errors.taskInstructions}
