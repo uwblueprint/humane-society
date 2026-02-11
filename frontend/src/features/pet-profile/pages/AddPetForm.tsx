@@ -13,7 +13,6 @@ import {
 import { ChevronRightIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useHistory, useParams } from "react-router-dom";
 import { PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
@@ -85,7 +84,6 @@ const validateDate = (month: string, date: string, year: string) => {
 };
 
 const AddPetForm = (): React.ReactElement => {
-  const history = useHistory();
   const toast = useToast();
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -115,7 +113,6 @@ const AddPetForm = (): React.ReactElement => {
     handleSubmit,
     setValue,
     getValues,
-    reset,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -208,11 +205,13 @@ const AddPetForm = (): React.ReactElement => {
     if (!files || files.length === 0) return;
     const file = files[0];
     const reader = new FileReader();
+    setIsUploading(true);
     reader.onloadend = () => {
       setLocalProfilePhoto(reader.result as string);
       setValue("profilePhoto", reader.result as string, {
         shouldValidate: true,
       });
+      setIsUploading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -675,7 +674,7 @@ const AddPetForm = (): React.ReactElement => {
           // add implementation here
         }}
         handleSecondaryButtonClick={closeAddPetModal}
-      ></AddPetModal>
+      />
     </>
   );
 };

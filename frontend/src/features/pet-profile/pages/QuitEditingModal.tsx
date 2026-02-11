@@ -1,6 +1,6 @@
-import { FC } from "react";
-import PopupModal from "../../../components/common/PopupModal";
+import React, { FC } from "react";
 import { useHistory } from "react-router-dom";
+import PopupModal from "../../../components/common/PopupModal";
 
 interface QuitEditingModalProps {
   isOpen: boolean; // Whether the modal should be visible
