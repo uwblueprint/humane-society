@@ -4,10 +4,8 @@ import auth from "../firebase";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { AuthenticatedUser, PasswordSetResponse } from "../types/AuthTypes";
 import baseAPIClient from "./BaseAPIClient";
-import {
-  getLocalStorageObjProperty,
-  setLocalStorageObjProperty,
-} from "../utils/LocalStorageUtils";
+import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
+import { refreshAccessToken } from "../utils/AuthUtils";
 
 const login = async (
   email: string,
@@ -107,23 +105,8 @@ const sendPasswordResetEmail = async (
   }
 };
 
-// for testing only, refresh does not need to be exposed in the client
 const refresh = async (): Promise<boolean> => {
-  try {
-    const { data } = await baseAPIClient.post(
-      "/auth/refresh",
-      {},
-      { withCredentials: true },
-    );
-    setLocalStorageObjProperty(
-      AUTHENTICATED_USER_KEY,
-      "accessToken",
-      data.accessToken,
-    );
-    return true;
-  } catch (error) {
-    return false;
-  }
+  return refreshAccessToken();
 };
 
 const getEmailOfCurrentUser = async (): Promise<string> => {

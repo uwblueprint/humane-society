@@ -107,6 +107,7 @@ class AuthService implements IAuthService {
 
   async generateSignInLink(email: string): Promise<string> {
     const actionCodeSettings = {
+      // Why this localhost lmao
       url: `http://localhost:3000/login/?email=${email}`,
       handleCodeInApp: true,
     };

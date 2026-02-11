@@ -39,3 +39,9 @@ export const setLocalStorageObjProperty = <O extends Record<string, string>>(
   object[property] = value;
   localStorage.setItem(localStorageKey, JSON.stringify(object));
 };
+
+// Clear a specific key from localStorage
+// TODO: add a try-catch with a logger
+export const clearLocalStorageKey = (localStorageKey: string): void => {
+  localStorage.removeItem(localStorageKey);
+};
