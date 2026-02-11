@@ -124,7 +124,11 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
               flex="1"
               gap="0.75rem"
             >
-              <Text style={textStyles.caption} color={colors.gray[500]} margin="0">
+              <Text
+                style={textStyles.caption}
+                color={colors.gray[500]}
+                margin="0"
+              >
                 {DAYS[index]}
               </Text>
               <Button
