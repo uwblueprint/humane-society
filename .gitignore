@@ -9,3 +9,5 @@
 .vscode
 **/*.cache
 **/*.egg-info
+**/package-lock.json
+**/seed-auth-map.json

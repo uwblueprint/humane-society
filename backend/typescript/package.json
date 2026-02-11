@@ -9,7 +9,12 @@
     "lint": "eslint . --ext .ts,.js",
     "fix": "eslint . --ext .ts,.js --fix",
     "postinstall": "tsc",
-    "sequelize": "ts-node ./node_modules/.bin/sequelize-cli"
+    "sequelize": "ts-node ./node_modules/.bin/sequelize-cli",
+    "seed": "yarn sequelize db:seed:all",
+    "start:ts": "ts-node -r dotenv/config server.ts",
+    "migrate": "yarn sequelize db:migrate",
+    "seed:undo": "yarn sequelize db:seed:undo:all",
+    "seed:auth": "ts-node -r dotenv/config scripts/seed-auth-users.ts"
   },
   "keywords": [],
   "author": "",
