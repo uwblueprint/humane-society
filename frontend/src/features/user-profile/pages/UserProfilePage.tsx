@@ -5,11 +5,13 @@ import NavBar from "../../../components/common/navbar/NavBar";
 import { User } from "../../../types/UserTypes";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import UserProfileSidebar from "../components/UserProfileSidebar";
+import CalendarDateSelector from "../components/CalendarDateSelector";
 
 const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
   const userId = Number(params.id);
   const [userData, setUserData] = useState<User | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const history = useHistory();
 
   useEffect(() => {
@@ -48,7 +50,18 @@ const ProfilePage = (): React.ReactElement => {
             colorLevel={userData.colorLevel}
             animalTags={userData.animalTags}
           />
-          <Flex backgroundColor="gray.100" flex="1" paddingTop="8.5rem" />
+          <Flex
+            backgroundColor="gray.100"
+            flex="1"
+            paddingTop="8.5rem"
+            paddingInline="2rem"
+            direction="column"
+          >
+            <CalendarDateSelector
+              selectedDate={selectedDate}
+              onChange={setSelectedDate}
+            />
+          </Flex>
         </Flex>
       )}
     </>
