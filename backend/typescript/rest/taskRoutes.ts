@@ -8,6 +8,7 @@ import {
   taskStartTimePatchValidator,
   taskEndTimePatchValidator,
   taskNotesPatchValidator,
+  taskGetByDateValidator,
 } from "../middlewares/validators/taskValidators";
 import TaskService from "../services/implementations/taskService";
 import {
@@ -32,6 +33,32 @@ taskRouter.get("/", async (req, res) => {
     await sendResponseByMimeType(res, 500, contentType, [
       { error: getErrorMessage(e) },
     ]);
+  }
+});
+
+/* Get Tasks for a specific date */
+taskRouter.get("/date", taskGetByDateValidator, async (req, res) => {
+  const { date, userId, petId } = req.query;
+
+  try {
+    const filters: { userId?: number; petId?: number } = {};
+
+    if (userId !== undefined && userId !== null) {
+      filters.userId = Number(userId);
+    }
+
+    if (petId !== undefined && petId !== null) {
+      filters.petId = Number(petId);
+    }
+
+    const tasks = await taskService.getTasksForDate(
+      date as string,
+      Object.keys(filters).length > 0 ? filters : undefined,
+    );
+
+    res.status(200).json(tasks);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
   }
 });
 

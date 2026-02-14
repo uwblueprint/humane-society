@@ -31,6 +31,10 @@ export interface TaskNotesPatchDTO {
   notes: string;
 }
 
+export type TaskResponseDTOForDate = TaskResponseDTO & {
+  isRecurring: boolean;
+};
+
 export interface ITaskService {
   /**
    * retrieve the Task with the given id
@@ -148,4 +152,16 @@ export interface ITaskService {
    * @throws Error if deletion fails
    */
   deleteTask(id: string): Promise<string>;
+
+  /**
+   * retrieve all tasks for a specific date, combining one-time and recurring instances
+   * @param date date in YYYY-MM-DD format
+   * @param filters optional userId and/or petId filters
+   * @returns array of tasks for that date with isRecurring flag
+   * @throws Error if retrieval fails
+   */
+  getTasksForDate(
+    date: string,
+    filters?: { userId?: number; petId?: number },
+  ): Promise<TaskResponseDTOForDate[]>;
 }

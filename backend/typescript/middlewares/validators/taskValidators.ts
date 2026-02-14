@@ -205,3 +205,44 @@ export const taskNotesPatchValidator = async (
 
   return next();
 };
+
+export const taskGetByDateValidator = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { query } = req;
+
+  if (!query.date || typeof query.date !== "string") {
+    return res
+      .status(400)
+      .send("date query parameter is required and must be a string.");
+  }
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(query.date)) {
+    return res
+      .status(400)
+      .send("date must be in YYYY-MM-DD format (e.g., 2025-02-15).");
+  }
+
+  if (!validateDate(query.date)) {
+    return res.status(400).send("date is not a valid calendar date.");
+  }
+
+  if (query.userId !== undefined && query.userId !== null) {
+    const userId = Number(query.userId);
+    if (Number.isNaN(userId) || !Number.isInteger(userId)) {
+      return res.status(400).send("userId must be an integer.");
+    }
+  }
+
+  if (query.petId !== undefined && query.petId !== null) {
+    const petId = Number(query.petId);
+    if (Number.isNaN(petId) || !Number.isInteger(petId)) {
+      return res.status(400).send("petId must be an integer.");
+    }
+  }
+
+  return next();
+};
