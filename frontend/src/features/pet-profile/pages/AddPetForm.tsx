@@ -316,7 +316,7 @@ const AddPetForm = (): React.ReactElement => {
                   >
                     <ProfilePhoto
                       size="large"
-                      type="user"
+                      type="pet"
                       image={localProfilePhoto}
                     />
                     <Flex

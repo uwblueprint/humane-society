@@ -412,7 +412,7 @@ const EditPetProfilePage = (): React.ReactElement => {
                   >
                     <ProfilePhoto
                       size="large"
-                      type="user"
+                      type="pet"
                       image={localProfilePhoto}
                     />
                     <Flex
