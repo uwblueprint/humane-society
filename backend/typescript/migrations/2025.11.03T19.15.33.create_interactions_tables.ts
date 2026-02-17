@@ -13,15 +13,46 @@ export const up: MigrationFn = async (params: any) => {
 
   await queryInterface.createTable("interactions", {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    actor_id: { type: DataTypes.INTEGER, allowNull: false },
-    target_user_id: { type: DataTypes.INTEGER },
-    target_pet_id: { type: DataTypes.INTEGER },
-    target_task_id: { type: DataTypes.INTEGER },
-    target_task_template_id: { type: DataTypes.INTEGER },
-    interaction_type_id: { type: DataTypes.INTEGER, allowNull: false },
-    metadata: { type: DataTypes.ARRAY(DataTypes.STRING) },
-    short_description: { type: DataTypes.STRING },
-    long_description: { type: DataTypes.STRING },
+    actor_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: "users", key: "id" },
+      onUpdate: "CASCADE",
+    },
+    target_user_id: {
+      type: DataTypes.INTEGER,
+      references: { model: "users", key: "id" },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    target_pet_id: {
+      type: DataTypes.INTEGER,
+      references: { model: "pets", key: "id" },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    target_task_id: {
+      type: DataTypes.INTEGER,
+      references: { model: "tasks", key: "id" },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    target_task_template_id: {
+      type: DataTypes.INTEGER,
+      references: { model: "task_templates", key: "id" },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    interaction_type_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: "interaction_types", key: "id" },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    metadata: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false },
+    short_description: { type: DataTypes.STRING, allowNull: false },
+    long_description: { type: DataTypes.STRING, allowNull: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   });
 };
