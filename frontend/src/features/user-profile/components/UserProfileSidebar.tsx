@@ -5,7 +5,6 @@ import {
   HStack,
   Icon,
   Image,
-  Spacer,
   Text,
   VStack,
   Link as ChakraLink,
@@ -81,13 +80,19 @@ function UserProfileSidebar({
       alignItems="start"
       gap="2.4rem"
     >
-      <HStack gap="0.6rem" minWidth="max-content" width="100%">
+      <HStack gap="0.6rem" width="100%">
         <ProfilePhoto size="small" type="user" image={profilePhoto} />
-        <Text margin="0" fontWeight="600" textStyle={{ base: "h2Mobile" }}>
+        <Text
+          margin="0"
+          fontWeight="600"
+          textStyle={{ base: "h2Mobile" }}
+          flex="1"
+          minWidth="0"
+          isTruncated
+        >
           {firstName} {lastName}
         </Text>
-        <Spacer />
-        <ChakraLink as={Link} to={editUserProfilePath}>
+        <ChakraLink as={Link} to={editUserProfilePath} flexShrink="0">
           <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
         </ChakraLink>
       </HStack>
