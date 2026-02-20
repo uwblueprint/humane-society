@@ -125,6 +125,8 @@ const InviteUserPage = (): React.ReactElement => {
         phoneNumber: formData.phoneNumber,
         canSeeAllLogs: false,
         canAssignUsersToTasks: false,
+        animalTags: animalTags,
+        colorLevel: colorLevelNumber,
       });
 
       // Step 2: Update the user with colorLevel and animalTags
