@@ -5,7 +5,6 @@ import {
   HStack,
   Image,
   Link,
-  Spacer,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -111,20 +110,27 @@ function PetProfileSidebar({
       gap="2.4rem"
     >
       <VStack gap="0.6rem" alignItems="start" width="100%">
-        <HStack gap="0.6rem" minWidth="max-content" width="100%">
+        <HStack gap="0.6rem" width="100%">
           <Image
             src={photo ?? DefaultPetProfilePhoto}
             alt={name}
             fit="cover"
             borderRadius="full"
             boxSize="2.4rem"
+            flexShrink="0"
           />
-          <Text margin="0" fontWeight="600" textStyle={{ base: "h2Mobile" }}>
+          <Text
+            margin="0"
+            fontWeight="600"
+            textStyle={{ base: "h2Mobile" }}
+            flex="1"
+            minWidth="0"
+            isTruncated
+          >
             {name}
           </Text>
-          <Spacer />
           {isAdminBehaviourist && (
-            <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`}>
+            <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`} flexShrink="0">
               <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
             </Link>
           )}

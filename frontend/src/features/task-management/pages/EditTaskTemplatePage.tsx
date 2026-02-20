@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import DeleteTaskTemplateModal from "../components/DeleteTaskTemplateModal";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
@@ -41,6 +42,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showQuitModal, setShowQuitModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     control,
@@ -74,7 +76,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   );
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchTaskTemplate = async () => {
       if (!taskTemplateId) return;
 
       try {
@@ -91,7 +93,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to fetch user data",
+          description: "Failed to fetch task template data",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -99,7 +101,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       }
     };
 
-    fetchUser();
+    fetchTaskTemplate();
   }, [reset, taskTemplateId, toast]);
 
   const handleBackClick = () => {
@@ -120,14 +122,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   };
 
   const handleDeleteTaskTemplate = () => {
-    // TODO: Open delete task template modal and remove toast
-    toast({
-      title: "Delete User",
-      description: "Delete functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
+    setShowDeleteModal(true);
   };
 
   const onSubmit = async (data: TaskTemplateFormData) => {
@@ -275,7 +270,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
                 onClick={handleDeleteTaskTemplate}
                 type="button"
               >
-                Delete User
+                Delete Task Template
               </Button>
               <Button
                 type="submit"
@@ -329,6 +324,13 @@ const EditTaskTemplatePage = (): React.ReactElement => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <DeleteTaskTemplateModal
+        taskTemplateId={taskTemplateId}
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDeleteSuccess={() => history.push(TASK_MANAGEMENT_PAGE)}
+      />
     </Flex>
   );
 };

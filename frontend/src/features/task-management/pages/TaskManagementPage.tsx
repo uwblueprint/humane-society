@@ -1,15 +1,29 @@
-import React, { useState, useMemo } from "react";
+import { useDisclosure } from "@chakra-ui/react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import TaskManagementTable from "../components/TaskManagementTable";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import { TableWrapper } from "../../../components/common/table";
-import { mockTasks } from "../../../types/TaskTypes";
+import { type Task } from "../../../types/TaskTypes";
 import Button from "../../../components/common/Button";
 import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
+import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import Pagination from "../../../components/common/Pagination";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const numTasksPerPage = 10;
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    onOpen();
+  };
 
   const handleClearFilters = () => {
     setFilters({});
@@ -29,8 +43,16 @@ const TaskManagementPage = (): React.ReactElement => {
   };
 
   const filteredTasks = useMemo(() => {
-    return mockTasks
-      .filter((task) => {
+    const hasActiveFilters = Object.values(filters).some(
+      (vals) => vals && vals.length > 0,
+    );
+    const hasSearch = search.trim() !== "";
+
+    // If no filters and no search, just return everything
+    if (!hasActiveFilters && !hasSearch) return tasks;
+
+    return tasks
+      .filter((task: Task) => {
         return Object.keys(filters).every((key) => {
           const filterVals = filters[key];
           if (!filterVals || filterVals.length === 0) return true;
@@ -38,11 +60,32 @@ const TaskManagementPage = (): React.ReactElement => {
         });
       })
       .filter(
-        (task) =>
+        (task: Task) =>
           task.name.toLowerCase().includes(search.toLowerCase()) ||
-          task.instructions.toLowerCase().includes(search.toLowerCase()),
+          task.instructions?.toLowerCase().includes(search.toLowerCase()),
       );
-  }, [filters, search]);
+  }, [filters, search, tasks]);
+
+  const filteredTasksLength = filteredTasks.length;
+
+  const getTasks = async () => {
+    try {
+      const fetchedTasks = await TaskTemplateAPIClient.getAllTaskTemplates();
+
+      if (fetchedTasks != null) {
+        setTasks(fetchedTasks);
+      }
+    } catch (error) {
+      setTasks([]);
+      // TODO: deprecate console use in frontend
+      /* eslint-disable-next-line no-console */
+      console.error("Could not fetch tasks");
+    }
+  };
+
+  useEffect(() => {
+    getTasks();
+  }, []);
 
   return (
     <TableWrapper
@@ -63,11 +106,30 @@ const TaskManagementPage = (): React.ReactElement => {
           </Button>
         ),
       }}
+      bottomContent={
+        <Pagination
+          value={page}
+          onChange={(newPage) => setPage(newPage)}
+          numberOfItems={filteredTasksLength}
+          itemsPerPage={numTasksPerPage}
+        />
+      }
     >
       <TaskManagementTable
-        tasks={filteredTasks}
+        tasks={filteredTasks.slice(
+          (page - 1) * numTasksPerPage,
+          page * numTasksPerPage,
+        )}
         clearFilters={handleClearFilters}
+        onTaskClick={handleTaskClick}
       />
+      {selectedTask && (
+        <TaskDetailsModal
+          isOpen={isOpen}
+          onClose={onClose}
+          taskTemplateId={selectedTask.id}
+        />
+      )}
     </TableWrapper>
   );
 };

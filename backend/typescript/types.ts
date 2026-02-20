@@ -101,3 +101,20 @@ export type NodemailerConfig = {
     refreshToken: string;
   };
 };
+
+export enum Days {
+  MON = "Mon",
+  TUE = "Tue",
+  WED = "Wed",
+  THU = "Thu",
+  FRI = "Fri",
+  SAT = "Sat",
+  SUN = "Sun",
+}
+
+export enum Cadence {
+  WEEKLY = "Weekly",
+  BIWEEKLY = "Biweekly",
+  MONTHLY = "Monthly",
+  ANNUALLY = "Annually",
+}

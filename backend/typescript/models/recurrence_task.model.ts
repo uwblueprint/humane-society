@@ -8,6 +8,7 @@ import {
   BelongsTo,
 } from "sequelize-typescript";
 import Task from "./task.model";
+import { Cadence, Days } from "../types";
 
 @Table({
   tableName: "recurrence_tasks",
@@ -28,18 +29,16 @@ export default class RecurrenceTask extends Model {
   task!: Task;
 
   @Column({
-    type: DataType.ARRAY(
-      DataType.ENUM("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
-    ),
+    type: DataType.ARRAY(DataType.ENUM(...Object.values(Days))),
     allowNull: true,
   })
-  days?: string[];
+  days?: Days[];
 
   @Column({
-    type: DataType.ENUM("Weekly", "Biweekly", "Monthly", "Annually"),
+    type: DataType.ENUM(...Object.values(Cadence)),
     allowNull: false,
   })
-  cadence!: string;
+  cadence!: Cadence;
 
   @Column({
     type: DataType.DATE,
