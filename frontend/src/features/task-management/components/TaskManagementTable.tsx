@@ -1,30 +1,23 @@
 import React from "react";
-import {
-  Text,
-  Flex,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Td,
-  Tbody,
-  Box,
-} from "@chakra-ui/react";
+import { Text, Flex, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
+import { TableEmptyState } from "../../../components/common/table";
 import { Task } from "../../../types/TaskTypes";
 import TaskManagementTableSection from "./TaskManagementTableSection";
 
 interface TaskManagementTableProps {
   tasks: Task[];
   clearFilters: () => void;
+  onTaskClick: (task: Task) => void;
 }
 
 const TaskManagementTable = ({
   tasks,
   clearFilters,
+  onTaskClick,
 }: TaskManagementTableProps): React.ReactElement => {
   return (
-    <Box width="100%" overflowX="auto">
-      <Table width="100%" minWidth="800px" textAlign="left" layout="fixed">
+    <Flex width="100%" overflowX="auto">
+      <Table width="100%" minWidth="50rem" textAlign="left" layout="fixed">
         <Thead borderBottom="1px solid" borderColor="gray.200">
           <Tr borderTop="1px solid" borderColor="gray.200">
             <Th width="20%" py="1rem" px="2.5rem">
@@ -49,34 +42,18 @@ const TaskManagementTable = ({
           <Tbody>
             <Tr>
               <Td colSpan={3}>
-                <Flex
-                  direction="column"
-                  alignItems="center"
-                  gap="1rem"
-                  my="5rem"
-                >
-                  <Text m="0" textStyle="subheading">
-                    No tasks currently match.
-                  </Text>
-                  <Text
-                    m="0"
-                    textStyle="h3"
-                    color="blue.500"
-                    cursor="pointer"
-                    textDecoration="underline"
-                    onClick={clearFilters}
-                  >
-                    Clear all
-                  </Text>
-                </Flex>
+                <TableEmptyState
+                  message="No tasks currently match."
+                  onClearFilters={clearFilters}
+                />
               </Td>
             </Tr>
           </Tbody>
         ) : (
-          <TaskManagementTableSection tasks={tasks} />
+          <TaskManagementTableSection tasks={tasks} onTaskClick={onTaskClick} />
         )}
       </Table>
-    </Box>
+    </Flex>
   );
 };
 

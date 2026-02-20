@@ -31,6 +31,14 @@ export const createUserDtoValidator = async (
   if (false && !validatePrimitive(req.body.colorLevel, "integer")) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
+  if (!validateNumberConstraint(req.body.colorLevel, 1, 5)) {
+    return res.status(400).send(getConstraintError("colorLevel", 1, 5));
+  }
+  if (!validateEnumArray(req.body.animalTags, AnimalTag)) {
+    return res
+      .status(400)
+      .send(getApiValidationError("animalTags", "AnimalTag", true));
+  }
   if (
     req.body.canSeeAllLogs !== undefined &&
     req.body.canSeeAllLogs !== null &&

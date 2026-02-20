@@ -12,6 +12,10 @@ export const PROFILE_PAGE = "/profile";
 
 export const PET_PROFILE_PAGE = "/pet-profile";
 
+export const EDIT_PET_PROFILE_PAGE = "/edit-pet-profile";
+
+export const ADD_PET_FORM = "/add-pet-form";
+
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
 export const INVITE_USER_PAGE = "/admin/users/invite";
@@ -21,6 +25,8 @@ export const ADMIN_EDIT_USER_PROFILE_PAGE = "/admin/edit-user-profile";
 export const TASK_MANAGEMENT_PAGE = "/admin/tasks";
 
 export const ADD_TASK_TEMPLATE_PAGE = "/admin/add-task-template";
+
+export const EDIT_TASK_TEMPLATE_PAGE = "/admin/tasks/edit";
 
 export const ADMIN_PAGE = "/admin";
 

@@ -1,17 +1,15 @@
 # Oakville and Milton Humane Society 🐾
 The Oakville and Milton Humane Society is a non-profit organization dedicated to protecting and improving the life of animals within the community and connecting them to the communities that care about them in Oakville and Milton. We will be developing a web application that allows volunteers to sign up for pet-sitting tasks, enabling volunteers to efficiently care for multiple animals.
 
-## Fall 2025 Team 
-- **Sehshasayi Thuray** (Project Lead)
-- **Matthew So** (Project Lead)
-- **Aashi Chaubey** (Developer)
-- **Artyom Gabtraupov** (Developer)
-- **Cindy Li** (Developer)
-- **Gateek Chandak** (Developer)
+## Winter 2026 Team 
+- **Akishai Sabaratnasarma** (Project Lead)
 - **Harry He** (Developer)
-- **Nathanael Ann** (Developer)
-- **Raj Shah** (Developer)
-- **Smeet Shah** (Developer)
+- **Anne Sun** (Developer)
+- **Angela Li** (Developer)
+- **Amanda Xi** (Developer)
+- **Victor Chan** (Developer)
+- **Wilson Chen** (Developer)
+- **Daphne Huang** (Developer)
 
 ## Stack Choices
 **Backend Language:** TypeScript (Express.js on Node.js) <br>
@@ -113,6 +111,17 @@ docker exec -it humane_society_frontend /bin/bash -c "yarn run fix"
 docker exec -it humane_society_backend /bin/bash -c "yarn test"
 ```
 
+## Running against Supabase DB
+We have deployed our Postgres DB on Supabase which you can connect your local application to, which can be useful for testing.
+
+1. Ask your Project Lead for the `DATABASE_URL` environment variable which stores our Supabase connection URL and add it to `.env` at the root of this project.
+    - Optionally, you can also be added to the OMHS organization on Supabase if you need to do some admin work on the deployed DB.
+2. Run the app against the Supabase DB
+```bash
+NODE_ENV=production docker compose up
+```
+
+> **Note:** Currently, the `humane_society_db` container is also run even when you run against Supabase. You should be able to stop it if the application is correctly connected to Supabase. Additional changes can be made to stop it from running when you want to run against Supabase, involving setting another environment variable (see this [PR](https://github.com/uwblueprint/humane-society/pull/152)).
 
 ## Version Control Guide
 

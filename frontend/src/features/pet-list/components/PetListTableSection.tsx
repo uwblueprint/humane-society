@@ -1,33 +1,18 @@
+import { Flex, Icon, SimpleGrid, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
-import { Flex, SimpleGrid, Text, Icon, Tbody, Tr, Td } from "@chakra-ui/react";
-import useOpenController from "../../../components/common/useOpenController";
-import ProfilePhoto from "../../../components/common/ProfilePhoto";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
+import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
+import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
+import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
+import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
 import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
-import {
-  AnimalTag,
-  ColorLevel,
-  TaskCategory,
-  TaskStatus,
-} from "../../../types/TaskTypes";
 import PetStatus from "../../../components/common/PetStatus";
-
-export interface PetInfo {
-  id: number;
-  name: string;
-  skill: ColorLevel;
-  image: string;
-  taskCategories: TaskCategory[];
-  status: TaskStatus;
-  lastCaredFor: string;
-  allTasksAssigned: boolean;
-  animalTag: AnimalTag;
-}
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import useOpenController from "../../../components/common/useOpenController";
+import { PetInfo } from "../../../types/PetTypes";
+import { TaskCategory } from "../../../types/TaskTypes";
+import formatTimeFromISO from "../../../utils/dateTimeUtils";
 
 interface PetListTableSectionProps {
   pets: PetInfo[];
@@ -88,10 +73,11 @@ export const PetListTableSection = ({
               <Flex gap="3rem" minWidth="max-content">
                 <ProfilePhoto
                   // name={pet.name}
-                  color={pet.skill}
-                  image={pet.image}
+                  color={pet.color}
+                  image={pet.photo}
                   size="large"
                   type="pet"
+                  showColorBorder
                 />
                 <Flex direction="column" justify="center" gap="0.5rem">
                   <Text textStyle="h3" m={0} color="gray.700">
@@ -139,7 +125,7 @@ export const PetListTableSection = ({
             <Td padding="0">
               {/* Last Cared For */}
               <Text textStyle="body" color="gray.700" m={0}>
-                {pet.lastCaredFor}
+                {formatTimeFromISO(pet.lastCaredFor)}
               </Text>
             </Td>
           </Tr>
@@ -147,3 +133,5 @@ export const PetListTableSection = ({
     </Tbody>
   );
 };
+
+export default PetListTableSection;

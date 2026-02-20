@@ -4,8 +4,7 @@ import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
 
-import Filter from "../../../components/common/Filter";
-import Search from "../../../components/common/Search";
+import { TableWrapper } from "../../../components/common/table";
 import UserManagementTable from "../components/UserManagementTable";
 import Button from "../../../components/common/Button";
 
@@ -83,46 +82,35 @@ const UserManagementPage = (): React.ReactElement => {
   };
 
   return (
-    <Flex direction="column" gap="2rem" width="100%" pt="2rem">
-      {errorMessage && (
-        <Alert status="error" mb={4}>
-          <AlertIcon />
-          {errorMessage}
-          <CloseButton
-            position="absolute"
-            right="8px"
-            top="8px"
-            onClick={() => setErrorMessage(null)}
-          />
-        </Alert>
-      )}
-      <Flex
-        padding="0 2.5rem"
-        maxWidth="100vw"
-        justifyContent="space-between"
-        gap="1rem"
-        alignItems="center"
-      >
-        <Filter
-          type="userManagement"
-          onChange={handleFilterChange}
-          selected={filters}
-        />
-        <Flex gap="1rem" alignItems="center">
-          <Search
-            placeholder="Search for a user..."
-            onChange={handleSearchChange}
-            search={search}
-          />
-          <Button
+    <TableWrapper
+      filterBarProps={{
+        filterType: "userManagement",
+        filters,
+        onFilterChange: handleFilterChange,
+        search,
+        onSearchChange: handleSearchChange,
+        searchPlaceholder: "Search for a user...",
+        actionButton: (
+         <Button
             variant="dark-blue"
             size="medium"
             onClick={handleInviteUserClick}
           >
             Invite User
           </Button>
-        </Flex>
-      </Flex>
+          )
+      }}
+      errorMessage={errorMessage}
+      onDismissError={() => setErrorMessage(null)}
+      bottomContent={
+        <Pagination
+          value={page}
+          onChange={(newPage) => setPage(newPage)}
+          numberOfItems={filteredUsersLength}
+          itemsPerPage={numUsersPerPage}
+        />
+      }
+    >
       <UserManagementTable
         users={filteredUsers.slice(
           (page - 1) * numUsersPerPage,
@@ -130,13 +118,7 @@ const UserManagementPage = (): React.ReactElement => {
         )}
         clearFilters={handleClearFilters}
       />
-      <Pagination
-        value={page}
-        onChange={(newPage) => setPage(newPage)}
-        numberOfItems={filteredUsersLength}
-        itemsPerPage={numUsersPerPage}
-      />
-    </Flex>
+    </TableWrapper>
   );
 };
 

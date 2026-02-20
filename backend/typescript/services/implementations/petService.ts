@@ -1,23 +1,37 @@
-import { Transaction } from "sequelize";
+import { DateTime } from "luxon";
+import { QueryTypes, Transaction } from "sequelize";
 import PgPet from "../../models/pet.model";
 // import PgTask from "../../models/task.model";
 // import PgTaskTemplate from "../../models/taskTemplate.model";
+import { sequelize } from "../../models";
 import PgPetCareInfo from "../../models/petCareInfo.model";
-// import PgUser from "../../models/user.model";
+import TaskTemplate from "../../models/taskTemplate.model";
+import PgUser from "../../models/user.model";
+import { colorLevelToEnum, dateToISOString } from "../../utilities/common";
+import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
+import logger from "../../utilities/logger";
 import {
   IPetService,
-  // PetListResponseDTO,
+  PetListItemDTO,
+  PetListSections,
+  PetRawDTO,
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
+  PetTask,
 } from "../interfaces/petService";
-import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
-import logger from "../../utilities/logger";
-import { sequelize } from "../../models";
 // import TaskTemplate from "../../models/taskTemplate.model";
-// import { Role } from "../../types";
+import {
+  AnimalTag,
+  LastCaredFor,
+  PetStatus,
+  Role,
+  TaskCategory,
+} from "../../types";
 
 const Logger = logger(__filename);
+
+const TIME_ZONE = "America/New_York";
 
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
@@ -30,7 +44,7 @@ class PetService implements IPetService {
     return age;
   }
 
-  async getPet(id: string): Promise<PetResponseDTO> {
+  async getPet(id: string): Promise<PetRawDTO> {
     let pet: PgPet | null;
     try {
       pet = await PgPet.findByPk(id, { include: PgPetCareInfo, plain: true });
@@ -49,7 +63,8 @@ class PetService implements IPetService {
       colorLevel: pet.color_level,
       status: pet.status,
       breed: pet.breed,
-      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : undefined,
+      neutered: pet.neutered,
+      birthday: pet.birthday,
       weight: pet.weight,
       sex: pet.sex,
       photo: pet.photo,
@@ -313,6 +328,413 @@ class PetService implements IPetService {
       throw error;
     }
     return id;
+  }
+
+  sortPetListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
+    const statusToPriority: Record<PetStatus, number> = {
+      [PetStatus.NEEDS_CARE]: 0,
+      [PetStatus.OCCUPIED]: 1,
+      [PetStatus.DOES_NOT_NEED_CARE]: 2,
+    };
+    // put pets with 'needs care' status first, then occupied, then does not need care
+    const statusSortFunction = (a: PetListItemDTO, b: PetListItemDTO) => {
+      return statusToPriority[a.status] - statusToPriority[b.status];
+    };
+    return petList.sort(statusSortFunction);
+  }
+
+  // Within section order by care urgency
+  private sortPetListByCareUrgency(
+    pets: PetListItemDTO[],
+    beginningOfTodayISO: string,
+  ): PetListItemDTO[] {
+    pets.sort((a, b) => {
+      // Never Cared For - highest priority
+      if (a.lastCaredFor === null) return -1;
+      if (b.lastCaredFor === null) return 1;
+
+      // Occupied - lowest priority
+      if (a.lastCaredFor === LastCaredFor.OCCUPIED) return 1;
+      if (b.lastCaredFor === LastCaredFor.OCCUPIED) return -1;
+
+      // Both are non-null, non-occupied strings
+      // Compare directly (older - higher priority)
+      if (a.lastCaredFor && b.lastCaredFor) {
+        return a.lastCaredFor.localeCompare(b.lastCaredFor);
+      }
+
+      return 0;
+    });
+
+    // Convert old dates to One or more days ago for display
+    return pets.map((pet) => {
+      if (
+        pet.lastCaredFor &&
+        pet.lastCaredFor !== LastCaredFor.OCCUPIED &&
+        pet.lastCaredFor !== LastCaredFor.ONE_OR_MORE_DAYS_AGO &&
+        pet.lastCaredFor < beginningOfTodayISO
+      ) {
+        return {
+          ...pet,
+          lastCaredFor: LastCaredFor.ONE_OR_MORE_DAYS_AGO,
+        };
+      }
+      return pet;
+    });
+  }
+
+  // Volunteer eligibility check (tags + color level)
+  private canVolunteerCareToday(
+    user: PgUser,
+    petAnimalTag: AnimalTag,
+    petColorLevelNum: number,
+  ): boolean {
+    const hasTag = (user.animal_tags || []).includes(petAnimalTag);
+    const colorOk = user.color_level >= petColorLevelNum; // user must be greater than or equal to pet level
+    return hasTag && colorOk; // both conditions must be true
+  }
+
+  // Build sections for volunteer view
+  private buildSectionsVolunteer(
+    allPets: PetListItemDTO[],
+    user: PgUser,
+    petColorLevelMap: Record<number, number>,
+    petAnimalTagMap: Record<number, AnimalTag>,
+    petsWithTasksScheduledToday: Set<number>,
+  ): PetListSections {
+    const sections: PetListSections = {
+      "Assigned to You": [],
+      "Other Pets": [],
+    };
+
+    const added = new Set<number>();
+
+    const pushOnce = (
+      target: string,
+      pet: PetListItemDTO,
+      addedSet: Set<number>,
+    ) => {
+      if (!sections[target]) sections[target] = [];
+      if (!addedSet.has(pet.id)) {
+        sections[target].push(pet);
+        addedSet.add(pet.id);
+      }
+    };
+
+    allPets
+      .filter((pet) => {
+        const canCare = this.canVolunteerCareToday(
+          user,
+          petAnimalTagMap[pet.id],
+          petColorLevelMap[pet.id],
+        );
+        if (!canCare) return false;
+
+        // Only show pets with tasks scheduled for today
+        if (!petsWithTasksScheduledToday.has(pet.id)) return false;
+
+        // If assigned to me, always include (even if occupied)
+        if (pet.isAssignedToMe) return true;
+
+        // Include if pet needs care or is occupied but has tasks that still need to be assigned
+        return (
+          pet.status === PetStatus.NEEDS_CARE ||
+          (pet.status === PetStatus.OCCUPIED && pet.allTasksAssigned === false)
+        );
+      })
+      .forEach((pet) => {
+        if (pet.isAssignedToMe) {
+          pushOnce("Assigned to You", pet, added);
+        } else {
+          pushOnce("Other Pets", pet, added);
+        }
+      });
+
+    // Sort each section by care urgency
+    const beginningOfTodayISO = dateToISOString(
+      DateTime.now().setZone(TIME_ZONE).startOf("day"),
+    );
+    sections["Assigned to You"] = this.sortPetListByCareUrgency(
+      sections["Assigned to You"],
+      beginningOfTodayISO,
+    );
+    sections["Other Pets"] = this.sortPetListByCareUrgency(
+      sections["Other Pets"],
+      beginningOfTodayISO,
+    );
+
+    return sections;
+  }
+
+  // Build sections for admin view (Staff/AB/Admin)
+  private buildSectionsAdmin(
+    allPets: PetListItemDTO[],
+    user: PgUser,
+  ): PetListSections {
+    const sections: PetListSections = {};
+    const added = new Set<number>();
+
+    const pushOnce = (
+      target: string,
+      pet: PetListItemDTO,
+      addedSet: Set<number>,
+    ) => {
+      if (!sections[target]) sections[target] = [];
+      if (!addedSet.has(pet.id)) {
+        sections[target].push(pet);
+        addedSet.add(pet.id);
+      }
+    };
+
+    const isStaff = user.role === Role.STAFF;
+    const isAB = user.role === Role.ANIMAL_BEHAVIOURIST;
+
+    // Staff/AB have "Assigned to You" section
+    if (isStaff || isAB) {
+      sections["Assigned to You"] = [];
+    }
+    sections["Has Unassigned Tasks"] = [];
+    sections["All Tasks Assigned"] = [];
+    sections["No Tasks"] = [];
+
+    allPets.forEach((pet) => {
+      // Staff/AB get "Assigned to You" first; if placed here, skip others.
+      if ((isStaff || isAB) && pet.isAssignedToMe) {
+        pushOnce("Assigned to You", pet, added);
+        return;
+      }
+
+      // Next priority: Has Unassigned Tasks
+      if (pet.allTasksAssigned === false) {
+        pushOnce("Has Unassigned Tasks", pet, added);
+        return;
+      }
+
+      // Then: All Tasks Assigned (TODAY)
+      if (pet.allTasksAssigned === true) {
+        pushOnce("All Tasks Assigned", pet, added);
+        return;
+      }
+
+      // Finally: No Tasks (no tasks today or all complete)
+      pushOnce("No Tasks", pet, added);
+    });
+
+    // Sort each section by care urgency
+    const beginningOfTodayISO = dateToISOString(
+      DateTime.now().setZone(TIME_ZONE).startOf("day"),
+    );
+    Object.keys(sections).forEach((k) => {
+      sections[k] = this.sortPetListByCareUrgency(
+        sections[k],
+        beginningOfTodayISO,
+      );
+    });
+
+    return sections;
+  }
+
+  // Build sections per role and sort each section by care urgency
+  private buildSectionsByRole(
+    allPets: PetListItemDTO[],
+    user: PgUser,
+    petColorLevelMap: Record<number, number>,
+    petAnimalTagMap: Record<number, AnimalTag>,
+    petsWithTasksScheduledToday: Set<number>,
+  ): PetListSections {
+    if (user.role === Role.VOLUNTEER) {
+      return this.buildSectionsVolunteer(
+        allPets,
+        user,
+        petColorLevelMap,
+        petAnimalTagMap,
+        petsWithTasksScheduledToday,
+      );
+    }
+
+    // Admin view for Staff/AB/Admin
+    return this.buildSectionsAdmin(allPets, user);
+  }
+
+  async getPetList(userId: number): Promise<PetListSections> {
+    const PET_TABLE_NAME = "pets";
+    const TASK_TABLE_NAME = "tasks";
+
+    // "today" window
+    const currentTime = DateTime.now().setZone(TIME_ZONE);
+    const beginningOfToday = currentTime.startOf("day");
+    const endOfToday = beginningOfToday.plus({ days: 1 });
+
+    try {
+      // Fetch user
+      const user = await PgUser.findByPk(userId);
+      if (!user) return {};
+
+      // Include animal_tag for volunteer gating
+      const petTasks = await sequelize.query<PetTask>(
+        `SELECT 
+          ${PET_TABLE_NAME}.id AS pet_id,
+          ${PET_TABLE_NAME}.name AS name,
+          ${PET_TABLE_NAME}.status AS status,
+          ${PET_TABLE_NAME}.photo AS photo,
+          ${PET_TABLE_NAME}.color_level AS color_level,
+          ${PET_TABLE_NAME}.animal_tag AS animal_tag,
+          ${TASK_TABLE_NAME}.user_id AS user_id,
+          ${TASK_TABLE_NAME}.task_template_id AS task_template_id,
+          ${TASK_TABLE_NAME}.scheduled_start_time AS scheduled_start_time,
+          ${TASK_TABLE_NAME}.start_time AS start_time,
+          ${TASK_TABLE_NAME}.end_time AS end_time
+        FROM ${PET_TABLE_NAME}
+        LEFT JOIN ${TASK_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${TASK_TABLE_NAME}.pet_id`,
+        { type: QueryTypes.SELECT },
+      );
+
+      const petIdToPetListItem: Record<string, PetListItemDTO> = {};
+      // Keep raw maps for volunteer gating
+      const petIdToColorLevel: Record<number, number> = {};
+      const petIdToAnimalTag: Record<number, AnimalTag> = {};
+      // Track pets with tasks scheduled for today (for volunteer filtering)
+      const petsWithTasksScheduledToday = new Set<number>();
+
+      // Preload all task templates to avoid multiple queries
+      const uniqueTaskTemplateIds = [
+        ...new Set(
+          petTasks
+            .map((pt) => pt.task_template_id)
+            .filter((id): id is number => id != null),
+        ),
+      ];
+      const taskTemplates = await TaskTemplate.findAll({
+        where: { id: uniqueTaskTemplateIds },
+        attributes: ["id", "category"],
+      });
+      const taskTemplateIdToCategory = new Map<number, TaskCategory>();
+      taskTemplates.forEach((tt) => {
+        taskTemplateIdToCategory.set(tt.id, tt.category);
+      });
+
+      // Build a map of pets and their associated task data.
+      petTasks.forEach((petTask) => {
+        // Store pet color level and animal tag for volunteer eligibility checks
+        petIdToColorLevel[petTask.pet_id] = petTask.color_level;
+        petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
+
+        // Check if task is scheduled for today or started today
+        const scheduledTime = petTask.scheduled_start_time
+          ? DateTime.fromJSDate(petTask.scheduled_start_time).setZone(TIME_ZONE)
+          : null;
+
+        const isToday =
+          !!scheduledTime &&
+          scheduledTime >= beginningOfToday &&
+          scheduledTime < endOfToday;
+
+        // Track pets with tasks scheduled for today
+        if (isToday) {
+          petsWithTasksScheduledToday.add(petTask.pet_id);
+        }
+
+        // Get or create pet data
+        let petData = petIdToPetListItem[petTask.pet_id];
+        if (!petData) {
+          petData = {
+            id: petTask.pet_id,
+            name: petTask.name,
+            photo: petTask.photo,
+            color: colorLevelToEnum(petTask.color_level),
+            taskCategories: [],
+            status: petTask.status,
+            lastCaredFor: null,
+            allTasksAssigned: null,
+            isAssignedToMe: false,
+            animalTag: petTask.animal_tag as AnimalTag,
+          };
+          petIdToPetListItem[petTask.pet_id] = petData;
+        }
+
+        // Update lastCaredFor
+        // If task is ongoing / pet is occupied
+        if (
+          petData.status === PetStatus.OCCUPIED ||
+          (petTask.start_time && !petTask.end_time)
+        ) {
+          petData.lastCaredFor = LastCaredFor.OCCUPIED;
+
+          // If task has not started
+        } else if (!petTask.end_time && !petTask.start_time) {
+          // lastCaredFor stays the same
+          // If task has ended
+        } else if (petTask.end_time) {
+          const endTime = DateTime.fromJSDate(petTask.end_time).setZone(
+            TIME_ZONE,
+          );
+
+          const endTimeISO = dateToISOString(endTime);
+          if (
+            !petData.lastCaredFor ||
+            petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO ||
+            endTimeISO > petData.lastCaredFor
+          ) {
+            petData.lastCaredFor = endTimeISO;
+          }
+        }
+
+        // Update task information, ONLY for TODAY's incomplete tasks
+        if (isToday && !petTask.end_time && petTask.task_template_id) {
+          // Get task category from map
+          const taskCategory = taskTemplateIdToCategory.get(
+            petTask.task_template_id,
+          );
+          if (!taskCategory) {
+            Logger.error(
+              `Task template with ID ${petTask.task_template_id} not found.`,
+            );
+            return;
+          }
+          // Add task category
+          petData.taskCategories.push(taskCategory);
+
+          // Update allTasksAssigned for today's tasks
+          // Initialize to true when we first see a task, then set to false if any task is unassigned
+          if (petData.allTasksAssigned === null) {
+            petData.allTasksAssigned = true;
+          }
+          if (!petTask.user_id) {
+            // If ANY today task is unassigned -> overall false
+            petData.allTasksAssigned = false;
+          }
+
+          // Update isAssignedToMe for today's tasks
+          if (petTask.user_id === user.id) {
+            petData.isAssignedToMe = true;
+          }
+        }
+      });
+
+      // Set allTasksAssigned to null for pets with no tasks today
+      // NOTE: While technically "all tasks are assigned" when there are no tasks,
+      // we use null to distinguish pets with no tasks from pets with tasks for the
+      // buildSectionsByRole function. null = No Tasks section, true/false = task-based sections.
+      const allPets = Object.values(petIdToPetListItem).map((pet) => {
+        const hasActiveTasks = pet.taskCategories.length > 0;
+        return {
+          ...pet,
+          allTasksAssigned: hasActiveTasks ? pet.allTasksAssigned : null,
+        };
+      });
+
+      // Build sectioned object by role
+      return this.buildSectionsByRole(
+        allPets,
+        user,
+        petIdToColorLevel,
+        petIdToAnimalTag,
+        petsWithTasksScheduledToday,
+      );
+    } catch (error: unknown) {
+      Logger.error(getErrorMessage(error));
+      throw error;
+    }
   }
 }
 

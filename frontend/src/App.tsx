@@ -30,6 +30,9 @@ import PageTitleUpdater from "./components/common/PageTitleUpdater";
 import { AuthenticatedUser } from "./types/AuthTypes";
 
 import VolunteerViewEditUserProfilePage from "./features/user-profile/pages/VolunteerViewEditUserProfilePage";
+import EditPetProfilePage from "./features/pet-profile/pages/EditPetProfilePage";
+import EditTaskTemplatePage from "./features/task-management/pages/EditTaskTemplatePage";
+import AddPetForm from "./features/pet-profile/pages/AddPetForm";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -97,6 +100,18 @@ const App = (): React.ReactElement => {
               />
               <PrivateRoute
                 exact
+                path={`${Routes.EDIT_PET_PROFILE_PAGE}/:id`}
+                component={EditPetProfilePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={`${Routes.ADD_PET_FORM}`}
+                component={AddPetForm}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
                 path={Routes.ADMIN_PAGE}
                 component={AdminPage}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
@@ -129,6 +144,12 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.ADD_TASK_TEMPLATE_PAGE}
                 component={AddTaskTemplatePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={`${Routes.EDIT_TASK_TEMPLATE_PAGE}/:taskTemplateId`}
+                component={EditTaskTemplatePage}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute

@@ -22,6 +22,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (location.pathname.startsWith(ROUTES.ADMIN_EDIT_USER_PROFILE_PAGE)) {
       return "User Profile";
     }
+    if (location.pathname.startsWith(ROUTES.EDIT_TASK_TEMPLATE_PAGE)) {
+      return "Task Management";
+    }
 
     switch (location.pathname) {
       case ROUTES.HOME_PAGE:

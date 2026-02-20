@@ -25,10 +25,7 @@ export type UserDTO = {
   profilePhoto?: string | null;
 };
 
-export type CreateUserDTO = Omit<
-  UserDTO,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
->;
+export type CreateUserDTO = Omit<UserDTO, "id" | "status" | "profilePhoto">;
 
 export type UpdateUserDTO = Omit<UserDTO, "id">;
 
@@ -49,15 +46,18 @@ export const sexEnum: Sex[] = [...sexValues];
 
 export type Sex = (typeof sexValues)[number];
 
-const petStatusValues = [
-  "Occupied",
-  "Needs Care",
-  "Does Not Need Care",
-] as const;
+export enum PetStatus {
+  OCCUPIED = "Occupied",
+  NEEDS_CARE = "Needs Care",
+  DOES_NOT_NEED_CARE = "Does Not Need Care",
+}
 
-export const petStatusEnum: PetStatus[] = [...petStatusValues];
+export enum LastCaredFor {
+  OCCUPIED = "Occupied",
+  ONE_OR_MORE_DAYS_AGO = "One or more days ago",
+}
 
-export type PetStatus = (typeof petStatusValues)[number];
+export const petStatusEnum: PetStatus[] = [...Object.values(PetStatus)];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
@@ -101,3 +101,20 @@ export type NodemailerConfig = {
     refreshToken: string;
   };
 };
+
+export enum Days {
+  MON = "Mon",
+  TUE = "Tue",
+  WED = "Wed",
+  THU = "Thu",
+  FRI = "Fri",
+  SAT = "Sat",
+  SUN = "Sun",
+}
+
+export enum Cadence {
+  WEEKLY = "Weekly",
+  BIWEEKLY = "Biweekly",
+  MONTHLY = "Monthly",
+  ANNUALLY = "Annually",
+}

@@ -16,7 +16,4 @@ export type User = {
   profilePhoto?: string;
 };
 
-export type CreateUserDTO = Omit<
-  User,
-  "id" | "status" | "colorLevel" | "animalTags" | "profilePhoto"
->;
+export type CreateUserDTO = Omit<User, "id" | "status" | "profilePhoto">;
