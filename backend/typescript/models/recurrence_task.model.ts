@@ -51,4 +51,10 @@ export default class RecurrenceTask extends Model {
     allowNull: true,
   })
   exclusions?: Date[];
+
+  @Column({})
+  created_at!: Date;
+
+  @Column({})
+  updated_at?: Date;
 }

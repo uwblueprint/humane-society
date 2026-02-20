@@ -1,0 +1,279 @@
+-- ========================================
+-- Tasks and Recurrence Tasks Standalone Seed Script
+-- ========================================
+-- This script creates sample tasks WITHOUT requiring data in users, pets, or task_templates
+-- It uses placeholder IDs that you'll need to adjust based on your actual data
+-- Usage: psql -U postgres -h humane_society_db -d humane_society_test -f seed-tasks-standalone.sql
+
+-- Clear existing data (optional - comment out to preserve data)
+TRUNCATE TABLE recurrence_tasks CASCADE;
+TRUNCATE TABLE tasks CASCADE;
+TRUNCATE TABLE task_templates CASCADE;
+TRUNCATE TABLE pets CASCADE;
+
+-- ========================================
+-- PETS (50 pets - Dogs, Cats, Birds, Bunnies, Small Animals)
+-- ========================================
+-- Based on AnimalTag enum: Bird, Bunny, Cat, Dog, Small Animal
+-- Based on PetStatus enum: Occupied, Needs Care, Does Not Need Care
+
+INSERT INTO pets (animal_tag, name, status, breed, birthday, weight, color_level, neutered, sex, photo, created_at, updated_at) VALUES
+-- Dogs (20)
+('Dog', 'Max', 'Needs Care', 'Labrador Retriever', '2021-03-15', 65.5, 2, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Bella', 'Occupied', 'German Shepherd', '2019-07-22', 70.0, 3, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Charlie', 'Needs Care', 'Golden Retriever', '2022-01-10', 68.0, 1, false, 'M', NULL, NOW(), NOW()),
+('Dog', 'Luna', 'Does Not Need Care', 'Beagle', '2020-09-05', 25.0, 2, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Cooper', 'Needs Care', 'Border Collie', '2021-06-18', 45.0, 4, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Daisy', 'Occupied', 'Poodle Mix', '2018-11-30', 35.0, 3, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Rocky', 'Needs Care', 'Pit Bull Terrier', '2020-04-12', 60.0, 5, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Sadie', 'Does Not Need Care', 'Australian Shepherd', '2022-08-25', 50.0, 2, false, 'F', NULL, NOW(), NOW()),
+('Dog', 'Buddy', 'Needs Care', 'Boxer', '2019-02-14', 70.0, 3, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Molly', 'Occupied', 'Cocker Spaniel', '2017-05-20', 30.0, 4, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Duke', 'Needs Care', 'Rottweiler', '2021-10-08', 95.0, 5, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Rosie', 'Does Not Need Care', 'Chihuahua', '2022-03-17', 6.0, 1, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Zeus', 'Needs Care', 'Great Dane', '2020-12-01', 140.0, 4, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Penny', 'Occupied', 'Shih Tzu', '2019-08-14', 14.0, 2, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Bear', 'Needs Care', 'Husky', '2021-04-22', 55.0, 3, false, 'M', NULL, NOW(), NOW()),
+('Dog', 'Coco', 'Does Not Need Care', 'Dachshund', '2020-07-09', 18.0, 2, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Thor', 'Needs Care', 'Doberman', '2022-05-30', 85.0, 4, false, 'M', NULL, NOW(), NOW()),
+('Dog', 'Lucy', 'Occupied', 'Cavalier King Charles', '2021-11-12', 16.0, 1, true, 'F', NULL, NOW(), NOW()),
+('Dog', 'Diesel', 'Needs Care', 'Bulldog', '2019-09-28', 50.0, 3, true, 'M', NULL, NOW(), NOW()),
+('Dog', 'Ruby', 'Does Not Need Care', 'Pomeranian', '2022-02-16', 7.0, 1, true, 'F', NULL, NOW(), NOW()),
+
+-- Cats (20)
+('Cat', 'Whiskers', 'Needs Care', 'Domestic Shorthair', '2021-04-10', 12.0, 2, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Shadow', 'Occupied', 'Black Cat', '2019-06-15', 10.0, 3, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Mittens', 'Needs Care', 'Calico', '2022-08-20', 9.0, 1, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Oliver', 'Does Not Need Care', 'Orange Tabby', '2020-03-05', 14.0, 2, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Luna', 'Needs Care', 'Siamese', '2021-09-12', 8.0, 3, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Simba', 'Occupied', 'Maine Coon', '2018-12-22', 18.0, 4, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Nala', 'Needs Care', 'Russian Blue', '2022-05-08', 10.0, 2, false, 'F', NULL, NOW(), NOW()),
+('Cat', 'Tiger', 'Does Not Need Care', 'Bengal', '2021-07-30', 12.0, 3, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Princess', 'Needs Care', 'Persian', '2019-10-14', 11.0, 4, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Smokey', 'Occupied', 'Gray Cat', '2017-08-25', 13.0, 3, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Cleo', 'Needs Care', 'Tuxedo', '2022-01-18', 9.0, 1, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Felix', 'Does Not Need Care', 'Domestic Longhair', '2020-11-03', 15.0, 2, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Bella', 'Needs Care', 'Tortoiseshell', '2021-06-27', 10.0, 2, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Oreo', 'Occupied', 'Tuxedo', '2022-04-09', 11.0, 1, false, 'M', NULL, NOW(), NOW()),
+('Cat', 'Ginger', 'Needs Care', 'Orange Tabby', '2019-02-16', 9.0, 3, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Socks', 'Does Not Need Care', 'Domestic Shorthair', '2021-12-20', 12.0, 2, true, 'M', NULL, NOW(), NOW()),
+('Cat', 'Chloe', 'Needs Care', 'Ragdoll', '2020-09-11', 13.0, 3, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Milo', 'Occupied', 'Domestic Shorthair', '2022-07-04', 10.0, 1, false, 'M', NULL, NOW(), NOW()),
+('Cat', 'Willow', 'Needs Care', 'Gray Cat', '2018-05-29', 9.0, 4, true, 'F', NULL, NOW(), NOW()),
+('Cat', 'Oscar', 'Does Not Need Care', 'Orange Tabby', '2021-03-22', 14.0, 2, true, 'M', NULL, NOW(), NOW()),
+
+-- Birds (5)
+('Bird', 'Tweety', 'Needs Care', 'Canary', '2022-03-10', 0.03, 1, NULL, 'M', NULL, NOW(), NOW()),
+('Bird', 'Polly', 'Occupied', 'African Grey', '2016-08-15', 0.5, 5, NULL, 'F', NULL, NOW(), NOW()),
+('Bird', 'Blue', 'Needs Care', 'Budgie', '2023-01-20', 0.04, 1, NULL, 'M', NULL, NOW(), NOW()),
+('Bird', 'Kiwi', 'Does Not Need Care', 'Cockatiel', '2021-06-12', 0.1, 2, NULL, 'F', NULL, NOW(), NOW()),
+('Bird', 'Rio', 'Needs Care', 'Macaw', '2014-11-05', 1.2, 5, NULL, 'M', NULL, NOW(), NOW()),
+
+-- Bunnies (3)
+('Bunny', 'Thumper', 'Needs Care', 'Holland Lop', '2022-04-15', 4.0, 1, true, 'M', NULL, NOW(), NOW()),
+('Bunny', 'Cottontail', 'Occupied', 'Rex', '2021-09-22', 5.0, 2, true, 'F', NULL, NOW(), NOW()),
+('Bunny', 'Peter', 'Needs Care', 'Flemish Giant', '2020-07-18', 15.0, 3, true, 'M', NULL, NOW(), NOW()),
+
+-- Small Animals (2)
+('Small Animal', 'Squeaky', 'Needs Care', 'Guinea Pig', '2023-02-10', 1.5, 1, false, 'M', NULL, NOW(), NOW()),
+('Small Animal', 'Nibbles', 'Does Not Need Care', 'Hamster', '2023-05-08', 0.15, 1, false, 'F', NULL, NOW(), NOW());
+
+-- ========================================
+-- TASK TEMPLATES (30 templates)
+-- ========================================
+-- Based on TaskCategory enum: Games, Husbandry, Pen Time, Training, Walk, Misc.
+
+INSERT INTO task_templates (task_name, category, instruction) VALUES
+-- Husbandry Tasks
+('Feed Dog - Morning', 'Husbandry', 'Provide morning meal with fresh water. Check food bowl is clean.'),
+('Feed Dog - Evening', 'Husbandry', 'Provide evening meal with fresh water. Check food bowl is clean.'),
+('Feed Cat - Morning', 'Husbandry', 'Provide morning meal with fresh water. Clean food area if needed.'),
+('Feed Cat - Evening', 'Husbandry', 'Provide evening meal with fresh water. Clean food area if needed.'),
+('Clean Kennel', 'Husbandry', 'Remove all waste, sanitize surfaces with approved cleaner, replace bedding with fresh materials.'),
+('Clean Cat Enclosure', 'Husbandry', 'Clean litter box completely, sanitize surfaces, replace bedding, refill water.'),
+('Refill Water Bowls', 'Husbandry', 'Empty and wash all water bowls. Refill with fresh clean water.'),
+('Groom Dog', 'Husbandry', 'Brush coat thoroughly, check for mats or tangles, trim nails if needed, check ears.'),
+('Groom Cat', 'Husbandry', 'Brush coat gently, check for mats, clean around eyes if needed.'),
+('Bathe Dog', 'Husbandry', 'Use dog shampoo, rinse thoroughly, dry completely. Check skin for issues.'),
+
+-- Walk Tasks
+('Short Walk (15 min)', 'Walk', 'Quick walk around block for bathroom break. Stay close to facility.'),
+('Medium Walk (30 min)', 'Walk', 'Standard exercise walk. Allow time for sniffing and bathroom breaks.'),
+('Long Walk (45 min)', 'Walk', 'Extended exercise walk. Vary route for mental stimulation.'),
+('Leash Training Walk', 'Walk', 'Practice loose leash walking. Reward good behavior. Use positive reinforcement.'),
+
+-- Training Tasks
+('Basic Obedience Training', 'Training', 'Work on sit, stay, come commands. Use treats and positive reinforcement. 5-10 minute sessions.'),
+('Socialization Session', 'Training', 'Introduce to new people, environments, or animals in controlled manner. Monitor stress levels.'),
+('Clicker Training', 'Training', 'Use clicker for positive reinforcement. Mark desired behaviors immediately. Keep sessions short.'),
+('Behavioral Assessment', 'Training', 'Evaluate temperament, food motivation, toy drive, and behavior around people/animals. Document findings.'),
+('Enrichment Activities', 'Training', 'Provide puzzle toys, hiding treats, or novel objects. Supervise and encourage problem-solving.'),
+
+-- Pen Time Tasks
+('Outdoor Pen Time', 'Pen Time', 'Supervised play in secure outdoor area. Monitor interactions. Ensure water available.'),
+('Indoor Play Time', 'Pen Time', 'Supervised play in indoor space. Provide toys. Watch for stress or overstimulation.'),
+('Group Play Session', 'Pen Time', 'Supervised play with compatible dogs only. Intervene if play gets too rough. Keep groups small.'),
+
+-- Games Tasks
+('Fetch Session', 'Games', 'Play fetch with appropriate toy in designated area. Let dog return naturally. Stop if dog loses interest.'),
+('Tug-of-War', 'Games', 'Interactive tug play with rope toy. Use "drop it" command. Keep energy moderate.'),
+('Puzzle Toys', 'Games', 'Provide food-dispensing puzzle toys. Start with easy difficulty. Supervise to prevent frustration.'),
+('Scent Work', 'Games', 'Hide treats in area for dog to find using nose. Start easy, gradually increase difficulty.'),
+
+-- Misc Tasks
+('Veterinary Checkup', 'Misc.', 'Transport to vet. Provide medical history. Follow vet instructions. Document any new medications or concerns.'),
+('Medication Administration', 'Misc.', 'Administer prescribed medication as directed. Hide in food if needed. Document administration time.'),
+('Photo Session', 'Misc.', 'Take clear, well-lit adoption photos. Capture personality. Include close-up and full body shots.'),
+('Meet & Greet', 'Misc.', 'Introduction with potential adopter. Supervise interaction. Answer questions about animal. Document outcome.');
+
+-- ========================================
+-- TASKS (100 tasks with hardcoded IDs)
+-- ========================================
+-- NOTE: Adjust user_id, pet_id, and task_template_id values to match your actual data
+--       or leave user_id as NULL for unassigned tasks
+
+-- ========================================
+-- COMPLETED TASKS (25)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(11, 3, '2026-02-16 10:00:00', '2026-02-16 10:05:00', '2026-02-16 10:20:00', 'Morning feeding completed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 3, '2026-02-16 10:00:00', '2026-02-16 10:10:00', '2026-02-16 10:25:00', 'Evening feeding completed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 5, '2026-02-16 10:00:00', '2026-02-16 10:15:00', '2026-02-16 10:45:00', 'Kennel cleaning done', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 11, '2026-02-16 10:00:00', '2026-02-16 10:30:00', '2026-02-16 10:45:00', 'Walk completed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 8, '2026-02-16 10:00:00', '2026-02-16 10:20:00', '2026-02-16 11:05:00', 'Grooming session finished', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 4, '2026-02-16 10:00:00', '2026-02-16 10:10:00', '2026-02-16 10:20:00', 'Fed and watered', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 12, '2026-02-16 10:00:00', '2026-02-16 10:25:00', '2026-02-16 10:55:00', 'Exercise walk done', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 15, '2026-02-16 10:00:00', '2026-02-16 10:35:00', '2026-02-16 11:05:00', 'Training session completed', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- IN-PROGRESS TASKS (15)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(11, 3, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Currently walking Max', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 4, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Training session in progress', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 3, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Cleaning kennel now', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 4, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Grooming in progress', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 5, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'On a walk', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 20, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Pen time ongoing', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 23, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Playing fetch', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 16, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Socialization in progress', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 6, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Cleaning cat area', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 19, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Enrichment activities ongoing', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 13, '2026-02-17 09:00:00', '2026-02-17 09:30:00', NULL, 'Long walk in progress', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- SCHEDULED FOR TODAY (10)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(11, 6, '2026-02-17 12:00:00', NULL, NULL, 'Evening feeding scheduled', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 6, '2026-02-17 13:00:00', NULL, NULL, 'Cat evening meal', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 3, '2026-02-17 11:00:00', NULL, NULL, 'Afternoon walk', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(7, 4, '2026-02-17 14:00:00', NULL, NULL, 'Pen time later today', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(8, 5, '2026-02-17 12:00:00', NULL, NULL, 'Fetch session planned', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 6, '2026-02-17 10:30:00', NULL, NULL, 'Water refill needed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(10, 3, '2026-02-17 13:00:00', NULL, NULL, 'Enrichment scheduled', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(10, 5, '2026-02-17 15:00:00', NULL, NULL, 'Indoor play time', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 4, '2026-02-17 12:30:00', NULL, NULL, 'Medium walk', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 5, '2026-02-17 14:00:00', NULL, NULL, 'Cat enclosure cleaning', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- SCHEDULED FOR TOMORROW (20)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(7, 5, '2026-02-18 18:00:00', NULL, NULL, 'Tomorrow morning feeding', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(7, 12, '2026-02-18 04:00:00', NULL, NULL, 'Tomorrow evening feeding', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(8, 3, '2026-02-18 18:00:00', NULL, NULL, 'Cat morning meal', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(8, 4, '2026-02-18 04:00:00', NULL, NULL, 'Cat evening meal', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 5, '2026-02-18 19:00:00', NULL, NULL, 'Kennel cleaning tomorrow', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 8, '2026-02-18 20:00:00', NULL, NULL, 'Grooming appointment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 11, '2026-02-18 17:00:00', NULL, NULL, 'Morning walk', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(7, 12, '2026-02-18 01:00:00', NULL, NULL, 'Afternoon walk', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(8, 13, '2026-02-18 02:00:00', NULL, NULL, 'Long walk scheduled', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 15, '2026-02-18 00:00:00', NULL, NULL, 'Obedience training', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(9, 16, '2026-02-18 21:00:00', NULL, NULL, 'Socialization session', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(8, 19, '2026-02-18 23:00:00', NULL, NULL, 'Enrichment activities', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(7, 20, '2026-02-18 20:00:00', NULL, NULL, 'Outdoor pen time', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(10, 21, '2026-02-18 22:00:00', NULL, NULL, 'Indoor play', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 23, '2026-02-18 01:00:00', NULL, NULL, 'Fetch game', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 24, '2026-02-18 00:00:00', NULL, NULL, 'Tug-of-war', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 25, '2026-02-18 21:00:00', NULL, NULL, 'Puzzle toys', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 7, '2026-02-18 22:00:00', NULL, NULL, 'Water refill', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 6, '2026-02-18 19:00:00', NULL, NULL, 'Cat area cleaning', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(10, 26, '2026-02-18 23:00:00', NULL, NULL, 'Scent work', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- OVERDUE TASKS (10)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(11, 5, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Kennel needs cleaning', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 12, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Walk missed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 3, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Grooming past due', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 4, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Training session missed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 5, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Cat area needs attention', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 11, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Walk not completed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 12, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Enrichment needed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 3, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Pen time missed', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 4, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Bath overdue', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 5, '2026-02-15 10:00:00', NULL, NULL, 'OVERDUE: Vet checkup missed', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- UNASSIGNED TASKS (20)
+-- ========================================
+INSERT INTO tasks (pet_id, task_template_id, scheduled_start_time, start_time, end_time, notes, created_at, updated_at) VALUES
+(11, 12, '2026-02-17 13:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 3, '2026-02-17 14:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 5, '2026-02-17 12:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 11, '2026-02-17 15:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 12, '2026-02-17 13:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 7, '2026-02-17 11:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 6, '2026-02-17 14:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(13, 20, '2026-02-17 16:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(14, 23, '2026-02-17 15:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(15, 21, '2026-02-17 14:00:00', NULL, NULL, 'Needs volunteer assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(11, 12, '2026-02-18 04:00:00', NULL, NULL, 'Tomorrow - needs assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00'),
+(12, 12, '2026-02-18 04:00:00', NULL, NULL, 'Tomorrow - needs assignment', '2026-02-17 10:00:00', '2026-02-17 10:00:00');
+
+-- ========================================
+-- RECURRENCE TASKS
+-- ========================================
+INSERT INTO recurrence_tasks (task_id, cadence, days, exclusions)
+VALUES
+(100, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri']::enum_recurrence_tasks_days[], NULL),
+(101, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri']::enum_recurrence_tasks_days[], NULL),
+(102, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']::enum_recurrence_tasks_days[], NULL),
+(43, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']::enum_recurrence_tasks_days[], NULL),
+(36, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']::enum_recurrence_tasks_days[], NULL),
+(105, 'Weekly', ARRAY['Sat']::enum_recurrence_tasks_days[], NULL),
+(106, 'Weekly', ARRAY['Sat']::enum_recurrence_tasks_days[], NULL),
+(107, 'Weekly', ARRAY['Mon', 'Wed', 'Fri']::enum_recurrence_tasks_days[], NULL),
+(104, 'Weekly', ARRAY['Mon', 'Wed', 'Fri']::enum_recurrence_tasks_days[], NULL),
+(108, 'Weekly', ARRAY['Mon', 'Wed', 'Fri']::enum_recurrence_tasks_days[], NULL),
+(109, 'Weekly', ARRAY['Tue', 'Thu']::enum_recurrence_tasks_days[], NULL),
+(144, 'Weekly', ARRAY['Tue', 'Thu']::enum_recurrence_tasks_days[], NULL),
+(142, 'Weekly', ARRAY['Sat', 'Sun']::enum_recurrence_tasks_days[], NULL),
+(141, 'Weekly', ARRAY['Sat', 'Sun']::enum_recurrence_tasks_days[], NULL),
+(145, 'Biweekly', ARRAY['Tue']::enum_recurrence_tasks_days[], NULL),
+(146, 'Biweekly', ARRAY['Thu']::enum_recurrence_tasks_days[], NULL),
+(157, 'Biweekly', ARRAY['Fri']::enum_recurrence_tasks_days[], NULL),
+(158, 'Monthly', NULL, NULL),
+(155, 'Monthly', NULL, NULL),
+(139, 'Monthly', NULL, NULL),
+
+INSERT INTO recurrence_tasks (task_id, cadence, days, exclusions)
+VALUES
+(42, 'Annually', NULL, ARRAY[]::timestamp[]),
+(160, 'Annually', NULL, ARRAY[]::timestamp[]);
+
+INSERT INTO recurrence_tasks (task_id, cadence, days, end_date, exclusions) VALUES
+(163, 'Weekly', ARRAY['Mon']::enum_recurrence_tasks_days[], '2026-08-17'::timestamp, ARRAY[]::timestamp[]),
+(97, 'Monthly', NULL, '2027-02-17'::timestamp, ARRAY[]::timestamp[]);
+
+INSERT INTO recurrence_tasks (task_id, cadence, days, end_date, exclusions) VALUES
+(114, 'Weekly', ARRAY['Mon', 'Tue', 'Wed', 'Thu', 'Fri']::enum_recurrence_tasks_days[], NULL, 
+ ARRAY['2024-12-25'::timestamp, '2024-12-26'::timestamp, '2025-01-01'::timestamp]);
+
+INSERT INTO recurrence_tasks (task_id, cadence, days, end_date, exclusions) VALUES
+(34, 'Weekly', ARRAY['Mon', 'Wed']::enum_recurrence_tasks_days[], NULL, ARRAY[]::timestamp[]),
+(55, 'Weekly', ARRAY['Tue', 'Thu', 'Sat']::enum_recurrence_tasks_days[], NULL, ARRAY[]::timestamp[]),
+(136, 'Weekly', ARRAY['Fri']::enum_recurrence_tasks_days[], NULL, ARRAY[]::timestamp[]),
+(164, 'Biweekly', ARRAY['Wed']::enum_recurrence_tasks_days[], NULL, ARRAY[]::timestamp[]);
