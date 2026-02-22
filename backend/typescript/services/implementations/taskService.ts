@@ -7,6 +7,7 @@ import {
   TaskUserPatchDTO,
   TaskTimePatchDTO,
   TaskNotesPatchDTO,
+  RecurrenceTaskDTO,
 } from "../interfaces/taskService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
@@ -26,12 +27,24 @@ class TaskService implements ITaskService {
     cadence: string,
     days?: Days[],
     endDate?: Date,
-  ) {
+  ): Promise<RecurrenceTaskDTO> {
     try {
       const task = await PgTask.findByPk(taskId, { raw: true });
       if (!task) {
         throw new NotFoundError(`Task id ${taskId} not found`);
       }
+
+      if (
+        endDate &&
+        task.scheduled_start_time &&
+        endDate < task.scheduled_start_time
+      )
+        throw new Error("End date cannot be before task start date.");
+      if (endDate && !task.scheduled_start_time)
+        throw new Error(
+          "Recurrence task must have a start date if end date is provided.",
+        );
+
       const recurrenceTask = await PgRecurrenceTask.create({
         task_id: taskId,
         ...(days && { days }),
@@ -43,7 +56,7 @@ class TaskService implements ITaskService {
         id: recurrenceTask.task_id,
         days: recurrenceTask.days,
         cadence: recurrenceTask.cadence,
-        endDate: recurrenceTask.end_date,
+        endDate: recurrenceTask.end_date ?? undefined,
         exclusions: recurrenceTask.exclusions,
       };
     } catch (error: unknown) {
@@ -55,7 +68,7 @@ class TaskService implements ITaskService {
   }
 
   /* eslint-disable class-methods-use-this */
-  async getRecurrence(taskId: string) {
+  async getRecurrence(taskId: string): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, {
         raw: true,
@@ -68,7 +81,7 @@ class TaskService implements ITaskService {
         id: recurrenceTask.task_id,
         days: recurrenceTask.days,
         cadence: recurrenceTask.cadence,
-        endDate: recurrenceTask.end_date,
+        endDate: recurrenceTask.end_date ?? undefined,
         exclusions: recurrenceTask.exclusions,
       };
     } catch (error: unknown) {
@@ -82,9 +95,23 @@ class TaskService implements ITaskService {
   /* eslint-disable class-methods-use-this */
   async updateRecurrence(
     recurrenceId: string,
-    updates: Partial<PgRecurrenceTask>,
-  ) {
+    updates: RecurrenceTaskDTO,
+  ): Promise<RecurrenceTaskDTO> {
     try {
+      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+
+      if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
+      if (
+        updates.endDate &&
+        task.scheduled_start_time &&
+        updates.endDate < task.scheduled_start_time
+      )
+        throw new Error("End date cannot be before task start date.");
+      if (updates.endDate && !task.scheduled_start_time)
+        throw new Error(
+          "Recurrence task must have a start date if end date is provided.",
+        );
+
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
           ...updates,
@@ -100,7 +127,7 @@ class TaskService implements ITaskService {
         id: updatedRecurrenceTask[1][0].task_id,
         days: updatedRecurrenceTask[1][0].days,
         cadence: updatedRecurrenceTask[1][0].cadence,
-        endDate: updatedRecurrenceTask[1][0].end_date,
+        endDate: updatedRecurrenceTask[1][0].end_date ?? undefined,
         exclusions: updatedRecurrenceTask[1][0].exclusions,
       };
     } catch (error: unknown) {
@@ -112,7 +139,7 @@ class TaskService implements ITaskService {
   }
 
   /* eslint-disable class-methods-use-this */
-  async deleteRecurrence(recurrenceId: string) {
+  async deleteRecurrence(recurrenceId: string): Promise<string> {
     try {
       const result = await PgRecurrenceTask.destroy({
         where: { task_id: recurrenceId },
@@ -132,7 +159,10 @@ class TaskService implements ITaskService {
   }
 
   /* eslint-disable class-methods-use-this */
-  async excludeDate(recurrenceId: string, date: Date) {
+  async excludeDate(
+    recurrenceId: string,
+    date: Date,
+  ): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
@@ -151,7 +181,14 @@ class TaskService implements ITaskService {
           resetDateToUTCMidnight(new Date(d)).getTime() === exclusion.getTime(),
       );
 
-      if (alreadyExists) return recurrenceTask;
+      if (alreadyExists)
+        return {
+          id: recurrenceTask.id,
+          days: recurrenceTask.days,
+          cadence: recurrenceTask.cadence,
+          endDate: recurrenceTask.end_date ?? undefined,
+          exclusions: recurrenceTask.exclusions,
+        };
 
       const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
       if (date < actualStart) {
@@ -198,7 +235,7 @@ class TaskService implements ITaskService {
         id: updatedRecurrenceTask[1][0].task_id,
         days: updatedRecurrenceTask[1][0].days,
         cadence: updatedRecurrenceTask[1][0].cadence,
-        endDate: updatedRecurrenceTask[1][0].end_date,
+        endDate: updatedRecurrenceTask[1][0].end_date ?? undefined,
         exclusions: updatedRecurrenceTask[1][0].exclusions,
       };
     } catch (error: unknown) {
@@ -212,7 +249,10 @@ class TaskService implements ITaskService {
   }
 
   /* eslint-disable class-methods-use-this */
-  async generateRecurringInstanceForData(taskId: string, date: Date) {
+  async generateRecurringInstanceForData(
+    taskId: string,
+    date: Date,
+  ): Promise<TaskResponseDTO> {
     try {
       const task = await PgTask.findByPk(taskId, { raw: true });
       const recurrence = await PgRecurrenceTask.findOne({
