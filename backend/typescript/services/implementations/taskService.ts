@@ -11,12 +11,22 @@ import {
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { Days } from "../../types";
-import { buildStartDates, isDateInRecurrence, resetDateToUTCMidnight } from "../../utilities/dateUtils";
+import {
+  buildStartDates,
+  isDateInRecurrence,
+  resetDateToUTCMidnight,
+} from "../../utilities/dateUtils";
+
 const Logger = logger(__filename);
 
 class TaskService implements ITaskService {
-
-  async createRecurrence(taskId: string, cadence: string, days?: Days[], endDate?: Date) {
+  /* eslint-disable class-methods-use-this */
+  async createRecurrence(
+    taskId: string,
+    cadence: string,
+    days?: Days[],
+    endDate?: Date,
+  ) {
     try {
       const task = await PgTask.findByPk(taskId, { raw: true });
       if (!task) {
@@ -24,10 +34,10 @@ class TaskService implements ITaskService {
       }
       const recurrenceTask = await PgRecurrenceTask.create({
         task_id: taskId,
-        ...(days && { days: days }),
-        cadence: cadence,
+        ...(days && { days }),
+        cadence,
         ...(endDate && { end_date: endDate }),
-      })
+      });
 
       return {
         id: recurrenceTask.task_id,
@@ -35,16 +45,21 @@ class TaskService implements ITaskService {
         cadence: recurrenceTask.cadence,
         endDate: recurrenceTask.end_date,
         exclusions: recurrenceTask.exclusions,
-      }
+      };
     } catch (error: unknown) {
-      Logger.error(`Failed to create recurrence. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to create recurrence. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
+  /* eslint-disable class-methods-use-this */
   async getRecurrence(taskId: string) {
     try {
-      const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, { raw: true });
+      const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, {
+        raw: true,
+      });
       if (!recurrenceTask) {
         throw new NotFoundError(`Task id ${taskId} not found`);
       }
@@ -55,71 +70,92 @@ class TaskService implements ITaskService {
         cadence: recurrenceTask.cadence,
         endDate: recurrenceTask.end_date,
         exclusions: recurrenceTask.exclusions,
-      }
+      };
     } catch (error: unknown) {
-      Logger.error(`Failed to get recurrence. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to get recurrence. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
-  async updateRecurrence(recurrenceId: string, updates: Partial<PgRecurrenceTask>) {
+  /* eslint-disable class-methods-use-this */
+  async updateRecurrence(
+    recurrenceId: string,
+    updates: Partial<PgRecurrenceTask>,
+  ) {
     try {
-      const updatedRecurrenceTask = await PgRecurrenceTask.update({
-        ...updates,
-      }, { where: { task_id: recurrenceId }, returning: true });
+      const updatedRecurrenceTask = await PgRecurrenceTask.update(
+        {
+          ...updates,
+        },
+        { where: { task_id: recurrenceId }, returning: true },
+      );
 
-      if (0 === updatedRecurrenceTask[0]) {
+      if (updatedRecurrenceTask[0] === 0) {
         throw new NotFoundError(`Recurrence id ${recurrenceId} not found`);
       }
 
       return {
         id: updatedRecurrenceTask[1][0].task_id,
         days: updatedRecurrenceTask[1][0].days,
-        cadence:  updatedRecurrenceTask[1][0].cadence,
+        cadence: updatedRecurrenceTask[1][0].cadence,
         endDate: updatedRecurrenceTask[1][0].end_date,
         exclusions: updatedRecurrenceTask[1][0].exclusions,
-      }
+      };
     } catch (error: unknown) {
-      Logger.error(`Failed to update recurrence. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to update recurrence. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
+  /* eslint-disable class-methods-use-this */
   async deleteRecurrence(recurrenceId: string) {
     try {
       const result = await PgRecurrenceTask.destroy({
         where: { task_id: recurrenceId },
       });
 
-      if (0 === result) {
+      if (result === 0) {
         throw new NotFoundError(`Recurrence id ${recurrenceId} not found`);
       }
 
-      return recurrenceId
+      return recurrenceId;
     } catch (error: unknown) {
-      Logger.error(`Failed to delete recurrence. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to delete recurrence. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
+  /* eslint-disable class-methods-use-this */
   async excludeDate(recurrenceId: string, date: Date) {
     try {
-      const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, { raw: true });
+      const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
+        raw: true,
+      });
       const task = await PgTask.findByPk(recurrenceId, { raw: true });
 
-      if (!recurrenceTask || !task) throw new NotFoundError("Recurrence task not found");
-      if (!task.scheduled_start_time) throw new NotFoundError("Recurrence task has no start time");
+      if (!recurrenceTask || !task)
+        throw new NotFoundError("Recurrence task not found");
+      if (!task.scheduled_start_time)
+        throw new NotFoundError("Recurrence task has no start time");
 
       const exclusion = resetDateToUTCMidnight(date);
 
-      const alreadyExists = recurrenceTask.exclusions?.some(d =>
-        resetDateToUTCMidnight(new Date(d)).getTime() === exclusion.getTime()
+      const alreadyExists = recurrenceTask.exclusions?.some(
+        (d) =>
+          resetDateToUTCMidnight(new Date(d)).getTime() === exclusion.getTime(),
       );
 
       if (alreadyExists) return recurrenceTask;
 
       const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
-      if (date < actualStart) { // throw error because these checks should be done on frontend too
+      if (date < actualStart) {
+        // throw error because these checks should be done on frontend too
         throw new Error("Exclusion date is before recurrence start date.");
       }
 
@@ -134,8 +170,9 @@ class TaskService implements ITaskService {
       if (recurrenceTask.days && recurrenceTask.days.length > 0) {
         startDates = buildStartDates(actualStart, recurrenceTask.days);
       }
-    
+
       let validExclusion = false;
+      // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
           validExclusion = true;
@@ -147,37 +184,58 @@ class TaskService implements ITaskService {
         throw new Error("An invalid exclusion date was given");
       }
 
-      const updatedExclusions = recurrenceTask.exclusions ? [...recurrenceTask.exclusions, date] : [date];
-      const updatedRecurrenceTask = await PgRecurrenceTask.update({
-        exclusions: updatedExclusions,
-      }, { where: { task_id: recurrenceId }, returning: true });
+      const updatedExclusions = recurrenceTask.exclusions
+        ? [...recurrenceTask.exclusions, date]
+        : [date];
+      const updatedRecurrenceTask = await PgRecurrenceTask.update(
+        {
+          exclusions: updatedExclusions,
+        },
+        { where: { task_id: recurrenceId }, returning: true },
+      );
 
       return {
         id: updatedRecurrenceTask[1][0].task_id,
         days: updatedRecurrenceTask[1][0].days,
-        cadence:  updatedRecurrenceTask[1][0].cadence,
+        cadence: updatedRecurrenceTask[1][0].cadence,
         endDate: updatedRecurrenceTask[1][0].end_date,
         exclusions: updatedRecurrenceTask[1][0].exclusions,
-      }
+      };
     } catch (error: unknown) {
-      Logger.error(`Failed to exclude date from recurrence. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to exclude date from recurrence. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
       throw error;
     }
   }
 
+  /* eslint-disable class-methods-use-this */
   async generateRecurringInstanceForData(taskId: string, date: Date) {
     try {
       const task = await PgTask.findByPk(taskId, { raw: true });
-      const recurrence = await PgRecurrenceTask.findOne({ where: { task_id: taskId }, raw: true });
-      if (!task || !recurrence) throw new NotFoundError(`Task or recurrence not found`);
-      if (!task.scheduled_start_time) throw new NotFoundError("Recurrence task has no start time");
+      const recurrence = await PgRecurrenceTask.findOne({
+        where: { task_id: taskId },
+        raw: true,
+      });
+      if (!task || !recurrence)
+        throw new NotFoundError(`Task or recurrence not found`);
+      if (!task.scheduled_start_time)
+        throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < actualStart) throw new Error("Date is before recurrence start date.");
-      if (recurrence.end_date && date > new Date(recurrence.end_date)) throw new Error("Date is after recurrence end date.");
-      if (recurrence.exclusions?.some((ex: Date) =>
-        resetDateToUTCMidnight(new Date(ex)).getTime() === resetDateToUTCMidnight(date).getTime()
-      )) {
+      if (date < actualStart)
+        throw new Error("Date is before recurrence start date.");
+      if (recurrence.end_date && date > new Date(recurrence.end_date))
+        throw new Error("Date is after recurrence end date.");
+      if (
+        recurrence.exclusions?.some(
+          (ex: Date) =>
+            resetDateToUTCMidnight(new Date(ex)).getTime() ===
+            resetDateToUTCMidnight(date).getTime(),
+        )
+      ) {
         throw new Error("Date is excluded from recurrence.");
       }
 
@@ -185,7 +243,8 @@ class TaskService implements ITaskService {
       if (recurrence.days && recurrence.days.length > 0) {
         startDates = buildStartDates(actualStart, recurrence.days);
       }
-      console.log("Start dates for recurrence:", startDates);
+
+      // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
           return {
@@ -202,7 +261,11 @@ class TaskService implements ITaskService {
       }
       throw new Error("No recurrence instance matches the given date.");
     } catch (error) {
-      Logger.error(`Failed to generate recurring instance. Reason = ${getErrorMessage(error)}`);
+      Logger.error(
+        `Failed to generate recurring instance. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
       throw error;
     }
   }
