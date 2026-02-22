@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { Flex, Text, Table, Thead, Tbody, Tr, Th, Td, Spinner} from "@chakra-ui/react";
-import { ChevronLeftIcon } from "@chakra-ui/icons";
+import {
+  Flex,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Spinner,
+} from "@chakra-ui/react";
+import { ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetProfileSidebar from "../components/PetProfileSidebar";
 import Button from "../../../components/common/Button";
@@ -9,158 +19,318 @@ import Search from "../../../components/common/Search";
 import Pagination from "../../../components/common/Pagination";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
+//import PetAPIClient from "../../../APIClients/PetAPIClient";
 import { User } from "../../../types/UserTypes";
-import { colorLevelMap } from "../../../types/TaskTypes";
+import { colorLevelMap, ColorLevel } from "../../../types/TaskTypes";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
-import PetAPIClient from "../../../APIClients/PetAPIClient";
-import PopupModal from "../../../components/common/PopupModal";
-import { useDisclosure } from "@chakra-ui/react";
+import colors from "../../../theme/colors";
+
+import { PetStatus, SexEnum } from "../../../types/PetTypes";
+
+// sample prop fro PetProfilePage for testing
+const sampleProp = {
+  id: 1,
+  name: "Benji",
+  status: PetStatus.NEEDS_CARE,
+  colourLevel: ColorLevel.YELLOW,
+  breed: "Siberian Husky",
+  birthday: "2025-07-27",
+  weightKg: 25.5,
+  spayedNeutered: true,
+  sex: SexEnum.MALE,
+  photo: "/images/dog2.png",
+  petCare: {
+    safetyInfo: "safety info",
+    managementInfo: "management info",
+    medicalInfo: "medical",
+  },
+};
 
 const AssignTaskPage = (): React.ReactElement => {
-    const params = useParams<{ petId: string; taskId: string }>();
-    const petId = Number(params.petId);
-    const taskId = Number{params.taskId};
-    const history = useHistory();
+  const params = useParams<{ petId: string }>();
+  const petId = Number(params.petId);
+  const history = useHistory();
 
-    const [users, setUsers] = useState<User[]>([]);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [searchTerm, setSearchTerm] = useState<string>("");
-    const [petData, setPetData] = useState<any | null>(null);
-    const [isRecurringTask, setIsRecurringTask] = useState<boolean>(false);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const {
-        isOpen: isRecurringModalOpen,
-        onOpen: openRecurringModal,
-        onClose: closeRecurringModal,
-    } = useDisclosure();
+  const usersPerPage = 10;
 
-    const usersPerPage = 7;
-
-    // fetch users
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const fetchedUsers = await UserAPIClient.get();
-                setUsers(fetchedUsers);
-            } catch (error) {
-                // console.error(`Failed to fetch user ${userId}:`, error);
-                history.push("/not-found");
-                // !!!! LOOK MORE INTO HOW TO DO SEND ERROR MSG !!!! -> from UserProfilePage
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUsers();
-    }, []);
-
-    // fetch pet data
-    useEffect(() => {
-        const fetchPet = async () => {
-            try {
-                const pet = await PetAPIClient.getPet(petId);
-                setPetData(pet);
-            } catch (error) {
-                // console.error(`Failed to fetch pet ${petId}:`, error);
-                history.push("/not-found");
-            }
-        };
-
-        fetchPet();
-    }, [petId, history]);
-
-    // TODO: Fetch task data to check if recurring
-    // For now, you'll need to add a TaskAPIClient.getTask(taskId) method
-    // This is a placeholder - replace when TaskAPIClient is ready
-    useEffect(() => {
-        const fetchTask = async () => {
-            try {
-            // const task = await TaskAPIClient.getTask(taskId);
-            // setIsRecurringTask(task.isRecurring);
-                
-            // Placeholder - assume not recurring for now
-            setIsRecurringTask(false);
-            } catch (error) {
-                console.error("Failed to fetch task:", error);
-            }
-        };
-
-        fetchTask();
-    }, [taskId]);    
-
-
-    // filters users based on search
-    const filteredUsers = useMemo(() => {
-        return users.filter((user) => 
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
-    }, [users, searchTerm]);
-
-    const paginatedUsers = useMemo(() => {
-        const startIndex = (currentPage - 1) * usersPerPage;
-        const endIndex = startIndex + usersPerPage;
-        return filteredUsers.slice(startIndex, endIndex);
-    }, [filteredUsers, currentPage, usersPerPage]);
-
-    const handleSearch = (value: string) => {
-        setSearchTerm(value);
-        setCurrentPage(1);
-    };
-
-    const handleRowClick = (user: User) => {
-        setSelectedUser(user);
-        setSearchTerm(user.name);
-    };
-
-    const handleBackClick = () => {
-        history.goBack();
-    };
-
-    const handleSaveClick = () => {
-        if (!selectedUser) return;
-    
-        // If task is recurring, show the modal
-        if (isRecurringTask) {
-            openRecurringModal();
-        } else {
-            // If not recurring, save immediately
-            handleConfirmAssignment(false);
-        }
-    };
-  
-    const handleConfirmAssignment = async (assignAllRecurring: boolean) => {
-        if (!selectedUser) return;
-    
-        try {
-            // TODO: Replace with actual API call when TaskAPIClient is ready
-            console.log("Assigning task", taskId, "to user", selectedUser.id);
-            console.log("Assign all recurring?", assignAllRecurring);
-      
-            // await TaskAPIClient.assignTask(taskId, selectedUser.id, assignAllRecurring);
-      
-            // Close modal if it's open
-            closeRecurringModal();
-      
-            // Go back to pet profile
-            history.goBack();
-        } catch (error) {
-            setErrorMessage(
-                `Failed to assign task. ${error instanceof Error ? error.message : "Unknown error occurred."}`,
-            );
-            closeRecurringModal();
-        }
-    };
-
-    if (loading) {
-        return (
-            <Flex justify="center" align="center" height="100vh">
-                <Spinner />
-            </Flex>
-        );
+  // fetch users
+  const getUsers = async () => {
+    try {
+      const fetchedUsers = await UserAPIClient.get();
+      if (fetchedUsers != null) setUsers(fetchedUsers);
+    } catch (error) {
+      setErrorMessage(`${error}`);
+    } finally {
+      setLoading(false);
     }
+  };
 
-}
+  useEffect(() => {
+    getUsers();
+  }, []);
 
+  // filters users based on search
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [users, search]);
+
+  const pagedUsers = filteredUsers.slice(
+    (page - 1) * usersPerPage,
+    page * usersPerPage,
+  );
+
+  const handleSearch = (value: string) => {
+    setSelectedUser(null);
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleRowClick = (user: User) => {
+    setSelectedUser(user);
+  };
+
+  const handleBackClick = () => {
+    history.goBack();
+  };
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner />
+      </Flex>
+    );
+  }
+
+  return (
+    <>
+      <NavBar pageName="Pet Profile" />
+      <Flex flex="1">
+        <PetProfileSidebar {...sampleProp} />
+
+        {/* main content */}
+        <Flex
+          direction="column"
+          flex="1"
+          backgroundColor="gray.50"
+          paddingTop="8.5rem"
+          paddingInline="2.5rem"
+          gap="1.5rem"
+        >
+          {/* back to pet profile */}
+          <Flex
+            align="center"
+            gap="0.25rem"
+            cursor="pointer"
+            onClick={handleBackClick}
+            width="fit-content"
+          >
+            <ChevronLeftIcon />
+            <Text m={0} textStyle="body">
+              Back to Pet Profile
+            </Text>
+          </Flex>
+
+          {/* title */}
+          <Text m={0} textStyle="h1">
+            Assign a Task
+          </Text>
+
+          {/* assign to label & search */}
+          <Flex direction="column" gap="0.5rem">
+            <Text m={0} textStyle="body">
+              Assign to:
+            </Text>
+            {selectedUser ? (
+              <Flex
+                align="center"
+                padding="0.5rem 0.75rem"
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="0.375rem"
+                backgroundColor="white"
+                width="100%"
+                height="2.5rem"
+                overflow="hidden"
+              >
+                {/* fill search bar when selected */}
+                <Flex
+                  align="center"
+                  gap="0.5rem"
+                  padding="0.25rem 0.5rem"
+                  borderRadius="full"
+                  backgroundColor="blue.50"
+                  cursor="pointer"
+                  //height="2.75rem"
+                  onClick={() => {
+                    setSelectedUser(null);
+                    setSearch("");
+                  }}
+                >
+                  <Flex
+                    width="1.5rem"
+                    height="1.5rem"
+                    flexShrink={0}
+                    borderRadius="full"
+                    overflow="hidden"
+                    sx={{
+                      "> *": {
+                        width: "1.5rem !important",
+                        height: "1.5rem !important",
+                      },
+                      "img": {
+                        width: "1.25rem !important",
+                        height: "1.25rem !important",
+                      },
+                      "div": { borderRadius: "50% !important" },
+                    }}
+                  >
+                    <ProfilePhoto
+                      image={selectedUser.profilePhoto}
+                      color={colorLevelMap[selectedUser.colorLevel]}
+                      showColorBorder
+                      size="small"
+                      type="user"
+                    />
+                  </Flex>
+                  <Text m={0} textStyle="body">
+                    {selectedUser.name}
+                  </Text>
+                </Flex>
+              </Flex>
+            ) : (
+              <Flex
+                backgroundColor="white"
+                width="100%"
+                sx={{ "> div": { maxWidth: "100%", width: "100%" } }}
+              >
+                <Search
+                  search={search}
+                  onChange={handleSearch}
+                  placeholder="Search for a user..."
+                />
+              </Flex>
+            )}
+          </Flex>
+
+          {/* user table */}
+          <Flex direction="column" gap="0.5rem">
+            <Text m={0} textStyle="body">
+              Suggestions:
+            </Text>
+            {errorMessage ? (
+              <Text m={0} color="red.500">
+                {errorMessage}
+              </Text>
+            ) : (
+              <>
+                {
+                  <Table w="100%">
+                    <Thead borderBottom="1px solid" borderColor="gray.200">
+                      <Tr>
+                        <Th>
+                          <Text m={0} textStyle="subheading">
+                            NAME
+                          </Text>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {pagedUsers.length === 0 ? (
+                        <Tr>
+                          <Td colSpan={2}>
+                            <Text m={0}>No users found.</Text>
+                          </Td>
+                        </Tr>
+                      ) : (
+                        pagedUsers.map((user) => (
+                          <Tr
+                            key={user.id}
+                            onClick={() => handleRowClick(user)}
+                            cursor="pointer"
+                            backgroundColor={
+                              selectedUser?.id === user.id ? "blue.50" : "white"
+                            }
+                            borderTop="1px solid"
+                            borderBottom="1px solid"
+                            borderColor="gray.200"
+                            _hover={{
+                              backgroundColor:
+                                selectedUser?.id === user.id
+                                  ? "blue.50"
+                                  : "gray.50",
+                            }}
+                          >
+                            <Td py="0.5rem">
+                              <Flex gap="1rem" align="center">
+                                <ProfilePhoto
+                                  image={user.profilePhoto}
+                                  color={colorLevelMap[user.colorLevel || 1]}
+                                  size="small"
+                                  type="user"
+                                />
+                                <Text m={0} textStyle="body">
+                                  {user.name}
+                                </Text>
+                              </Flex>
+                            </Td>
+                            <Td py="0.5rem" width="50%">
+                              <Flex
+                                sx={{
+                                  "> div": {
+                                    borderWidth: "0",
+                                    backgroundColor:
+                                      selectedUser?.id === user.id
+                                        ? "blue.50"
+                                        : "white",
+                                  },
+                                }}
+                              >
+                                <ColourLevelBadge
+                                  colourLevel={colorLevelMap[user.colorLevel]}
+                                  size="small"
+                                />
+                              </Flex>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
+                    </Tbody>
+                  </Table>
+                }
+              </>
+            )}
+          </Flex>
+
+          {/* pagination */}
+          <Pagination
+            value={page}
+            onChange={(newPage) => setPage(newPage)}
+            numberOfItems={filteredUsers.length}
+            itemsPerPage={usersPerPage}
+          />
+
+          {/* save/next button */}
+          <Flex justify="flex-end">
+            <Button
+              variant={selectedUser ? "green" : "gray"}
+              rightIcon={<ChevronRightIcon />}
+            >
+              {selectedUser ? "Save" : "Next"}
+            </Button>
+          </Flex>
+        </Flex>
+      </Flex>
+    </>
+  );
+};
+
+export default AssignTaskPage;
