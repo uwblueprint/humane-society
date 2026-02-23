@@ -6,7 +6,6 @@ import {
   FormLabel,
   Image,
   Spacer,
-  Spinner,
   Text,
   useDisclosure,
   useToast,
@@ -14,23 +13,19 @@ import {
 import { ChevronRightIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useHistory, useParams } from "react-router-dom";
-import PetAPIClient from "../../../APIClients/PetAPIClient";
 import { PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Input from "../../../components/common/Input";
 import NavBar from "../../../components/common/navbar/NavBar";
-import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { SexEnum } from "../../../types/PetTypes";
-import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
-import {
-  getDaysInMonth,
-  MONTH_NUMBER_TO_NAME,
-} from "../../../utils/CommonUtils";
+import { AnimalTag } from "../../../types/TaskTypes";
+import { getDaysInMonth } from "../../../utils/CommonUtils";
+import QuitEditingModal from "./QuitEditingModal";
+import { HOME_PAGE } from "../../../constants/Routes";
+import AddPetModal from "./AddPetModal";
 
 interface FormData {
   name: string;
@@ -48,17 +43,6 @@ interface FormData {
   medicalInfo: string;
   profilePhoto: string;
 }
-
-const getSpayedNeuteredValue = (sex?: SexEnum, spayedNeutered?: boolean) => {
-  if (spayedNeutered === undefined || spayedNeutered === null) {
-    return "";
-  }
-  if (sex === undefined || sex === SexEnum.MALE) {
-    return spayedNeutered ? "Neutered" : "Unneutered";
-  }
-  // Must be female
-  return spayedNeutered ? "Spayed" : "Not spayed";
-};
 
 // By default we give 31 days if no month is
 // selected. If a month is selected and no year
@@ -99,21 +83,22 @@ const validateDate = (month: string, date: string, year: string) => {
   return true;
 };
 
-const EditPetProfilePage = (): React.ReactElement => {
-  const params = useParams<{ id: string }>();
-  const petId = Number(params.id);
-  const history = useHistory();
+const AddPetForm = (): React.ReactElement => {
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
   >(undefined);
   const [isUploading, setIsUploading] = useState(false);
   const [page, setPage] = useState(1);
   const {
-    isOpen: isDeleteConfirmModalOpen,
-    onOpen: openDeleteConfirmModal,
-    onClose: closeDeleteConfirmModal,
+    isOpen: isQuitEditingModalOpen,
+    onOpen: openQuitEditingModal,
+    onClose: closeQuitEditingModal,
+  } = useDisclosure();
+  const {
+    isOpen: isAddPetModalOpen,
+    onOpen: openAddPetModal,
+    onClose: closeAddPetModal,
   } = useDisclosure();
 
   // Birthday date options can vary depending on the month
@@ -128,7 +113,6 @@ const EditPetProfilePage = (): React.ReactElement => {
     handleSubmit,
     setValue,
     getValues,
-    reset,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -150,58 +134,6 @@ const EditPetProfilePage = (): React.ReactElement => {
     mode: "onChange", // Errors are updated on every change
     reValidateMode: "onChange",
   });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const petData = await PetAPIClient.getPet(petId);
-
-        // Update local profile photo state
-        setLocalProfilePhoto(petData.photo);
-
-        let birthdayYear: string | undefined;
-        let birthdayMonth: string | undefined;
-        let birthdayDate: string | undefined;
-        if (petData.birthday) {
-          // We make an assumption that dates are returned in "YYYY-MM-DD" which should be true from sequelize
-          const [year, month, day] = petData.birthday.split("-");
-
-          birthdayYear = year;
-          birthdayMonth = MONTH_NUMBER_TO_NAME[Number(month)];
-          birthdayDate = day;
-
-          // Update valid dates depending on the month / year
-          setBirthdayDateOptions(
-            getBirthdayDateOptions(birthdayMonth, birthdayYear),
-          );
-        }
-
-        // Prepopulate form with pet data
-        reset({
-          name: petData.name,
-          colourLevel: colorLevelMap[petData.colorLevel],
-          animalTag: petData.animalTag,
-          breed: petData.breed || "",
-          weight: petData.weight?.toString() || "",
-          birthdayYear,
-          birthdayMonth,
-          birthdayDate,
-          sex: petData.sex === SexEnum.MALE ? "Male" : "Female",
-          neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
-          safetyInfo: petData.careInfo?.safetyInfo || "",
-          managementInfo: petData.careInfo?.managementInfo || "",
-          medicalInfo: petData.careInfo?.medicalInfo || "",
-          profilePhoto: petData.photo || "",
-        });
-      } catch (error) {
-        history.push("/not-found");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [history, petId, reset, toast]);
 
   // Dynamically update days when month/year changes
   const selectedBirthdayMonth = watch("birthdayMonth");
@@ -250,28 +182,8 @@ const EditPetProfilePage = (): React.ReactElement => {
         profilePhoto: localProfilePhoto,
       });
 
-      toast({
-        title: "Success",
-        description: "Form data logged to console",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+      openAddPetModal();
     }
-  };
-
-  const handleDeletePet = () => {
-    // TODO: Remove this and send request to delete to backend endpoint
-    // eslint-disable-next-line no-console
-    console.log("Delete pet functionality not implemented yet");
-    toast({
-      title: "Delete pet",
-      description: "Delete functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
-    closeDeleteConfirmModal();
   };
 
   const handleNextPage = async () => {
@@ -345,14 +257,6 @@ const EditPetProfilePage = (): React.ReactElement => {
     "Unspayed",
   ];
 
-  if (loading) {
-    return (
-      <Flex justify="center" align="center" height="100vh">
-        <Spinner />
-      </Flex>
-    );
-  }
-
   return (
     <>
       <NavBar pageName="Pet Profile" />
@@ -377,17 +281,17 @@ const EditPetProfilePage = (): React.ReactElement => {
             gap="0.5rem"
             mb="1.5rem"
             cursor="pointer"
-            onClick={() => window.history.back()}
+            onClick={() => openQuitEditingModal()}
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
             <Text m={0} textStyle="body" color="gray.600">
-              Back to Profile
+              Back to Pet List
             </Text>
           </Flex>
 
           <Text textStyle="h2" mb="2rem" m={0}>
-            Edit Pet Profile
+            Create Pet Profile
           </Text>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -716,14 +620,6 @@ const EditPetProfilePage = (): React.ReactElement => {
               {page === 1 && (
                 <>
                   <Button
-                    variant="red"
-                    size="medium"
-                    onClick={openDeleteConfirmModal}
-                    type="button"
-                  >
-                    Delete Pet
-                  </Button>
-                  <Button
                     as="button"
                     variant="gray"
                     size="medium"
@@ -759,18 +655,28 @@ const EditPetProfilePage = (): React.ReactElement => {
           </form>
         </Flex>
       </Flex>
-      <PopupModal
-        open={isDeleteConfirmModalOpen}
-        title="Delete Pet?"
-        message="Are you sure you want to delete this pet? This process cannot be undone."
-        primaryButtonText="Delete"
-        primaryButtonColor="red"
-        onPrimaryClick={handleDeletePet}
-        secondaryButtonText="Cancel"
-        onSecondaryClick={closeDeleteConfirmModal}
+      <QuitEditingModal
+        isOpen={isQuitEditingModalOpen}
+        handleSecondaryButtonClick={closeQuitEditingModal}
+        navigateTo={HOME_PAGE}
+      />
+      <AddPetModal
+        isOpen={isAddPetModalOpen}
+        handlePrimaryButtonClick={() => {
+          closeAddPetModal();
+          toast({
+            title: "Success",
+            description: "Form data logged to console",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          // add implementation here
+        }}
+        handleSecondaryButtonClick={closeAddPetModal}
       />
     </>
   );
 };
 
-export default EditPetProfilePage;
+export default AddPetForm;
