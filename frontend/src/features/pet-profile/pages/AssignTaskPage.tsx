@@ -46,7 +46,6 @@ const sampleProp = {
 };
 
 const AssignTaskPage = (): React.ReactElement => {
-  const params = useParams<{ petId: string }>();
   const history = useHistory();
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -228,78 +227,78 @@ const AssignTaskPage = (): React.ReactElement => {
               </Text>
             ) : (
               <>
-                  <Table w="100%">
-                    <Thead borderBottom="1px solid" borderColor="gray.200">
+                <Table w="100%">
+                  <Thead borderBottom="1px solid" borderColor="gray.200">
+                    <Tr>
+                      <Th>
+                        <Text m={0} textStyle="subheading">
+                          NAME
+                        </Text>
+                      </Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {pagedUsers.length === 0 ? (
                       <Tr>
-                        <Th>
-                          <Text m={0} textStyle="subheading">
-                            NAME
-                          </Text>
-                        </Th>
+                        <Td colSpan={2}>
+                          <Text m={0}>No users found.</Text>
+                        </Td>
                       </Tr>
-                    </Thead>
-                    <Tbody>
-                      {pagedUsers.length === 0 ? (
-                        <Tr>
-                          <Td colSpan={2}>
-                            <Text m={0}>No users found.</Text>
+                    ) : (
+                      pagedUsers.map((user) => (
+                        <Tr
+                          key={user.id}
+                          onClick={() => handleRowClick(user)}
+                          cursor="pointer"
+                          backgroundColor={
+                            selectedUser?.id === user.id ? "blue.50" : "white"
+                          }
+                          borderTop="1px solid"
+                          borderBottom="1px solid"
+                          borderColor="gray.200"
+                          _hover={{
+                            backgroundColor:
+                              selectedUser?.id === user.id
+                                ? "blue.50"
+                                : "gray.50",
+                          }}
+                        >
+                          <Td py="0.5rem">
+                            <Flex gap="1rem" align="center">
+                              <ProfilePhoto
+                                image={user.profilePhoto}
+                                color={colorLevelMap[user.colorLevel || 1]}
+                                size="small"
+                                type="user"
+                              />
+                              <Text m={0} textStyle="body">
+                                {user.name}
+                              </Text>
+                            </Flex>
+                          </Td>
+                          <Td py="0.5rem" width="50%">
+                            <Flex
+                              sx={{
+                                "> div": {
+                                  borderWidth: "0",
+                                  backgroundColor:
+                                    selectedUser?.id === user.id
+                                      ? "blue.50"
+                                      : "white",
+                                },
+                              }}
+                            >
+                              <ColourLevelBadge
+                                colourLevel={colorLevelMap[user.colorLevel]}
+                                size="small"
+                              />
+                            </Flex>
                           </Td>
                         </Tr>
-                      ) : (
-                        pagedUsers.map((user) => (
-                          <Tr
-                            key={user.id}
-                            onClick={() => handleRowClick(user)}
-                            cursor="pointer"
-                            backgroundColor={
-                              selectedUser?.id === user.id ? "blue.50" : "white"
-                            }
-                            borderTop="1px solid"
-                            borderBottom="1px solid"
-                            borderColor="gray.200"
-                            _hover={{
-                              backgroundColor:
-                                selectedUser?.id === user.id
-                                  ? "blue.50"
-                                  : "gray.50",
-                            }}
-                          >
-                            <Td py="0.5rem">
-                              <Flex gap="1rem" align="center">
-                                <ProfilePhoto
-                                  image={user.profilePhoto}
-                                  color={colorLevelMap[user.colorLevel || 1]}
-                                  size="small"
-                                  type="user"
-                                />
-                                <Text m={0} textStyle="body">
-                                  {user.name}
-                                </Text>
-                              </Flex>
-                            </Td>
-                            <Td py="0.5rem" width="50%">
-                              <Flex
-                                sx={{
-                                  "> div": {
-                                    borderWidth: "0",
-                                    backgroundColor:
-                                      selectedUser?.id === user.id
-                                        ? "blue.50"
-                                        : "white",
-                                  },
-                                }}
-                              >
-                                <ColourLevelBadge
-                                  colourLevel={colorLevelMap[user.colorLevel]}
-                                  size="small"
-                                />
-                              </Flex>
-                            </Td>
-                          </Tr>
-                        ))
-                      )}
-                    </Tbody>
-                  </Table>
+                      ))
+                    )}
+                  </Tbody>
+                </Table>
               </>
             )}
           </Flex>
