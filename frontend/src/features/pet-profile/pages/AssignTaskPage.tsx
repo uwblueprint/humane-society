@@ -1,3 +1,4 @@
+/* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import {
@@ -19,11 +20,9 @@ import Search from "../../../components/common/Search";
 import Pagination from "../../../components/common/Pagination";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
-//import PetAPIClient from "../../../APIClients/PetAPIClient";
 import { User } from "../../../types/UserTypes";
 import { colorLevelMap, ColorLevel } from "../../../types/TaskTypes";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
-import colors from "../../../theme/colors";
 
 import { PetStatus, SexEnum } from "../../../types/PetTypes";
 
@@ -48,9 +47,7 @@ const sampleProp = {
 
 const AssignTaskPage = (): React.ReactElement => {
   const params = useParams<{ petId: string }>();
-  const petId = Number(params.petId);
   const history = useHistory();
-
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState<string>("");
@@ -169,7 +166,6 @@ const AssignTaskPage = (): React.ReactElement => {
                   borderRadius="full"
                   backgroundColor="blue.50"
                   cursor="pointer"
-                  //height="2.75rem"
                   onClick={() => {
                     setSelectedUser(null);
                     setSearch("");
@@ -186,11 +182,11 @@ const AssignTaskPage = (): React.ReactElement => {
                         width: "1.5rem !important",
                         height: "1.5rem !important",
                       },
-                      "img": {
+                      img: {
                         width: "1.25rem !important",
                         height: "1.25rem !important",
                       },
-                      "div": { borderRadius: "50% !important" },
+                      div: { borderRadius: "50% !important" },
                     }}
                   >
                     <ProfilePhoto
@@ -232,7 +228,6 @@ const AssignTaskPage = (): React.ReactElement => {
               </Text>
             ) : (
               <>
-                {
                   <Table w="100%">
                     <Thead borderBottom="1px solid" borderColor="gray.200">
                       <Tr>
@@ -305,7 +300,6 @@ const AssignTaskPage = (): React.ReactElement => {
                       )}
                     </Tbody>
                   </Table>
-                }
               </>
             )}
           </Flex>
