@@ -1,3 +1,5 @@
+import React from "react";
+import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -5,7 +7,6 @@ import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
 import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
-import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 

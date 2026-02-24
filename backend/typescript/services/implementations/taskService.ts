@@ -410,9 +410,12 @@ class TaskService implements ITaskService {
         where: whereClause,
         include: [
           { model: TaskTemplate, attributes: ["task_name", "category"] },
-          { model: User, attributes: ["id", "first_name", "last_name"], required: false },
+          {
+            model: User,
+            attributes: ["id", "first_name", "last_name"],
+            required: false,
+          },
         ],
-        
       });
 
       const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
@@ -427,12 +430,14 @@ class TaskService implements ITaskService {
           notes: task.notes,
           isRecurring: false,
           taskName: (task as any).task_template?.task_name,
-          category: (task as any).task_template?.category,   
-          assignedUser: (task as any).user ? {
-            id: (task as any).user.id,
-            firstName: (task as any).user.first_name,
-            lastName: (task as any).user.last_name,
-          } : null,           
+          category: (task as any).task_template?.category,
+          assignedUser: (task as any).user
+            ? {
+                id: (task as any).user.id,
+                firstName: (task as any).user.first_name,
+                lastName: (task as any).user.last_name,
+              }
+            : null,
         }),
       );
 

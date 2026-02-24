@@ -1,15 +1,10 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
-import { Flex, Spinner, Table, Text } from "@chakra-ui/react";
+import { Flex, Spinner, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import NavBar from "../../../components/common/navbar/NavBar";
 import { useHistory, useParams } from "react-router-dom";
+import NavBar from "../../../components/common/navbar/NavBar";
 import { PetStatus, SexEnum } from "../../../types/PetTypes";
-import {
-  ColorLevel,
-  ScheduledTaskDTO,
-  Task,
-  TaskCategory,
-} from "../../../types/TaskTypes";
+import { ColorLevel, ScheduledTaskDTO } from "../../../types/TaskTypes";
 import PetProfileSidebar from "../components/PetProfileSidebar";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import { TableColumn, TableHeader } from "../../../components/common/table";
@@ -49,17 +44,14 @@ const PetProfilePage = (): React.ReactElement => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      console.log("fetchTasks called, petId:", petId);
-      if (!petId || isNaN(petId)) {
+      if (!petId || Number.isNaN(petId)) {
         history.push("/not-found");
         return;
       }
 
       try {
         const dateString = selectedDate.toISOString().split("T")[0];
-        console.log("fetching tasks for date:", dateString, "petId:", petId);
         const fetchedTasks = await getPetTasksByDate(petId, dateString);
-        console.log("fetchedTasks:", fetchedTasks);
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
@@ -70,7 +62,7 @@ const PetProfilePage = (): React.ReactElement => {
     };
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate]);
+  }, [petId, selectedDate, history]);
 
   const sampleProp = {
     id: 1,
@@ -89,6 +81,20 @@ const PetProfilePage = (): React.ReactElement => {
       medicalInfo: "medical",
     },
   };
+
+  let content;
+  if (loading) {
+    content = <Spinner />;
+  } else if (tasks.length === 0) {
+    content = <Text>No tasks currently.</Text>;
+  } else {
+    content = (
+      <PetProfileTaskTableSection
+        tasks={tasks}
+        gridTemplateColumns={gridTemplateColumns}
+      />
+    );
+  }
 
   return (
     <>
@@ -123,16 +129,7 @@ const PetProfilePage = (): React.ReactElement => {
             />
           </Flex>
 
-          {loading ? (
-            <Spinner />
-          ) : tasks.length === 0 ? (
-            <Text>No tasks currently.</Text>
-          ) : (
-            <PetProfileTaskTableSection
-              tasks={tasks}
-              gridTemplateColumns={gridTemplateColumns}
-            />
-          )}
+          {content}
         </Flex>
       </Flex>
     </>

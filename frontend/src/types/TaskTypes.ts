@@ -78,4 +78,4 @@ export interface ScheduledTaskDTO {
   notes?: string;
   category: TaskCategory;
   isRecurring: boolean;
- } 
+} 
