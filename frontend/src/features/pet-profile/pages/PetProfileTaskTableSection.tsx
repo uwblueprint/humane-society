@@ -67,7 +67,7 @@ const PetProfileTaskTableSection = ({
           <Flex align="center" gap="0.75rem">
             <Icon as={taskTypeIcons[task.category]} boxSize="1.5rem" />
             <Text textStyle="body" m={0}>
-              {task.name}
+              {task.taskName}
             </Text>
           </Flex>
           <Text textStyle="body" m={0}>

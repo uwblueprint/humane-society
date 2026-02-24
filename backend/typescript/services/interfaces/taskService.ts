@@ -1,3 +1,5 @@
+import { TaskCategory } from "../../types";
+
 export interface TaskRequestDTO {
   userId?: number;
   petId: number;
@@ -33,6 +35,13 @@ export interface TaskNotesPatchDTO {
 
 export type TaskResponseDTOForDate = TaskResponseDTO & {
   isRecurring: boolean;
+  taskName?: string;
+  category?: TaskCategory;
+  assignedUser?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
 };
 
 export interface ITaskService {

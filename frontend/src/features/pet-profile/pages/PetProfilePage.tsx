@@ -51,7 +51,7 @@ const PetProfilePage = (): React.ReactElement => {
       id: 1,
       petId: 1,
       taskTemplateId: 1,
-      name: "Morning Walk",
+      taskName: "Morning Walk",
       category: TaskCategory.WALK,
       scheduledStartTime: new Date("2025-01-01T09:00:00"),
       startTime: new Date("2025-01-01T09:05:00"),
@@ -64,7 +64,7 @@ const PetProfilePage = (): React.ReactElement => {
       id: 2,
       petId: 1,
       taskTemplateId: 2,
-      name: "Training Session",
+      taskName: "Training Session",
       category: TaskCategory.TRAINING,
       scheduledStartTime: new Date("2025-01-01T10:00:00"),
       isRecurring: false,
@@ -73,6 +73,7 @@ const PetProfilePage = (): React.ReactElement => {
   ];
   useEffect(() => {
     const fetchTasks = async () => {
+      console.log("fetchTasks called, petId:", petId);
       if (!petId || isNaN(petId)) {
         history.push("/not-found");
         return;
@@ -80,7 +81,9 @@ const PetProfilePage = (): React.ReactElement => {
 
       try {
         const dateString = selectedDate.toISOString().split("T")[0];
+        console.log("fetching tasks for date:", dateString, "petId:", petId);
         const fetchedTasks = await getPetTasksByDate(petId, dateString);
+        console.log("fetchedTasks:", fetchedTasks);
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
@@ -89,7 +92,9 @@ const PetProfilePage = (): React.ReactElement => {
         console.error(err);
       }
     };
-  });
+    fetchTasks();
+  }, [petId, selectedDate]);
+
   const sampleProp = {
     id: 1,
     name: "Benji",
@@ -117,6 +122,9 @@ const PetProfilePage = (): React.ReactElement => {
           backgroundColor="gray.100"
           flex="1"
           paddingTop="8.5rem"
+          paddingLeft="2rem"
+          paddingRight="2rem"
+          paddingBottom="2rem"
           flexDirection="column"
         >
           <CalendarDateSelector
@@ -128,7 +136,7 @@ const PetProfilePage = (): React.ReactElement => {
             gridTemplateColumns={gridTemplateColumns}
           />
           <PetProfileTaskTableSection
-            tasks={mockTasks}
+            tasks={tasks}
             gridTemplateColumns={gridTemplateColumns}
           />
         </Flex>

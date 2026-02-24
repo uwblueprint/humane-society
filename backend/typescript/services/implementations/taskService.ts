@@ -12,6 +12,8 @@ import {
 } from "../interfaces/taskService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
+import TaskTemplate from "../../models/taskTemplate.model";
+import { User } from "../../models";
 
 const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
@@ -406,7 +408,11 @@ class TaskService implements ITaskService {
 
       const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
         where: whereClause,
-        raw: true,
+        include: [
+          { model: TaskTemplate, attributes: ["task_name", "category"] },
+          { model: User, attributes: ["id", "first_name", "last_name"], required: false },
+        ],
+        
       });
 
       const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
@@ -420,6 +426,13 @@ class TaskService implements ITaskService {
           endTime: task.end_time,
           notes: task.notes,
           isRecurring: false,
+          taskName: (task as any).task_template?.task_name,
+          category: (task as any).task_template?.category,   
+          assignedUser: (task as any).user ? {
+            id: (task as any).user.id,
+            firstName: (task as any).user.first_name,
+            lastName: (task as any).user.last_name,
+          } : null,           
         }),
       );
 
