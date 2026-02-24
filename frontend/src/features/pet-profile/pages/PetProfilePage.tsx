@@ -1,5 +1,5 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
-import { Flex, Table } from "@chakra-ui/react";
+import { Flex, Spinner, Table, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import NavBar from "../../../components/common/navbar/NavBar";
 import { useHistory, useParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [loading, setLoading] = useState(true);
   const history = useHistory();
   const { id } = useParams<{ id: string }>();
   const petId = Number(id);
@@ -46,31 +47,6 @@ const PetProfilePage = (): React.ReactElement => {
   // const params = useParams<{ id: string }>();
   // const petId = Number(params.id);
 
-  const mockTasks: ScheduledTaskDTO[] = [
-    {
-      id: 1,
-      petId: 1,
-      taskTemplateId: 1,
-      taskName: "Morning Walk",
-      category: TaskCategory.WALK,
-      scheduledStartTime: new Date("2025-01-01T09:00:00"),
-      startTime: new Date("2025-01-01T09:05:00"),
-      endTime: new Date("2025-01-01T09:30:00"),
-      notes: "completed task",
-      isRecurring: false,
-      assignedUser: { id: 1, firstName: "John", lastName: "Doe" },
-    },
-    {
-      id: 2,
-      petId: 1,
-      taskTemplateId: 2,
-      taskName: "Training Session",
-      category: TaskCategory.TRAINING,
-      scheduledStartTime: new Date("2025-01-01T10:00:00"),
-      isRecurring: false,
-      assignedUser: { id: 2, firstName: "Jane", lastName: "Smith" },
-    },
-  ];
   useEffect(() => {
     const fetchTasks = async () => {
       console.log("fetchTasks called, petId:", petId);
@@ -93,6 +69,7 @@ const PetProfilePage = (): React.ReactElement => {
       }
     };
     fetchTasks();
+    setLoading(false);
   }, [petId, selectedDate]);
 
   const sampleProp = {
@@ -131,14 +108,31 @@ const PetProfilePage = (): React.ReactElement => {
             selectedDate={selectedDate}
             onChange={(date) => setSelectedDate(date)}
           />
-          <TableHeader
-            columns={taskTableColumns}
-            gridTemplateColumns={gridTemplateColumns}
-          />
-          <PetProfileTaskTableSection
-            tasks={tasks}
-            gridTemplateColumns={gridTemplateColumns}
-          />
+          <Flex
+            backgroundColor="gray.50"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            marginBottom="0.5rem"
+            marginTop="0.5rem"
+            borderRadius="0.75rem"
+          >
+            <TableHeader
+              columns={taskTableColumns}
+              gridTemplateColumns={gridTemplateColumns}
+            />
+          </Flex>
+
+          {loading ? (
+            <Spinner />
+          ) : tasks.length === 0 ? (
+            <Text>No tasks currently.</Text>
+          ) : (
+            <PetProfileTaskTableSection
+              tasks={tasks}
+              gridTemplateColumns={gridTemplateColumns}
+            />
+          )}
         </Flex>
       </Flex>
     </>
