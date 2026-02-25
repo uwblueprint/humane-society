@@ -1,3 +1,4 @@
+import axios from "axios";
 import { User, CreateUserDTO } from "../types/UserTypes";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import baseAPIClient from "./BaseAPIClient";
@@ -73,6 +74,9 @@ const deleteUser = async (userId: string): Promise<void> => {
       headers: { Authorization: bearerToken },
     });
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
     throw new Error(`Failed to delete user '${error}'`);
   }
 };
