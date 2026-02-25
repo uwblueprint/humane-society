@@ -125,7 +125,7 @@ const InviteUserPage = (): React.ReactElement => {
         phoneNumber: formData.phoneNumber,
         canSeeAllLogs: false,
         canAssignUsersToTasks: false,
-        animalTags: animalTags,
+        animalTags: formData.animalTags,
         colorLevel: colorLevelNumber,
       });
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Alert, AlertIcon, CloseButton, Flex } from "@chakra-ui/react";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
 
@@ -91,14 +90,14 @@ const UserManagementPage = (): React.ReactElement => {
         onSearchChange: handleSearchChange,
         searchPlaceholder: "Search for a user...",
         actionButton: (
-         <Button
+          <Button
             variant="dark-blue"
             size="medium"
             onClick={handleInviteUserClick}
           >
             Invite User
           </Button>
-          )
+        ),
       }}
       errorMessage={errorMessage}
       onDismissError={() => setErrorMessage(null)}
