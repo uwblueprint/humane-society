@@ -51,7 +51,7 @@ export interface ITaskService {
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;
   updateRecurrence(
     recurrenceId: string,
-    updates: RecurrenceTaskDTO,
+    updates: Partial<RecurrenceTaskDTO>,
   ): Promise<RecurrenceTaskDTO>;
   deleteRecurrence(recurrenceId: string): Promise<string>;
   excludeDate(recurrenceId: string, date: Date): Promise<RecurrenceTaskDTO>;

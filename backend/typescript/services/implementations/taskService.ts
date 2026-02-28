@@ -95,7 +95,7 @@ class TaskService implements ITaskService {
   /* eslint-disable class-methods-use-this */
   async updateRecurrence(
     recurrenceId: string,
-    updates: RecurrenceTaskDTO,
+    updates: Partial<RecurrenceTaskDTO>,
   ): Promise<RecurrenceTaskDTO> {
     try {
       const task = await PgTask.findByPk(recurrenceId, { raw: true });
