@@ -93,7 +93,7 @@ const App = (): React.ReactElement => {
                 allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
-                exact
+                exact={false}
                 path={`${Routes.PET_PROFILE_PAGE}/:id`}
                 component={PetProfilePage}
                 allowedRoles={AuthConstants.ALL_ROLES}

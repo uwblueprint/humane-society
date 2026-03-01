@@ -31,7 +31,7 @@ const sampleProp = {
   id: 1,
   name: "Benji",
   status: PetStatus.NEEDS_CARE,
-  colourLevel: ColorLevel.YELLOW,
+  colorLevel: ColorLevel.YELLOW,
   breed: "Siberian Husky",
   birthday: "2025-07-27",
   weightKg: 25.5,

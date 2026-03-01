@@ -34,14 +34,14 @@ export interface PetProfileSidebarProps {
   id: number;
   name: string;
   status: PetStatusEnum;
-  colourLevel: ColorLevel;
+  colorLevel: ColorLevel;
   breed?: string;
   birthday?: string;
-  weightKg?: number;
-  spayedNeutered?: boolean;
-  sex: SexEnum;
+  weight?: number;
+  neutered?: boolean;
+  sex?: SexEnum;
   photo?: string;
-  petCare?: {
+  careInfo?: {
     safetyInfo?: string;
     medicalInfo?: string;
     managementInfo?: string;
@@ -72,6 +72,11 @@ const getSpayStatusLabel = (spayedNeutered?: boolean) => {
   return spayedNeutered ? "Spayed" : "Not spayed";
 };
 
+const getSexLabel = (sex?: SexEnum) => {
+  if (sex === undefined) return "Unknown sex";
+  return sex === SexEnum.MALE ? "Male" : "Female";
+};
+
 const getAgeLabel = (birthday: string) => {
   const ageInMonths = getAgeInMonths(birthday);
   if (ageInMonths < 12) {
@@ -85,14 +90,14 @@ function PetProfileSidebar({
   id,
   name,
   status,
-  colourLevel,
+  colorLevel,
   breed,
   birthday,
-  weightKg,
-  spayedNeutered,
+  weight,
+  neutered,
   sex,
   photo,
-  petCare,
+  careInfo,
 }: PetProfileSidebarProps): React.ReactElement {
   const role = getCurrentUserRole();
   const isAdminBehaviourist =
@@ -131,7 +136,7 @@ function PetProfileSidebar({
           </Text>
           {isAdminBehaviourist && (
             <Link href={`${EDIT_PET_PROFILE_PAGE}/${id}`} flexShrink="0">
-              <Image src={PencilIcon} alt="close" boxSize="1.2rem" />
+              <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
             </Link>
           )}
         </HStack>
@@ -142,7 +147,7 @@ function PetProfileSidebar({
         <Text margin="0" fontWeight="600" textStyle={{ base: "h3" }}>
           Colour Level
         </Text>
-        <ColourLevelBadge colourLevel={colourLevel} size="large" />
+        <ColourLevelBadge colourLevel={colorLevel} size="large" />
       </VStack>
 
       <VStack alignItems="start" gap="0.6rem" width="100%">
@@ -203,7 +208,7 @@ function PetProfileSidebar({
                 lineHeight="100%"
                 textAlign="center"
               >
-                {weightKg ? `${weightKg} kg` : "Unknown weight"}
+                {weight ? `${weight} kg` : "Unknown weight"}
               </Text>
             </VStack>
           </GridItem>
@@ -224,7 +229,7 @@ function PetProfileSidebar({
                 lineHeight="100%"
                 textAlign="center"
               >
-                {getSpayStatusLabel(spayedNeutered)}
+                {getSpayStatusLabel(neutered)}
               </Text>
             </VStack>
           </GridItem>
@@ -239,7 +244,7 @@ function PetProfileSidebar({
             >
               <Image
                 src={sex === SexEnum.MALE ? MaleIcon : FemaleIcon}
-                alt="close"
+                alt="sex"
                 boxSize="1.2rem"
               />
               <Text
@@ -249,7 +254,7 @@ function PetProfileSidebar({
                 lineHeight="100%"
                 textAlign="center"
               >
-                {sex === SexEnum.MALE ? "Male" : "Female"}
+                {getSexLabel(sex)}
               </Text>
             </VStack>
           </GridItem>
@@ -261,15 +266,18 @@ function PetProfileSidebar({
           Care Info
         </Text>
 
-        {petCare ? (
-          Object.entries(petCare).map(([key, description]) => (
-            <ArrowDropdown
-              key={key}
-              headerText={CARE_INFO_KEY_TO_LABEL[key]}
-              iconSrc={getCareInfoIcon(key)}
-              bodyText={description}
-            />
-          ))
+        {careInfo ? (
+          Object.entries(careInfo).map(
+            ([key, description]) =>
+              key !== "id" && (
+                <ArrowDropdown
+                  key={key}
+                  headerText={CARE_INFO_KEY_TO_LABEL[key]}
+                  iconSrc={getCareInfoIcon(key)}
+                  bodyText={description}
+                />
+              ),
+          )
         ) : (
           <Text textStyle="body" fontSize="1rem" margin="0" lineHeight="100%">
             No pet care info

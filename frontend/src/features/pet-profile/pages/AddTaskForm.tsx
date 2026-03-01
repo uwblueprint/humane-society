@@ -1,0 +1,92 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { Box, Flex, Spacer, Text } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
+import Button from "../../../components/common/Button";
+import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
+import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
+
+interface AddTaskFormProps {
+  petId: number;
+  petName: string;
+}
+
+const AddTaskForm = ({
+  petId,
+  petName,
+}: AddTaskFormProps): React.ReactElement => {
+  const history = useHistory();
+
+  const [currentStep] = useState(1); // TODO: Add setCurrentStep once the 2nd page is added
+
+  const { control, setValue, watch, trigger } = useForm<AddTaskFormData>({
+    defaultValues: {
+      search: "",
+      selectedTemplate: null,
+    },
+  });
+
+  const selectedTemplate = watch("selectedTemplate");
+
+  const handleNextPage = async () => {
+    const isValid = await trigger("selectedTemplate");
+    if (isValid) {
+      // setCurrentStep(2);
+    }
+  };
+
+  return (
+    <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
+      {/* Back Button */}
+      <Flex
+        align="center"
+        gap="0.5rem"
+        cursor="pointer"
+        onClick={() => history.push(`/pet-profile/${petId}`)}
+        _hover={{ opacity: 0.7 }}
+      >
+        <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
+        <Text textStyle="body" color="gray.600" m={0}>
+          Back to Pet Profile
+        </Text>
+      </Flex>
+
+      <Text textStyle="h2" m={0}>
+        Add Task
+      </Text>
+
+      <Box>
+        {currentStep === 1 && (
+          <AddTaskTemplateSelection
+            petName={petName}
+            control={control}
+            setValue={setValue}
+          />
+        )}
+
+        <Flex align="stretch" mt="2rem" gap="1rem">
+          <Text margin="0" alignSelf="center">
+            {currentStep}/3
+          </Text>
+          <Spacer />
+          {currentStep === 1 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              rightIcon={<ChevronRightIcon />}
+              onClick={handleNextPage}
+              type="button"
+              isDisabled={!selectedTemplate}
+            >
+              Next
+            </Button>
+          )}
+        </Flex>
+      </Box>
+    </Flex>
+  );
+};
+
+export default AddTaskForm;
