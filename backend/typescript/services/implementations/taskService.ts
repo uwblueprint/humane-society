@@ -183,7 +183,7 @@ class TaskService implements ITaskService {
 
       if (alreadyExists)
         return {
-          id: recurrenceTask.id,
+          id: recurrenceTask.task_id,
           days: recurrenceTask.days,
           cadence: recurrenceTask.cadence,
           endDate: recurrenceTask.end_date ?? undefined,
