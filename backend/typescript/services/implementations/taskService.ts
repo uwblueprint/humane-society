@@ -114,7 +114,11 @@ class TaskService implements ITaskService {
 
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
-          ...updates,
+          ...(updates.days && { days: updates.days }),
+          ...(updates.cadence && { cadence: updates.cadence }),
+          ...(updates.endDate && { end_date: updates.endDate }),
+          ...(updates.exclusions && { exclusions: updates.exclusions }),
+          ...(updates.id && { task_id: updates.id }),
         },
         { where: { task_id: recurrenceId }, returning: true },
       );
