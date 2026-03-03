@@ -1,22 +1,37 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Route,
+  Switch,
+  useHistory,
+  useParams,
+  useRouteMatch,
+} from "react-router-dom";
 import NavBar from "../../../components/common/navbar/NavBar";
-import { PetStatus, SexEnum } from "../../../types/PetTypes";
-import { ColorLevel, ScheduledTaskDTO } from "../../../types/TaskTypes";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
+import { Pet } from "../../../types/PetTypes";
+import { colorLevelMap, ScheduledTaskDTO } from "../../../types/TaskTypes";
+import UserRoles from "../../../constants/UserConstants";
+import * as AuthConstants from "../../../constants/AuthConstants";
+import AuthContext from "../../../contexts/AuthContext";
+import PrivateRoute from "../../../components/auth/PrivateRoute";
 import PetProfileSidebar from "../components/PetProfileSidebar";
-import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
+import AddTaskForm from "./AddTaskForm";
+import Button from "../../../components/common/Button";
 import { TableColumn, TableHeader } from "../../../components/common/table";
-import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
 import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
+import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
+import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [loading, setLoading] = useState(true);
+  const params = useParams<{ id: string }>();
+  const petId = Number(params.id);
+  const { path, url } = useRouteMatch();
   const history = useHistory();
-  const { id } = useParams<{ id: string }>();
-  const petId = Number(id);
+  const { authenticatedUser } = useContext(AuthContext);
+  const isDefaultTaskView = useRouteMatch({ path, exact: true });
   const taskTableColumns: TableColumn[] = [
     { label: "TASK" },
     { label: "TIME START" },
@@ -38,9 +53,13 @@ const PetProfilePage = (): React.ReactElement => {
     if (isAssigned && !task.endTime) return 1;
     return 2;
   };
-  // TODO: Connect endpoint
-  // const params = useParams<{ id: string }>();
-  // const petId = Number(params.id);
+
+  const canAddTask =
+    authenticatedUser?.role === UserRoles.ADMIN ||
+    authenticatedUser?.role === UserRoles.BEHAVIOURIST;
+
+  const [petData, setPetData] = useState<Pet | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -64,22 +83,42 @@ const PetProfilePage = (): React.ReactElement => {
     setLoading(false);
   }, [petId, selectedDate, history]);
 
-  const sampleProp = {
-    id: 1,
-    name: "Benji",
-    status: PetStatus.NEEDS_CARE,
-    colourLevel: ColorLevel.YELLOW,
-    breed: "Siberian Husky",
-    birthday: "2025-07-27",
-    weightKg: 25.5,
-    spayedNeutered: true,
-    sex: SexEnum.MALE,
-    photo: "/images/dog2.png",
-    petCare: {
-      safetyInfo: "safety info",
-      managementInfo: "management info",
-      medicalInfo: "medical",
-    },
+  useEffect(() => {
+    const fetchPet = async () => {
+      if (!petId) {
+        history.push("/not-found");
+        return;
+      }
+      try {
+        const data = await PetAPIClient.getPet(petId);
+        setPetData(data);
+      } catch (error) {
+        console.error("fetchPet failed:", error);
+        history.push("/not-found");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPet();
+  }, [petId, history]);
+
+  if (loading || !petData) {
+    return (
+      <Flex
+        width="100%"
+        height="100vh"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  // Map numeric colorLevel to ColorLevel enum for sidebar props
+  const sidebarProps = {
+    ...petData,
+    colorLevel: colorLevelMap[petData.colorLevel],
   };
 
   let content;
@@ -100,7 +139,7 @@ const PetProfilePage = (): React.ReactElement => {
     <>
       <NavBar pageName="Pet Profile" />
       <Flex flex="1">
-        <PetProfileSidebar {...sampleProp} />
+        <PetProfileSidebar {...sidebarProps} />
         <Flex
           backgroundColor="gray.100"
           flex="1"
@@ -110,29 +149,50 @@ const PetProfilePage = (): React.ReactElement => {
           paddingBottom="2rem"
           flexDirection="column"
         >
-          <CalendarDateSelector
-            selectedDate={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
+        <Switch>
+          <Route exact path={path}>
+            <Flex flexDirection="column">
+              {canAddTask && (
+                <Button
+                  variant="dark-blue"
+                  onClick={() => history.push(`${url}/add-task`)}
+                >
+                  Add Task
+                </Button>
+              )}
+              <CalendarDateSelector
+                selectedDate={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+              />
+              <Flex
+                backgroundColor="gray.50"
+                alignItems="center"
+                borderBottom="1px solid"
+                borderColor="gray.200"
+                marginBottom="0.5rem"
+                marginTop="0.5rem"
+                borderRadius="0.75rem"
+              >
+                <TableHeader
+                  columns={taskTableColumns}
+                  gridTemplateColumns={gridTemplateColumns}
+                />
+              </Flex>
+              {content}
+            </Flex>
+          </Route>
+          <PrivateRoute
+            path={`${path}/add-task`}
+            component={() => (
+              <AddTaskForm petId={petData.id} petName={petData.name} />
+            )}
+            allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+            exact
           />
-          <Flex
-            backgroundColor="gray.50"
-            alignItems="center"
-            borderBottom="1px solid"
-            borderColor="gray.200"
-            marginBottom="0.5rem"
-            marginTop="0.5rem"
-            borderRadius="0.75rem"
-          >
-            <TableHeader
-              columns={taskTableColumns}
-              gridTemplateColumns={gridTemplateColumns}
-            />
-          </Flex>
-
-          {content}
-        </Flex>
+        </Switch>
       </Flex>
-    </>
+    </Flex>
+  </>
   );
 };
 

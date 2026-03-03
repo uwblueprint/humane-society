@@ -20,6 +20,7 @@ import { getLocalStorageObj } from "./utils/LocalStorageUtils";
 import InteractionLogPage from "./features/interaction-log/pages/InteractionLogPage";
 import ProfilePage from "./features/user-profile/pages/UserProfilePage";
 import PetProfilePage from "./features/pet-profile/pages/PetProfilePage";
+import AssignTaskPage from "./features/pet-profile/pages/AssignTaskPage";
 import UserManagementPage from "./features/user-management/pages/UserManagementPage";
 import AdminViewEditUserProfilePage from "./features/user-profile/pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
@@ -31,6 +32,7 @@ import { AuthenticatedUser } from "./types/AuthTypes";
 import VolunteerViewEditUserProfilePage from "./features/user-profile/pages/VolunteerViewEditUserProfilePage";
 import EditPetProfilePage from "./features/pet-profile/pages/EditPetProfilePage";
 import EditTaskTemplatePage from "./features/task-management/pages/EditTaskTemplatePage";
+import AddPetForm from "./features/pet-profile/pages/AddPetForm";
 
 const App = (): React.ReactElement => {
   const currentUser: AuthenticatedUser = getLocalStorageObj<AuthenticatedUser>(
@@ -91,7 +93,7 @@ const App = (): React.ReactElement => {
                 allowedRoles={AuthConstants.ALL_ROLES}
               />
               <PrivateRoute
-                exact
+                exact={false}
                 path={`${Routes.PET_PROFILE_PAGE}/:id`}
                 component={PetProfilePage}
                 allowedRoles={AuthConstants.ALL_ROLES}
@@ -100,6 +102,18 @@ const App = (): React.ReactElement => {
                 exact
                 path={`${Routes.EDIT_PET_PROFILE_PAGE}/:id`}
                 component={EditPetProfilePage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={`${Routes.ASSIGN_TASK_PAGE}/:petId`}
+                component={AssignTaskPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              />
+              <PrivateRoute
+                exact
+                path={`${Routes.ADD_PET_FORM}`}
+                component={AddPetForm}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
