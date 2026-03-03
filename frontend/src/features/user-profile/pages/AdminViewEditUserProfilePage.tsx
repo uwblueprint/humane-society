@@ -3,6 +3,7 @@ import { Flex, Text, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useParams, useHistory } from "react-router-dom";
+import { USER_MANAGEMENT_PAGE } from "../../../constants/Routes";
 import Input from "../../../components/common/Input";
 import SingleSelect from "../../../components/common/SingleSelect";
 import MultiSelect from "../../../components/common/MultiSelect";
@@ -322,6 +323,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         isOpen={isDeleteSelected}
         userId={userId}
         handleSecondaryButtonClick={handleCancelDeleteUser}
+        onDeleteSuccess={() => history.push(USER_MANAGEMENT_PAGE)}
       />
     </>
   );
