@@ -93,7 +93,6 @@ const PetProfilePage = (): React.ReactElement => {
         const data = await PetAPIClient.getPet(petId);
         setPetData(data);
       } catch (error) {
-        console.error("fetchPet failed:", error);
         history.push("/not-found");
       } finally {
         setLoading(false);
@@ -141,7 +140,7 @@ const PetProfilePage = (): React.ReactElement => {
       <Flex flex="1">
         <PetProfileSidebar {...sidebarProps} />
         <Flex
-          backgroundColor="gray.100"
+          backgroundColor={isDefaultTaskView ? "gray.100" : "gray.50"}
           flex="1"
           paddingTop="8.5rem"
           paddingLeft="2rem"
@@ -149,50 +148,50 @@ const PetProfilePage = (): React.ReactElement => {
           paddingBottom="2rem"
           flexDirection="column"
         >
-        <Switch>
-          <Route exact path={path}>
-            <Flex flexDirection="column">
-              {canAddTask && (
-                <Button
-                  variant="dark-blue"
-                  onClick={() => history.push(`${url}/add-task`)}
-                >
-                  Add Task
-                </Button>
-              )}
-              <CalendarDateSelector
-                selectedDate={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-              />
-              <Flex
-                backgroundColor="gray.50"
-                alignItems="center"
-                borderBottom="1px solid"
-                borderColor="gray.200"
-                marginBottom="0.5rem"
-                marginTop="0.5rem"
-                borderRadius="0.75rem"
-              >
-                <TableHeader
-                  columns={taskTableColumns}
-                  gridTemplateColumns={gridTemplateColumns}
+          <Switch>
+            <Route exact path={path}>
+              <Flex flexDirection="column">
+                {canAddTask && (
+                  <Button
+                    variant="dark-blue"
+                    onClick={() => history.push(`${url}/add-task`)}
+                  >
+                    Add Task
+                  </Button>
+                )}
+                <CalendarDateSelector
+                  selectedDate={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
                 />
+                <Flex
+                  backgroundColor="gray.50"
+                  alignItems="center"
+                  borderBottom="1px solid"
+                  borderColor="gray.200"
+                  marginBottom="0.5rem"
+                  marginTop="0.5rem"
+                  borderRadius="0.75rem"
+                >
+                  <TableHeader
+                    columns={taskTableColumns}
+                    gridTemplateColumns={gridTemplateColumns}
+                  />
+                </Flex>
+                {content}
               </Flex>
-              {content}
-            </Flex>
-          </Route>
-          <PrivateRoute
-            path={`${path}/add-task`}
-            component={() => (
-              <AddTaskForm petId={petData.id} petName={petData.name} />
-            )}
-            allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
-            exact
-          />
-        </Switch>
+            </Route>
+            <PrivateRoute
+              path={`${path}/add-task`}
+              component={() => (
+                <AddTaskForm petId={petData.id} petName={petData.name} />
+              )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+          </Switch>
+        </Flex>
       </Flex>
-    </Flex>
-  </>
+    </>
   );
 };
 

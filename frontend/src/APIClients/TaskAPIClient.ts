@@ -34,7 +34,7 @@ const getAllTasks = async (): Promise<Task[]> => {
 };
 
 export const getPetTasksByDate = async (
-  petId: number, 
+  petId: number,
   date: string,
 ): Promise<ScheduledTaskDTO[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -50,6 +50,6 @@ export const getPetTasksByDate = async (
   } catch (error) {
     throw new Error(`Failed to fetch tasks: ${error}`);
   }
-}; 
+};
 
 export default { getTask, getAllTasks };
