@@ -84,4 +84,22 @@ const getPetList = async (userId: number): Promise<PetListSections> => {
   }
 };
 
-export default { getPetTasks, getPet, getPets, getPetList };
+const deletePet = async (petId: number | string): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.delete(`/pets/${petId}`, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(
+      `Failed to delete pet. ${
+        error instanceof Error ? error.message : "Unknown error occurred."
+      }`,
+    );
+  }
+};
+
+export default { getPetTasks, getPet, getPets, getPetList, deletePet };
