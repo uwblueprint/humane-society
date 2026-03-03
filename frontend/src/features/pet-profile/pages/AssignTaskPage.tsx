@@ -75,7 +75,9 @@ const AssignTaskPage = (): React.ReactElement => {
   // filters users based on search
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
-      user.name.toLowerCase().includes(search.toLowerCase()),
+      `${user.firstName} ${user.lastName}`
+        .toLowerCase()
+        .includes(search.toLowerCase()),
     );
   }, [users, search]);
 
@@ -197,7 +199,7 @@ const AssignTaskPage = (): React.ReactElement => {
                     />
                   </Flex>
                   <Text m={0} textStyle="body">
-                    {selectedUser.name}
+                    {`${selectedUser.firstName} ${selectedUser.lastName}`}
                   </Text>
                 </Flex>
               </Flex>
@@ -272,7 +274,7 @@ const AssignTaskPage = (): React.ReactElement => {
                                 type="user"
                               />
                               <Text m={0} textStyle="body">
-                                {user.name}
+                                {`${user.firstName} ${user.lastName}`}
                               </Text>
                             </Flex>
                           </Td>
