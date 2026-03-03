@@ -3,28 +3,22 @@ import { useToast } from "@chakra-ui/react";
 import PopupModal from "../../../components/common/PopupModal";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import AuthContext from "../../../contexts/AuthContext";
-import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 interface DeleteUserModalProps {
   isOpen: boolean; // Whether the modal should be visible
   handleSecondaryButtonClick: () => void; // Functionality for secondary button
   userId: string; // userID to be deleted
+  onDeleteSuccess?: () => void;
 }
 
 const DeleteUserModal: FC<DeleteUserModalProps> = ({
   isOpen,
   handleSecondaryButtonClick,
   userId,
+  onDeleteSuccess,
 }) => {
   const toast = useToast();
-  const { authenticatedUser, setAuthenticatedUser } = useContext(AuthContext);
-
-  const logout = async () => {
-    if (authenticatedUser?.id) {
-      setAuthenticatedUser(null);
-      localStorage.removeItem(AUTHENTICATED_USER_KEY);
-    }
-  };
+  const { authenticatedUser } = useContext(AuthContext);
 
   const handlePrimaryButtonClick = async () => {
     if (String(authenticatedUser?.id) === String(userId)) {
@@ -47,7 +41,7 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
         duration: 3000,
         isClosable: true,
       });
-      logout();
+      onDeleteSuccess?.();
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "";
       const description = errorMessage.includes(
