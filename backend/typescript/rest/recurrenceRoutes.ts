@@ -55,11 +55,11 @@ recurrenceRouter.post(
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
   addRecurrenceToTaskValidator,
   async (req, res) => {
-    const { task_id } = req.params;
+    const { task_id: taskId } = req.params;
     try {
       const { body } = req;
       const recurringTask = await recurrenceService.addRecurrenceToTask(
-        task_id,
+        taskId,
         {
           task: body.task
             ? {

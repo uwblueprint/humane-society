@@ -26,7 +26,9 @@ export const createRecurringTaskValidator = async (
     body.task.userId !== null &&
     !validatePrimitive(body.task.userId, "integer")
   ) {
-    return res.status(400).send(getApiValidationError("task.userId", "integer"));
+    return res
+      .status(400)
+      .send(getApiValidationError("task.userId", "integer"));
   }
 
   if (!validatePrimitive(body.task.petId, "integer")) {
@@ -54,7 +56,9 @@ export const createRecurringTaskValidator = async (
     body.task.startTime !== null &&
     !validateDate(body.task.startTime)
   ) {
-    return res.status(400).send(getApiValidationError("task.startTime", "Date"));
+    return res
+      .status(400)
+      .send(getApiValidationError("task.startTime", "Date"));
   }
 
   if (
@@ -82,7 +86,9 @@ export const createRecurringTaskValidator = async (
     return res
       .status(400)
       .send(
-        `The recurrence.cadence must be one of: ${Object.values(Cadence).join(", ")}`,
+        `The recurrence.cadence must be one of: ${Object.values(Cadence).join(
+          ", ",
+        )}`,
       );
   }
 
@@ -94,7 +100,9 @@ export const createRecurringTaskValidator = async (
     return res
       .status(400)
       .send(
-        `The recurrence.days must be an array of: ${Object.values(Days).join(", ")}`,
+        `The recurrence.days must be an array of: ${Object.values(Days).join(
+          ", ",
+        )}`,
       );
   }
 
@@ -117,12 +125,14 @@ export const createRecurringTaskValidator = async (
         .status(400)
         .send("The recurrence.exclusions must be an array of dates");
     }
-    for (const exclusion of body.recurrence.exclusions) {
-      if (!validateDate(exclusion)) {
-        return res
-          .status(400)
-          .send("Each item in recurrence.exclusions must be a valid date");
-      }
+    if (
+      !body.recurrence.exclusions.every((exclusion: string) =>
+        validateDate(exclusion),
+      )
+    ) {
+      return res
+        .status(400)
+        .send("Each item in recurrence.exclusions must be a valid date");
     }
   }
 
@@ -218,7 +228,9 @@ export const addRecurrenceToTaskValidator = async (
     return res
       .status(400)
       .send(
-        `The recurrence.cadence must be one of: ${Object.values(Cadence).join(", ")}`,
+        `The recurrence.cadence must be one of: ${Object.values(Cadence).join(
+          ", ",
+        )}`,
       );
   }
 
@@ -230,7 +242,9 @@ export const addRecurrenceToTaskValidator = async (
     return res
       .status(400)
       .send(
-        `The recurrence.days must be an array of: ${Object.values(Days).join(", ")}`,
+        `The recurrence.days must be an array of: ${Object.values(Days).join(
+          ", ",
+        )}`,
       );
   }
 
@@ -253,12 +267,14 @@ export const addRecurrenceToTaskValidator = async (
         .status(400)
         .send("The recurrence.exclusions must be an array of dates");
     }
-    for (const exclusion of body.recurrence.exclusions) {
-      if (!validateDate(exclusion)) {
-        return res
-          .status(400)
-          .send("Each item in recurrence.exclusions must be a valid date");
-      }
+    if (
+      !body.recurrence.exclusions.every((exclusion: string) =>
+        validateDate(exclusion),
+      )
+    ) {
+      return res
+        .status(400)
+        .send("Each item in recurrence.exclusions must be a valid date");
     }
   }
 
