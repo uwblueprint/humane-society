@@ -1,5 +1,4 @@
-import { TaskCategory } from "../../types";
-import { Days } from "../../types";
+import { TaskCategory, Days } from "../../types";
 
 export interface TaskRequestDTO {
   userId?: number;

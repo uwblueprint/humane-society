@@ -10,10 +10,10 @@ import {
   TaskTimePatchDTO,
   TaskNotesPatchDTO,
   TaskResponseDTOForDate,
+  RecurrenceTaskDTO
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
 import { User } from "../../models";
-import { RecurrenceTaskDTO } from "../interfaces/taskService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { Days } from "../../types";
