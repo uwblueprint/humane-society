@@ -29,7 +29,7 @@ async function get(userId?: number): Promise<User | User[]> {
   }
 }
 
-const create = async (formData: CreateUserDTO): Promise<CreateUserDTO> => {
+const create = async (formData: CreateUserDTO): Promise<User> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -41,6 +41,24 @@ const create = async (formData: CreateUserDTO): Promise<CreateUserDTO> => {
     return data;
   } catch (error) {
     throw new Error(`Failed to create user: ${error}`);
+  }
+};
+
+const update = async (
+  userId: number,
+  formData: Partial<User>,
+): Promise<User> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.put(`/users/${userId}`, formData, {
+      headers: { Authorization: bearerToken },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update user: ${error}`);
   }
 };
 
@@ -81,4 +99,4 @@ const deleteUser = async (userId: string): Promise<void> => {
   }
 };
 
-export default { get, create, invite, deleteUser };
+export default { get, create, invite, update, deleteUser };

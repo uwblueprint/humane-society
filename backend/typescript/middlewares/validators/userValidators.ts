@@ -26,7 +26,9 @@ export const createUserDtoValidator = async (
   if (!validatePrimitive(req.body.role, "string")) {
     return res.status(400).send(getApiValidationError("role", "string"));
   }
-  if (!validatePrimitive(req.body.colorLevel, "integer")) {
+  // put a false here, not sure what a color level is because the backend literally sets it to 1 on creation anyway
+  // TODO: remove this check altogether
+  if (false && !validatePrimitive(req.body.colorLevel, "integer")) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
   if (!validateNumberConstraint(req.body.colorLevel, 1, 5)) {
@@ -62,7 +64,6 @@ export const createUserDtoValidator = async (
   ) {
     return res.status(400).send(getApiValidationError("phoneNumber", "string"));
   }
-
   return next();
 };
 

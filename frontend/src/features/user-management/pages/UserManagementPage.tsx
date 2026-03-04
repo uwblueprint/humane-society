@@ -1,13 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { User } from "../../../types/UserTypes";
 
 import { TableWrapper } from "../../../components/common/table";
 import UserManagementTable from "../components/UserManagementTable";
+import Button from "../../../components/common/Button";
 
 import Pagination from "../../../components/common/Pagination";
+import * as Routes from "../../../constants/Routes";
 
 const UserManagementPage = (): React.ReactElement => {
+  const history = useHistory();
   const [users, setUsers] = useState<User[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
@@ -72,6 +76,10 @@ const UserManagementPage = (): React.ReactElement => {
     getUsers();
   }, []);
 
+  const handleInviteUserClick = () => {
+    history.push(Routes.INVITE_USER_PAGE);
+  };
+
   return (
     <TableWrapper
       filterBarProps={{
@@ -81,6 +89,15 @@ const UserManagementPage = (): React.ReactElement => {
         search,
         onSearchChange: handleSearchChange,
         searchPlaceholder: "Search for a user...",
+        actionButton: (
+          <Button
+            variant="dark-blue"
+            size="medium"
+            onClick={handleInviteUserClick}
+          >
+            Invite User
+          </Button>
+        ),
       }}
       errorMessage={errorMessage}
       onDismissError={() => setErrorMessage(null)}

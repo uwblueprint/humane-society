@@ -210,13 +210,15 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
     const invitedUser = user;
     invitedUser.status = UserStatus.INVITED;
     await userService.updateUserById(user.id, invitedUser);
-
     res.status(204).send();
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(error));
     } else {
-      res.status(500).json({ error: getErrorMessage(error) });
+      await userService.deleteUserByEmail(req.body.email);
+      res
+        .status(500)
+        .json({ error: `${getErrorMessage(error)}\nUser has been deleted!` });
     }
   }
 });

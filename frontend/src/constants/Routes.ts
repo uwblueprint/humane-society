@@ -22,6 +22,8 @@ export const ADD_TASK_PAGE = "/add-task";
 
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
+export const INVITE_USER_PAGE = "/admin/users/invite";
+
 export const ADMIN_EDIT_USER_PROFILE_PAGE = "/admin/edit-user-profile";
 
 export const TASK_MANAGEMENT_PAGE = "/admin/tasks";

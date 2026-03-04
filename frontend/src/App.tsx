@@ -22,6 +22,7 @@ import ProfilePage from "./features/user-profile/pages/UserProfilePage";
 import PetProfilePage from "./features/pet-profile/pages/PetProfilePage";
 import AssignTaskPage from "./features/pet-profile/pages/AssignTaskPage";
 import UserManagementPage from "./features/user-management/pages/UserManagementPage";
+import InviteUserPage from "./features/user-management/pages/InviteUserPage";
 import AdminViewEditUserProfilePage from "./features/user-profile/pages/AdminViewEditUserProfilePage";
 import AdminPage from "./pages/AdminPage";
 import Layout from "./Layout";
@@ -127,6 +128,12 @@ const App = (): React.ReactElement => {
                 path={Routes.USER_MANAGEMENT_PAGE}
                 component={UserManagementPage}
                 allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+              />
+              <PrivateRoute
+                exact
+                path={Routes.INVITE_USER_PAGE}
+                component={InviteUserPage}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
