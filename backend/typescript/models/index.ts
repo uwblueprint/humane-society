@@ -18,7 +18,4 @@ sequelize.addModels([User]);
 
 // defineRelationships();
 
-
 export { sequelize, User };
-
-

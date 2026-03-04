@@ -11,8 +11,7 @@ import {
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { Role } from "../types";
-import { logInteraction } from "../middlewares/logInteraction";
+import logInteraction from "../middlewares/logInteraction";
 
 const taskTemplateRouter: Router = Router();
 
@@ -127,7 +126,7 @@ taskTemplateRouter.patch("/:id/name", async (req, res) => {
       taskName: req.body.name,
     });
 
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(updated);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -143,7 +142,7 @@ taskTemplateRouter.patch("/:id/instructions", async (req, res) => {
       instructions: req.body.instructions,
     });
 
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(updated);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
