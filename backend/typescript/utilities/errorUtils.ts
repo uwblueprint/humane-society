@@ -11,4 +11,12 @@ export class NotFoundError extends Error {
   }
 }
 
+// Thrown when a task already has a recurrence rule
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConflictError";
+  }
+}
+
 export const INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured.";
