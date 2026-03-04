@@ -1,15 +1,17 @@
-import { sequelize } from "../../models";
+import Interaction from "../../models/interaction.model";
+import InteractionType from "../../models/interactionType.model";
 
-export const InteractionService = {
+const InteractionService = {
   async getInteractionTypeId(interactionTypeEnum: string) {
     try {
-      const type = await sequelize.models.InteractionType.findOne({
+      const type = await InteractionType.findOne({
         where: { action_type: interactionTypeEnum },
       });
-      if (!type) throw new Error(`Interaction type not found: ${interactionTypeEnum}`);
-      // @ts-ignore
+      if (!type)
+        throw new Error(`Interaction type not found: ${interactionTypeEnum}`);
       return type.id;
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Error fetching interaction type:", err);
       throw err;
     }
@@ -37,7 +39,7 @@ export const InteractionService = {
     long_description: string;
   }) {
     try {
-      const interaction = await sequelize.models.Interaction.create({
+      const interaction = await Interaction.create({
         actor_id: actorId,
         target_user_id: targetUserId,
         target_pet_id: targetPetId,
@@ -50,8 +52,10 @@ export const InteractionService = {
       });
       return interaction;
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Error logging interaction:", err);
       throw err;
     }
   },
 };
+export default InteractionService;

@@ -1,9 +1,8 @@
-import type { MigrationFn } from "umzug";
+import { Migration } from "../umzug";
 import { InteractionTypeEnum } from "../types";
 
-export const up: MigrationFn = async (params: any) => {
-  const context = params.context;
-  const queryInterface = context.getQueryInterface?.() ?? context;
+export const up: Migration = async ({ context: sequelize }) => {
+  const queryInterface = sequelize.getQueryInterface();
 
   const interactionTypes = Object.values(InteractionTypeEnum).map((type) => ({
     action_type: type,
@@ -12,9 +11,8 @@ export const up: MigrationFn = async (params: any) => {
   await queryInterface.bulkInsert("interaction_types", interactionTypes, {});
 };
 
-export const down: MigrationFn = async (params: any) => {
-  const context = params.context;
-  const queryInterface = context.getQueryInterface?.() ?? context;
+export const down: Migration = async ({ context: sequelize }) => {
+  const queryInterface = sequelize.getQueryInterface();
 
-  await queryInterface.bulkDelete("interaction_types", null, {});
+  await queryInterface.bulkDelete("interaction_types", {}, {});
 };

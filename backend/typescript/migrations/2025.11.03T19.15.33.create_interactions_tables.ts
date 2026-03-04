@@ -1,11 +1,8 @@
 import { DataTypes } from "sequelize";
-import type { MigrationFn } from "umzug";
+import { Migration } from "../umzug";
 
-export const up: MigrationFn = async (params: any) => {
-  const context = params.context;
-  const queryInterface =
-    context.getQueryInterface?.() ?? context;
-
+export const up: Migration = async ({ context: sequelize }) => {
+  const queryInterface = sequelize.getQueryInterface();
   await queryInterface.createTable("interaction_types", {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     action_type: { type: DataTypes.STRING, allowNull: false },
@@ -57,10 +54,8 @@ export const up: MigrationFn = async (params: any) => {
   });
 };
 
-export const down: MigrationFn = async (params: any) => {
-  const context = params.context;
-  const queryInterface =
-    context.getQueryInterface?.() ?? context;
+export const down: Migration = async ({ context: sequelize }) => {
+  const queryInterface = sequelize.getQueryInterface();
 
   await queryInterface.dropTable("interactions");
   await queryInterface.dropTable("interaction_types");

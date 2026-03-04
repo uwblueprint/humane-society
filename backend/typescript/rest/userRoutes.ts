@@ -13,13 +13,14 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { Role, UserDTO } from "../types";
+
 import {
   getErrorMessage,
   NotFoundError,
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { logInteraction } from "../middlewares/logInteraction";
+import logInteraction from "../middlewares/logInteraction";
 
 const userRouter: Router = Router();
 
@@ -332,7 +333,8 @@ userRouter.delete("/", async (req, res) => {
 userRouter.patch("/:id/name", async (req, res) => {
   const idNum = Number(req.params.id);
   if (Number.isNaN(idNum)) {
-    return res.status(400).json({ error: "Invalid user ID" });
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
   }
 
   try {
@@ -341,19 +343,19 @@ userRouter.patch("/:id/name", async (req, res) => {
       lastName: req.body.lastName,
     });
 
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(updated);
   } catch (e) {
     res.status(500).send(getErrorMessage(e));
   }
 });
 
-
 /* Change user color level */
 userRouter.patch("/:id/color-level", async (req, res) => {
   const idNum = Number(req.params.id);
   if (Number.isNaN(idNum)) {
-    return res.status(400).json({ error: "Invalid user ID" });
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
   }
 
   try {
@@ -361,19 +363,19 @@ userRouter.patch("/:id/color-level", async (req, res) => {
       colorLevel: req.body.colorLevel,
     });
 
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(updated);
   } catch (e) {
     res.status(500).send(getErrorMessage(e));
   }
 });
 
-
 /* Change user role by id */
 userRouter.patch("/:id/role", async (req, res) => {
   const idNum = Number(req.params.id);
   if (Number.isNaN(idNum)) {
-    return res.status(400).json({ error: "Invalid user ID" });
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
   }
 
   try {
@@ -381,7 +383,7 @@ userRouter.patch("/:id/role", async (req, res) => {
       role: req.body.role,
     });
 
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(updated);
   } catch (e) {
     res.status(500).send(getErrorMessage(e));

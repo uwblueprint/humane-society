@@ -17,9 +17,7 @@ import {
 import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
-import { logInteraction } from "../middlewares/logInteraction";
-
-
+import logInteraction from "../middlewares/logInteraction";
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
@@ -148,7 +146,7 @@ taskRouter.patch(
       const Task = await taskService.assignUser(id, {
         userId: body.userId,
       });
-      await logInteraction(req, res);
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -168,7 +166,7 @@ taskRouter.patch(
       const Task = await taskService.scheduleTask(id, {
         time: body.scheduledStartTime,
       });
-      await logInteraction(req, res);
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -187,7 +185,7 @@ taskRouter.patch(
       const Task = await taskService.startTask(id, {
         time: body.startTime,
       });
-      await logInteraction(req, res);
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -203,7 +201,7 @@ taskRouter.patch("/:id/end", taskEndTimePatchValidator, async (req, res) => {
     const Task = await taskService.endTask(id, {
       time: body.endTime,
     });
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -218,7 +216,7 @@ taskRouter.patch("/:id/notes", taskNotesPatchValidator, async (req, res) => {
     const Task = await taskService.updateTaskNotes(id, {
       notes: body.notes,
     });
-    await logInteraction(req, res);
+    await logInteraction(req);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -234,15 +232,12 @@ taskRouter.delete(
 
     try {
       const deletedId = await taskService.deleteTask(id);
-      await logInteraction(req, res);
+      await logInteraction(req);
       res.status(200).json({ id: deletedId });
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
     }
   },
 );
-
-
-
 
 export default taskRouter;
