@@ -10,7 +10,7 @@ import {
   TaskTimePatchDTO,
   TaskNotesPatchDTO,
   TaskResponseDTOForDate,
-  RecurrenceTaskDTO
+  RecurrenceTaskDTO,
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
 import { User } from "../../models";
