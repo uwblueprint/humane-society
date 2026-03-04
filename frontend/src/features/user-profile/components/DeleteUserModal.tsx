@@ -27,6 +27,17 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
   };
 
   const handlePrimaryButtonClick = async () => {
+    if (String(authenticatedUser?.id) === String(userId)) {
+      toast({
+        title: "Delete User",
+        description: "You cannot delete your own account.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       await UserAPIClient.deleteUser(userId);
       toast({
@@ -38,9 +49,15 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
       });
       logout();
     } catch (e) {
+      const errorMessage =
+        e instanceof Error ? e.message : "";
+      const description =
+        errorMessage.includes("user status must be 'Inactive' or 'Invited'")
+          ? "User must be deactivated before deletion. Please change the user's status to 'Inactive' or 'Invited' first."
+          : "Unable to delete user, please try again later.";
       toast({
         title: "Delete User",
-        description: "Unable to delete user, please try again later.",
+        description,
         status: "error",
         duration: 3000,
         isClosable: true,

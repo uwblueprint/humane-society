@@ -68,7 +68,7 @@ const UserListTableSection = ({
                   showColorBorder
                 />
                 <Text textStyle="body" m={0} color={textColor}>
-                  {user.firstName} {user.lastName}
+                  {`${user.firstName} ${user.lastName}`}
                 </Text>
               </Flex>
             </Td>

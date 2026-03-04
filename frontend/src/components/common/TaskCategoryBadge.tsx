@@ -19,13 +19,15 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
 
 export interface TaskCategoryBadgeProps {
   taskCategory: TaskCategory;
+  iconSize?: string;
 }
 
 const TaskCategoryBadge = ({
   taskCategory,
+  iconSize = "2.5rem",
 }: TaskCategoryBadgeProps): React.ReactElement => (
   <Flex flexDirection="row" alignItems="center" gap="0.8125rem">
-    <Icon as={taskCategoryIcons[taskCategory]} boxSize="2.5rem" />
+    <Icon as={taskCategoryIcons[taskCategory]} boxSize={iconSize} />
     <Text textStyle="body" m={0}>
       {taskCategory}
     </Text>

@@ -51,10 +51,10 @@ const UserManagementPage = (): React.ReactElement => {
           return filterVals.includes(value as string);
         });
       })
-      .filter(
-        (user) =>
-          user.firstName.toLowerCase().includes(search.toLowerCase()) ||
-          user.lastName.toLowerCase().includes(search.toLowerCase()),
+      .filter((user) =>
+        `${user.firstName} ${user.lastName}`
+          .toLowerCase()
+          .includes(search.toLowerCase()),
       );
   }, [filters, search, users]);
 

@@ -14,7 +14,11 @@ export const PET_PROFILE_PAGE = "/pet-profile";
 
 export const EDIT_PET_PROFILE_PAGE = "/edit-pet-profile";
 
+export const ASSIGN_TASK_PAGE = "/assign-task";
+
 export const ADD_PET_FORM = "/add-pet-form";
+
+export const ADD_TASK_PAGE = "/add-task";
 
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
