@@ -59,7 +59,9 @@ const UserListTableSection = ({
             borderTop="1px solid"
             borderBottom="1px solid"
             borderColor="gray.200"
-            onClick={() => history.push('/admin/users/${user.id}')}
+            onClick={() => {
+              // console.log("Navigating to:", `/admin/users/${user.id}`);
+              history.push(`/admin/users/${user.id}`);}}
             cursor="pointer"
             _hover={{ backgroundColor: "gray.50"}}
           >
