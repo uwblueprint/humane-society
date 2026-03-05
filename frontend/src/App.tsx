@@ -131,6 +131,12 @@ const App = (): React.ReactElement => {
               />
               <PrivateRoute
                 exact
+                path={`${Routes.USER_MANAGEMENT_PAGE}/:id`}
+                component={ProfilePage}
+                allowedRoles={new Set([AuthConstants.ADMIN])}
+              />
+              <PrivateRoute
+                exact
                 path={Routes.INVITE_USER_PAGE}
                 component={InviteUserPage}
                 allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}

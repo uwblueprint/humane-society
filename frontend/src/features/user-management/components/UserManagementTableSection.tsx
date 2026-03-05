@@ -1,5 +1,6 @@
 import React from "react";
 import { Flex, Icon, Tbody, Td, Text, Tr } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 
 // TODO: move these into index.ts
 
@@ -26,6 +27,8 @@ interface UserListTableSectionProps {
 const UserListTableSection = ({
   users,
 }: UserListTableSectionProps): React.ReactElement => {
+  const history = useHistory();
+
   const roleIcons: Record<UserRoles, React.ElementType> = {
     [UserRoles.ADMIN]: AdminTag,
     [UserRoles.BEHAVIOURIST]: BehaviouristTag,
@@ -56,6 +59,12 @@ const UserListTableSection = ({
             borderTop="1px solid"
             borderBottom="1px solid"
             borderColor="gray.200"
+            onClick={() => {
+              // console.log("Navigating to:", `/admin/users/${user.id}`);
+              history.push(`/admin/users/${user.id}`);
+            }}
+            cursor="pointer"
+            _hover={{ backgroundColor: "gray.50" }}
           >
             {/* NAME */}
             <Td pl="2.625rem" pr="7rem" py="0.25rem">
