@@ -125,15 +125,15 @@ const App = (): React.ReactElement => {
               />
               <PrivateRoute
                 exact
-                path={`${Routes.USER_MANAGEMENT_PAGE}/:id`}
-                component={ProfilePage}
-                allowedRoles={new Set ([AuthConstants.ADMIN])}
-              />
-              <PrivateRoute
-                exact
                 path={Routes.USER_MANAGEMENT_PAGE}
                 component={UserManagementPage}
                 allowedRoles={AuthConstants.STAFF_BEHAVIOURISTS_ADMIN}
+              />
+              <PrivateRoute
+                exact
+                path={`${Routes.USER_MANAGEMENT_PAGE}/:id`}
+                component={ProfilePage}
+                allowedRoles={new Set([AuthConstants.ADMIN])}
               />
               <PrivateRoute
                 exact
