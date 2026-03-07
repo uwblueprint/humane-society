@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { Flex, Text, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
@@ -13,7 +14,6 @@ import { AnimalTag } from "../../../types/TaskTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import NavBar from "../../../components/common/navbar/NavBar";
 import DeleteUserModal from "../components/DeleteUserModal";
-import axios from "axios";
 
 interface FormData {
   firstName: string;
@@ -44,13 +44,13 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
     [],
   );
 
-  const colourLevelReverseMap: Record<string, number> = { 
-    Green: 1, 
+  const colourLevelReverseMap: Record<string, number> = {
+    Green: 1,
     Yellow: 2,
-    Orange: 3, 
-    Red: 4, 
-    Blue: 5, 
-  }  
+    Orange: 3,
+    Red: 4,
+    Blue: 5,
+  };
 
   const {
     control,
@@ -77,10 +77,13 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           animalTag: userData.animalTags,
         });
       } catch (error) {
-        const is403 = axios.isAxiosError(error) && error.response?.status === 403;
+        const is403 =
+          axios.isAxiosError(error) && error.response?.status === 403;
         toast({
           title: "Error",
-          description: is403 ? "Failed to fetch user data" : "You are not authorized to perform this action",
+          description: is403
+            ? "Failed to fetch user data"
+            : "You are not authorized to perform this action",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -102,13 +105,15 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
       email: data.email,
       role: data.role,
       colorLevel: colourLevelReverseMap[data.colourLevel],
-      animalTags: Array.isArray(data.animalTag) ? data.animalTag : [data.animalTag],
+      animalTags: Array.isArray(data.animalTag)
+        ? data.animalTag
+        : [data.animalTag],
     };
 
     // eslint-disable-next-line no-console
     try {
       await UserAPIClient.update(parseInt(userId, 10), formattedData);
-      const updatedUser = await UserAPIClient.get(parseInt(userId, 10)); 
+      const updatedUser = await UserAPIClient.get(parseInt(userId, 10));
       reset({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
@@ -117,14 +122,14 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         role: updatedUser.role,
         colourLevel: colourLevelMap[updatedUser.colorLevel],
         animalTag: updatedUser.animalTags,
-        })
+      });
       toast({
         title: "Success",
         description: "User profile updated",
         status: "success",
         duration: 3000,
         isClosable: true,
-      });    
+      });
     } catch (err) {
       toast({
         title: "Fail",
@@ -132,11 +137,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         status: "error",
         duration: 3000,
         isClosable: true,
-    });
+      });
     } finally {
       setSubmitting(false);
-    };
-  }
+    }
+  };
 
   const handleDeleteUser = () => {
     setIsDeleteSelected(true);
@@ -343,7 +348,12 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                 >
                   Delete User
                 </Button>
-                <Button variant="green" size="medium" type="submit" disabled={submitting}>
+                <Button
+                  variant="green"
+                  size="medium"
+                  type="submit"
+                  disabled={submitting}
+                >
                   {submitting ? "Saving..." : "Save"}
                 </Button>
               </Flex>
