@@ -6,7 +6,7 @@ import { User } from "../../../types/UserTypes";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import UserProfileSidebar from "../components/UserProfileSidebar";
 import CalendarDateSelector from "../components/CalendarDateSelector";
-import AuthContext from  "../../../contexts/AuthContext";
+import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
 
 const ProfilePage = (): React.ReactElement => {
@@ -42,7 +42,7 @@ const ProfilePage = (): React.ReactElement => {
       }
     };
     fetchUser();
-  }, [userId, history, params]);
+  }, [userId, history, params, authenticatedUser]);
 
   return (
     <>
