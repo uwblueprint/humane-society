@@ -46,7 +46,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
 export interface RecurrenceTaskDTO {
   id: number;
   cadence: string;
-  days?: string[];
+  days?: Days[];
   endDate?: Date;
   exclusions?: Date[];
 }
