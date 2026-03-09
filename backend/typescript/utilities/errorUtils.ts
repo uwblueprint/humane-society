@@ -9,3 +9,5 @@ export { default as NotFoundError } from "./notFoundError";
 
 // Thrown when a task already has a recurrence rule
 export { default as ConflictError } from "./conflictError";
+
+export { BadRequestError } from "./badRequestError"
