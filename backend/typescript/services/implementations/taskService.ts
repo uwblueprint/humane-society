@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
 import {
@@ -8,6 +10,7 @@ import {
   TaskTimePatchDTO,
   TaskNotesPatchDTO,
   RecurrenceTaskDTO,
+  TaskResponseDTOForDate,
 } from "../interfaces/taskService";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
@@ -19,6 +22,7 @@ import {
 } from "../../utilities/dateUtils";
 
 const Logger = logger(__filename);
+const TIME_ZONE = "America/New_York";
 
 class TaskService implements ITaskService {
   /* eslint-disable class-methods-use-this */
@@ -669,6 +673,100 @@ class TaskService implements ITaskService {
       return id;
     } catch (error: unknown) {
       Logger.error(`Failed to delete task. Reason = ${getErrorMessage(error)}`);
+      throw error;
+    }
+  }
+
+  async getTasksForDate(
+    date: string,
+    filters?: { userId?: number; petId?: number },
+  ): Promise<TaskResponseDTOForDate[]> {
+    try {
+      const selectedDate = DateTime.fromISO(date, { zone: TIME_ZONE });
+      if (!selectedDate.isValid) {
+        throw new Error(`Invalid date format: ${date}`);
+      }
+
+      const beginningOfDay = selectedDate.startOf("day").toJSDate();
+      const endOfDay = selectedDate.plus({ days: 1 }).startOf("day").toJSDate();
+
+      const whereClause: Record<string, unknown> = {
+        scheduled_start_time: {
+          [Op.gte]: beginningOfDay,
+          [Op.lt]: endOfDay,
+        },
+      };
+
+      if (filters?.userId !== undefined) {
+        whereClause.user_id = filters.userId;
+      }
+
+      if (filters?.petId !== undefined) {
+        whereClause.pet_id = filters.petId;
+      }
+
+      const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
+        where: whereClause,
+        raw: true,
+      });
+
+      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
+        (task) => ({
+          id: task.id,
+          userId: task.user_id,
+          petId: task.pet_id,
+          taskTemplateId: task.task_template_id,
+          scheduledStartTime: task.scheduled_start_time,
+          startTime: task.start_time,
+          endTime: task.end_time,
+          notes: task.notes,
+          isRecurring: false,
+        }),
+      );
+
+      const recurringWhereClause: Record<string, unknown> = {};
+      if (filters?.userId !== undefined) {
+        recurringWhereClause.user_id = filters.userId;
+      }
+      if (filters?.petId !== undefined) {
+        recurringWhereClause.pet_id = filters.petId;
+      }
+
+      const recurringTasks = await PgTask.findAll({
+        where: recurringWhereClause,
+        include: [{ model: PgRecurrenceTask, required: true }],
+      });
+
+      const selectedDateObj = resetDateToUTCMidnight(beginningOfDay);
+
+      const results = await Promise.all(
+        recurringTasks.map((task) =>
+          this.generateRecurringInstanceForData(task.id, selectedDateObj)
+            .then(
+              (instance): TaskResponseDTOForDate => ({
+                ...instance,
+                isRecurring: true,
+              }),
+            )
+            .catch(() => null),
+        ),
+      );
+
+      const recurringInstances = results.filter(
+        (r): r is TaskResponseDTOForDate => r !== null,
+      );
+
+      // Deduplicate: recurring tasks whose start date falls on the selected date
+      const recurringTaskIds = new Set(recurringInstances.map((r) => r.id));
+      const filteredOneTimeTasks = oneTimeTasksWithFlag.filter(
+        (task) => !recurringTaskIds.has(task.id),
+      );
+
+      return [...filteredOneTimeTasks, ...recurringInstances];
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
