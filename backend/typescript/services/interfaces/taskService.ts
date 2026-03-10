@@ -1,4 +1,4 @@
-import { Days } from "../../types";
+import { TaskCategory, Days } from "../../types";
 
 export interface TaskRequestDTO {
   userId?: number;
@@ -33,6 +33,16 @@ export interface TaskNotesPatchDTO {
   notes: string;
 }
 
+export type TaskResponseDTOForDate = TaskResponseDTO & {
+  isRecurring: boolean;
+  taskName?: string;
+  category?: TaskCategory;
+  assignedUser?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
+};
 export interface RecurrenceTaskDTO {
   id: number;
   cadence: string;
@@ -176,4 +186,16 @@ export interface ITaskService {
    * @throws Error if deletion fails
    */
   deleteTask(id: string): Promise<string>;
+
+  /**
+   * retrieve all tasks for a specific date, combining one-time and recurring instances
+   * @param date date in YYYY-MM-DD format
+   * @param filters optional userId and/or petId filters
+   * @returns array of tasks for that date with isRecurring flag
+   * @throws Error if retrieval fails
+   */
+  getTasksForDate(
+    date: string,
+    filters?: { userId?: number; petId?: number },
+  ): Promise<TaskResponseDTOForDate[]>;
 }

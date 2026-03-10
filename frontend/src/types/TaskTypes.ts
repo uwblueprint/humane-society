@@ -60,3 +60,22 @@ export interface TaskTemplateResponseDTO {
   category: TaskCategory;
   instructions?: string;
 }
+
+export interface ScheduledTaskDTO {
+  id: number;
+  userId?: number;
+  petId: number;
+  taskTemplateId: number;
+  taskName: string;
+  assignedUser?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  } | null;
+  scheduledStartTime?: Date;
+  startTime?: Date;
+  endTime?: Date;
+  notes?: string;
+  category: TaskCategory;
+  isRecurring: boolean;
+}
