@@ -664,6 +664,17 @@ const EditPetProfilePage = (): React.ReactElement => {
                   <Controller
                     name="safetyInfo"
                     control={control}
+                    rules={{
+                      validate: {
+                      maxWords: (value: string) => {
+                        const wordCount = value.trim().split(/\s+/).length;
+                        return (
+                          wordCount <= 10000 ||
+                          "Information must not exceed 10,000 words."
+                        );
+                      },
+                    },
+                  }}
                     render={({ field }) => (
                       <TextArea
                         label="Safety Information"
@@ -679,6 +690,17 @@ const EditPetProfilePage = (): React.ReactElement => {
                   <Controller
                     name="managementInfo"
                     control={control}
+                    rules={{
+                      validate: {
+                        maxWords: (value: string) => {
+                          const wordCount = value.trim().split(/\s+/).length;
+                          return (
+                            wordCount <= 10000 ||
+                            "Information must not exceed 10,000 words."
+                          );
+                        },
+                      },
+                    }}
                     render={({ field }) => (
                       <TextArea
                         label="Management Information"
@@ -694,6 +716,17 @@ const EditPetProfilePage = (): React.ReactElement => {
                   <Controller
                     name="medicalInfo"
                     control={control}
+                    rules={{
+                      validate: {
+                        maxWords: (value: string) => {
+                          const wordCount = value.trim().split(/\s+/).length;
+                          return (
+                            wordCount <= 10000 ||
+                            "Information must not exceed 10,000 words."
+                          );
+                        },
+                      },
+                    }}
                     render={({ field }) => (
                       <TextArea
                         label="Medical Information"
