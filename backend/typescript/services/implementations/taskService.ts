@@ -118,25 +118,23 @@ class TaskService implements ITaskService {
         throw new Error(
           "Recurrence task must have a start date if end date is provided.",
         );
-      
-      let newExclusions: Date[] | undefined = updates.exclusions ?? recurrenceTask.exclusions;
-      
-      // all exclusions after the end date should be removed
-      if (recurrenceTask.end_date && updates.endDate && (updates.exclusions || recurrenceTask.exclusions) && updates.endDate < recurrenceTask.end_date) {
-        const end = resetDateToUTCMidnight(updates.endDate);
 
+       // normalize it to utc midnight
+      const newEndDate = updates.endDate ? resetDateToUTCMidnight(updates.endDate) : undefined;
+
+      // all exclusions after the end date should be removed
+      if (recurrenceTask.end_date && newEndDate && (updates.exclusions || recurrenceTask.exclusions) && newEndDate < recurrenceTask.end_date) {
         const sourceExclusions = (updates.exclusions ?? recurrenceTask.exclusions ?? [])
           .map((d) => resetDateToUTCMidnight(new Date(d))); // normalize
 
-        newExclusions = end
-          ? sourceExclusions.filter((d) => d.getTime() <= end.getTime())
+        updates.exclusions = newEndDate
+          ? sourceExclusions.filter((d) => d.getTime() <= newEndDate.getTime())
           : sourceExclusions;
       }
 
     // check if endDate comes before the first occurrence of any of the start days calculated from days array
-    if (updates.endDate && task.scheduled_start_time) {
+    if (newEndDate && task.scheduled_start_time) {
       const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
-      const end = resetDateToUTCMidnight(updates.endDate);
 
       // use updated days if provided, otherwise existing
       const sourceDays = updates.days ?? recurrenceTask.days;
@@ -145,7 +143,7 @@ class TaskService implements ITaskService {
         // prune: keep only days whose first occurrence is on/before endDate
         const prunedDays = sourceDays.filter((day) => {
           const [first] = buildStartDates(actualStart, [day]); // first occurrence for this weekday
-          return first.getTime() <= end.getTime();
+          return first.getTime() <= newEndDate.getTime();
         });
 
         updates.days = prunedDays;
@@ -161,9 +159,9 @@ class TaskService implements ITaskService {
         {
           ...(updates.days && { days: updates.days }),
           ...(updates.cadence && { cadence: updates.cadence }),
-          ...(updates.endDate && { end_date: updates.endDate }),
+          ...(newEndDate && { end_date: newEndDate }),
           ...(updates.id && { task_id: updates.id }),
-          ...(newExclusions ? { exclusions: newExclusions } : {})
+          ...(updates.exclusions ? { exclusions: updates.exclusions } : {})
         },
         { where: { task_id: recurrenceId }, returning: true },
       );
