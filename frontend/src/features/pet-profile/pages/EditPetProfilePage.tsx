@@ -666,15 +666,15 @@ const EditPetProfilePage = (): React.ReactElement => {
                     control={control}
                     rules={{
                       validate: {
-                      maxWords: (value: string) => {
-                        const wordCount = value.trim().split(/\s+/).length;
-                        return (
-                          wordCount <= 10000 ||
-                          "Information must not exceed 10,000 words."
-                        );
+                        maxWords: (value: string) => {
+                          const wordCount = value.trim().split(/\s+/).length;
+                          return (
+                            wordCount <= 10000 ||
+                            "Information must not exceed 10,000 words."
+                          );
+                        },
                       },
-                    },
-                  }}
+                    }}
                     render={({ field }) => (
                       <TextArea
                         label="Safety Information"
