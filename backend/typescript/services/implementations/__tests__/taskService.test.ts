@@ -1,21 +1,6 @@
-
- // Tests for the delete recurrence task endpoint
-  // test cases:
-  // - test one where the task deletes all or part of the exclusion dates
-  // - test adding to exclusion dates (single)
-  // - test deleting task completely, ie first instance, but the time given by the user is different from the exact start time
-  // - test deletingtas from one exclusion date onwards, but the inout time isnt at midnight
-  // - test deleting task where all the days ecept for the dayof week of the first date is deleted (ie we edit task to be just a one day thing)
-  // - for all tests, make it so that the input is not midnight
-  // - test invalid params, ie: missing one or wrong format
-  // - test task with unavailable end date, or task with unavailable start date
-  // - test with 500 error
 import PgTask from "../../../models/task.model";
 import PgRecurrenceTask from "../../../models/recurrence_task.model";
-import {
-  BadRequestError,
-  NotFoundError,
-} from "../../../utilities/errorUtils";
+import { BadRequestError, NotFoundError } from "../../../utilities/errorUtils";
 import { Cadence, Days } from "../../../types";
 import { resetDateToUTCMidnight } from "../../../utilities/dateUtils";
 import TaskService from "../taskService";
@@ -56,18 +41,18 @@ describe("TaskService using dates shaped like delete route inputs", () => {
     destroy: jest.Mock;
   };
 
+  // based off of the parsing logic used in the route
   const parseRouteDate = (value: unknown): Date | undefined => {
     return value &&
       typeof value === "string" &&
-      (/^\d{4}-\d{2}-\d{2}$/.test(value) || !isNaN(Date.parse(value)))
+      (/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isNaN(Date.parse(value)))
       ? new Date(value)
       : undefined;
   };
 
+  // based off of the parsing logic used in the route
   const parseRouteSingle = (value: unknown): boolean | undefined => {
-    return value === "true" || value === "false"
-      ? value === "true"
-      : undefined;
+    return value === "true" || value === "false" ? value === "true" : undefined;
   };
 
   beforeEach(() => {
@@ -126,7 +111,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         cadence: Cadence.WEEKLY,
         days: [Days.TUE],
         end_date: null,
-        exclusions: [new Date("2026-03-10T00:00:00Z")],
+        exclusions: [new Date("2026-03-24T00:00:00Z")],
       });
 
       mockPgRecurrenceTask.update.mockResolvedValue([
@@ -138,19 +123,19 @@ describe("TaskService using dates shaped like delete route inputs", () => {
             days: [Days.TUE],
             end_date: null,
             exclusions: [
-              new Date("2026-03-10T00:00:00Z"),
+              new Date("2026-03-24T00:00:00Z"),
               new Date("2026-03-17T13:45:00Z"),
             ],
           },
         ],
       ]);
-
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       const result = await service.excludeDate("123", date!);
 
       expect(mockPgRecurrenceTask.update).toHaveBeenCalledWith(
         {
           exclusions: [
-            new Date("2026-03-10T00:00:00Z"),
+            new Date("2026-03-24T00:00:00Z"),
             new Date("2026-03-17T13:45:00Z"),
           ],
         },
@@ -163,7 +148,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         cadence: Cadence.WEEKLY,
         endDate: undefined,
         exclusions: [
-          new Date("2026-03-10T00:00:00Z"),
+          new Date("2026-03-24T00:00:00Z"),
           new Date("2026-03-17T13:45:00Z"),
         ],
       });
@@ -186,6 +171,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         exclusions: [new Date("2026-03-17T00:00:00Z")],
       });
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       await expect(service.excludeDate("123", date!)).rejects.toThrow(
         BadRequestError,
       );
@@ -208,6 +194,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         exclusions: [],
       });
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       await expect(service.excludeDate("123", date!)).rejects.toThrow(
         BadRequestError,
       );
@@ -230,6 +217,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         exclusions: [],
       });
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       await expect(service.excludeDate("123", date!)).rejects.toThrow(
         BadRequestError,
       );
@@ -252,6 +240,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         exclusions: [],
       });
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       await expect(service.excludeDate("110", date!)).rejects.toThrow(
         NotFoundError,
       );
@@ -287,13 +276,14 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         ],
       ]);
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       const result = await service.excludeDate("123", date!);
 
       expect(result.endDate).toBeUndefined();
       expect(result.exclusions).toEqual([date]);
     });
   });
-
+  // wrong from here
   describe("updateRecurrence", () => {
     it("deletes all or part of exclusion dates when recurrence is shortened from a non-midnight route input", async () => {
       const selectedDeleteDate = parseRouteDate("2026-01-15T09:30:00+02:00");
@@ -310,13 +300,13 @@ describe("TaskService using dates shaped like delete route inputs", () => {
 
       mockPgRecurrenceTask.findByPk.mockResolvedValue({
         task_id: "107",
-        cadence: "DAILY",
-        days: null,
+        cadence: Cadence.WEEKLY,
+        days: [Days.THU, Days.MON],
         end_date: new Date("2026-01-31T00:00:00Z"),
         exclusions: [
           new Date("2026-01-05T15:00:00Z"),
-          new Date("2026-01-10T12:00:00Z"),
-          new Date("2026-01-20T09:00:00Z"),
+          new Date("2026-01-12T12:00:00Z"),
+          new Date("2026-01-18T09:00:00Z"),
         ],
       });
 
@@ -325,12 +315,12 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         [
           {
             task_id: "107",
-            cadence: "DAILY",
-            days: null,
+            cadence: Cadence.WEEKLY,
+            days: [Days.THU, Days.MON],
             end_date: resetDateToUTCMidnight(newEndDate),
             exclusions: [
               new Date("2026-01-05T00:00:00Z"),
-              new Date("2026-01-10T00:00:00Z"),
+              new Date("2026-01-12T00:00:00Z"),
             ],
           },
         ],
@@ -344,23 +334,23 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       expect(payload.end_date.toISOString()).toBe("2026-01-14T00:00:00.000Z");
       expect(payload.exclusions).toEqual([
         new Date("2026-01-05T00:00:00Z"),
-        new Date("2026-01-10T00:00:00Z"),
+        new Date("2026-01-12T00:00:00Z"),
       ]);
 
       expect(result).toEqual({
         id: "107",
-        days: null,
-        cadence: "DAILY",
+        days: [Days.THU, Days.MON],
+        cadence: Cadence.WEEKLY,
         endDate: new Date("2026-01-14T00:00:00Z"),
         exclusions: [
           new Date("2026-01-05T00:00:00Z"),
-          new Date("2026-01-10T00:00:00Z"),
+          new Date("2026-01-12T00:00:00Z"),
         ],
       });
     });
 
-    it("updates recurrence from one selected delete date onward when input time is not midnight", async () => {
-      const selectedDeleteDate = parseRouteDate("2026-03-20T16:20:00-07:00");
+    it("removes a date from Days array and exclusions because first instance of Days is removed", async () => {
+      const selectedDeleteDate = parseRouteDate("2026-03-11T16:20:00-07:00");
       expect(selectedDeleteDate).toBeDefined();
 
       const newEndDate = new Date(
@@ -374,10 +364,10 @@ describe("TaskService using dates shaped like delete route inputs", () => {
 
       mockPgRecurrenceTask.findByPk.mockResolvedValue({
         task_id: "123",
-        cadence: Cadence.WEEKLY,
-        days: [Days.TUE],
+        cadence: Cadence.BIWEEKLY,
+        days: [Days.TUE, Days.WED],
         end_date: new Date("2026-04-30T00:00:00Z"),
-        exclusions: [],
+        exclusions: [new Date("2026-03-11T00:00:00Z")],
       });
 
       mockPgRecurrenceTask.update.mockResolvedValue([
@@ -385,7 +375,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         [
           {
             task_id: "123",
-            cadence: Cadence.WEEKLY,
+            cadence: Cadence.BIWEEKLY,
             days: [Days.TUE],
             end_date: resetDateToUTCMidnight(newEndDate),
             exclusions: [],
@@ -460,7 +450,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
 
       mockPgRecurrenceTask.findByPk.mockResolvedValue({
         task_id: "110",
-        cadence: Cadence.WEEKLY,
+        cadence: Cadence.ANNUALLY,
         days: [Days.TUE],
         end_date: null,
         exclusions: [],
@@ -488,7 +478,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
 
       mockPgRecurrenceTask.findByPk.mockResolvedValue({
         task_id: "123",
-        cadence: Cadence.WEEKLY,
+        cadence: Cadence.BIWEEKLY,
         days: [Days.TUE],
         end_date: null,
         exclusions: [],
@@ -499,7 +489,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         [
           {
             task_id: "123",
-            cadence: Cadence.WEEKLY,
+            cadence: Cadence.BIWEEKLY,
             days: [Days.TUE],
             end_date: resetDateToUTCMidnight(newEndDate),
             exclusions: [],
@@ -521,9 +511,10 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       expect(selectedDate).toBeDefined();
 
       const scheduledStart = new Date("2026-03-10T15:00:00Z");
-      expect(
-        resetDateToUTCMidnight(selectedDate!).getTime(),
-      ).toBe(resetDateToUTCMidnight(scheduledStart).getTime());
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      expect(resetDateToUTCMidnight(selectedDate!).getTime()).toBe(
+        resetDateToUTCMidnight(scheduledStart).getTime(),
+      );
 
       mockPgRecurrenceTask.destroy.mockResolvedValue(1);
 
@@ -552,7 +543,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       mockPgRecurrenceTask.findByPk.mockRejectedValue(
         new Error("database exploded"),
       );
-
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       await expect(service.excludeDate("123", date!)).rejects.toThrow(
         "database exploded",
       );

@@ -260,41 +260,51 @@ taskRouter.delete(
   async (req, res) => {
     const { taskId } = req.params;
 
-    const date = (req.query.date && typeof req.query.date === "string" && !/^\d{4}-\d{2}-\d{2}$/.test(req.query.date)) ? new Date(req.query.date) : undefined;
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
+    const single =
+      req.query.single === "true" || req.query.single === "false"
+        ? req.query.single === "true"
+        : undefined;
 
-    const single = (req.query.single !== "true" && req.query.single !== "false") ? req.query.single === "true" : undefined;
-
-    if (!date || !single) {
+    if (date === undefined || single === undefined) {
       res.status(400).send("Invalid query parameters");
       return;
     }
 
     try {
       const task = await taskService.getTask(taskId);
-      if (!task.scheduledStartTime) throw new NotFoundError("Task scheduled start time not found");
+      if (!task.scheduledStartTime)
+        throw new NotFoundError("Task scheduled start time not found");
 
       if (single) {
-        const updatedRecurrence = await taskService.excludeDate(taskId, date)
+        const updatedRecurrence = await taskService.excludeDate(taskId, date);
         res.status(200).json({
-          "task": task, 
-          "recurrenceTask": updatedRecurrence
+          task,
+          recurrenceTask: updatedRecurrence,
+        });
+      } else if (
+        resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
+        resetDateToUTCMidnight(date).getTime()
+      ) {
+        await taskService.deleteRecurrence(taskId);
+        const deletedTaskId = await taskService.deleteTask(taskId);
+        res.status(200).json({
+          deleted: true,
+          taskId: deletedTaskId,
         });
       } else {
-        if (resetDateToUTCMidnight(task.scheduledStartTime) === resetDateToUTCMidnight(date)) {
-          await taskService.deleteRecurrence(taskId);
-          const deletedTaskId = await taskService.deleteTask(taskId);
-          res.status(200).json({ 
-            "deleted": true, 
-            "taskId": deletedTaskId
-          });
-        } else {
-          const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-          const updatedRecurrence = await taskService.updateRecurrence(taskId, {endDate: newEndDate});
-          res.status(200).json({ 
-            "task": task, 
-            "recurrenceTask": updatedRecurrence
-          });
-        }
+        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+          endDate: newEndDate,
+        });
+        res.status(200).json({
+          task,
+          recurrenceTask: updatedRecurrence,
+        });
       }
     } catch (e: unknown) {
       if (e instanceof NotFoundError) {

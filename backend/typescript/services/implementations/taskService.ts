@@ -43,7 +43,8 @@ class TaskService implements ITaskService {
       if (
         endDate &&
         task.scheduled_start_time &&
-        endDate < task.scheduled_start_time
+        resetDateToUTCMidnight(endDate).getTime() <
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
         throw new Error("End date cannot be before task start date.");
       if (endDate && !task.scheduled_start_time)
@@ -105,13 +106,19 @@ class TaskService implements ITaskService {
   ): Promise<RecurrenceTaskDTO> {
     try {
       const task = await PgTask.findByPk(recurrenceId, { raw: true });
-      const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, { raw: true });
+      const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
+        raw: true,
+      });
       if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
-      if (!recurrenceTask) throw new NotFoundError(`Recurrence for task id ${recurrenceId} not found`);
+      if (!recurrenceTask)
+        throw new NotFoundError(
+          `Recurrence for task id ${recurrenceId} not found`,
+        );
       if (
         updates.endDate &&
         task.scheduled_start_time &&
-        updates.endDate <= task.scheduled_start_time
+        resetDateToUTCMidnight(updates.endDate).getTime() <
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
         throw new Error("End date cannot be before task start date.");
       if (updates.endDate && !task.scheduled_start_time)
@@ -119,49 +126,64 @@ class TaskService implements ITaskService {
           "Recurrence task must have a start date if end date is provided.",
         );
 
-       // normalize it to utc midnight
-      const newEndDate = updates.endDate ? resetDateToUTCMidnight(updates.endDate) : undefined;
+      // normalize it to utc midnight
+      const newEndDate = updates.endDate
+        ? resetDateToUTCMidnight(updates.endDate)
+        : undefined;
 
+      let newExclusions = updates.exclusions ? updates.exclusions : undefined;
       // all exclusions after the end date should be removed
-      if (recurrenceTask.end_date && newEndDate && (updates.exclusions || recurrenceTask.exclusions) && newEndDate < recurrenceTask.end_date) {
-        const sourceExclusions = (updates.exclusions ?? recurrenceTask.exclusions ?? [])
-          .map((d) => resetDateToUTCMidnight(new Date(d))); // normalize
+      if (
+        recurrenceTask.end_date &&
+        newEndDate &&
+        (updates.exclusions || recurrenceTask.exclusions) &&
+        newEndDate.getTime() < recurrenceTask.end_date.getTime()
+      ) {
+        const sourceExclusions = (
+          updates.exclusions ??
+          recurrenceTask.exclusions ??
+          []
+        ).map((d) => resetDateToUTCMidnight(new Date(d))); // normalize
 
-        updates.exclusions = newEndDate
+        newExclusions = newEndDate
           ? sourceExclusions.filter((d) => d.getTime() <= newEndDate.getTime())
           : sourceExclusions;
       }
 
-    // check if endDate comes before the first occurrence of any of the start days calculated from days array
-    if (newEndDate && task.scheduled_start_time) {
-      const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
+      let newDays = updates.days ? updates.days : undefined;
+      // check if endDate comes before the first occurrence of any of the start days calculated from days array
+      if (newEndDate && task.scheduled_start_time) {
+        const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
 
-      // use updated days if provided, otherwise existing
-      const sourceDays = updates.days ?? recurrenceTask.days;
+        // use updated days if provided, otherwise existing
+        const sourceDays = updates.days ?? recurrenceTask.days;
 
-      if (sourceDays && sourceDays.length > 0) {
-        // prune: keep only days whose first occurrence is on/before endDate
-        const prunedDays = sourceDays.filter((day) => {
-          const [first] = buildStartDates(actualStart, [day]); // first occurrence for this weekday
-          return first.getTime() <= newEndDate.getTime();
-        });
+        if (sourceDays && sourceDays.length > 0) {
+          // prune: keep only days whose first occurrence is on/before endDate
+          const prunedDays = sourceDays.filter((day) => {
+            const [first] = buildStartDates(actualStart, [day]); // first occurrence for this weekday
+            return first.getTime() <= newEndDate.getTime();
+          });
 
-        updates.days = prunedDays;
+          newDays = prunedDays;
 
-        // this shouldn't be happening
-        if (prunedDays.length === 0) {
-          throw new BadRequestError("End date is before or on the first occurrence of all selected days.");
+          // this shouldn't be happening
+          if (prunedDays.length === 0) {
+            throw new BadRequestError(
+              "End date is before or on the first occurrence of all selected days.",
+            );
+          }
         }
       }
-    }
 
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
-          ...(updates.days && { days: updates.days }),
-          ...(updates.cadence && { cadence: updates.cadence }),
-          ...(newEndDate && { end_date: newEndDate }),
-          ...(updates.id && { task_id: updates.id }),
-          ...(updates.exclusions ? { exclusions: updates.exclusions } : {})
+          ...(newDays !== undefined ? { days: newDays } : {}),
+          ...(updates.cadence !== undefined
+            ? { cadence: updates.cadence }
+            : {}),
+          ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
+          ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
         { where: { task_id: recurrenceId }, returning: true },
       );
@@ -229,18 +251,24 @@ class TaskService implements ITaskService {
       );
 
       if (alreadyExists)
-        throw new BadRequestError("Exclusion date already exists for this recurrence.");
+        throw new BadRequestError(
+          "Exclusion date already exists for this recurrence.",
+        );
 
       const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
       if (date < actualStart) {
         // throw error because these checks should be done on frontend too
-        throw new BadRequestError("Exclusion date is before recurrence start date.");
+        throw new BadRequestError(
+          "Exclusion date is before recurrence start date.",
+        );
       }
 
       if (recurrenceTask.end_date) {
         const end = resetDateToUTCMidnight(recurrenceTask.end_date);
         if (exclusion > end) {
-          throw new BadRequestError("Exclusion date is after recurrence end date.");
+          throw new BadRequestError(
+            "Exclusion date is after recurrence end date.",
+          );
         }
       }
 
