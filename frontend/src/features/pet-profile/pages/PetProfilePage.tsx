@@ -18,7 +18,6 @@ import AuthContext from "../../../contexts/AuthContext";
 import PrivateRoute from "../../../components/auth/PrivateRoute";
 import PetProfileSidebar from "../components/PetProfileSidebar";
 import AddTaskForm from "./AddTaskForm";
-import Button from "../../../components/common/Button";
 import { TableColumn, TableHeader } from "../../../components/common/table";
 import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
@@ -28,7 +27,7 @@ const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const params = useParams<{ id: string }>();
   const petId = Number(params.id);
-  const { path, url } = useRouteMatch();
+  const { path } = useRouteMatch();
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const isDefaultTaskView = useRouteMatch({ path, exact: true });
