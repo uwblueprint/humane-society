@@ -49,12 +49,12 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
       });
       logout();
     } catch (e) {
-      const errorMessage =
-        e instanceof Error ? e.message : "";
-      const description =
-        errorMessage.includes("user status must be 'Inactive' or 'Invited'")
-          ? "User must be deactivated before deletion. Please change the user's status to 'Inactive' or 'Invited' first."
-          : "Unable to delete user, please try again later.";
+      const errorMessage = e instanceof Error ? e.message : "";
+      const description = errorMessage.includes(
+        "user status must be 'Inactive' or 'Invited'",
+      )
+        ? "User must be deactivated before deletion. Please change the user's status to 'Inactive' or 'Invited' first."
+        : "Unable to delete user, please try again later.";
       toast({
         title: "Delete User",
         description,
