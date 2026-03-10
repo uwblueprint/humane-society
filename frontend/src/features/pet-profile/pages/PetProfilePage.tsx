@@ -44,12 +44,12 @@ const PetProfilePage = (): React.ReactElement => {
   const sortTask = (task: ScheduledTaskDTO): number => {
     const isCompleted = !!task.endTime;
     const isAssigned = !!task.userId;
-    const isPastStartTime = task.startTime
-      ? new Date(task.startTime) < new Date()
+    const isPastStartTime = task.scheduledStartTime
+      ? new Date(task.scheduledStartTime) < new Date()
       : false;
 
     if (isCompleted) return 3;
-    if (!isAssigned && isPastStartTime) return 0;
+    if (!isAssigned && isPastStartTime && !task.endTime) return 0;
     if (isAssigned && !task.endTime) return 1;
     return 2;
   };
