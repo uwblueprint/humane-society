@@ -151,14 +151,7 @@ const PetProfilePage = (): React.ReactElement => {
           <Switch>
             <Route exact path={path}>
               <Flex flexDirection="column">
-                {canAddTask && (
-                  <Button
-                    variant="dark-blue"
-                    onClick={() => history.push(`${url}/add-task`)}
-                  >
-                    Add Task
-                  </Button>
-                )}
+                {canAddTask}
                 <CalendarDateSelector
                   selectedDate={selectedDate}
                   onChange={(date) => setSelectedDate(date)}
