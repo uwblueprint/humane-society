@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
+ import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 
 interface AddTaskFormProps {
@@ -18,12 +19,32 @@ const AddTaskForm = ({
 }: AddTaskFormProps): React.ReactElement => {
   const history = useHistory();
 
-  const [currentStep] = useState(1); // TODO: Add setCurrentStep once the 2nd page is added
+  const [currentStep, setCurrentStep] = useState(1);
 
+  const today = new Date();
   const { control, setValue, watch, trigger } = useForm<AddTaskFormData>({
     defaultValues: {
       search: "",
       selectedTemplate: null,
+
+      // page 2
+      taskName: "",
+      taskCategory: "",
+      instructions: "",
+      startMonth: today.toLocaleString("default", { month : "long"}),
+      startDay: String(today.getDate()),
+      startYear: String(today.getFullYear()),
+      startMinute: "",
+      startHour: "",
+      endMinute: "",
+      endHour: "",
+      isRepeating: false,
+      recurringDays: [],
+      recurringFrequency: "Weekly",
+      endDay: "",
+      endMonth: "",
+      endYear: "",
+
     },
   });
 
@@ -32,7 +53,7 @@ const AddTaskForm = ({
   const handleNextPage = async () => {
     const isValid = await trigger("selectedTemplate");
     if (isValid) {
-      // setCurrentStep(2);
+      setCurrentStep(2);
     }
   };
 
@@ -63,6 +84,13 @@ const AddTaskForm = ({
             control={control}
             setValue={setValue}
           />
+        )}
+
+        {currentStep === 2 && (
+          <AddTaskForm2
+            control={control}
+            watch={watch}
+            />
         )}
 
         <Flex align="stretch" mt="2rem" gap="1rem">

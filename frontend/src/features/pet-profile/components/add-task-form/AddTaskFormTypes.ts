@@ -12,19 +12,19 @@ export interface AddTaskFormData {
   taskCategory: string;
   instructions: string;
 
-  startDateDay: string;
-  startDateMonth: string;
-  startDateYear: string;
-  startTimeMinute: string;
-  startTimeHour: string;
-  endTimeMinute: string;
-  endTimeHour: string;
+  startDay: string;
+  startMonth: string;
+  startYear: string;
+  startMinute: string;
+  startHour: string;
+  endMinute: string;
+  endHour: string;
   
   isRepeating: boolean;
   recurringDays: string[];
-  recurringCadence: string;
-  endDateDay: string;
-  endDateMonth: string;
-  endDateYear: string;
+  recurringFrequency: string;
+  endDay: string;
+  endMonth: string;
+  endYear: string;
 
 }
