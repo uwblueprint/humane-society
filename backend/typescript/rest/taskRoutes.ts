@@ -22,19 +22,6 @@ const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 const taskService: ITaskService = new TaskService();
 
-/* Get all Tasks */
-taskRouter.get("/", async (req, res) => {
-  const contentType = req.headers["content-type"];
-  try {
-    const tasks = await taskService.getTasks();
-    await sendResponseByMimeType<TaskResponseDTO>(res, 200, contentType, tasks);
-  } catch (e: unknown) {
-    await sendResponseByMimeType(res, 500, contentType, [
-      { error: getErrorMessage(e) },
-    ]);
-  }
-});
-
 /* Get Task by id */
 taskRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
