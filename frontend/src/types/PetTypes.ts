@@ -75,4 +75,22 @@ export interface PetListItemDTO {
   animalTag: AnimalTag;
 }
 
+export interface PetRequestDTO {
+  animalTag: AnimalTag;
+  name: string;
+  colorLevel: number;
+  status: PetStatus;
+  breed?: string;
+  neutered?: boolean;
+  birthday?: string;
+  weight?: number;
+  sex?: SexEnum;
+  photo?: string;
+  careInfo?: {
+    safetyInfo?: string;
+    medicalInfo?: string;
+    managementInfo?: string;
+  };
+}
+
 export type PetListSections = Record<string, PetListItemDTO[]>;
