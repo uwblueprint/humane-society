@@ -84,6 +84,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
         {/* Buttons */}
         {(hasPrimaryButton || hasSecondaryButton) && (
           <Flex
+            width="100%"
             height={{ base: hasSecondaryButton ? "5rem" : "2rem", md: "3rem" }}
             minH="2rem"
             direction={{ base: "column-reverse", md: "row" }}

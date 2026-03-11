@@ -11,11 +11,8 @@ import UserRoles from "../../../constants/UserConstants";
 import { ColorLevel, AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import * as Routes from "../../../constants/Routes";
-import { ReactComponent as BirdTag } from "../../../assets/icons/animal-tag/bird.svg";
-import { ReactComponent as BunnyTag } from "../../../assets/icons/animal-tag/bunny.svg";
-import { ReactComponent as CatTag } from "../../../assets/icons/animal-tag/cat.svg";
-import { ReactComponent as DogTag } from "../../../assets/icons/animal-tag/dog.svg";
-import { ReactComponent as SmallAnimalTag } from "../../../assets/icons/animal-tag/small-animal.svg";
+import NavBar from "../../../components/common/navbar/NavBar";
+import PopupModal from "../../../components/common/PopupModal";
 
 export interface InviteUserFormData {
   firstName: string;
@@ -45,8 +42,26 @@ const InviteUserPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
   const handleBack = () => {
-    history.push(Routes.USER_MANAGEMENT_PAGE); // Should this be history.back() ?
+    if (hasUnsavedChanges) {
+      setIsQuitModalOpen(true);
+    } else {
+      history.push(Routes.USER_MANAGEMENT_PAGE); // Should this be history.back() ?
+    }
+  };
+
+  const handleConfirmQuit = () => {
+    history.push(Routes.USER_MANAGEMENT_PAGE);
+  };
+
+  const handleCancelQuit = () => {
+    setIsQuitModalOpen(false);
   };
 
   const validateForm = (): boolean => {
@@ -102,6 +117,11 @@ const InviteUserPage = (): React.ReactElement => {
       return;
     }
 
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmInvite = async () => {
+    setIsConfirmModalOpen(false);
     setLoading(true);
     setSubmitError(null);
 
@@ -139,7 +159,7 @@ const InviteUserPage = (): React.ReactElement => {
       await UserAPIClient.invite(formData.email);
 
       // Navigate back to user management page
-      handleBack();
+      setIsSuccessModalOpen(true);
     } catch (err) {
       setSubmitError(
         err instanceof Error
@@ -149,6 +169,11 @@ const InviteUserPage = (): React.ReactElement => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateFormData = (updates: Partial<InviteUserFormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+    setHasUnsavedChanges(true);
   };
 
   const roleValues = [
@@ -178,168 +203,199 @@ const InviteUserPage = (): React.ReactElement => {
     AnimalTag.SMALL_ANIMAL,
   ];
 
-  const animalTagIcons = [BirdTag, BunnyTag, CatTag, DogTag, SmallAnimalTag];
-
   const animalTagColors = ["purple", "pink", "orange", "teal", "blue"];
 
   return (
-    <Flex direction="column" width="100%" minHeight="100vh" bg="gray.50">
+    <>
       {/* Header */}
+      <NavBar pageName="User Management" />
+
+      {/* Main Content */}
       <Flex
-        bg="white.default"
-        borderBottom="1px solid"
-        borderColor="gray.200"
-        px="2.5rem"
-        py="1.5rem"
-        alignItems="center"
+        width="100%"
+        paddingTop="7.5rem"
+        backgroundColor="gray.50"
+        justifyContent="center"
       >
         <Flex
-          alignItems="center"
-          gap="0.5rem"
-          cursor="pointer"
-          onClick={handleBack}
-          _hover={{ opacity: 0.7 }}
+          flexDirection="column"
+          width="100%"
+          maxWidth="85rem"
+          mx="auto"
+          p="1.5rem"
         >
-          <ChevronLeftIcon boxSize="1.5rem" color="blue.500" />
-          <Text m={0} textStyle="body" color="blue.500">
-            Back to User Management
+          {/* Back Button */}
+          <Flex
+            width="fit-content"
+            alignItems="center"
+            gap="0.5rem"
+            mb="1.5rem"
+            cursor="pointer"
+            onClick={handleBack}
+            _hover={{ opacity: 0.7 }}
+          >
+            <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
+            <Text m={0} textStyle="body" color="gray.600">
+              Back to User Management
+            </Text>
+          </Flex>
+
+          {/* Title */}
+          <Text m={0} mb="1.5rem" textStyle="h2">
+            Invite User
           </Text>
+
+          <form onSubmit={handleSubmit}>
+            <Flex direction="column" gap="1.25rem">
+              {/* First Name and Last Name Row */}
+              <Flex gap="1rem">
+                <Flex flex="1">
+                  <Input
+                    label="First Name"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      updateFormData({ firstName: e.target.value })
+                    }
+                    error={errors.firstName}
+                    required
+                    placeholder="John"
+                  />
+                </Flex>
+                <Flex flex="1">
+                  <Input
+                    label="Last Name"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      updateFormData({ lastName: e.target.value })
+                    }
+                    error={errors.lastName}
+                    required
+                    placeholder="Doe"
+                  />
+                </Flex>
+              </Flex>
+
+              {/* Phone Number */}
+              <Input
+                label="Phone Number"
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  updateFormData({ phoneNumber: e.target.value })
+                }
+                error={errors.phoneNumber}
+                required
+                placeholder="647-123-4566"
+                type="tel"
+              />
+
+              {/* Email */}
+              <Input
+                label="Email"
+                value={formData.email}
+                onChange={(e) => updateFormData({ email: e.target.value })}
+                error={errors.email}
+                required
+                placeholder="user@humanesociety.org"
+                type="email"
+              />
+
+              {/* Role */}
+              <SingleSelect
+                values={roleValues}
+                selected={formData.role}
+                onSelect={(value) => updateFormData({ role: value })}
+                label="Role"
+                placeholder="Click for options"
+                maxHeight="none"
+                required
+                error={!!errors.role}
+              />
+
+              {/* Colour Level */}
+              <SingleSelect
+                values={colorLevels}
+                selected={formData.colorLevel}
+                onSelect={(level) => updateFormData({ colorLevel: level })}
+                iconElements={colorLevelElements}
+                label="Colour Level"
+                placeholder="Click for options"
+                maxHeight="none"
+                required
+                error={!!errors.colorLevel}
+              />
+
+              {/* Animal Tag */}
+              <MultiSelect
+                values={animalTags}
+                selected={formData.animalTags}
+                onSelect={(tags) => updateFormData({ animalTags: tags })}
+                colours={animalTagColors}
+                label="Animal Tag"
+                placeholder="Click for options"
+                maxHeight="none"
+                required
+                error={!!errors.animalTags}
+              />
+
+              {/* Error Message */}
+              {submitError && (
+                <Flex
+                  bg="red.50"
+                  border="1px solid"
+                  borderColor="red.400"
+                  borderRadius="0.375rem"
+                  p="0.75rem"
+                >
+                  <Text m={0} color="red.800" fontSize="0.875rem">
+                    {submitError}
+                  </Text>
+                </Flex>
+              )}
+
+              {/* Submit Button */}
+              <Flex justify="flex-end" mt="1rem">
+                <Button
+                  type="submit"
+                  variant="dark-blue"
+                  size="large"
+                  disabled={loading}
+                  isLoading={loading}
+                >
+                  {loading ? "Sending..." : "Send Invite"}
+                </Button>
+              </Flex>
+            </Flex>
+          </form>
         </Flex>
       </Flex>
 
-      {/* Main Content */}
-      <Flex direction="column" px="2.5rem" py="2rem" maxWidth="50rem">
-        <Text m={0} mb="2rem" textStyle="h2" color="gray.700">
-          Invite User
-        </Text>
-
-        <form onSubmit={handleSubmit}>
-          <Flex direction="column" gap="1.25rem">
-            {/* First Name and Last Name Row */}
-            <Flex gap="1rem">
-              <Flex flex="1">
-                <Input
-                  label="First Name"
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, firstName: e.target.value })
-                  }
-                  error={errors.firstName}
-                  required
-                  placeholder="John"
-                />
-              </Flex>
-              <Flex flex="1">
-                <Input
-                  label="Last Name"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lastName: e.target.value })
-                  }
-                  error={errors.lastName}
-                  required
-                  placeholder="Doe"
-                />
-              </Flex>
-            </Flex>
-
-            {/* Phone Number */}
-            <Input
-              label="Phone Number"
-              value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
-              }
-              error={errors.phoneNumber}
-              required
-              placeholder="647-123-4566"
-              type="tel"
-            />
-
-            {/* Email */}
-            <Input
-              label="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              error={errors.email}
-              required
-              placeholder="user@humanesociety.org"
-              type="email"
-            />
-
-            {/* Role */}
-            <SingleSelect
-              values={roleValues}
-              selected={formData.role}
-              onSelect={(value) => setFormData({ ...formData, role: value })}
-              label="Role"
-              placeholder="Click for options"
-              required
-              error={!!errors.role}
-            />
-
-            {/* Colour Level */}
-            <SingleSelect
-              values={colorLevels}
-              selected={formData.colorLevel}
-              onSelect={(level) =>
-                setFormData({ ...formData, colorLevel: level })
-              }
-              iconElements={colorLevelElements}
-              label="Colour Level"
-              placeholder="Click for options"
-              required
-              error={!!errors.colorLevel}
-            />
-
-            {/* Animal Tag */}
-            <MultiSelect
-              values={animalTags}
-              selected={formData.animalTags}
-              onSelect={(tags) =>
-                setFormData({ ...formData, animalTags: tags })
-              }
-              icons={animalTagIcons}
-              colours={animalTagColors}
-              label="Animal Tag"
-              placeholder="Click for options"
-              required
-              error={!!errors.animalTags}
-            />
-
-            {/* Error Message */}
-            {submitError && (
-              <Flex
-                bg="red.50"
-                border="1px solid"
-                borderColor="red.400"
-                borderRadius="0.375rem"
-                p="0.75rem"
-              >
-                <Text m={0} color="red.800" fontSize="0.875rem">
-                  {submitError}
-                </Text>
-              </Flex>
-            )}
-
-            {/* Submit Button */}
-            <Flex justify="flex-end" mt="1rem">
-              <Button
-                type="submit"
-                variant="dark-blue"
-                size="large"
-                disabled={loading}
-                isLoading={loading}
-              >
-                {loading ? "Sending..." : "Send Invite"}
-              </Button>
-            </Flex>
-          </Flex>
-        </form>
-      </Flex>
-    </Flex>
+      <PopupModal
+        open={isQuitModalOpen}
+        title="Quit Editing?"
+        message="Changes you made so far will not be saved."
+        primaryButtonText="Leave"
+        primaryButtonColor="red"
+        onPrimaryClick={handleConfirmQuit}
+        secondaryButtonText="Keep Editing"
+        onSecondaryClick={handleCancelQuit}
+      />
+      <PopupModal
+        open={isConfirmModalOpen}
+        title="Invite User?"
+        message="Are you sure you want to invite this user? A verification link will be sent to them."
+        primaryButtonText="Invite"
+        onPrimaryClick={handleConfirmInvite}
+        secondaryButtonText="Cancel"
+        onSecondaryClick={() => setIsConfirmModalOpen(false)}
+      />
+      <PopupModal
+        open={isSuccessModalOpen}
+        title="Invite Sent!"
+        message="A verification link has successfully been sent to the user's email."
+        primaryButtonText="Back to User Management"
+        onPrimaryClick={() => history.push(Routes.USER_MANAGEMENT_PAGE)}
+      />
+    </>
   );
 };
 
