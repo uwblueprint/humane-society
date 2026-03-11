@@ -1,5 +1,7 @@
 import { Router } from "express";
 
+import fs from "fs";
+import multer from "multer";
 import { getAccessToken } from "../middlewares/auth";
 import {
   createUserDtoValidator,
@@ -19,12 +21,23 @@ import {
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import FileStorageService from "../services/implementations/fileStorageService";
+import {
+  MAX_FILE_SIZE_BYTES,
+  ACCEPTED_TYPES,
+  MAX_FILE_SIZE_MB,
+} from "../constants";
+
+const upload = multer({ dest: "uploads/" });
 
 const userRouter: Router = Router();
 
 const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
 const authService: IAuthService = new AuthService(userService, emailService);
+const fileStorageService: FileStorageService = new FileStorageService(
+  process.env.SUPABASE_STORAGE_BUCKET || "",
+);
 
 /* Get all users, optionally filter by a userId or email query parameter to retrieve a single user */
 userRouter.get("/", async (req, res) => {
@@ -325,6 +338,141 @@ userRouter.delete("/", async (req, res) => {
   res
     .status(400)
     .json({ error: "Must supply one of userId or email as query parameter." });
+});
+
+userRouter.post(
+  "/me/profile-photo/upload",
+  upload.single("file"),
+  async (req, res) => {
+    const { file } = req;
+    const { userId } = req.body;
+    const { oldStoragePath } = req.body;
+
+    try {
+      if (!file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return;
+      }
+
+      if (!userId) {
+        res.status(400).json({ error: "Missing userId" });
+        return;
+      }
+
+      if (!ACCEPTED_TYPES.includes(file.mimetype)) {
+        res.status(400).json({
+          error: `Invalid file type, must be ${ACCEPTED_TYPES.join(", ")}`,
+        });
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        res
+          .status(400)
+          .json({ error: `File size exceeds limit of ${MAX_FILE_SIZE_MB}MB` });
+        return;
+      }
+
+      const storagePath = `users/${userId}/profile-photo-${Date.now()}.${
+        file.mimetype.split("/")[1]
+      }`;
+
+      await fileStorageService.createFile(
+        storagePath,
+        file.path,
+        file.mimetype,
+      );
+
+      try {
+        const user = await userService.getUserById(String(userId));
+        await userService.updateUserById(Number(userId), {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          colorLevel: user.colorLevel,
+          animalTags: user.animalTags,
+          canSeeAllLogs: user.canSeeAllLogs,
+          canAssignUsersToTasks: user.canAssignUsersToTasks,
+          phoneNumber: user.phoneNumber,
+          profilePhoto: storagePath, // Only thing changed is profile photo path
+        });
+      } catch (error: unknown) {
+        // If updating the DB fails, delete the uploaded file in storage
+        await fileStorageService.deleteFile(storagePath);
+        throw error;
+      }
+
+      if (oldStoragePath) {
+        await fileStorageService.deleteFile(oldStoragePath);
+      }
+
+      res.status(200).json({
+        message: "File uploaded successfully",
+        storagePath,
+      });
+    } catch (error: unknown) {
+      res.status(500).send(getErrorMessage(error));
+    } finally {
+      // Clean up temp file
+      if (file?.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    }
+  },
+);
+
+userRouter.post("/me/profile-photo/default", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) {
+    res.status(400).json({ error: "Missing userId query parameter" });
+    return;
+  }
+
+  try {
+    const user = await userService.getUserById(String(userId));
+    if (user.profilePhoto) {
+      await fileStorageService.deleteFile(user.profilePhoto);
+    }
+    await userService.updateUserById(Number(userId), {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      colorLevel: user.colorLevel,
+      animalTags: user.animalTags,
+      canSeeAllLogs: user.canSeeAllLogs,
+      canAssignUsersToTasks: user.canAssignUsersToTasks,
+      phoneNumber: user.phoneNumber,
+      profilePhoto: null, // set profile photo to null to use default
+    });
+    res.status(200).json({ message: "User set to default profile photo" });
+  } catch (error: unknown) {
+    res.status(500).send(getErrorMessage(error));
+  }
+});
+
+userRouter.get("/me/profile-photo", async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    if (!userId) {
+      res.status(400).json({ error: "Missing userId query parameter" });
+      return;
+    }
+    const user = await userService.getUserById(String(userId));
+
+    if (user.profilePhoto) {
+      const url = await fileStorageService.getFile(user.profilePhoto);
+      res.status(200).json({ url });
+    } else {
+      res.status(404).json({ error: "Profile photo not found" });
+    }
+  } catch (error: unknown) {
+    res.status(500).send(getErrorMessage(error));
+  }
 });
 
 export default userRouter;
