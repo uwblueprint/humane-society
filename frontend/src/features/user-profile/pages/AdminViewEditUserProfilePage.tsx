@@ -159,7 +159,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const roleOptions = Object.values(UserRoles);
   const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
   const colorLevelIcons = colourLevelOptions.map((level) => (
-    <ColourLevelBadge key={level} colourLevel={level as ColorLevel} size="small" />
+    <ColourLevelBadge
+      key={level}
+      colourLevel={level as ColorLevel}
+      size="small"
+    />
   ));
   const animalTagOptions = Object.values(AnimalTag);
   const animalTagColors = ["orange", "pink", "blue", "green", "purple"]; // Colors for animal tags
