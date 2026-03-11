@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
 import NavBar from "../../../components/common/navbar/NavBar";
@@ -6,6 +6,8 @@ import { User } from "../../../types/UserTypes";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import UserProfileSidebar from "../components/UserProfileSidebar";
 import CalendarDateSelector from "../components/CalendarDateSelector";
+import AuthContext from "../../../contexts/AuthContext";
+import UserRoles from "../../../constants/UserConstants";
 
 const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
@@ -13,6 +15,7 @@ const ProfilePage = (): React.ReactElement => {
   const [userData, setUserData] = useState<User | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const history = useHistory();
+  const { authenticatedUser } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -22,6 +25,15 @@ const ProfilePage = (): React.ReactElement => {
       } else {
         try {
           const data = await UserAPIClient.get(Number(userId));
+
+          const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
+          const isOwnPage = authenticatedUser?.id === userId;
+
+          if (!isAdmin && !isOwnPage) {
+            history.push("/not-found");
+            return;
+          }
+
           setUserData(data);
         } catch (error) {
           // console.error(`Failed to fetch user ${userId}:`, error);
@@ -30,7 +42,7 @@ const ProfilePage = (): React.ReactElement => {
       }
     };
     fetchUser();
-  }, [userId, history, params]);
+  }, [userId, history, params, authenticatedUser]);
 
   return (
     <>

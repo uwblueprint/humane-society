@@ -1,14 +1,11 @@
-/* eslint-disable-next-line import/prefer-default-export */
 export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : "Unknown error occurred.";
 };
 
-// Thrown when resource is not found
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NotFoundError";
-  }
-}
-
 export const INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error occured.";
+
+// Thrown when resource is not found
+export { default as NotFoundError } from "./notFoundError";
+
+// Thrown when a task already has a recurrence rule
+export { default as ConflictError } from "./conflictError";
