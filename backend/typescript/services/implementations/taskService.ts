@@ -13,8 +13,12 @@ import {
   RecurrenceTaskDTO,
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
-import { User } from "../../models";
-import { BadRequestError, getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
+import User from "../../models/user.model";
+import {
+  BadRequestError,
+  getErrorMessage,
+  NotFoundError,
+} from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { Days } from "../../types";
 import {
