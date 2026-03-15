@@ -11,6 +11,7 @@ import {
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import logInteraction from "../middlewares/logInteraction";
 
 const taskTemplateRouter: Router = Router();
 
@@ -114,6 +115,37 @@ taskTemplateRouter.delete("/:id", async (req, res) => {
     } else {
       res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
+  }
+});
+
+/* Change task template name by id */
+taskTemplateRouter.patch("/:id/name", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await taskTemplateService.updateTaskTemplate(id, {
+      taskName: req.body.name,
+    });
+
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+/* Change task template instruction by id */
+taskTemplateRouter.patch("/:id/instructions", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await taskTemplateService.updateTaskTemplate(id, {
+      instructions: req.body.instructions,
+    });
+
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
   }
 });
 

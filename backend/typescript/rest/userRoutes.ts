@@ -13,12 +13,14 @@ import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
 import { Role, UserDTO } from "../types";
+
 import {
   getErrorMessage,
   NotFoundError,
   INTERNAL_SERVER_ERROR_MESSAGE,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
+import logInteraction from "../middlewares/logInteraction";
 
 const userRouter: Router = Router();
 
@@ -325,6 +327,67 @@ userRouter.delete("/", async (req, res) => {
   res
     .status(400)
     .json({ error: "Must supply one of userId or email as query parameter." });
+});
+
+/* Change user name by id */
+userRouter.patch("/:id/name", async (req, res) => {
+  const idNum = Number(req.params.id);
+  if (Number.isNaN(idNum)) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+
+  try {
+    const updated = await userService.updateUserById(idNum, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+    });
+
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+/* Change user color level */
+userRouter.patch("/:id/color-level", async (req, res) => {
+  const idNum = Number(req.params.id);
+  if (Number.isNaN(idNum)) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+
+  try {
+    const updated = await userService.updateUserById(idNum, {
+      colorLevel: req.body.colorLevel,
+    });
+
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e) {
+    res.status(500).send(getErrorMessage(e));
+  }
+});
+
+/* Change user role by id */
+userRouter.patch("/:id/role", async (req, res) => {
+  const idNum = Number(req.params.id);
+  if (Number.isNaN(idNum)) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+
+  try {
+    const updated = await userService.updateUserById(idNum, {
+      role: req.body.role,
+    });
+
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e) {
+    res.status(500).send(getErrorMessage(e));
+  }
 });
 
 export default userRouter;
