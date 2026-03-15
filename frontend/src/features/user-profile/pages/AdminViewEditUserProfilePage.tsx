@@ -11,8 +11,8 @@ import MultiSelect from "../../../components/common/MultiSelect";
 import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import UserRoles from "../../../constants/UserConstants";
-import { AnimalTag } from "../../../types/TaskTypes";
-import ColourStarIcon from "../../../components/common/ColourStarIcon";
+import { AnimalTag, ColorLevel } from "../../../types/TaskTypes";
+import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 import NavBar from "../../../components/common/navbar/NavBar";
 import DeleteUserModal from "../components/DeleteUserModal";
 
@@ -158,13 +158,13 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
 
   const roleOptions = Object.values(UserRoles);
   const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
-  const colorLevelIcons = [
-    <ColourStarIcon key="green" colour="green.300" />,
-    <ColourStarIcon key="yellow" colour="yellow.800" />,
-    <ColourStarIcon key="orange" colour="orange.400" />,
-    <ColourStarIcon key="red" colour="red.600" />,
-    <ColourStarIcon key="blue" colour="blue.400" />,
-  ];
+  const colorLevelIcons = colourLevelOptions.map((level) => (
+    <ColourLevelBadge
+      key={level}
+      colourLevel={level as ColorLevel}
+      size="small"
+    />
+  ));
   const animalTagOptions = Object.values(AnimalTag);
   const animalTagColors = ["orange", "pink", "blue", "green", "purple"]; // Colors for animal tags
 
@@ -314,6 +314,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     selected={field.value}
                     onSelect={field.onChange}
                     placeholder="Select colour level"
+                    maxHeight="none"
                     error={!!errors.colourLevel}
                     required
                   />
@@ -333,6 +334,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     onSelect={field.onChange}
                     placeholder="Select animal tags"
                     colours={animalTagColors}
+                    maxHeight="none"
                     error={!!errors.animalTag}
                     required
                   />
