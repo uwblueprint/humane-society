@@ -22,42 +22,70 @@ const AddTaskForm = ({
   const [currentStep, setCurrentStep] = useState(1);
 
   const today = new Date();
-  const { control, setValue, watch, trigger } = useForm<AddTaskFormData>({
-    defaultValues: {
-      search: "",
-      selectedTemplate: null,
+  const { control, setValue, watch, trigger, getValues } =
+    useForm<AddTaskFormData>({
+      defaultValues: {
+        search: "",
+        selectedTemplate: null,
 
-      // page 2
-      taskName: "",
-      taskCategory: "",
-      instructions: "",
-      startMonth: today.toLocaleString("default", { month: "long" }),
-      startDay: String(today.getDate()),
-      startYear: String(today.getFullYear()),
-      startMinute: "",
-      startHour: "",
-      endMinute: "",
-      endHour: "",
-      isRepeating: false,
-      recurringDays: [],
-      recurringCadences: "Weekly",
-      endDay: "",
-      endMonth: "",
-      endYear: "",
-    },
-  });
+        // page 2
+        taskName: "",
+        taskCategory: "",
+        instructions: "",
+        startMonth: today.toLocaleString("default", { month: "long" }),
+        startDay: String(today.getDate()),
+        startYear: String(today.getFullYear()),
+        startMinute: "",
+        startHour: "",
+        endMinute: "",
+        endHour: "",
+        isRepeating: false,
+        recurringDays: [],
+        recurringCadences: "Weekly",
+        endDay: "",
+        endMonth: "",
+        endYear: "",
+      },
+    });
 
   const selectedTemplate = watch("selectedTemplate");
+  const isRepeating = watch("isRepeating");
 
-  const handleNextPage = async () => {
+  const handleNextPage1 = async () => {
     const isValid = await trigger("selectedTemplate");
-    if (isValid) {
+    if (isValid && selectedTemplate) {
+      setValue("taskName", selectedTemplate.name);
+      setValue("taskCategory", selectedTemplate.category);
+      setValue("instructions", selectedTemplate.instructions);
       setCurrentStep(2);
     }
   };
 
+  const handleNextPage2 = async () => {
+    const validateFields: (keyof AddTaskFormData)[] = [
+      "instructions",
+      "startMonth",
+      "startDay",
+      "startYear",
+      "startHour",
+      "startMinute",
+      "endHour",
+      "endMinute",
+      ...(isRepeating
+        ? (["reccuringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
+        : []),
+      ...(isRepeating && getValues("endMonth")
+        ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
+        : []),
+    ];
+
+    const isValid = await trigger(validateFields);
+    if (isValid) {
+      // TODO: setCurrentStep(3)
+    }
+  };
+
   const handlePreviousPage = async () => {
-    // const isValid =
     setCurrentStep(currentStep - 1);
   };
 
@@ -90,7 +118,7 @@ const AddTaskForm = ({
           />
         )}
 
-        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} />}
+        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} getValues={getValues}/>}
 
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
@@ -103,7 +131,7 @@ const AddTaskForm = ({
               variant="gray"
               size="medium"
               rightIcon={<ChevronRightIcon />}
-              onClick={handleNextPage}
+              onClick={handleNextPage1}
               type="button"
               isDisabled={!selectedTemplate}
             >
@@ -128,7 +156,7 @@ const AddTaskForm = ({
               variant="gray"
               size="medium"
               rightIcon={<ChevronRightIcon />}
-              onClick={handleNextPage}
+              onClick={handleNextPage2}
               type="button"
             >
               Next

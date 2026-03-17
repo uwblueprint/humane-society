@@ -8,21 +8,26 @@ import {
   FormErrorMessage,
   FormLabel,
   Select,
-  Textarea,
 } from "@chakra-ui/react";
 import React from "react";
-import { Control, Controller, UseFormWatch } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  UseFormWatch,
+  UseFormGetValues,
+} from "react-hook-form";
 import Input from "../../../../components/common/Input";
 import TaskCategoryBadge from "../../../../components/common/TaskCategoryBadge";
 import { TaskCategory } from "../../../../types/TaskTypes";
 import { AddTaskFormData } from "./AddTaskFormTypes";
 import SingleSelect from "../../../../components/common/SingleSelect";
-import MultiSelect from "../../../../components/common/MultiSelect";
 import TextArea from "../../../../components/common/TextArea";
+import { getDaysInMonth } from "../../../../utils/CommonUtils";
 
 interface AddTaskForm2Props {
   control: Control<AddTaskFormData>;
   watch: UseFormWatch<AddTaskFormData>;
+  getValues: UseFormGetValues<AddTaskFormData>;
 }
 
 // TODO: make this work lol !
@@ -36,15 +41,6 @@ function isLeapYear(year: number): boolean {
   }
 }
 
-// helper to get days based on month/year
-function getDaysInMonth(month: string, year: string): number {
-  const m = parseInt(month, 10);
-  const y = parseInt(year, 10);
-  if (m === 2 && isLeapYear(y)) return 29;
-  else if (m === 2) return 28;
-  else if (m === 4 || m === 6 || m === 9 || m === 11) return 30;
-  else return 31;
-}
 const MONTHS = [
   "January",
   "February",
@@ -88,16 +84,24 @@ const HOURS = [
 const MINUTES = ["00", "15", "30", "45"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FREQUENCY = ["Weekly", "Biweekly", "Monthly", "Annually"];
-
 const YEARS: string[] = [];
 const today = new Date();
 for (let i = 0; i < 5; i++) {
   YEARS.push(String(today.getFullYear() + i));
 }
 
+function toMinute(hour: string, minute: string): number {
+  return Number(hour) * 60 + Number(minute);
+}
+
+function toDate(month: string, day: string, year: string): Date {
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
 const AddTaskForm2 = ({
   control,
   watch,
+  getValues,
 }: AddTaskForm2Props): React.ReactElement => {
   const isRepeating = watch("isRepeating");
   const startMonth = watch("startMonth");
@@ -106,11 +110,11 @@ const AddTaskForm2 = ({
   const endYear = watch("endYear");
 
   const startDays = Array.from(
-    { length: getDaysInMonth(startMonth, startYear) },
+    { length: getDaysInMonth(startMonth, Number(startYear)) },
     (_, i) => String(i + 1),
   );
   const endDays = Array.from(
-    { length: getDaysInMonth(endMonth, endYear) },
+    { length: getDaysInMonth(endMonth, Number(endYear)) },
     (_, i) => String(i + 1),
   );
 
@@ -120,7 +124,12 @@ const AddTaskForm2 = ({
     <Flex flexDirection="column" gap="1.5rem" width="100%">
       {/* Task Name */}
       <FormControl>
-        <FormLabel color="gray.600" marginBottom="0.38rem" fontWeight="normal">
+        <FormLabel
+          color="gray.600"
+          marginBottom="0.38rem"
+          fontWeight="normal"
+          m={0}
+        >
           Task Name:
         </FormLabel>
         <Controller
@@ -132,7 +141,12 @@ const AddTaskForm2 = ({
 
       {/* Task Category */}
       <FormControl>
-        <FormLabel color="gray.600" marginBottom="0.38rem" fontWeight="normal">
+        <FormLabel
+          color="gray.600"
+          marginBottom="0.38rem"
+          fontWeight="normal"
+          m={0}
+        >
           Task Category:
         </FormLabel>
         {taskCategory && (
@@ -145,7 +159,12 @@ const AddTaskForm2 = ({
 
       {/* Instructions */}
       <FormControl isRequired>
-        <FormLabel color="gray.600" marginBottom="0.38rem" fontWeight="normal">
+        <FormLabel
+          color="gray.600"
+          marginBottom="0.38rem"
+          fontWeight="normal"
+          m={0}
+        >
           Instructions:
         </FormLabel>
         <Controller
@@ -170,76 +189,105 @@ const AddTaskForm2 = ({
               onChange={field.onChange}
               error={error?.message}
               required={true}
+              placeholder="Enter instructions"
             />
           )}
         />
       </FormControl>
 
       {/* Start Date */}
-      <Flex flexDirection="column" gap="0.375rem">
-        <FormControl isRequired>
-          <FormLabel
-            color="gray.600"
-            marginBottom="0.38rem"
-            fontWeight="normal"
-          >
-            Start Date:
-          </FormLabel>
-          <Flex gap="0.75rem">
-            {/* Month */}
-            <Flex flex="2">
-              <Controller
-                control={control}
-                name="startMonth"
-                rules={{ required: true }}
-                render={({ field, fieldState: { error } }) => (
+      <FormControl isRequired>
+        <FormLabel
+          color="gray.600"
+          marginBottom="0.38rem"
+          fontWeight="normal"
+          m={0}
+        >
+          Start Date:
+        </FormLabel>
+        <Flex gap="0.75rem">
+          {/* Month */}
+          <Flex flex="2">
+            <Controller
+              control={control}
+              name="startMonth"
+              rules={{
+                required: true,
+              }}
+              render={({ field, fieldState: { error } }) => (
+                <SingleSelect
+                  values={MONTHS}
+                  selected={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Enter month"
+                  error={!!error}
+                />
+              )}
+            />
+          </Flex>
+          {/* Day */}
+          <Flex flex="1">
+            <Controller
+              control={control}
+              name="startDay"
+              rules={{
+                required: true,
+                validate: {
+                  // TODO: FIX ERROR MSG AND VALIDATION TS SO CHOPPED HOLYYYYYY (lock in)
+                  validDate: (day) => {
+                    const { startMonth: month, startYear: year } = getValues();
+                    if (!month || !year) return false;
+                    const selected = toDate(month, day, year);
+                    const today = new Date();
+                    today.setHours(0, 0);
+                    return (
+                      selected > today ||
+                      `Date must be after ${today.toLocaleDateString("en-CA", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}`
+                    );
+                  },
+                },
+              }}
+              render={({ field, fieldState: { error } }) => (
+                <Flex flexDirection="column" gap="0.25rem" width="100%">
                   <SingleSelect
-                    values={MONTHS}
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    placeholder="Enter month"
-                    error={!!error}
-                  />
-                )}
-              />
-            </Flex>
-            {/* Day */}
-            <Flex flex="1">
-              <Controller
-                control={control}
-                name="startDay"
-                rules={{ required: true }}
-                render={({ field, fieldState: { error } }) => (
-                  <SingleSelect
-                    values={startDays} // TODO: fix this shit later dawg to actually get the right number of days
+                    values={startDays}
                     selected={field.value}
                     onSelect={field.onChange}
                     placeholder="Enter date"
                     error={!!error}
                   />
-                )}
-              />
-            </Flex>
-            {/* Year*/}
-            <Flex flex="1">
-              <Controller
-                control={control}
-                name="startYear"
-                rules={{ required: true }}
-                render={({ field, fieldState: { error } }) => (
-                  <SingleSelect
-                    values={YEARS}
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    placeholder="Enter year"
-                    error={!!error}
-                  />
-                )}
-              />
-            </Flex>
+                  {error && (
+                    <Text color="red.400" fontSize="1rem" m={0}>
+                      {error.message}
+                    </Text>
+                  )}
+                </Flex>
+              )}
+            />
           </Flex>
-        </FormControl>
-      </Flex>
+          {/* Year*/}
+          <Flex flex="1">
+            <Controller
+              control={control}
+              name="startYear"
+              rules={{ required: true }}
+              render={({ field, fieldState: { error } }) => (
+                <SingleSelect
+                  values={YEARS}
+                  selected={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Enter year"
+                  error={!!error}
+                />
+              )}
+            />
+          </Flex>
+        </Flex>
+      </FormControl>
 
       {/* Scheduled Start and End Times */}
       <Flex gap="1.5rem">
@@ -250,6 +298,7 @@ const AddTaskForm2 = ({
               color="gray.600"
               marginBottom="0.38rem"
               fontWeight="normal"
+              m={0}
             >
               Scheduled Start Time:
             </FormLabel>
@@ -259,7 +308,7 @@ const AddTaskForm2 = ({
                 <Controller
                   control={control}
                   name="startHour"
-                  rules={{ required: true }}
+                  rules={{ required: "Please fill out start time." }}
                   render={({ field, fieldState: { error } }) => (
                     <SingleSelect
                       values={HOURS}
@@ -277,7 +326,7 @@ const AddTaskForm2 = ({
                 <Controller
                   control={control}
                   name="startMinute"
-                  rules={{ required: true }}
+                  rules={{ required: "Please fill out start time." }}
                   render={({ field, fieldState: { error } }) => (
                     <SingleSelect
                       values={MINUTES}
@@ -300,6 +349,7 @@ const AddTaskForm2 = ({
               color="gray.600"
               marginBottom="0.38rem"
               fontWeight="normal"
+              m={0}
             >
               Scheduled End Time:
             </FormLabel>
@@ -309,15 +359,38 @@ const AddTaskForm2 = ({
                 <Controller
                   control={control}
                   name="endHour"
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    validate: {
+                      isValid: (endHour) => {
+                        const { startHour, startMinute, endMinute } =
+                          getValues();
+                        if (!startHour || !startMinute || !endMinute)
+                          return true;
+                        else
+                          return (
+                            toMinute(endHour, endMinute) >
+                              toMinute(startHour, startMinute) ||
+                            "End time cannot precede start time."
+                          );
+                      },
+                    },
+                  }}
                   render={({ field, fieldState: { error } }) => (
-                    <SingleSelect
-                      values={HOURS}
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      placeholder="Enter hour"
-                      error={!!error}
-                    />
+                    <Flex flexDirection="column" gap="0.25rem" width="100%">
+                      <SingleSelect
+                        values={HOURS}
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Enter hour"
+                        error={!!error}
+                      />
+                      {error && (
+                        <Text color="red.400" fontSize="1rem" m={0}>
+                          {error.message}
+                        </Text>
+                      )}
+                    </Flex>
                   )}
                 />
               </Flex>
@@ -373,13 +446,20 @@ const AddTaskForm2 = ({
             <Controller
               control={control}
               name="recurringDays"
-              rules={{ required: "Please select an option" }}
+              rules={{
+                required: "Please select an option",
+                validate: {
+                  isValid: (days) =>
+                    days.length > 0 || "Please select an option",
+                },
+              }}
               render={({ field, fieldState: { error } }) => (
                 <Flex flexDirection="column" gap="0.38rem">
                   <FormLabel
                     color="gray.600"
                     marginBottom="0.38rem"
                     fontWeight="normal"
+                    m={0}
                   >
                     Recurring Days:
                   </FormLabel>
@@ -403,14 +483,14 @@ const AddTaskForm2 = ({
                           paddingY="0.375rem"
                           borderRadius="0.375rem"
                           border="1px solid"
-                          borderColor={isSelected ? "blue.700" : "gray.200"}
+                          borderColor={error ? "red.600" : isSelected ? "blue.700" : "gray.200"}
                           backgroundColor={isSelected ? "blue.700" : "gray.200"}
                           cursor="pointer"
                         >
                           <Text
-                            m={0}
                             textStyle="body"
                             color={isSelected ? "white" : "gray.700"}
+                            m={0}
                           >
                             {day}
                           </Text>
@@ -419,7 +499,7 @@ const AddTaskForm2 = ({
                     })}
                   </Flex>
                   {error && (
-                    <Text m={0} color="red.500" fontSize="0.75rem">
+                    <Text color="red.400" fontSize="1rem" m={0}>
                       {error.message}
                     </Text>
                   )}
@@ -435,6 +515,7 @@ const AddTaskForm2 = ({
                 color="gray.600"
                 marginBottom="0.38rem"
                 fontWeight="normal"
+                m={0}
               >
                 Recurring Cadences:
               </FormLabel>
@@ -442,7 +523,7 @@ const AddTaskForm2 = ({
                 control={control}
                 name="recurringCadences"
                 rules={{
-                  required: isRepeating ? "Please select a cadence." : false,
+                  required: "Please select an option from the dropdown.",
                 }}
                 render={({ field, fieldState: { error } }) => (
                   <Flex flexDirection="column" gap="0.375rem">
@@ -455,7 +536,7 @@ const AddTaskForm2 = ({
                       required
                     />
                     {error && (
-                      <Text m={0} color="red.500" fontSize="0.75rem">
+                      <Text color="red.400" fontSize="1rem" m={0}>
                         {error.message}
                       </Text>
                     )}
@@ -467,63 +548,82 @@ const AddTaskForm2 = ({
 
           {/* End Date */}
           <Flex flexDirection="column" gap="0.375rem">
-              <FormLabel
-                color="gray.600"
-                marginBottom="0.38rem"
-                fontWeight="normal"
-              >
-                End Date:
-              </FormLabel>
-              <Flex gap="0.75rem">
-                {/* Month */}
-                <Flex flex="2">
-                  <Controller
-                    control={control}
-                    name="endMonth"
-                    render={({ field, fieldState: { error } }) => (
-                      <SingleSelect
-                        values={MONTHS}
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        placeholder="Enter month"
-                        error={!!error}
-                      />
-                    )}
-                  />
-                </Flex>
-                {/* Day */}
-                <Flex flex="1">
-                  <Controller
-                    control={control}
-                    name="endDay"
-                    render={({ field, fieldState: { error } }) => (
-                      <SingleSelect
-                        values={endDays} // TODO: fix this shit later dawg to actually get the right number of days
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        placeholder="Enter date"
-                        error={!!error}
-                      />
-                    )}
-                  />
-                </Flex>
-                {/* Year*/}
-                <Flex flex="1">
-                  <Controller
-                    control={control}
-                    name="endYear"
-                    render={({ field, fieldState: { error } }) => (
-                      <SingleSelect
-                        values={YEARS}
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        placeholder="Enter year"
-                        error={!!error}
-                      />
-                    )}
-                  />
-                </Flex>
+            <FormLabel
+              color="gray.600"
+              marginBottom="0.38rem"
+              fontWeight="normal"
+              m={0}
+            >
+              End Date:
+            </FormLabel>
+            <Flex gap="0.75rem">
+              {/* Month */}
+              <Flex flex="2">
+                <Controller
+                  control={control}
+                  name="endMonth"
+                  render={({ field, fieldState: { error } }) => (
+                    <SingleSelect
+                      values={MONTHS}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      placeholder="Enter month"
+                      error={!!error}
+                    />
+                  )}
+                />
               </Flex>
+              {/* Day */}
+              <Flex flex="1">
+                <Controller
+                  control={control}
+                  name="endDay"
+									rules={{
+										validate: {
+											isValid: (endDay) => {
+												const { endMonth, endYear, startDay, startMonth, startYear } = getValues();
+												if ( !endDay || !endMonth || !endYear ) return true;
+												const end = toDate(endMonth, endDay, endYear);
+												const start = toDate(startMonth, startDay, startYear);
+												return end > start || "End date cannot precede start date."
+											},
+										},
+									}}
+                  render={({ field, fieldState: { error } }) => (
+										<Flex flexDirection="column" gap="0.25rem" width="100%">
+                    <SingleSelect
+                      values={endDays}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      placeholder="Enter date"
+                      error={!!error}
+                    />
+										                      {error && (
+                        <Text m={0} color="red.400" fontSize="1rem">
+                          {error.message}
+                        </Text>
+                      )}
+											</Flex>
+                  )}
+                />
+              </Flex>
+              {/* Year*/}
+              <Flex flex="1">
+                <Controller
+                  control={control}
+                  name="endYear"
+                  render={({ field, fieldState: { error } }) => (
+                    <SingleSelect
+                      values={YEARS}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      placeholder="Enter year"
+                      error={!!error}
+                    />
+                  )}
+                />
+              </Flex>
+            </Flex>
           </Flex>
         </Flex>
       )}
