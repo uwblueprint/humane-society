@@ -75,6 +75,7 @@ const PetProfilePage = (): React.ReactElement => {
         );
         setTasks(sortedTasks);
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(err);
       }
     };
