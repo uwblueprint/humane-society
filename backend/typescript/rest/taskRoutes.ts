@@ -142,7 +142,7 @@ taskRouter.post(
 );
 
 taskRouter.post(
-  "/tasks/recurrences/:taskId/edit",
+  "/recurrences/:taskId/edit",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
   async (req, res) => {
     const { taskId } = req.params;
@@ -164,9 +164,9 @@ taskRouter.post(
 
     try {
       if (single) {
-        await taskService.excludeDate(taskId, date);
         const temporaryTask =
           await taskService.generateRecurringInstanceForData(taskId, date);
+        await taskService.excludeDate(taskId, date);
         res.status(200).json({
           task: {
             ...temporaryTask,
@@ -176,6 +176,7 @@ taskRouter.post(
         });
       } else {
         const task = await taskService.getTask(taskId);
+        const recurrence = await taskService.getRecurrence(taskId)
         const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
@@ -190,9 +191,9 @@ taskRouter.post(
         });
         const newRecurrence = await taskService.createRecurrence(
           newTask.id.toString(),
-          updatedRecurrence.cadence,
-          updatedRecurrence.days,
-          updatedRecurrence.endDate,
+          recurrence.cadence,
+          recurrence.days,
+          recurrence.endDate,
         );
         res.status(200).json({
           task: newTask,
