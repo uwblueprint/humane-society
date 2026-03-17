@@ -1,4 +1,4 @@
-import { Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { Flex, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import React from "react";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import Search from "../../../components/common/Search";
@@ -15,6 +15,7 @@ type UserSelectionProps = {
   page: number;
   errorMessage: string | null;
   usersPerPage: number;
+  loading: boolean;
   onSearch: (value: string) => void;
   onRowClick: (user: User) => void;
   onPageChange: (page: number) => void;
@@ -29,11 +30,20 @@ const UserSelection = ({
   page,
   errorMessage,
   usersPerPage,
+  loading,
   onSearch,
   onRowClick,
   onPageChange,
   onClearSelection,
 }: UserSelectionProps): React.ReactElement => {
+    if (loading) {
+        return (
+            <Flex justify="center" align="center">
+            <Spinner />
+            </Flex>
+        );
+        }
+
   return (
     <>
       {/* assign to label & search */}

@@ -92,14 +92,6 @@ const AssignTaskPage = (): React.ReactElement => {
     history.goBack();
   };
 
-  if (loading) {
-    return (
-      <Flex justify="center" align="center" height="100vh">
-        <Spinner />
-      </Flex>
-    );
-  }
-
   return (
     <>
       <NavBar pageName="Pet Profile" />
@@ -142,6 +134,7 @@ const AssignTaskPage = (): React.ReactElement => {
             page={page}
             errorMessage={errorMessage}
             usersPerPage={usersPerPage}
+            loading={loading}
             onSearch={handleSearch}
             onRowClick={handleRowClick}
             onPageChange={setPage}
