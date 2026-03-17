@@ -267,10 +267,7 @@ const EditPetProfilePage = (): React.ReactElement => {
     let neutered: boolean | undefined;
     if (data.neutered === "Neutered" || data.neutered === "Spayed") {
       neutered = true;
-    } else if (
-      data.neutered === "Unneutered" ||
-      data.neutered === "Unspayed"
-    ) {
+    } else if (data.neutered === "Unneutered" || data.neutered === "Unspayed") {
       neutered = false;
     }
 
@@ -338,7 +335,11 @@ const EditPetProfilePage = (): React.ReactElement => {
         birthdayYear: updatedBirthdayYear,
         birthdayMonth: updatedBirthdayMonth,
         birthdayDate: updatedBirthdayDate,
-        sex: updatedPet.sex === SexEnum.MALE ? "Male" : updatedPet.sex === SexEnum.FEMALE ? "Female" : "",
+        sex: (() => {
+          if (updatedPet.sex === SexEnum.MALE) return "Male";
+          if (updatedPet.sex === SexEnum.FEMALE) return "Female";
+          return "";
+        })(),
         neutered: getSpayedNeuteredValue(updatedPet.sex, updatedPet.neutered),
         safetyInfo: updatedPet.careInfo?.safetyInfo || "",
         managementInfo: updatedPet.careInfo?.managementInfo || "",

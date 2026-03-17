@@ -277,9 +277,19 @@ class PetService implements IPetService {
           },
           { where: { pet_id: id }, returning: true, transaction },
         );
-        // pet care info is not required anymore
         if (petCareInfoUpdateResult[0]) {
           [, [resultingPetCareInfo]] = petCareInfoUpdateResult;
+        } else {
+          // if no existing row in pet care info, create
+          resultingPetCareInfo = await PgPetCareInfo.create(
+            {
+              pet_id: Number(id),
+              safety_info: pet.careInfo?.safetyInfo,
+              medical_info: pet.careInfo?.medicalInfo,
+              management_info: pet.careInfo?.managementInfo,
+            },
+            { transaction },
+          );
         }
       }
 
