@@ -314,6 +314,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     selected={field.value}
                     onSelect={field.onChange}
                     placeholder="Select colour level"
+                    maxHeight="none"
                     error={!!errors.colourLevel}
                     required
                   />
@@ -333,6 +334,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     onSelect={field.onChange}
                     placeholder="Select animal tags"
                     colours={animalTagColors}
+                    maxHeight="none"
                     error={!!errors.animalTag}
                     required
                   />

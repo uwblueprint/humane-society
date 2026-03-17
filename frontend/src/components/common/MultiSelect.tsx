@@ -163,7 +163,22 @@ const MultiSelect = <T extends string | number>({
                   const color = getColorForValue(value);
                   const IconComponent = icons?.[values.indexOf(value)];
 
-                  return (
+                  return IconComponent ? (
+                    <Flex
+                      key={String(value)}
+                      align="center"
+                      gap="0.25rem"
+                      flexShrink={0}
+                    >
+                      <Icon as={IconComponent} height="2rem" width="auto" />
+                      <TagCloseButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveTag(value);
+                        }}
+                      />
+                    </Flex>
+                  ) : (
                     <Tag
                       key={String(value)}
                       colorScheme={color}
@@ -174,9 +189,6 @@ const MultiSelect = <T extends string | number>({
                       display="flex"
                       gap="0.25rem"
                     >
-                      {IconComponent && (
-                        <Icon as={IconComponent} boxSize="1rem" />
-                      )}
                       <TagLabel textStyle="button" m={0}>
                         {String(value)}
                       </TagLabel>
