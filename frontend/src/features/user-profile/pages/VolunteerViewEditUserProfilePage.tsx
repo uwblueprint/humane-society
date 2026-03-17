@@ -138,7 +138,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           userId,
           user?.profilePhoto,
         );
-      } else {
+      } else if (localProfilePhoto === undefined) {
         await UserAPIClient.setDefaultProfilePhoto(userId);
       }
 
