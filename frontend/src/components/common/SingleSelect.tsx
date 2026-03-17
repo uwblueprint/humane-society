@@ -137,18 +137,16 @@ const SingleSelect = <T extends string | number>({
                 ) : (
                   iconElements && iconElements[values.indexOf(selected)]
                 )}
-                {!iconElements && (
-                  <Text
-                    m={0}
-                    textStyle="body"
-                    color="gray.600"
-                    overflow="hidden"
-                    textOverflow="ellipsis"
-                    whiteSpace="nowrap"
-                  >
-                    {displayValue}
-                  </Text>
-                )}
+                <Text
+                  m={0}
+                  textStyle="body"
+                  color="gray.600"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                >
+                  {displayValue}
+                </Text>
               </Flex>
             ) : (
               <Text
@@ -229,17 +227,15 @@ const SingleSelect = <T extends string | number>({
                   ) : (
                     IconComponent && IconComponent
                   )}
-                  {!IconComponent && (
-                    <Text
-                      m={0}
-                      textStyle="body"
-                      color="gray.700"
-                      textAlign="left"
-                      flex="1"
-                    >
-                      {String(value)}
-                    </Text>
-                  )}
+                  <Text
+                    m={0}
+                    textStyle="body"
+                    color="gray.700"
+                    textAlign="left"
+                    flex="1"
+                  >
+                    {String(value)}
+                  </Text>
                 </Flex>
                 {!isLastItem && (
                   <Box height="1px" bg="gray.50" mx="16px" my="4px" />

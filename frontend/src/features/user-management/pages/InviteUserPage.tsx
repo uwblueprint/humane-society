@@ -5,7 +5,7 @@ import { ChevronLeftIcon } from "@chakra-ui/icons";
 import Input from "../../../components/common/Input";
 import SingleSelect from "../../../components/common/SingleSelect";
 import MultiSelect from "../../../components/common/MultiSelect";
-import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
+import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Button from "../../../components/common/Button";
 import UserRoles from "../../../constants/UserConstants";
 import { ColorLevel, AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
@@ -191,9 +191,13 @@ const InviteUserPage = (): React.ReactElement => {
     ColorLevel.BLUE,
   ];
 
-  const colorLevelElements = colorLevels.map((level) => (
-    <ColourLevelBadge key={level} colourLevel={level} size="small" />
-  ));
+  const colorLevelElements = [
+    <ColourStarIcon key="green" colour="green.300" />,
+    <ColourStarIcon key="yellow" colour="yellow.800" />,
+    <ColourStarIcon key="orange" colour="orange.400" />,
+    <ColourStarIcon key="red" colour="red.600" />,
+    <ColourStarIcon key="blue" colour="blue.400" />,
+  ];
 
   const animalTags = [
     AnimalTag.BIRD,
