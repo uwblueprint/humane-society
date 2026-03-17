@@ -22,7 +22,7 @@ export interface AddTaskFormData {
   
   isRepeating: boolean;
   recurringDays: string[];
-  recurringFrequency: string;
+  recurringCadences: string;
   endDay: string;
   endMonth: string;
   endYear: string;

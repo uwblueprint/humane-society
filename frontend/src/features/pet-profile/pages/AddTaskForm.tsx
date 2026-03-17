@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
- import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
+import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 
 interface AddTaskFormProps {
@@ -31,7 +31,7 @@ const AddTaskForm = ({
       taskName: "",
       taskCategory: "",
       instructions: "",
-      startMonth: today.toLocaleString("default", { month : "long"}),
+      startMonth: today.toLocaleString("default", { month: "long" }),
       startDay: String(today.getDate()),
       startYear: String(today.getFullYear()),
       startMinute: "",
@@ -40,11 +40,10 @@ const AddTaskForm = ({
       endHour: "",
       isRepeating: false,
       recurringDays: [],
-      recurringFrequency: "Weekly",
+      recurringCadences: "Weekly",
       endDay: "",
       endMonth: "",
       endYear: "",
-
     },
   });
 
@@ -55,6 +54,11 @@ const AddTaskForm = ({
     if (isValid) {
       setCurrentStep(2);
     }
+  };
+
+  const handlePreviousPage = async () => {
+    // const isValid =
+    setCurrentStep(currentStep - 1);
   };
 
   return (
@@ -86,12 +90,7 @@ const AddTaskForm = ({
           />
         )}
 
-        {currentStep === 2 && (
-          <AddTaskForm2
-            control={control}
-            watch={watch}
-            />
-        )}
+        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} />}
 
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
@@ -107,6 +106,30 @@ const AddTaskForm = ({
               onClick={handleNextPage}
               type="button"
               isDisabled={!selectedTemplate}
+            >
+              Next
+            </Button>
+          )}
+          {currentStep === 2 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              leftIcon={<ChevronLeftIcon />}
+              onClick={handlePreviousPage}
+              type="button"
+            >
+              Previous
+            </Button>
+          )}
+          {currentStep === 2 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              rightIcon={<ChevronRightIcon />}
+              onClick={handleNextPage}
+              type="button"
             >
               Next
             </Button>

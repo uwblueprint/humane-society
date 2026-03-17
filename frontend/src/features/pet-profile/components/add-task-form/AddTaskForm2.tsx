@@ -1,5 +1,6 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
+  Text,
   Checkbox,
   Box,
   Flex,
@@ -58,12 +59,34 @@ const MONTHS = [
   "November",
   "December",
 ];
-const HOURS: string[] = [];
-for (let i = 0; i < 24; i++) {
-  HOURS.push(String(i));
-}
+const HOURS = [
+  "00",
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+];
 const MINUTES = ["00", "15", "30", "45"];
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FREQUENCY = ["Weekly", "Biweekly", "Monthly", "Annually"];
 
 const YEARS: string[] = [];
@@ -174,7 +197,7 @@ const AddTaskForm2 = ({
                     values={MONTHS}
                     selected={field.value}
                     onSelect={field.onChange}
-                    placeholder="Month"
+                    placeholder="Enter month"
                     error={!!error}
                   />
                 )}
@@ -191,7 +214,7 @@ const AddTaskForm2 = ({
                     values={startDays} // TODO: fix this shit later dawg to actually get the right number of days
                     selected={field.value}
                     onSelect={field.onChange}
-                    placeholder="Day"
+                    placeholder="Enter date"
                     error={!!error}
                   />
                 )}
@@ -208,7 +231,7 @@ const AddTaskForm2 = ({
                     values={YEARS}
                     selected={field.value}
                     onSelect={field.onChange}
-                    placeholder="Year"
+                    placeholder="Enter year"
                     error={!!error}
                   />
                 )}
@@ -322,7 +345,188 @@ const AddTaskForm2 = ({
       </Flex>
 
       {/* Repeated Task Checkbox */}
-      <Checkbox />
+      <Controller
+        control={control}
+        name="isRepeating"
+        render={({ field }) => (
+          <Checkbox
+            isChecked={field.value}
+            onChange={field.onChange}
+            size="lg"
+            _checked={{
+              "& .chakra-checkbox__control": {
+                background: "blue.700",
+                borderColor: "blue.700",
+              },
+            }}
+          >
+            Repeating Task
+          </Checkbox>
+        )}
+      />
+
+      {/* If Repeating is Checked */}
+      {isRepeating && (
+        <Flex flexDirection="column" gap="1.5rem">
+          {/* Recurring Days */}
+          <FormControl isRequired>
+            <Controller
+              control={control}
+              name="recurringDays"
+              rules={{ required: "Please select an option" }}
+              render={({ field, fieldState: { error } }) => (
+                <Flex flexDirection="column" gap="0.38rem">
+                  <FormLabel
+                    color="gray.600"
+                    marginBottom="0.38rem"
+                    fontWeight="normal"
+                  >
+                    Recurring Days:
+                  </FormLabel>
+                  <Flex gap="4.5rem" justifyContent="space-between">
+                    {DAYS.map((day) => {
+                      const isSelected = field.value?.includes(day);
+                      return (
+                        <Flex
+                          key={day}
+                          as="button"
+                          type="button"
+                          flex="1"
+                          justifyContent="center"
+                          onClick={() => {
+                            const updated = isSelected
+                              ? field.value.filter((d) => d !== day)
+                              : [...(field.value ?? []), day];
+                            field.onChange(updated);
+                          }}
+                          paddingX="3rem"
+                          paddingY="0.375rem"
+                          borderRadius="0.375rem"
+                          border="1px solid"
+                          borderColor={isSelected ? "blue.700" : "gray.200"}
+                          backgroundColor={isSelected ? "blue.700" : "gray.200"}
+                          cursor="pointer"
+                        >
+                          <Text
+                            m={0}
+                            textStyle="body"
+                            color={isSelected ? "white" : "gray.700"}
+                          >
+                            {day}
+                          </Text>
+                        </Flex>
+                      );
+                    })}
+                  </Flex>
+                  {error && (
+                    <Text m={0} color="red.500" fontSize="0.75rem">
+                      {error.message}
+                    </Text>
+                  )}
+                </Flex>
+              )}
+            />
+          </FormControl>
+
+          {/* Recurring Cadences */}
+          <Flex flexDirection="column" gap="0.375rem">
+            <FormControl isRequired>
+              <FormLabel
+                color="gray.600"
+                marginBottom="0.38rem"
+                fontWeight="normal"
+              >
+                Recurring Cadences:
+              </FormLabel>
+              <Controller
+                control={control}
+                name="recurringCadences"
+                rules={{
+                  required: isRepeating ? "Please select a cadence." : false,
+                }}
+                render={({ field, fieldState: { error } }) => (
+                  <Flex flexDirection="column" gap="0.375rem">
+                    <SingleSelect
+                      values={FREQUENCY}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      placeholder="Click for options"
+                      error={!!error}
+                      required
+                    />
+                    {error && (
+                      <Text m={0} color="red.500" fontSize="0.75rem">
+                        {error.message}
+                      </Text>
+                    )}
+                  </Flex>
+                )}
+              />
+            </FormControl>
+          </Flex>
+
+          {/* End Date */}
+          <Flex flexDirection="column" gap="0.375rem">
+              <FormLabel
+                color="gray.600"
+                marginBottom="0.38rem"
+                fontWeight="normal"
+              >
+                End Date:
+              </FormLabel>
+              <Flex gap="0.75rem">
+                {/* Month */}
+                <Flex flex="2">
+                  <Controller
+                    control={control}
+                    name="endMonth"
+                    render={({ field, fieldState: { error } }) => (
+                      <SingleSelect
+                        values={MONTHS}
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Enter month"
+                        error={!!error}
+                      />
+                    )}
+                  />
+                </Flex>
+                {/* Day */}
+                <Flex flex="1">
+                  <Controller
+                    control={control}
+                    name="endDay"
+                    render={({ field, fieldState: { error } }) => (
+                      <SingleSelect
+                        values={endDays} // TODO: fix this shit later dawg to actually get the right number of days
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Enter date"
+                        error={!!error}
+                      />
+                    )}
+                  />
+                </Flex>
+                {/* Year*/}
+                <Flex flex="1">
+                  <Controller
+                    control={control}
+                    name="endYear"
+                    render={({ field, fieldState: { error } }) => (
+                      <SingleSelect
+                        values={YEARS}
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        placeholder="Enter year"
+                        error={!!error}
+                      />
+                    )}
+                  />
+                </Flex>
+              </Flex>
+          </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 };
