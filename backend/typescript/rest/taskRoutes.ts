@@ -141,6 +141,70 @@ taskRouter.post(
   },
 );
 
+taskRouter.post(
+  "/tasks/recurrences/:taskId/edit",
+  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { taskId } = req.params;
+
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
+    const single =
+      req.query.single === "true" || req.query.single === "false"
+        ? req.query.single === "true"
+        : undefined;
+
+    if (date === undefined || single === undefined) {
+      res.status(400).send("Invalid query parameters");
+      return;
+    }
+
+    try {
+      if (single) {
+        await taskService.excludeDate(taskId, date);
+        const temporaryTask =
+          await taskService.generateRecurringInstanceForData(taskId, date);
+        res.status(200).json({
+          task: {
+            ...temporaryTask,
+            ...(req.body ? req.body : undefined),
+            scheduledStartTime: date,
+          },
+        });
+      } else {
+        const task = await taskService.getTask(taskId);
+        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+          endDate: newEndDate,
+        });
+        const newTask = await taskService.createTask({
+          petId: task.id,
+          taskTemplateId: task.taskTemplateId,
+          startTime: task.startTime,
+          endTime: task.endTime,
+          scheduledStartTime: date,
+          ...req.body,
+        });
+        const newRecurrence = await taskService.createRecurrence(
+          newTask.id.toString(),
+          updatedRecurrence.cadence,
+          updatedRecurrence.days,
+          updatedRecurrence.endDate,
+        );
+        res.status(200).json({
+          task: newTask,
+          recurrenceTask: newRecurrence,
+        });
+      }
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
+
 /* Update Task by id */
 taskRouter.patch(
   "/:id",
