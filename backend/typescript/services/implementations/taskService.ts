@@ -742,9 +742,85 @@ class TaskService implements ITaskService {
         }),
       );
 
-      const recurringInstances: TaskResponseDTOForDate[] = [];
+      const recurringWhereClause: Record<string, unknown> = {};
+      if (filters?.userId !== undefined) {
+        recurringWhereClause.user_id = filters.userId;
+      }
+      if (filters?.petId !== undefined) {
+        recurringWhereClause.pet_id = filters.petId;
+      }
 
-      return [...oneTimeTasksWithFlag, ...recurringInstances];
+      const recurringTasks = await PgTask.findAll({
+        where: recurringWhereClause,
+        include: [{ model: PgRecurrenceTask, required: true }],
+      });
+
+      const selectedDateObj = resetDateToUTCMidnight(beginningOfDay);
+
+      const results = await Promise.all(
+        recurringTasks.map((task) =>
+          this.generateRecurringInstanceForData(task.id, selectedDateObj)
+            .then(
+              (instance): TaskResponseDTOForDate => ({
+                ...instance,
+                isRecurring: true,
+              }),
+            )
+            .catch(() => null),
+        ),
+      );
+
+      const recurringInstances = results.filter(
+        (r): r is TaskResponseDTOForDate => r !== null,
+      );
+
+      // Enrich recurring instances with task name, category, and assigned user
+      const recurringTaskIds = recurringInstances.map((r) => r.id);
+      const enrichedRecurringTasks =
+        recurringTaskIds.length > 0
+          ? await PgTask.findAll({
+              where: { id: recurringTaskIds },
+              include: [
+                { model: TaskTemplate, attributes: ["task_name", "category"] },
+                {
+                  model: User,
+                  attributes: ["id", "first_name", "last_name"],
+                  required: false,
+                },
+              ],
+            })
+          : [];
+
+      const enrichmentMap = new Map(
+        enrichedRecurringTasks.map((t) => [t.id, t]),
+      );
+
+      const enrichedRecurringInstances: TaskResponseDTOForDate[] =
+        recurringInstances.map((instance) => {
+          const enriched = enrichmentMap.get(instance.id);
+          return {
+            ...instance,
+            taskName: (enriched as any)?.task_template?.task_name,
+            category: (enriched as any)?.task_template?.category,
+            assignedUser: (enriched as any)?.user
+              ? {
+                  id: (enriched as any).user.id,
+                  firstName: (enriched as any).user.first_name,
+                  lastName: (enriched as any).user.last_name,
+                }
+              : null,
+          };
+        });
+
+      // Deduplicate: recurring tasks whose start date falls on the selected date
+      const recurringInstanceIds = new Set(
+        enrichedRecurringInstances.map((r) => r.id),
+      );
+      const filteredOneTimeTasks = oneTimeTasksWithFlag.filter(
+        (task) => !recurringInstanceIds.has(task.id),
+      );
+
+      return [...filteredOneTimeTasks, ...enrichedRecurringInstances];
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,

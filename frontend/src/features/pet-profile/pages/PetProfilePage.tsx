@@ -68,7 +68,11 @@ const PetProfilePage = (): React.ReactElement => {
       }
 
       try {
-        const dateString = selectedDate.toISOString().split("T")[0];
+        const dateString = [
+          selectedDate.getFullYear(),
+          String(selectedDate.getMonth() + 1).padStart(2, "0"),
+          String(selectedDate.getDate()).padStart(2, "0"),
+        ].join("-");
         const fetchedTasks = await getPetTasksByDate(petId, dateString);
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
