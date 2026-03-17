@@ -1,7 +1,7 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import React, { useEffect, useState, useMemo } from "react";
 import { useHistory } from "react-router-dom";
-import { Flex, Text, Spinner } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetProfileSidebar from "../components/PetProfileSidebar";

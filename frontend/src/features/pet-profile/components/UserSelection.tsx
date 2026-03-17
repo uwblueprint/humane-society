@@ -1,4 +1,14 @@
-import { Flex, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+  Flex,
+  Spinner,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import React from "react";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import Search from "../../../components/common/Search";
@@ -36,13 +46,13 @@ const UserSelection = ({
   onPageChange,
   onClearSelection,
 }: UserSelectionProps): React.ReactElement => {
-    if (loading) {
-        return (
-            <Flex justify="center" align="center">
-            <Spinner />
-            </Flex>
-        );
-        }
+  if (loading) {
+    return (
+      <Flex justify="center" align="center">
+        <Spinner />
+      </Flex>
+    );
+  }
 
   return (
     <>
