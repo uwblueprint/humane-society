@@ -46,9 +46,7 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
       const errorMessage = e instanceof Error ? e.message : "";
       let description = "Unable to delete user, please try again later.";
       if (
-        errorMessage.includes(
-          "user status must be 'Inactive' or 'Invited'",
-        )
+        errorMessage.includes("user status must be 'Inactive' or 'Invited'")
       ) {
         description =
           "User must be deactivated before deletion. Please change the user's status to 'Inactive' or 'Invited' first.";
