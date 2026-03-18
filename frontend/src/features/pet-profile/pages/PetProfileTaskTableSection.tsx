@@ -9,6 +9,7 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
@@ -18,13 +19,13 @@ interface PetProfileTaskTableSectionProps {
 const getStatusBadge = (task: ScheduledTaskDTO) => {
   if (task.endTime)
     return (
-      <Button as="button" variant="gray" size="medium" type="button">
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
         Completed
       </Button>
     );
   if (!task.assignedUser)
     return (
-      <Button as="button" variant="blue" size="medium" type="button">
+      <Button as="button" variant="dark-blue" size="medium" type="button">
         Assign
       </Button>
     );
@@ -79,11 +80,18 @@ const PetProfileTaskTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Text textStyle="body" m={0}>
-            {task.assignedUser
-              ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
-              : "Unassigned"}
-          </Text>
+          <Flex align="center" gap="0.75rem">
+            <ProfilePhoto
+              image={task.assignedUser?.profilePhoto ?? undefined}
+              size="small"
+              type="user"
+            />
+            <Text textStyle="body" m={0}>
+              {task.assignedUser
+                ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
+                : "Unassigned"}
+            </Text>
+          </Flex>
           {getStatusBadge(task)}
         </Grid>
       ))}

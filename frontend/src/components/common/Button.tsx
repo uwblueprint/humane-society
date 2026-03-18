@@ -9,6 +9,7 @@ interface CustomButtonProps extends ButtonProps {
     | "blue-outline"
     | "white"
     | "gray"
+    | "gray-shaded"
     | "gray-outline"
     | "green"
     | "red";
@@ -65,6 +66,12 @@ const VARIANT_STYLES = {
   gray: {
     bg: "gray.200",
     color: "gray.700",
+    border: "none",
+    borderColor: undefined,
+  },
+  "gray-shaded": {
+    bg: "gray.200",
+    color: "gray.400",
     border: "none",
     borderColor: undefined,
   },
