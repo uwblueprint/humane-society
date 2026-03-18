@@ -71,6 +71,7 @@ export interface ScheduledTaskDTO {
     id: number;
     firstName: string;
     lastName: string;
+    profilePhoto?: string | null;
   } | null;
   scheduledStartTime?: Date;
   startTime?: Date;

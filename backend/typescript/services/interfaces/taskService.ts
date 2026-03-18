@@ -41,6 +41,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
     id: number;
     firstName: string;
     lastName: string;
+    profilePhoto?: string | null;
   } | null;
 };
 export interface RecurrenceTaskDTO {
