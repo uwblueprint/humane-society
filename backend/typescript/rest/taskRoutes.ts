@@ -15,13 +15,15 @@ import {
   TaskResponseDTO,
   ITaskService,
 } from "../services/interfaces/taskService";
-import { BadRequestError, getErrorMessage, NotFoundError } from "../utilities/errorUtils";
+import {
+  BadRequestError,
+  getErrorMessage,
+  NotFoundError,
+} from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 import logInteraction from "../middlewares/logInteraction";
-import {
-  resetDateToUTCMidnight,
-} from "../utilities/dateUtils";
+import { resetDateToUTCMidnight } from "../utilities/dateUtils";
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
