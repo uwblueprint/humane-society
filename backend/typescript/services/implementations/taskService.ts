@@ -776,7 +776,7 @@ class TaskService implements ITaskService {
           { model: TaskTemplate, attributes: ["task_name", "category"] },
           {
             model: User,
-            attributes: ["id", "first_name", "last_name"],
+            attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
         ],
@@ -800,6 +800,7 @@ class TaskService implements ITaskService {
                 id: (task as any).user.id,
                 firstName: (task as any).user.first_name,
                 lastName: (task as any).user.last_name,
+                profilePhoto: (task as any).user.profile_photo,
               }
             : null,
         }),
@@ -847,7 +848,7 @@ class TaskService implements ITaskService {
                 { model: TaskTemplate, attributes: ["task_name", "category"] },
                 {
                   model: User,
-                  attributes: ["id", "first_name", "last_name"],
+                  attributes: ["id", "first_name", "last_name", "profile_photo"],
                   required: false,
                 },
               ],
@@ -870,6 +871,7 @@ class TaskService implements ITaskService {
                   id: (enriched as any).user.id,
                   firstName: (enriched as any).user.first_name,
                   lastName: (enriched as any).user.last_name,
+                  profilePhoto: (enriched as any).user.profile_photo,
                 }
               : null,
           };
