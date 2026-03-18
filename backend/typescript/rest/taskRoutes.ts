@@ -23,7 +23,10 @@ import {
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 import logInteraction from "../middlewares/logInteraction";
-import { resetDateToUTCMidnight } from "../utilities/dateUtils";
+import {
+  isDateInRecurrence,
+  resetDateToUTCMidnight,
+} from "../utilities/dateUtils";
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
@@ -176,8 +179,24 @@ taskRouter.post(
         });
       } else {
         const task = await taskService.getTask(taskId);
-        const recurrence = await taskService.getRecurrence(taskId)
+        const recurrence = await taskService.getRecurrence(taskId);
         const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+
+        if (!task.scheduledStartTime) {
+          throw new NotFoundError("Given task has no start date");
+        }
+        if (
+          !isDateInRecurrence(
+            task.scheduledStartTime,
+            newEndDate,
+            recurrence.cadence,
+          )
+        ) {
+          throw new BadRequestError(
+            "Given date doesn't follow the recurrence rule",
+          );
+        }
+
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });

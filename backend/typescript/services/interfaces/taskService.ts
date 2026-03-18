@@ -1,4 +1,4 @@
-import { TaskCategory, Days } from "../../types";
+import { TaskCategory, Days, Cadence } from "../../types";
 
 export interface TaskRequestDTO {
   userId?: number;
@@ -45,7 +45,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
 };
 export interface RecurrenceTaskDTO {
   id: number;
-  cadence: string;
+  cadence: Cadence;
   days?: Days[];
   endDate?: Date;
   exclusions?: Date[];
@@ -54,17 +54,22 @@ export interface RecurrenceTaskDTO {
 export interface ITaskService {
   createRecurrence(
     taskId: string,
-    cadence: string,
+    cadence: Cadence,
     days?: Days[],
     endDate?: Date,
   ): Promise<RecurrenceTaskDTO>;
+
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;
+
   updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
   ): Promise<RecurrenceTaskDTO>;
+
   deleteRecurrence(recurrenceId: string): Promise<string>;
+
   excludeDate(recurrenceId: string, date: Date): Promise<RecurrenceTaskDTO>;
+
   generateRecurringInstanceForData(
     taskId: string,
     date: Date,
