@@ -44,7 +44,8 @@ const ProfilePhoto = ({
   return (
     <Flex
       p={showColorBorder ? "0.19rem" : "0rem"}
-      boxSize={showColorBorder ? containerSize : undefined}
+      boxSize={showColorBorder ? containerSize : imageSize}
+      flexShrink={0}
       justify="center"
       align="center"
       borderRadius="full"

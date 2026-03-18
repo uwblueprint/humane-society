@@ -80,13 +80,13 @@ const PetProfileTaskTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Flex align="center" gap="0.75rem">
+          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
             <ProfilePhoto
               image={task.assignedUser?.profilePhoto ?? undefined}
               size="small"
               type="user"
             />
-            <Text textStyle="body" m={0}>
+            <Text textStyle="body" m={0} isTruncated>
               {task.assignedUser
                 ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
                 : "Unassigned"}

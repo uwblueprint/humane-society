@@ -730,14 +730,14 @@ class TaskService implements ITaskService {
           endTime: task.end_time,
           notes: task.notes,
           isRecurring: false,
-          taskName: (task as any).task_template?.task_name,
-          category: (task as any).task_template?.category,
-          assignedUser: (task as any).user
+          taskName: task.task_template?.task_name,
+          category: task.task_template?.category,
+          assignedUser: task.user
             ? {
-                id: (task as any).user.id,
-                firstName: (task as any).user.first_name,
-                lastName: (task as any).user.last_name,
-                profilePhoto: (task as any).user.profile_photo,
+                id: task.user.id,
+                firstName: task.user.first_name,
+                lastName: task.user.last_name,
+                profilePhoto: task.user.profile_photo,
               }
             : null,
         }),
@@ -775,7 +775,7 @@ class TaskService implements ITaskService {
         (r): r is TaskResponseDTOForDate => r !== null,
       );
 
-      // Enrich recurring instances with task name, category, and assigned user
+      // Enrich recurring instances with task name, category, assigned user, profile photo
       const recurringTaskIds = recurringInstances.map((r) => r.id);
       const enrichedRecurringTasks =
         recurringTaskIds.length > 0
@@ -785,7 +785,12 @@ class TaskService implements ITaskService {
                 { model: TaskTemplate, attributes: ["task_name", "category"] },
                 {
                   model: User,
-                  attributes: ["id", "first_name", "last_name", "profile_photo"],
+                  attributes: [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "profile_photo",
+                  ],
                   required: false,
                 },
               ],
@@ -801,14 +806,14 @@ class TaskService implements ITaskService {
           const enriched = enrichmentMap.get(instance.id);
           return {
             ...instance,
-            taskName: (enriched as any)?.task_template?.task_name,
-            category: (enriched as any)?.task_template?.category,
-            assignedUser: (enriched as any)?.user
+            taskName: enriched?.task_template?.task_name,
+            category: enriched?.task_template?.category,
+            assignedUser: enriched?.user
               ? {
-                  id: (enriched as any).user.id,
-                  firstName: (enriched as any).user.first_name,
-                  lastName: (enriched as any).user.last_name,
-                  profilePhoto: (enriched as any).user.profile_photo,
+                  id: enriched.user.id,
+                  firstName: enriched.user.first_name,
+                  lastName: enriched.user.last_name,
+                  profilePhoto: enriched.user.profile_photo,
                 }
               : null,
           };
