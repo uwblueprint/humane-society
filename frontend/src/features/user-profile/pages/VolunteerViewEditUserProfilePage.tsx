@@ -226,7 +226,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
             gap="0.5rem"
             mb="1.5rem"
             cursor="pointer"
-            onClick={() => window.history.back()}
+            onClick={() => openQuitEditingModal()}
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
