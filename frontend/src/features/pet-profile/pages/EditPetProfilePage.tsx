@@ -31,6 +31,8 @@ import {
   getDaysInMonth,
   MONTH_NUMBER_TO_NAME,
 } from "../../../utils/CommonUtils";
+import QuitEditingModal from "./QuitEditingModal";
+import { PET_PROFILE_PAGE } from "../../../constants/Routes";
 
 interface FormData {
   name: string;
@@ -114,6 +116,11 @@ const EditPetProfilePage = (): React.ReactElement => {
     isOpen: isDeleteConfirmModalOpen,
     onOpen: openDeleteConfirmModal,
     onClose: closeDeleteConfirmModal,
+  } = useDisclosure();
+  const {
+    isOpen: isQuitEditingModalOpen,
+    onOpen: openQuitEditingModal,
+    onClose: closeQuitEditingModal,
   } = useDisclosure();
 
   // Birthday date options can vary depending on the month
@@ -377,7 +384,7 @@ const EditPetProfilePage = (): React.ReactElement => {
             gap="0.5rem"
             mb="1.5rem"
             cursor="pointer"
-            onClick={() => window.history.back()}
+            onClick={() => openQuitEditingModal()}
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
@@ -801,6 +808,11 @@ const EditPetProfilePage = (): React.ReactElement => {
         onPrimaryClick={handleDeletePet}
         secondaryButtonText="Cancel"
         onSecondaryClick={closeDeleteConfirmModal}
+      />
+      <QuitEditingModal
+        isOpen={isQuitEditingModalOpen}
+        handleSecondaryButtonClick={closeQuitEditingModal}
+        navigateTo={`${PET_PROFILE_PAGE}/${params.id}`}
       />
     </>
   );

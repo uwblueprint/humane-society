@@ -6,6 +6,7 @@ import {
   Spinner,
   Image,
   useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
@@ -18,6 +19,8 @@ import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import AuthContext from "../../../contexts/AuthContext";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import PencilIcon from "../../../assets/icons/pencil.svg";
+import { PROFILE_PAGE } from "../../../constants/Routes";
+import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
 
 interface FormData {
   userId: string;
@@ -38,6 +41,11 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     string | undefined
   >(authenticatedUser?.profilePhoto || undefined);
   const [isUploading, setIsUploading] = useState(false);
+  const {
+    isOpen: isQuitEditingModalOpen,
+    onOpen: openQuitEditingModal,
+    onClose: closeQuitEditingModal,
+  } = useDisclosure();
 
   const {
     control,
@@ -324,6 +332,11 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           </form>
         </Flex>
       </Flex>
+      <QuitEditingModal
+        isOpen={isQuitEditingModalOpen}
+        handleSecondaryButtonClick={closeQuitEditingModal}
+        navigateTo={`${PROFILE_PAGE}/${authenticatedUser?.id}`}
+      />
     </>
   );
 };
