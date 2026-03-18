@@ -21,6 +21,8 @@ import UserAPIClient from "../../../APIClients/UserAPIClient";
 import PencilIcon from "../../../assets/icons/pencil.svg";
 import { PROFILE_PAGE } from "../../../constants/Routes";
 import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
+import ProfilePhotoModal from "../components/ProfilePhotoModal";
+import { User } from "../../../types/UserTypes";
 
 interface FormData {
   userId: string;
@@ -40,12 +42,15 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
   >(authenticatedUser?.profilePhoto || undefined);
+  const [user, setUser] = useState<User | null>(null);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const {
     isOpen: isQuitEditingModalOpen,
     onOpen: openQuitEditingModal,
     onClose: closeQuitEditingModal,
   } = useDisclosure();
+  const [isProfilePhotoModalOpen, setIsProfilePhotoModalOpen] = useState(false);
 
   const {
     control,
@@ -74,9 +79,16 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
 
       try {
         const userData = await UserAPIClient.get(authenticatedUser.id);
-
+        setUser(userData);
         // Update local profile photo state
-        setLocalProfilePhoto(userData.profilePhoto || undefined);
+        if (userData.profilePhoto) {
+          const profilePhotoUrl = await UserAPIClient.getProfilePhotoUrl(
+            userData.id,
+          );
+          setLocalProfilePhoto(profilePhotoUrl);
+        } else {
+          setLocalProfilePhoto(undefined);
+        }
 
         // Prepopulate form with fresh user data
         reset({
@@ -112,7 +124,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     );
   }
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     // TODO: deprecate console use in frontend
     /* eslint-disable-next-line no-console */
     console.log({
@@ -123,26 +135,72 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
       email: data.email,
       profilePhoto: localProfilePhoto,
     });
+
+    try {
+      const userId = Number(authenticatedUser?.id?.toString());
+      setIsUploading(true);
+
+      if (profilePhotoFile) {
+        await UserAPIClient.uploadProfilePhoto(
+          profilePhotoFile,
+          userId,
+          user?.profilePhoto,
+        );
+      } else if (localProfilePhoto === undefined) {
+        await UserAPIClient.setDefaultProfilePhoto(userId);
+      }
+
+      toast({
+        title: "Upload successful",
+        description: "Your profile photo has been updated.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      history.push(`/profile/${userId}`);
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleChangePassword = () => {
     history.push("/forgot-password");
   };
 
-  const handleProfilePhotoChange = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const file = files[0];
+  const handleProfilePhotoChange = (file: File | null) => {
+    if (!file) {
+      setLocalProfilePhoto(undefined);
+      setProfilePhotoFile(null);
+      return;
+    }
     const reader = new FileReader();
-    setIsUploading(true);
     reader.onloadend = () => {
       setLocalProfilePhoto(reader.result as string);
       setValue("profilePhoto", reader.result as string, {
         shouldValidate: true,
       });
-      setIsUploading(false);
     };
+    setProfilePhotoFile(file);
     reader.readAsDataURL(file);
   };
+
+  if (isUploading) {
+    return (
+      <Flex justify="center" align="center" height="100vh" width="100%">
+        <Spinner />
+      </Flex>
+    );
+  }
 
   return (
     <>
@@ -212,6 +270,9 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                 cursor="pointer"
                 border="none"
                 zIndex={2}
+                onClick={() => {
+                  setIsProfilePhotoModalOpen(true);
+                }}
               >
                 <Image
                   src={PencilIcon}
@@ -219,14 +280,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                   style={{ stroke: "black" }}
                 />
               </Flex>
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                id="profile-photo-upload"
-                onChange={(e) => handleProfilePhotoChange(e.target.files)}
-                disabled={isUploading}
-              />
             </Flex>
           </Flex>
 
@@ -336,6 +389,12 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
         isOpen={isQuitEditingModalOpen}
         handleSecondaryButtonClick={closeQuitEditingModal}
         navigateTo={`${PROFILE_PAGE}/${authenticatedUser?.id}`}
+      />
+      <ProfilePhotoModal
+        isOpen={isProfilePhotoModalOpen}
+        profilePhoto={localProfilePhoto}
+        onClose={() => setIsProfilePhotoModalOpen(false)}
+        onConfirm={handleProfilePhotoChange}
       />
     </>
   );

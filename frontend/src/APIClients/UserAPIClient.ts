@@ -99,4 +99,78 @@ const deleteUser = async (userId: string): Promise<void> => {
   }
 };
 
-export default { get, create, invite, update, deleteUser };
+const uploadProfilePhoto = async (
+  file: File,
+  userId: number,
+  oldStoragePath?: string,
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  const url = `/users/me/profile-photo/upload`;
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("userId", userId.toString());
+    if (oldStoragePath) {
+      formData.append("oldStoragePath", oldStoragePath);
+    }
+
+    await baseAPIClient.post(url, formData, {
+      headers: {
+        Authorization: bearerToken,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (error) {
+    throw new Error(`Failed to upload profile photo: ${error}`);
+  }
+};
+const setDefaultProfilePhoto = async (userId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    const url = `/users/me/profile-photo/default`;
+    await baseAPIClient.post(url, null, {
+      headers: { Authorization: bearerToken },
+      params: { userId },
+    });
+  } catch (error) {
+    throw new Error(`Failed to set default profile photo: ${error}`);
+  }
+};
+
+const getProfilePhotoUrl = async (userId: number): Promise<string> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    const url = `/users/me/profile-photo`;
+    const { data } = await baseAPIClient.get(url, {
+      headers: { Authorization: bearerToken },
+      params: { userId },
+    });
+    return data.url;
+  } catch (error) {
+    throw new Error(`Failed to get profile photo URL: ${error}`);
+  }
+};
+
+export default {
+  get,
+  create,
+  invite,
+  update,
+  deleteUser,
+  uploadProfilePhoto,
+  getProfilePhotoUrl,
+  setDefaultProfilePhoto,
+};
