@@ -103,13 +103,11 @@ const CreatePasswordPage = (): React.ReactElement => {
             gap={{ base: "1.12rem", md: "1rem" }}
             width={{ md: "28.875rem" }}
             justifyContent="center"
+            background="gray.100"
+            borderRadius="0.375rem"
+            padding="3.75rem"
           >
-            <Text
-              color="gray.600"
-              textStyle={{ base: "h2Mobile", md: "h2" }}
-              m={0}
-              textAlign="center"
-            >
+            <Text color="gray.700" textStyle="h1" m={0} textAlign="center">
               Welcome!
             </Text>
             <Flex direction="column" gap="2.25rem">
@@ -122,7 +120,6 @@ const CreatePasswordPage = (): React.ReactElement => {
                   <FormLabel
                     textStyle="bodyMobile"
                     textColor="gray.600"
-                    lineHeight="0.5rem"
                     m={0}
                   >
                     Email Address:
@@ -133,7 +130,6 @@ const CreatePasswordPage = (): React.ReactElement => {
                   <FormLabel
                     textColor="gray.600"
                     textStyle="bodyMobile"
-                    lineHeight="0.5rem"
                     m={0}
                   >
                     Create Password:
@@ -149,7 +145,6 @@ const CreatePasswordPage = (): React.ReactElement => {
                   <FormLabel
                     textColor="gray.600"
                     textStyle="bodyMobile"
-                    lineHeight="0.5rem"
                     m={0}
                   >
                     Confirm Password:
@@ -166,12 +161,12 @@ const CreatePasswordPage = (): React.ReactElement => {
                 <Button
                   type="submit"
                   textStyle="bodyMobile"
-                  onClick={handleSubmitForm}
-                  color="white"
-                  h="2.4rem"
+                  size="lg"
                   width="100%"
+                  variant="solid"
+                  color="white"
                   bg="blue.700"
-                  m={0}
+                  onClick={handleSubmitForm}
                 >
                   Create Account
                 </Button>
