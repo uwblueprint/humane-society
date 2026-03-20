@@ -1,5 +1,5 @@
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { Pet, PetListSections } from "../types/PetTypes";
+import { Pet, PetListSections, PetRequestDTO } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
@@ -84,4 +84,17 @@ const getPetList = async (userId: number): Promise<PetListSections> => {
   }
 };
 
-export default { getPetTasks, getPet, getPets, getPetList };
+const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  const { data } = await baseAPIClient.put(`/pets/${petId}`, formData, {
+    headers: { Authorization: bearerToken },
+  });
+
+  return data;
+};
+
+export default { getPetTasks, getPet, getPets, getPetList, update };
