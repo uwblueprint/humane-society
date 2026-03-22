@@ -3,30 +3,35 @@
 // with red/blue options for the primary button.
 
 import React from "react";
-import { Flex, Text, Button } from "@chakra-ui/react";
+import { Flex, Text, Button, Image } from "@chakra-ui/react";
+import CloseIcon from "../../assets/icons/close.svg";
 
-interface PopupModalProps {
+interface ContentModalProps {
   open: boolean; // Controls whether the modal is visible
   title: string; // Title displayed at the top of the modal
-  message: string; // Main message or body text of the modal
+  message?: string; // Main message or body text of the modal
   // Primary button props
+  content?: React.ReactNode;
   primaryButtonText?: string; // Text for the primary action button
   onPrimaryClick?: () => void; // Function to call when the primary button is clicked
   primaryButtonColor?: "blue" | "red"; // Optional: sets primary button color; defaults to "blue"
   // Secondary button props
   secondaryButtonText?: string; // Optional: text for the secondary button (if shown)
   onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
+  onClose?: () => void; // Optional: function to call when the close icon is clicked
 }
 
-const PopupModal: React.FC<PopupModalProps> = ({
+const ContentModal: React.FC<ContentModalProps> = ({
   open,
   title,
   message,
+  content,
   primaryButtonText,
   primaryButtonColor = "blue",
   onPrimaryClick,
   secondaryButtonText,
   onSecondaryClick,
+  onClose,
 }) => {
   const hasPrimaryButton = primaryButtonText && onPrimaryClick;
   const hasSecondaryButton = secondaryButtonText && onSecondaryClick;
@@ -48,29 +53,53 @@ const PopupModal: React.FC<PopupModalProps> = ({
       {/* Popup Container */}
       <Flex
         bg="white"
-        align="center"
+        align="left"
         direction="column"
-        gap={{ base: "1.25rem", md: "1.875rem" }}
-        width={{ base: "20.375rem", md: "33.625rem" }}
-        pt={{ base: "2rem", md: "3.6875rem" }}
-        pb={{ base: "2rem", md: "3.6875rem" }}
-        pl={{ base: "2rem", md: "3rem" }}
-        pr={{ base: "2rem", md: "3rem" }}
+        gap="1rem"
+        width={{ base: "15.375rem", md: "29.625rem" }}
+        pt={{ base: "0.75rem", md: "2rem" }}
+        pb={{ base: "1.5rem", md: "3.6875rem" }}
+        pl={{ base: "1.5rem", md: "3rem" }}
+        pr={{ base: "1.5rem", md: "3rem" }}
         borderRadius="md"
         boxShadow="lg"
       >
         {/* Title */}
-        <Text
-          textStyle={{ base: "h3", md: "h1" }}
-          color="blue.700"
-          textAlign="center"
-          m={0}
-        >
-          {title}
-        </Text>
+        <Flex align="center" justify="space-between" width="100%">
+          <Text
+            textStyle={{ base: "bodyBold", md: "h2" }}
+            fontWeight="bold"
+            color="blue.700"
+            textAlign="left"
+            m={0}
+            flex="1"
+          >
+            {title}
+          </Text>
+          <Flex
+            as="button"
+            type="button"
+            align="center"
+            justify="flex-end"
+            borderRadius="0.5rem"
+            border="none"
+            cursor="pointer"
+            onClick={onClose}
+          >
+            <Image
+              src={CloseIcon}
+              boxSize={{ base: "0.875rem", md: "1.25rem" }}
+              alt="Close"
+            />
+          </Flex>
+        </Flex>
+
+        {/* Content Area */}
+        {content}
+
         {/* Message Body */}
         <Text
-          textStyle={{ base: "bodyMobile", md: "body" }}
+          textStyle={{ base: "caption", md: "body" }}
           color="gray.600"
           lineHeight="150%"
           textAlign="center"
@@ -84,11 +113,10 @@ const PopupModal: React.FC<PopupModalProps> = ({
         {/* Buttons */}
         {(hasPrimaryButton || hasSecondaryButton) && (
           <Flex
-            width="100%"
-            height={{ base: hasSecondaryButton ? "5rem" : "2rem", md: "3rem" }}
-            minH="2rem"
+            height={{ base: hasSecondaryButton ? "4rem" : "2rem", md: "3rem" }}
+            minH={{ base: "2rem", md: "3rem" }}
             direction={{ base: "column-reverse", md: "row" }}
-            gap={{ base: "1rem", md: "1.5rem" }}
+            gap={{ base: "0.75rem", md: "1.5rem" }}
             justifyContent="center"
           >
             {/* Secondary Button */}
@@ -100,8 +128,9 @@ const PopupModal: React.FC<PopupModalProps> = ({
                 bg="gray.200"
                 color="gray.700"
                 textStyle={{ base: "caption", md: "button" }}
+                fontSize={{ base: "0.725rem", md: "inherit" }}
                 _hover={{ bg: "gray.200" }}
-                height={{ base: "2rem", md: "3rem" }}
+                height={{ base: "1.75rem", md: "3rem" }}
                 m={0}
               >
                 {secondaryButtonText}
@@ -124,6 +153,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
                 onClick={onPrimaryClick}
                 flex={hasSecondaryButton ? "1" : "unset"}
                 textStyle={{ base: "caption", md: "button" }}
+                fontSize={{ base: "0.725rem", md: "inherit" }}
                 m={0}
               >
                 {primaryButtonText}
@@ -136,4 +166,4 @@ const PopupModal: React.FC<PopupModalProps> = ({
   );
 };
 
-export default PopupModal;
+export default ContentModal;

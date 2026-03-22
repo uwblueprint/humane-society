@@ -8,15 +8,22 @@ import {
   taskStartTimePatchValidator,
   taskEndTimePatchValidator,
   taskNotesPatchValidator,
+  taskGetByDateValidator,
 } from "../middlewares/validators/taskValidators";
 import TaskService from "../services/implementations/taskService";
 import {
   TaskResponseDTO,
   ITaskService,
 } from "../services/interfaces/taskService";
-import { getErrorMessage, NotFoundError } from "../utilities/errorUtils";
+import {
+  BadRequestError,
+  getErrorMessage,
+  NotFoundError,
+} from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
+import logInteraction from "../middlewares/logInteraction";
+import { resetDateToUTCMidnight } from "../utilities/dateUtils";
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
@@ -32,6 +39,32 @@ taskRouter.get("/", async (req, res) => {
     await sendResponseByMimeType(res, 500, contentType, [
       { error: getErrorMessage(e) },
     ]);
+  }
+});
+
+/* Get Tasks for a specific date */
+taskRouter.get("/date", taskGetByDateValidator, async (req, res) => {
+  const { date, userId, petId } = req.query;
+
+  try {
+    const filters: { userId?: number; petId?: number } = {};
+
+    if (userId !== undefined && userId !== null) {
+      filters.userId = Number(userId);
+    }
+
+    if (petId !== undefined && petId !== null) {
+      filters.petId = Number(petId);
+    }
+
+    const tasks = await taskService.getTasksForDate(
+      date as string,
+      Object.keys(filters).length > 0 ? filters : undefined,
+    );
+
+    res.status(200).json(tasks);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
   }
 });
 
@@ -145,6 +178,7 @@ taskRouter.patch(
       const Task = await taskService.assignUser(id, {
         userId: body.userId,
       });
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -154,7 +188,7 @@ taskRouter.patch(
 
 /* Updates/Sets a scheduled start time to an Task */
 taskRouter.patch(
-  "/:id/schedule",
+  "/:id/start-date",
   isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
   taskScheduledTimePatchValidator,
   async (req, res) => {
@@ -164,6 +198,7 @@ taskRouter.patch(
       const Task = await taskService.scheduleTask(id, {
         time: body.scheduledStartTime,
       });
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -182,6 +217,7 @@ taskRouter.patch(
       const Task = await taskService.startTask(id, {
         time: body.startTime,
       });
+      await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));
@@ -197,6 +233,7 @@ taskRouter.patch("/:id/end", taskEndTimePatchValidator, async (req, res) => {
     const Task = await taskService.endTask(id, {
       time: body.endTime,
     });
+    await logInteraction(req);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
@@ -211,11 +248,81 @@ taskRouter.patch("/:id/notes", taskNotesPatchValidator, async (req, res) => {
     const Task = await taskService.updateTaskNotes(id, {
       notes: body.notes,
     });
+    await logInteraction(req);
     res.status(200).json(Task);
   } catch (e: unknown) {
     res.status(500).send(getErrorMessage(e));
   }
 });
+
+/* Delete Recurring Task Instance(s) */
+taskRouter.delete(
+  "/recurrences/:taskId",
+  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { taskId } = req.params;
+
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
+    const single =
+      req.query.single === "true" || req.query.single === "false"
+        ? req.query.single === "true"
+        : undefined;
+
+    if (date === undefined || single === undefined) {
+      res.status(400).send("Invalid query parameters");
+      return;
+    }
+
+    try {
+      const task = await taskService.getTask(taskId);
+      if (!task.scheduledStartTime)
+        throw new NotFoundError("Task scheduled start time not found");
+
+      if (single) {
+        const updatedRecurrence = await taskService.excludeDate(taskId, date);
+        res.status(200).json({
+          task,
+          recurrenceTask: updatedRecurrence,
+        });
+      } else if (
+        resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
+        resetDateToUTCMidnight(date).getTime()
+      ) {
+        await taskService.deleteRecurrence(taskId);
+        const deletedTaskId = await taskService.deleteTask(taskId);
+        res.status(200).json({
+          deleted: true,
+          taskId: deletedTaskId,
+        });
+      } else {
+        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+          endDate: newEndDate,
+        });
+        res.status(200).json({
+          task,
+          recurrenceTask: updatedRecurrence,
+        });
+      }
+    } catch (e: unknown) {
+      if (e instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(e));
+        return;
+      }
+
+      if (e instanceof BadRequestError) {
+        res.status(400).send(getErrorMessage(e));
+        return;
+      }
+
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
 
 /* Delete Task by id */
 taskRouter.delete(
@@ -226,6 +333,7 @@ taskRouter.delete(
 
     try {
       const deletedId = await taskService.deleteTask(id);
+      await logInteraction(req);
       res.status(200).json({ id: deletedId });
     } catch (e: unknown) {
       res.status(500).send(getErrorMessage(e));

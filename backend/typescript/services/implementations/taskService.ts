@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
 import {
@@ -7,9 +9,16 @@ import {
   TaskUserPatchDTO,
   TaskTimePatchDTO,
   TaskNotesPatchDTO,
+  TaskResponseDTOForDate,
   RecurrenceTaskDTO,
 } from "../interfaces/taskService";
-import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
+import TaskTemplate from "../../models/taskTemplate.model";
+import User from "../../models/user.model";
+import {
+  BadRequestError,
+  getErrorMessage,
+  NotFoundError,
+} from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import { Days } from "../../types";
 import {
@@ -19,6 +28,7 @@ import {
 } from "../../utilities/dateUtils";
 
 const Logger = logger(__filename);
+const TIME_ZONE = "America/New_York";
 
 class TaskService implements ITaskService {
   /* eslint-disable class-methods-use-this */
@@ -37,7 +47,8 @@ class TaskService implements ITaskService {
       if (
         endDate &&
         task.scheduled_start_time &&
-        endDate < task.scheduled_start_time
+        resetDateToUTCMidnight(endDate).getTime() <
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
         throw new Error("End date cannot be before task start date.");
       if (endDate && !task.scheduled_start_time)
@@ -99,12 +110,19 @@ class TaskService implements ITaskService {
   ): Promise<RecurrenceTaskDTO> {
     try {
       const task = await PgTask.findByPk(recurrenceId, { raw: true });
-
+      const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
+        raw: true,
+      });
       if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
+      if (!recurrenceTask)
+        throw new NotFoundError(
+          `Recurrence for task id ${recurrenceId} not found`,
+        );
       if (
         updates.endDate &&
         task.scheduled_start_time &&
-        updates.endDate < task.scheduled_start_time
+        resetDateToUTCMidnight(updates.endDate).getTime() <
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
         throw new Error("End date cannot be before task start date.");
       if (updates.endDate && !task.scheduled_start_time)
@@ -112,13 +130,64 @@ class TaskService implements ITaskService {
           "Recurrence task must have a start date if end date is provided.",
         );
 
+      // normalize it to utc midnight
+      const newEndDate = updates.endDate
+        ? resetDateToUTCMidnight(updates.endDate)
+        : undefined;
+
+      let newExclusions = updates.exclusions ? updates.exclusions : undefined;
+      // all exclusions after the end date should be removed
+      if (
+        recurrenceTask.end_date &&
+        newEndDate &&
+        (updates.exclusions || recurrenceTask.exclusions) &&
+        newEndDate.getTime() < recurrenceTask.end_date.getTime()
+      ) {
+        const sourceExclusions = (
+          updates.exclusions ??
+          recurrenceTask.exclusions ??
+          []
+        ).map((d) => resetDateToUTCMidnight(new Date(d))); // normalize
+
+        newExclusions = newEndDate
+          ? sourceExclusions.filter((d) => d.getTime() <= newEndDate.getTime())
+          : sourceExclusions;
+      }
+
+      let newDays = updates.days ? updates.days : undefined;
+      // check if endDate comes before the first occurrence of any of the start days calculated from days array
+      if (newEndDate && task.scheduled_start_time) {
+        const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
+
+        // use updated days if provided, otherwise existing
+        const sourceDays = updates.days ?? recurrenceTask.days;
+
+        if (sourceDays && sourceDays.length > 0) {
+          // prune: keep only days whose first occurrence is on/before endDate
+          const prunedDays = sourceDays.filter((day) => {
+            const [first] = buildStartDates(actualStart, [day]); // first occurrence for this weekday
+            return first.getTime() <= newEndDate.getTime();
+          });
+
+          newDays = prunedDays;
+
+          // this shouldn't be happening
+          if (prunedDays.length === 0) {
+            throw new BadRequestError(
+              "End date is before or on the first occurrence of all selected days.",
+            );
+          }
+        }
+      }
+
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
-          ...(updates.days && { days: updates.days }),
-          ...(updates.cadence && { cadence: updates.cadence }),
-          ...(updates.endDate && { end_date: updates.endDate }),
-          ...(updates.exclusions && { exclusions: updates.exclusions }),
-          ...(updates.id && { task_id: updates.id }),
+          ...(newDays !== undefined ? { days: newDays } : {}),
+          ...(updates.cadence !== undefined
+            ? { cadence: updates.cadence }
+            : {}),
+          ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
+          ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
         { where: { task_id: recurrenceId }, returning: true },
       );
@@ -174,7 +243,7 @@ class TaskService implements ITaskService {
       const task = await PgTask.findByPk(recurrenceId, { raw: true });
 
       if (!recurrenceTask || !task)
-        throw new NotFoundError("Recurrence task not found");
+        throw new NotFoundError("Recurrence task/task was not found");
       if (!task.scheduled_start_time)
         throw new NotFoundError("Recurrence task has no start time");
 
@@ -186,24 +255,24 @@ class TaskService implements ITaskService {
       );
 
       if (alreadyExists)
-        return {
-          id: recurrenceTask.task_id,
-          days: recurrenceTask.days,
-          cadence: recurrenceTask.cadence,
-          endDate: recurrenceTask.end_date ?? undefined,
-          exclusions: recurrenceTask.exclusions,
-        };
+        throw new BadRequestError(
+          "Exclusion date already exists for this recurrence.",
+        );
 
       const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
       if (date < actualStart) {
         // throw error because these checks should be done on frontend too
-        throw new Error("Exclusion date is before recurrence start date.");
+        throw new BadRequestError(
+          "Exclusion date is before recurrence start date.",
+        );
       }
 
       if (recurrenceTask.end_date) {
         const end = resetDateToUTCMidnight(recurrenceTask.end_date);
         if (exclusion > end) {
-          throw new Error("Exclusion date is after recurrence end date.");
+          throw new BadRequestError(
+            "Exclusion date is after recurrence end date.",
+          );
         }
       }
 
@@ -222,7 +291,7 @@ class TaskService implements ITaskService {
       }
 
       if (!validExclusion) {
-        throw new Error("An invalid exclusion date was given");
+        throw new BadRequestError("An invalid exclusion date was given");
       }
 
       const updatedExclusions = recurrenceTask.exclusions
@@ -669,6 +738,156 @@ class TaskService implements ITaskService {
       return id;
     } catch (error: unknown) {
       Logger.error(`Failed to delete task. Reason = ${getErrorMessage(error)}`);
+      throw error;
+    }
+  }
+
+  async getTasksForDate(
+    date: string,
+    filters?: { userId?: number; petId?: number },
+  ): Promise<TaskResponseDTOForDate[]> {
+    try {
+      const selectedDate = DateTime.fromISO(date, { zone: TIME_ZONE });
+      if (!selectedDate.isValid) {
+        throw new Error(`Invalid date format: ${date}`);
+      }
+
+      const beginningOfDay = selectedDate.startOf("day").toJSDate();
+      const endOfDay = selectedDate.plus({ days: 1 }).startOf("day").toJSDate();
+
+      const whereClause: Record<string, unknown> = {
+        scheduled_start_time: {
+          [Op.gte]: beginningOfDay,
+          [Op.lt]: endOfDay,
+        },
+      };
+
+      if (filters?.userId !== undefined) {
+        whereClause.user_id = filters.userId;
+      }
+
+      if (filters?.petId !== undefined) {
+        whereClause.pet_id = filters.petId;
+      }
+
+      const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
+        where: whereClause,
+        include: [
+          { model: TaskTemplate, attributes: ["task_name", "category"] },
+          {
+            model: User,
+            attributes: ["id", "first_name", "last_name"],
+            required: false,
+          },
+        ],
+      });
+
+      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
+        (task) => ({
+          id: task.id,
+          userId: task.user_id,
+          petId: task.pet_id,
+          taskTemplateId: task.task_template_id,
+          scheduledStartTime: task.scheduled_start_time,
+          startTime: task.start_time,
+          endTime: task.end_time,
+          notes: task.notes,
+          isRecurring: false,
+          taskName: (task as any).task_template?.task_name,
+          category: (task as any).task_template?.category,
+          assignedUser: (task as any).user
+            ? {
+                id: (task as any).user.id,
+                firstName: (task as any).user.first_name,
+                lastName: (task as any).user.last_name,
+              }
+            : null,
+        }),
+      );
+
+      const recurringWhereClause: Record<string, unknown> = {};
+      if (filters?.userId !== undefined) {
+        recurringWhereClause.user_id = filters.userId;
+      }
+      if (filters?.petId !== undefined) {
+        recurringWhereClause.pet_id = filters.petId;
+      }
+
+      const recurringTasks = await PgTask.findAll({
+        where: recurringWhereClause,
+        include: [{ model: PgRecurrenceTask, required: true }],
+      });
+
+      const selectedDateObj = resetDateToUTCMidnight(beginningOfDay);
+
+      const results = await Promise.all(
+        recurringTasks.map((task) =>
+          this.generateRecurringInstanceForData(task.id, selectedDateObj)
+            .then(
+              (instance): TaskResponseDTOForDate => ({
+                ...instance,
+                isRecurring: true,
+              }),
+            )
+            .catch(() => null),
+        ),
+      );
+
+      const recurringInstances = results.filter(
+        (r): r is TaskResponseDTOForDate => r !== null,
+      );
+
+      // Enrich recurring instances with task name, category, and assigned user
+      const recurringTaskIds = recurringInstances.map((r) => r.id);
+      const enrichedRecurringTasks =
+        recurringTaskIds.length > 0
+          ? await PgTask.findAll({
+              where: { id: recurringTaskIds },
+              include: [
+                { model: TaskTemplate, attributes: ["task_name", "category"] },
+                {
+                  model: User,
+                  attributes: ["id", "first_name", "last_name"],
+                  required: false,
+                },
+              ],
+            })
+          : [];
+
+      const enrichmentMap = new Map(
+        enrichedRecurringTasks.map((t) => [t.id, t]),
+      );
+
+      const enrichedRecurringInstances: TaskResponseDTOForDate[] =
+        recurringInstances.map((instance) => {
+          const enriched = enrichmentMap.get(instance.id);
+          return {
+            ...instance,
+            taskName: (enriched as any)?.task_template?.task_name,
+            category: (enriched as any)?.task_template?.category,
+            assignedUser: (enriched as any)?.user
+              ? {
+                  id: (enriched as any).user.id,
+                  firstName: (enriched as any).user.first_name,
+                  lastName: (enriched as any).user.last_name,
+                }
+              : null,
+          };
+        });
+
+      // Deduplicate: recurring tasks whose start date falls on the selected date
+      const recurringInstanceIds = new Set(
+        enrichedRecurringInstances.map((r) => r.id),
+      );
+      const filteredOneTimeTasks = oneTimeTasksWithFlag.filter(
+        (task) => !recurringInstanceIds.has(task.id),
+      );
+
+      return [...filteredOneTimeTasks, ...enrichedRecurringInstances];
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
