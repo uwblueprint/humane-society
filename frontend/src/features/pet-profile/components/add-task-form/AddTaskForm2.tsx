@@ -1,14 +1,4 @@
-import { ChevronDownIcon } from "@chakra-ui/icons";
-import {
-  Text,
-  Checkbox,
-  Box,
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Select,
-} from "@chakra-ui/react";
+import { Text, Checkbox, Flex, FormControl, FormLabel } from "@chakra-ui/react";
 import React from "react";
 import {
   Control,
@@ -24,25 +14,16 @@ import { TaskCategory } from "../../../../types/TaskTypes";
 import { AddTaskFormData } from "./AddTaskFormTypes";
 import SingleSelect from "../../../../components/common/SingleSelect";
 import TextArea from "../../../../components/common/TextArea";
-import { MONTH_NAME_TO_NUMBER } from "../../../../utils/CommonUtils";
-import { getDaysInMonth } from "../../../../utils/CommonUtils";
+import {
+  MONTH_NAME_TO_NUMBER,
+  getDaysInMonth,
+} from "../../../../utils/CommonUtils";
 
 interface AddTaskForm2Props {
   control: Control<AddTaskFormData>;
   watch: UseFormWatch<AddTaskFormData>;
   getValues: UseFormGetValues<AddTaskFormData>;
   trigger: UseFormTrigger<AddTaskFormData>;
-}
-
-// TODO: make this work lol !
-function isLeapYear(year: number): boolean {
-  if (year % 100 === 0 && year % 400 !== 0) {
-    return false;
-  } else if (year % 4 === 0) {
-    return true;
-  } else {
-    return false;
-  }
 }
 
 const MONTHS = [
@@ -90,7 +71,8 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FREQUENCY = ["Weekly", "Biweekly", "Monthly", "Annually"];
 const YEARS: string[] = [];
 const today = new Date();
-for (let i = 0; i < 5; i++) {
+today.setHours(0, 0, 0, 0);
+for (let i = 0; i < 5; i + 1) {
   YEARS.push(String(today.getFullYear() + i));
 }
 
@@ -208,7 +190,7 @@ const AddTaskForm2 = ({
               <TextArea
                 value={field.value}
                 onChange={field.onChange}
-                required={true}
+                required
                 placeholder="Enter instructions"
                 style={{ borderColor: error ? "red" : undefined }}
               />
@@ -269,8 +251,6 @@ const AddTaskForm2 = ({
                         getValues();
                       if (!month || !year) return false;
                       const selected = toDate(month, day, year);
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
                       return (
                         selected >= today ||
                         `Date must be after ${today.toLocaleDateString(
@@ -298,7 +278,7 @@ const AddTaskForm2 = ({
                 )}
               />
             </Flex>
-            {/* Year*/}
+            {/* Year */}
             <Flex flex="1">
               <Controller
                 control={control}
@@ -426,12 +406,11 @@ const AddTaskForm2 = ({
                           getValues();
                         if (!startHour || !startMinute || !endMinute)
                           return true;
-                        else
-                          return (
-                            toMinute(endHour, endMinute) >
-                              toMinute(startHour, startMinute) ||
-                            "End time cannot precede start time."
-                          );
+                        return (
+                          toMinute(endHour, endMinute) >
+                            toMinute(startHour, startMinute) ||
+                          "End time cannot precede start time."
+                        );
                       },
                     },
                   }}
@@ -461,12 +440,11 @@ const AddTaskForm2 = ({
                         const { startHour, startMinute, endHour } = getValues();
                         if (!startHour || !startMinute || !endMinute)
                           return true;
-                        else
-                          return (
-                            toMinute(endHour, endMinute) >
-                              toMinute(startHour, startMinute) ||
-                            "End time cannot precede start time."
-                          );
+                        return (
+                          toMinute(endHour, endMinute) >
+                            toMinute(startHour, startMinute) ||
+                          "End time cannot precede start time."
+                        );
                       },
                     },
                   }}
@@ -550,7 +528,7 @@ const AddTaskForm2 = ({
                               : [...(field.value ?? []), day];
                             field.onChange(updated);
                           }}
-                          paddingX="3rem"
+                          paddingX="0.5rem"
                           paddingY="0.375rem"
                           borderRadius="0.375rem"
                           border="1px solid"
@@ -655,13 +633,7 @@ const AddTaskForm2 = ({
                   rules={{
                     validate: {
                       isValid: (endDay) => {
-                        const {
-                          endMonth,
-                          endYear,
-                          startDay,
-                          startMonth,
-                          startYear,
-                        } = getValues();
+                        const { startDay } = getValues();
                         if (!endDay || !endMonth || !endYear) return true;
                         const end = toDate(endMonth, endDay, endYear);
                         const start = toDate(startMonth, startDay, startYear);
@@ -684,7 +656,7 @@ const AddTaskForm2 = ({
                   )}
                 />
               </Flex>
-              {/* Year*/}
+              {/* Year */}
               <Flex flex="1">
                 <Controller
                   control={control}
