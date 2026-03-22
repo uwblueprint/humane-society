@@ -144,6 +144,7 @@ const SingleSelect = <T extends string | number>({
                   overflow="hidden"
                   textOverflow="ellipsis"
                   whiteSpace="nowrap"
+                  pr="4px"
                 >
                   {displayValue}
                 </Text>
@@ -157,6 +158,7 @@ const SingleSelect = <T extends string | number>({
                 overflow="hidden"
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
+                pr="4px"
               >
                 {placeholder}
               </Text>

@@ -119,7 +119,14 @@ const AddTaskForm = ({
           />
         )}
 
-        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} getValues={getValues} trigger={trigger} />}
+        {currentStep === 2 && (
+          <AddTaskForm2
+            control={control}
+            watch={watch}
+            getValues={getValues}
+            trigger={trigger}
+          />
+        )}
 
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">

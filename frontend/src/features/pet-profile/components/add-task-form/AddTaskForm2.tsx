@@ -240,7 +240,7 @@ const AddTaskForm2 = ({
                 control={control}
                 name="startMonth"
                 rules={{
-                  required: true
+                  required: true,
                 }}
                 render={({ field, fieldState: { error } }) => (
                   <SingleSelect
@@ -344,7 +344,7 @@ const AddTaskForm2 = ({
             </FormLabel>
             <Flex gap="0.75rem">
               {/* Start Hour */}
-              <Flex flex="1">
+              <Flex flex="1" minWidth="20rem">
                 <Controller
                   control={control}
                   name="startHour"
@@ -363,7 +363,9 @@ const AddTaskForm2 = ({
                   )}
                 />
               </Flex>
-              : {/* TODO: UNCHUZZ THIS ITS SO OFF CENTER LOL */}
+              <Text m={0} alignSelf="center">
+                :
+              </Text>
               {/* Start Minute */}
               <Flex flex="1">
                 <Controller
@@ -444,7 +446,9 @@ const AddTaskForm2 = ({
                   )}
                 />
               </Flex>
-              : {/* TODO: UNCHUZZ THIS ITS SO OFF CENTER LOL */}
+              <Text m={0} alignSelf="center">
+                :
+              </Text>
               {/* End Minute */}
               <Flex flex="1">
                 <Controller
