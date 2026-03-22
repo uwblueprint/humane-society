@@ -72,7 +72,7 @@ const FREQUENCY = ["Weekly", "Biweekly", "Monthly", "Annually"];
 const YEARS: string[] = [];
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-for (let i = 0; i < 5; i + 1) {
+for (let i = 0; i < 5; i += 1) {
   YEARS.push(String(today.getFullYear() + i));
 }
 
@@ -369,14 +369,10 @@ const AddTaskForm2 = ({
             </Flex>
           </FormControl>
           {(errors.startHour ||
-            errors.startMinute ||
-            errors.endHour ||
-            errors.endMinute) && (
+            errors.startMinute ) && (
             <Text color="red.400" fontSize="1rem" m={0}>
               {errors.startHour?.message ||
-                errors.startMinute?.message ||
-                errors.endHour?.message ||
-                errors.endMinute?.message}
+                errors.startMinute?.message }
             </Text>
           )}
         </Flex>
@@ -399,7 +395,7 @@ const AddTaskForm2 = ({
                   control={control}
                   name="endHour"
                   rules={{
-                    required: true,
+                    required: "Please fill out end time.",
                     validate: {
                       isValid: (endHour) => {
                         const { startHour, startMinute, endMinute } =
@@ -418,7 +414,10 @@ const AddTaskForm2 = ({
                     <SingleSelect
                       values={HOURS}
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(val) => {
+                        field.onChange(val);
+                        trigger("endHour");
+                      }}
                       placeholder="Enter hour"
                       error={!!error || endTimeError}
                     />
@@ -434,12 +433,13 @@ const AddTaskForm2 = ({
                   control={control}
                   name="endMinute"
                   rules={{
-                    required: true,
+                    required: "Please fill out end time.",
                     validate: {
                       isValid: (endMinute) => {
                         const { startHour, startMinute, endHour } = getValues();
-                        if (!startHour || !startMinute || !endMinute)
+                        if (!startHour || !startMinute)
                           return true;
+                        if (!endHour) return true;
                         return (
                           toMinute(endHour, endMinute) >
                             toMinute(startHour, startMinute) ||
@@ -464,6 +464,11 @@ const AddTaskForm2 = ({
               </Flex>
             </Flex>
           </FormControl>
+          {(errors.endHour || errors.endMinute) && (
+            <Text color="red.400" fontSize="1rem" m={0}>
+              {errors.endHour?.message || errors.endMinute?.message}
+            </Text>
+          )}
         </Flex>
       </Flex>
 
