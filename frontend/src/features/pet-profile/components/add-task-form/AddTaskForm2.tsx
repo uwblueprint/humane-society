@@ -368,11 +368,9 @@ const AddTaskForm2 = ({
               </Flex>
             </Flex>
           </FormControl>
-          {(errors.startHour ||
-            errors.startMinute ) && (
+          {(errors.startHour || errors.startMinute) && (
             <Text color="red.400" fontSize="1rem" m={0}>
-              {errors.startHour?.message ||
-                errors.startMinute?.message }
+              {errors.startHour?.message || errors.startMinute?.message}
             </Text>
           )}
         </Flex>
@@ -437,8 +435,7 @@ const AddTaskForm2 = ({
                     validate: {
                       isValid: (endMinute) => {
                         const { startHour, startMinute, endHour } = getValues();
-                        if (!startHour || !startMinute)
-                          return true;
+                        if (!startHour || !startMinute) return true;
                         if (!endHour) return true;
                         return (
                           toMinute(endHour, endMinute) >
