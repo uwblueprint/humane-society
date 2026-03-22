@@ -24,6 +24,7 @@ const AddTaskForm = ({
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
     useForm<AddTaskFormData>({
+      mode: "onChange",
       defaultValues: {
         search: "",
         selectedTemplate: null,
@@ -72,7 +73,7 @@ const AddTaskForm = ({
       "endHour",
       "endMinute",
       ...(isRepeating
-        ? (["reccuringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
+        ? (["recuringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
         : []),
       ...(isRepeating && getValues("endMonth")
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
@@ -118,7 +119,7 @@ const AddTaskForm = ({
           />
         )}
 
-        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} getValues={getValues}/>}
+        {currentStep === 2 && <AddTaskForm2 control={control} watch={watch} getValues={getValues} trigger={trigger} />}
 
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
