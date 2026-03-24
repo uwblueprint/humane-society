@@ -267,18 +267,33 @@ const EditPetProfilePage = (): React.ReactElement => {
     }
   };
 
-  const handleDeletePet = () => {
-    // TODO: Remove this and send request to delete to backend endpoint
-    // eslint-disable-next-line no-console
-    console.log("Delete pet functionality not implemented yet");
-    toast({
-      title: "Delete pet",
-      description: "Delete functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
-    closeDeleteConfirmModal();
+  const handleDeletePet = async () => {
+    try {
+      await PetAPIClient.deletePet(petId);
+      toast({
+        title: "Success",
+        description: "Pet deleted successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      closeDeleteConfirmModal();
+      history.push("/");
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "";
+      const description = errorMessage
+        .toLowerCase()
+        .includes("foreign key constraint")
+        ? "All tasks for this pet must be unassigned before deletion."
+        : "Unable to delete pet, please try again later.";
+      toast({
+        title: "Delete Pet",
+        description,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleNextPage = async () => {
