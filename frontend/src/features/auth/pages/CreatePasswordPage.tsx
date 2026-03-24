@@ -117,21 +117,13 @@ const CreatePasswordPage = (): React.ReactElement => {
                 width="100%"
               >
                 <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textStyle="bodyMobile"
-                    textColor="gray.600"
-                    m={0}
-                  >
+                  <FormLabel textStyle="bodyMobile" textColor="gray.600" m={0}>
                     Email Address:
                   </FormLabel>
                   <Input value={email} placeholder={email} disabled />
                 </Flex>
                 <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textColor="gray.600"
-                    textStyle="bodyMobile"
-                    m={0}
-                  >
+                  <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
                     Create Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
@@ -142,11 +134,7 @@ const CreatePasswordPage = (): React.ReactElement => {
                   </FormControl>
                 </Flex>
                 <Flex direction="column" gap="0.375rem">
-                  <FormLabel
-                    textColor="gray.600"
-                    textStyle="bodyMobile"
-                    m={0}
-                  >
+                  <FormLabel textColor="gray.600" textStyle="bodyMobile" m={0}>
                     Confirm Password:
                   </FormLabel>
                   <FormControl isInvalid={!!errorMessage}>
