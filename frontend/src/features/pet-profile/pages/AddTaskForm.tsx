@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
+import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 
 interface AddTaskFormProps {
@@ -18,22 +19,75 @@ const AddTaskForm = ({
 }: AddTaskFormProps): React.ReactElement => {
   const history = useHistory();
 
-  const [currentStep] = useState(1); // TODO: Add setCurrentStep once the 2nd page is added
+  const [currentStep, setCurrentStep] = useState(1);
 
-  const { control, setValue, watch, trigger } = useForm<AddTaskFormData>({
-    defaultValues: {
-      search: "",
-      selectedTemplate: null,
-    },
-  });
+  const today = new Date();
+  const { control, setValue, watch, trigger, getValues } =
+    useForm<AddTaskFormData>({
+      mode: "onChange",
+      defaultValues: {
+        search: "",
+        selectedTemplate: null,
+
+        // page 2
+        taskName: "",
+        taskCategory: "",
+        instructions: "",
+        startMonth: today.toLocaleString("default", { month: "long" }),
+        startDay: String(today.getDate()),
+        startYear: String(today.getFullYear()),
+        startMinute: "",
+        startHour: "",
+        endMinute: "",
+        endHour: "",
+        isRepeating: false,
+        recurringDays: [],
+        recurringCadences: "Weekly",
+        endDay: "",
+        endMonth: "",
+        endYear: "",
+      },
+    });
 
   const selectedTemplate = watch("selectedTemplate");
+  const isRepeating = watch("isRepeating");
 
-  const handleNextPage = async () => {
+  const handleNextPage1 = async () => {
     const isValid = await trigger("selectedTemplate");
-    if (isValid) {
-      // setCurrentStep(2);
+    if (isValid && selectedTemplate) {
+      setValue("taskName", selectedTemplate.name);
+      setValue("taskCategory", selectedTemplate.category);
+      setValue("instructions", selectedTemplate.instructions);
+      setCurrentStep(2);
     }
+  };
+
+  const handleNextPage2 = async () => {
+    const validateFields: (keyof AddTaskFormData)[] = [
+      "instructions",
+      "startMonth",
+      "startDay",
+      "startYear",
+      "startHour",
+      "startMinute",
+      "endHour",
+      "endMinute",
+      ...(isRepeating
+        ? (["recurringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
+        : []),
+      ...(isRepeating && getValues("endMonth")
+        ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
+        : []),
+    ];
+
+    const isValid = await trigger(validateFields);
+    if (isValid) {
+      // TODO: setCurrentStep(3)
+    }
+  };
+
+  const handlePreviousPage = async () => {
+    setCurrentStep(currentStep - 1);
   };
 
   return (
@@ -65,6 +119,15 @@ const AddTaskForm = ({
           />
         )}
 
+        {currentStep === 2 && (
+          <AddTaskForm2
+            control={control}
+            watch={watch}
+            getValues={getValues}
+            trigger={trigger}
+          />
+        )}
+
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
             {currentStep}/3
@@ -76,9 +139,33 @@ const AddTaskForm = ({
               variant="gray"
               size="medium"
               rightIcon={<ChevronRightIcon />}
-              onClick={handleNextPage}
+              onClick={handleNextPage1}
               type="button"
               isDisabled={!selectedTemplate}
+            >
+              Next
+            </Button>
+          )}
+          {currentStep === 2 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              leftIcon={<ChevronLeftIcon />}
+              onClick={handlePreviousPage}
+              type="button"
+            >
+              Previous
+            </Button>
+          )}
+          {currentStep === 2 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              rightIcon={<ChevronRightIcon />}
+              onClick={handleNextPage2}
+              type="button"
             >
               Next
             </Button>
