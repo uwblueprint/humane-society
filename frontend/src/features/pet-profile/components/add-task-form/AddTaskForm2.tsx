@@ -72,7 +72,7 @@ const FREQUENCY = ["Weekly", "Biweekly", "Monthly", "Annually"];
 const YEARS: string[] = [];
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-for (let i = 0; i < 5; i += 1) {
+for (let i = 0; i < 10; i += 1) {
   YEARS.push(String(today.getFullYear() + i));
 }
 
