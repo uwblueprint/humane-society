@@ -22,15 +22,16 @@ import { TableColumn, TableHeader } from "../../../components/common/table";
 import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
+import Button from "../../../components/common/Button";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const params = useParams<{ id: string }>();
   const petId = Number(params.id);
-  const { path } = useRouteMatch();
+  const { path, url } = useRouteMatch();
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
-  const isDefaultTaskView = useRouteMatch({ path, exact: true });
+  const isDefaultTaskView = useRouteMatch({ path: url, exact: true });
   const taskTableColumns: TableColumn[] = [
     { label: "TASK" },
     { label: "TIME START" },
@@ -154,11 +155,32 @@ const PetProfilePage = (): React.ReactElement => {
           <Switch>
             <Route exact path={path}>
               <Flex flexDirection="column">
-                {canAddTask}
-                <CalendarDateSelector
-                  selectedDate={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                />
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  marginBottom="0.5rem"
+                  position="relative"
+                >
+                  <CalendarDateSelector
+                    selectedDate={selectedDate}
+                    onChange={(date) => setSelectedDate(date)}
+                  />
+                  {canAddTask && (
+                    <Button
+                      as="button"
+                      variant="dark-blue"
+                      size="medium"
+                      onClick={() => history.push(`${url}/add-task`)}
+                      type="button"
+                      position="absolute"
+                      top="0"
+                      right="0"
+                    >
+                      Add Task
+                    </Button>
+                  )}
+                </Flex>
+
                 <Flex
                   backgroundColor="gray.50"
                   alignItems="center"
@@ -178,9 +200,13 @@ const PetProfilePage = (): React.ReactElement => {
               </Flex>
             </Route>
             <PrivateRoute
-              path={`${path}/add-task`}
+              path={`${url}/add-task`}
               component={() => (
-                <AddTaskForm petId={petData.id} petName={petData.name} />
+                <AddTaskForm
+                  petId={petData.id}
+                  petName={petData.name}
+                  petColorLevel={petData.colorLevel}
+                />
               )}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               exact
