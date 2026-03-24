@@ -6,6 +6,7 @@ import {
   Spinner,
   Image,
   useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
@@ -18,6 +19,8 @@ import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import AuthContext from "../../../contexts/AuthContext";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import PencilIcon from "../../../assets/icons/pencil.svg";
+import { PROFILE_PAGE } from "../../../constants/Routes";
+import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
 import ProfilePhotoModal from "../components/ProfilePhotoModal";
 import { User } from "../../../types/UserTypes";
 
@@ -42,6 +45,11 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const [user, setUser] = useState<User | null>(null);
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const {
+    isOpen: isQuitEditingModalOpen,
+    onOpen: openQuitEditingModal,
+    onClose: closeQuitEditingModal,
+  } = useDisclosure();
   const [isProfilePhotoModalOpen, setIsProfilePhotoModalOpen] = useState(false);
 
   const {
@@ -218,7 +226,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
             gap="0.5rem"
             mb="1.5rem"
             cursor="pointer"
-            onClick={() => window.history.back()}
+            onClick={() => openQuitEditingModal()}
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
@@ -377,6 +385,11 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           </form>
         </Flex>
       </Flex>
+      <QuitEditingModal
+        isOpen={isQuitEditingModalOpen}
+        handleSecondaryButtonClick={closeQuitEditingModal}
+        navigateTo={`${PROFILE_PAGE}/${authenticatedUser?.id}`}
+      />
       <ProfilePhotoModal
         isOpen={isProfilePhotoModalOpen}
         profilePhoto={localProfilePhoto}

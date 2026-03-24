@@ -1,10 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
-import { Flex, Text, useToast } from "@chakra-ui/react";
+import { Flex, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useParams, useHistory } from "react-router-dom";
-import { USER_MANAGEMENT_PAGE } from "../../../constants/Routes";
+import { PROFILE_PAGE, USER_MANAGEMENT_PAGE } from "../../../constants/Routes";
 import Input from "../../../components/common/Input";
 import SingleSelect from "../../../components/common/SingleSelect";
 import MultiSelect from "../../../components/common/MultiSelect";
@@ -15,6 +15,7 @@ import { AnimalTag } from "../../../types/TaskTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import NavBar from "../../../components/common/navbar/NavBar";
 import DeleteUserModal from "../components/DeleteUserModal";
+import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
 
 interface FormData {
   firstName: string;
@@ -33,6 +34,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isDeleteSelected, setIsDeleteSelected] = useState(false);
+  const {
+    isOpen: isQuitEditingModalOpen,
+    onOpen: openQuitEditingModal,
+    onClose: closeQuitEditingModal,
+  } = useDisclosure();
 
   const colourLevelMap = useMemo<Record<number, string>>(
     () => ({
@@ -152,10 +158,6 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
     setIsDeleteSelected(false);
   };
 
-  const handleBackToProfile = () => {
-    history.goBack(); // Go back to previous page
-  };
-
   const roleOptions = Object.values(UserRoles);
   const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
   const colorLevelIcons = [
@@ -169,11 +171,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const animalTagColors = ["orange", "pink", "blue", "green", "purple"]; // Colors for animal tags
 
   if (loading) {
-    return (
-      <Flex justify="center" align="center" height="100vh">
-        <Text>Loading...</Text>
-      </Flex>
-    );
+    return <></>;
   }
 
   return (
@@ -200,7 +198,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
             gap="0.5rem"
             mb="1.5rem"
             cursor="pointer"
-            onClick={handleBackToProfile}
+            onClick={() => openQuitEditingModal()}
             _hover={{ opacity: 0.7 }}
           >
             <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
@@ -364,6 +362,11 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           </form>
         </Flex>
       </Flex>
+      <QuitEditingModal
+        isOpen={isQuitEditingModalOpen}
+        handleSecondaryButtonClick={closeQuitEditingModal}
+        navigateTo={`${PROFILE_PAGE}/${userId}`}
+      />
       <DeleteUserModal
         isOpen={isDeleteSelected}
         userId={userId}
