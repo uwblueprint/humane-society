@@ -1,8 +1,7 @@
 import baseAPIClient from "./BaseAPIClient";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
-import { ScheduledTaskDTO, Task } from "../types/TaskTypes";
-import { PetTask, RecurrenceTask } from "../types/TaskTypes";
+import { ScheduledTaskDTO, PetTask, RecurrenceTask } from "../types/TaskTypes";
 
 const getTask = async (taskId: number): Promise<PetTask> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
