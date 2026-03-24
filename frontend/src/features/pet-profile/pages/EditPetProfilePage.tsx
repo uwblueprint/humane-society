@@ -272,10 +272,16 @@ const EditPetProfilePage = (): React.ReactElement => {
       });
       closeDeleteConfirmModal();
       history.push("/");
-    } catch (error) {
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "";
+      const description = errorMessage
+        .toLowerCase()
+        .includes("foreign key constraint")
+        ? "All tasks for this pet must be unassigned before deletion."
+        : "Unable to delete pet, please try again later.";
       toast({
-        title: "Error",
-        description: "Failed to delete pet. Please try again later.",
+        title: "Delete Pet",
+        description,
         status: "error",
         duration: 3000,
         isClosable: true,

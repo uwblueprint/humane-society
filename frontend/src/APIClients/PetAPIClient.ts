@@ -1,3 +1,4 @@
+import axios from "axios";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { Pet, PetListSections } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
@@ -94,11 +95,10 @@ const deletePet = async (petId: number | string): Promise<void> => {
       headers: { Authorization: bearerToken },
     });
   } catch (error) {
-    throw new Error(
-      `Failed to delete pet. ${
-        error instanceof Error ? error.message : "Unknown error occurred."
-      }`,
-    );
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error(`Failed to delete pet '${error}'`);
   }
 };
 
