@@ -38,7 +38,7 @@ const PetProfilePage = (): React.ReactElement => {
     { label: "ASSIGNED TO" },
     { label: "STATUS" },
   ];
-  const gridTemplateColumns = "20rem 10rem 10rem 15rem 15rem";
+  const gridTemplateColumns = "2.5fr 2fr 2fr 3fr 2.5fr";
   const [tasks, setTasks] = useState<ScheduledTaskDTO[]>([]);
   const sortTask = (task: ScheduledTaskDTO): number => {
     const isCompleted = !!task.endTime;
@@ -145,9 +145,9 @@ const PetProfilePage = (): React.ReactElement => {
         <Flex
           backgroundColor={isDefaultTaskView ? "gray.100" : "gray.50"}
           flex="1"
+          minWidth="0"
           paddingTop="8.5rem"
-          paddingLeft="2rem"
-          paddingRight="2rem"
+          paddingInline="2rem"
           paddingBottom="2rem"
           flexDirection="column"
         >
@@ -167,6 +167,7 @@ const PetProfilePage = (): React.ReactElement => {
                   marginBottom="0.5rem"
                   marginTop="0.5rem"
                   borderRadius="0.75rem"
+                  width="100%"
                 >
                   <TableHeader
                     columns={taskTableColumns}

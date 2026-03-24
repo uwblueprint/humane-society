@@ -110,7 +110,6 @@ function PetProfileSidebar({
       paddingBottom="1rem"
       width="28%"
       maxW="20rem"
-      minW="16rem"
       flexShrink={0}
       backgroundColor="white"
       alignItems="start"
