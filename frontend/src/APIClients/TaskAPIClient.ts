@@ -52,4 +52,23 @@ export const getPetTasksByDate = async (
   }
 };
 
+export const getUserTasksByDate = async (
+  date: string,
+  userId?: number,
+): Promise<ScheduledTaskDTO[]> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.get("/tasks/date", {
+      headers: { Authorization: bearerToken },
+      params: { userId, date },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch tasks: ${error}`);
+  }
+};
+
 export default { getTask, getAllTasks };
