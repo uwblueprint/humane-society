@@ -83,6 +83,21 @@ taskRouter.get("/:id", async (req, res) => {
   }
 });
 
+/* Get Task Recurrence by id */
+taskRouter.get("/:id/recurrence", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const recurrence = await taskService.getRecurrence(id);
+    res.status(200).json(recurrence);
+  } catch (e: unknown) {
+    if (e instanceof NotFoundError) {
+      res.status(404).send(getErrorMessage(e));
+    } else {
+      res.status(500).send(getErrorMessage(e));
+    }
+  }
+});
+
 /* Get Tasks for specific Pet by Pet id */
 taskRouter.get("/pet/:petId", async (req, res) => {
   const { petId } = req.params;

@@ -79,3 +79,22 @@ export interface ScheduledTaskDTO {
   category: TaskCategory;
   isRecurring: boolean;
 }
+
+export interface PetTask {
+  id: number;
+  userId?: number;
+  petId: number;
+  taskTemplateId: number;
+  scheduledStartTime?: string;
+  startTime?: string;
+  endTime?: string;
+  notes?: string;
+}
+
+export interface RecurrenceTask {
+  id: number;
+  cadence: string;
+  days?: string[];
+  endDate?: string;
+  exclusions?: string[];
+}
