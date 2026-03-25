@@ -7,6 +7,7 @@ import {
   useHistory,
   useParams,
   useRouteMatch,
+  useLocation,
 } from "react-router-dom";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
@@ -19,9 +20,10 @@ import PrivateRoute from "../../../components/auth/PrivateRoute";
 import PetProfileSidebar from "../components/PetProfileSidebar";
 import AddTaskForm from "./AddTaskForm";
 import { TableColumn, TableHeader } from "../../../components/common/table";
-import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
+import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
+import AssignTaskPage from "./AssignTaskPage";
 import Button from "../../../components/common/Button";
 
 const PetProfilePage = (): React.ReactElement => {
@@ -30,6 +32,7 @@ const PetProfilePage = (): React.ReactElement => {
   const petId = Number(params.id);
   const { path, url } = useRouteMatch();
   const history = useHistory();
+  const location = useLocation();
   const { authenticatedUser } = useContext(AuthContext);
   const isDefaultTaskView = useRouteMatch({ path: url, exact: true });
   const taskTableColumns: TableColumn[] = [
@@ -74,7 +77,10 @@ const PetProfilePage = (): React.ReactElement => {
           String(selectedDate.getMonth() + 1).padStart(2, "0"),
           String(selectedDate.getDate()).padStart(2, "0"),
         ].join("-");
-        const fetchedTasks = await getPetTasksByDate(petId, dateString);
+        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+          petId,
+          dateString,
+        );
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
@@ -85,7 +91,7 @@ const PetProfilePage = (): React.ReactElement => {
     };
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history]);
+  }, [petId, selectedDate, history, location.key]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -132,6 +138,7 @@ const PetProfilePage = (): React.ReactElement => {
   } else {
     content = (
       <PetProfileTaskTableSection
+        petId={petId}
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
       />
@@ -208,6 +215,12 @@ const PetProfilePage = (): React.ReactElement => {
                   petColorLevel={petData.colorLevel}
                 />
               )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+            <PrivateRoute
+              path={`${path}/assign-task/:taskId`}
+              component={AssignTaskPage}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               exact
             />
