@@ -1,25 +1,33 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { Box, Flex, Spacer, Text } from "@chakra-ui/react";
+import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
 import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
+import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
+import TaskAPIClient from "../../../APIClients/TaskAPIClient";
+import { User } from "../../../types/UserTypes";
+import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
 
 interface AddTaskFormProps {
   petId: number;
   petName: string;
+  petColorLevel: number;
 }
 
 const AddTaskForm = ({
   petId,
   petName,
+  petColorLevel,
 }: AddTaskFormProps): React.ReactElement => {
   const history = useHistory();
+  const toast = useToast();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedUser, onSelectUser] = useState<User | null>(null)
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -82,7 +90,7 @@ const AddTaskForm = ({
 
     const isValid = await trigger(validateFields);
     if (isValid) {
-      // TODO: setCurrentStep(3)
+      setCurrentStep(3)
     }
   };
 
@@ -128,6 +136,14 @@ const AddTaskForm = ({
           />
         )}
 
+        {currentStep === 3 && (
+          <AddTaskForm3
+            petColorLevel={petColorLevel}
+            selectedUser={selectedUser}
+            onSelectUser={onSelectUser}
+          />
+        )}
+
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
             {currentStep}/3
@@ -168,6 +184,18 @@ const AddTaskForm = ({
               type="button"
             >
               Next
+            </Button>
+          )}
+          {currentStep === 3 && (
+            <Button
+              as="button"
+              variant="gray"
+              size="medium"
+              leftIcon={<ChevronLeftIcon />}
+              onClick={handlePreviousPage}
+              type="button"
+            >
+              Previous
             </Button>
           )}
         </Flex>
