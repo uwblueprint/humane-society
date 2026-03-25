@@ -23,7 +23,10 @@ import {
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 import logInteraction from "../middlewares/logInteraction";
-import { resetDateToUTCMidnight } from "../utilities/dateUtils";
+import {
+  isDateInRecurrence,
+  resetDateToUTCMidnight,
+} from "../utilities/dateUtils";
 
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
@@ -137,6 +140,87 @@ taskRouter.post(
       } else {
         res.status(500).send(getErrorMessage(error));
       }
+    }
+  },
+);
+
+taskRouter.post(
+  "/recurrences/:taskId/edit",
+  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { taskId } = req.params;
+
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
+    const single =
+      req.query.single === "true" || req.query.single === "false"
+        ? req.query.single === "true"
+        : undefined;
+
+    if (date === undefined || single === undefined) {
+      res.status(400).send("Invalid query parameters");
+      return;
+    }
+
+    try {
+      if (single) {
+        const temporaryTask =
+          await taskService.generateRecurringInstanceForData(taskId, date);
+        await taskService.excludeDate(taskId, date);
+        res.status(200).json({
+          task: {
+            ...temporaryTask,
+            ...(req.body ? req.body : undefined),
+            scheduledStartTime: date,
+          },
+        });
+      } else {
+        const task = await taskService.getTask(taskId);
+        const recurrence = await taskService.getRecurrence(taskId);
+        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+
+        if (!task.scheduledStartTime) {
+          throw new NotFoundError("Given task has no start date");
+        }
+        if (
+          !isDateInRecurrence(
+            task.scheduledStartTime,
+            newEndDate,
+            recurrence.cadence,
+          )
+        ) {
+          throw new BadRequestError(
+            "Given date doesn't follow the recurrence rule",
+          );
+        }
+
+        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+          endDate: newEndDate,
+        });
+        const newTask = await taskService.createTask({
+          petId: task.id,
+          taskTemplateId: task.taskTemplateId,
+          startTime: task.startTime,
+          endTime: task.endTime,
+          scheduledStartTime: date,
+          ...req.body,
+        });
+        const newRecurrence = await taskService.createRecurrence(
+          newTask.id.toString(),
+          recurrence.cadence,
+          recurrence.days,
+          recurrence.endDate,
+        );
+        res.status(200).json({
+          task: newTask,
+          recurrenceTask: newRecurrence,
+        });
+      }
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
     }
   },
 );
