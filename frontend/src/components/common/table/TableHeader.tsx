@@ -21,10 +21,11 @@ const TableHeader = ({
       borderTop="1px solid"
       borderBottom="1px solid"
       borderColor="gray.200"
+      width="100%"
     >
       <Grid
         gridTemplateColumns={gridTemplateColumns}
-        padding="1rem 2.5rem"
+        padding="1rem 1.5rem"
         alignItems="center"
       >
         {columns.map((column, index) => (

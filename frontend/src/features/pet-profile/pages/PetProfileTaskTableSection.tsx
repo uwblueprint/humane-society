@@ -57,7 +57,7 @@ const PetProfileTaskTableSection = ({
         <Grid
           key={task.id}
           gridTemplateColumns={gridTemplateColumns}
-          padding="1rem 2.5rem"
+          padding="1rem 1.5rem"
           alignItems="center"
           borderBottom="1px solid"
           borderColor="gray.200"
@@ -66,9 +66,9 @@ const PetProfileTaskTableSection = ({
           marginTop="0.5rem"
           borderRadius="0.75rem"
         >
-          <Flex align="center" gap="0.75rem">
-            <Icon as={taskTypeIcons[task.category]} boxSize="1.5rem" />
-            <Text textStyle="body" m={0}>
+          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+            <Icon as={taskTypeIcons[task.category]} boxSize="1.5rem" flexShrink={0} />
+            <Text textStyle="body" m={0} isTruncated>
               {task.taskName}
             </Text>
           </Flex>
