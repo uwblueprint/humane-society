@@ -52,7 +52,7 @@ export const getPetTasksByDate = async (
   }
 };
 
-export const getUserTasksByDate = async (
+export const getTasksByDate = async (
   date: string,
   userId?: number,
 ): Promise<ScheduledTaskDTO[]> => {

@@ -9,7 +9,7 @@ import CalendarDateSelector from "../components/CalendarDateSelector";
 import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
 import { TableColumn, TableHeader } from "../../../components/common/table";
-import { getPetTasksByDate, getUserTasksByDate } from "../../../APIClients/TaskAPIClient";
+import { getTasksByDate } from "../../../APIClients/TaskAPIClient";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserProfilePageTableSection from "./UserProfilePageTableSection";
 
@@ -21,6 +21,7 @@ const ProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
+  
   const taskTableColumns: TableColumn[] = [
     { label: "TASK" },
     { label: "TIME START" },
@@ -53,9 +54,17 @@ const ProfilePage = (): React.ReactElement => {
 
           const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
           const isOwnPage = authenticatedUser?.id === userId;
+          const isViewedUserAdmin = data?.role === UserRoles.ADMIN;
+          const isViewedUserUnverified = data?.status === "Invited";
 
           if (!isAdmin && !isOwnPage) {
             history.push("/not-found");
+            return;
+          }
+
+          if ((isAdmin && isViewedUserAdmin && !isOwnPage) || isViewedUserUnverified) {
+            setTasks([]);
+            setLoading(false);
             return;
           }
 
@@ -82,7 +91,7 @@ const ProfilePage = (): React.ReactElement => {
           String(selectedDate.getMonth() + 1).padStart(2, "0"),
           String(selectedDate.getDate()).padStart(2, "0"),
         ].join("-");
-        const fetchedTasks = await getUserTasksByDate(dateString);
+        const fetchedTasks = await getTasksByDate(dateString, userId);
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
@@ -93,7 +102,7 @@ const ProfilePage = (): React.ReactElement => {
     };
     fetchTasks();
     setLoading(false);
-  }, [userId, selectedDate, history]);
+  }, [userId, selectedDate, history, userData]);
 
   let content;
   if (loading) {
@@ -152,6 +161,7 @@ const ProfilePage = (): React.ReactElement => {
                 gridTemplateColumns={gridTemplateColumns}
               />
           </Flex>
+          {content}
         </Flex>
       </Flex>
       )}
