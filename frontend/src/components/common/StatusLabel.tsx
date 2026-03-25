@@ -19,11 +19,11 @@ const STATUS_STYLES: Record<
   { bg: string; color: string }
 > = {
   Assign: { bg: "blue.700", color: "white" },
-  Assigned: { bg: "gray.100", color: "gray.400" },
+  Assigned: { bg: "gray.100", color: "gray.700" },
   Completed: { bg: "gray.100", color: "gray.400" },
   Incomplete: { bg: "red.200", color: "white.default" },
   Start: { bg: "blue.700", color: "white" },
-  Occupied: { bg: "gray.50", color: "gray.800" },
+  Occupied: { bg: "gray.100", color: "gray.800" },
   "In-Progress": { bg: "green.200", color: "green.800" },
 };
 
