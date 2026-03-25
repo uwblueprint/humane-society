@@ -67,10 +67,10 @@ const UserSelection = ({
             padding="0.5rem 0.75rem"
             border="1px solid"
             borderColor="gray.200"
-            borderRadius="0.375rem"
+            borderRadius="0.325rem"
             backgroundColor="white"
             width="100%"
-            height="2.5rem"
+            height="3.25rem"
             overflow="hidden"
           >
             {/* fill search bar when selected */}
@@ -84,21 +84,20 @@ const UserSelection = ({
               onClick={onClearSelection}
             >
               <Flex
-                width="1.5rem"
-                height="1.5rem"
+                width="2.25rem"
+                height="2.25rem"
                 flexShrink={0}
                 borderRadius="full"
                 overflow="hidden"
                 sx={{
                   "> *": {
-                    width: "1.5rem !important",
-                    height: "1.5rem !important",
+                    width: "2.25rem !important",
+                    height: "2.25rem !important",
                   },
                   img: {
-                    width: "1.25rem !important",
-                    height: "1.25rem !important",
+                    width: "1.75rem !important",
+                    height: "1.75rem !important",
                   },
-                  div: { borderRadius: "50% !important" },
                 }}
               >
                 <ProfilePhoto
@@ -118,7 +117,12 @@ const UserSelection = ({
           <Flex
             backgroundColor="white"
             width="100%"
-            sx={{ "> div": { maxWidth: "100%", width: "100%" } }}
+            sx={{
+              "> div": { maxWidth: "100%", width: "100%" },
+              input: { height: "3.25rem" },
+              ".chakra-input__group": { height: "3.25rem" },
+              ".chakra-input__right-element": { height: "3.25rem" },
+            }}
           >
             <Search
               search={search}
