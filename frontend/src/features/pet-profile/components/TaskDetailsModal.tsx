@@ -91,6 +91,12 @@ const getTaskDetailedStatus = (
   if (task.endTime) return "Completed";
   if (isPastDay(task.scheduledStartTime)) return "Incomplete";
   if (task.startTime) {
+    if (
+      authenticatedUser?.role === UserRoles.ADMIN ||
+      authenticatedUser?.role === UserRoles.BEHAVIOURIST
+    ) {
+      return "In-Progress";
+    }
     return task.userId === authenticatedUser?.id ? "In-Progress" : "Occupied";
   }
   if (task.userId) return "Assigned";
@@ -479,7 +485,7 @@ const TaskDetailsModal = ({
                       Reassign
                     </Button>
                   )}
-                  {status === "In-Progress" && (
+                  {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
                     <Button variant="dark-blue" size="medium" width="100%">
                       Complete Task
                     </Button>
