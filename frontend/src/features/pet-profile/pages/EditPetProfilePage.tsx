@@ -197,9 +197,9 @@ const EditPetProfilePage = (): React.ReactElement => {
           animalTag: petData.animalTag,
           breed: petData.breed || "",
           weight: petData.weight?.toString() || "",
-          birthdayYear,
-          birthdayMonth,
-          birthdayDate,
+          birthdayYear: birthdayYear || "",
+          birthdayMonth: birthdayMonth || "",
+          birthdayDate: birthdayDate || "",
           sex: petData.sex === SexEnum.MALE ? "Male" : "Female",
           neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
           safetyInfo: petData.careInfo?.safetyInfo || "",
@@ -246,8 +246,8 @@ const EditPetProfilePage = (): React.ReactElement => {
 
     if (!isValid) return;
 
-    // Build birthday string (YYYY-MM-DD) or undefined
-    let birthday: string | undefined;
+    // Build birthday string (YYYY-MM-DD) or null
+    let birthday: string | null = null;
     if (
       data.birthdayMonth &&
       data.birthdayMonth !== "--" &&
@@ -263,28 +263,25 @@ const EditPetProfilePage = (): React.ReactElement => {
       birthday = `${data.birthdayYear}-${month}-${day}`;
     }
 
-    // Convert neutered string to boolean or undefined
-    let neutered: boolean | undefined;
+    // Convert neutered string to boolean or null
+    let neutered: boolean | null = null;
     if (data.neutered === "Neutered" || data.neutered === "Spayed") {
       neutered = true;
     } else if (data.neutered === "Unneutered" || data.neutered === "Unspayed") {
       neutered = false;
     }
 
-    // Convert sex string to SexEnum or undefined
+    // Convert sex string to SexEnum (sex is NOT NULL in DB, send undefined to keep existing value)
     let sex: SexEnum | undefined;
     if (data.sex === "Male") sex = SexEnum.MALE;
     else if (data.sex === "Female") sex = SexEnum.FEMALE;
 
-    // Build careInfo only if at least one field has content
-    const careInfo =
-      data.safetyInfo || data.managementInfo || data.medicalInfo
-        ? {
-            safetyInfo: data.safetyInfo || undefined,
-            medicalInfo: data.medicalInfo || undefined,
-            managementInfo: data.managementInfo || undefined,
-          }
-        : undefined;
+    // Build careInfo with null for blank fields
+    const careInfo = {
+      safetyInfo: data.safetyInfo || null,
+      medicalInfo: data.medicalInfo || null,
+      managementInfo: data.managementInfo || null,
+    };
 
     setSubmitting(true);
     try {
@@ -296,15 +293,15 @@ const EditPetProfilePage = (): React.ReactElement => {
         colorLevel: colorLevelToNumber[data.colourLevel],
         animalTag: data.animalTag as AnimalTag,
         status: currentPet.status as PetStatus,
-        breed: data.breed || undefined,
-        weight: data.weight ? parseFloat(data.weight) : undefined,
+        breed: data.breed || null,
+        weight: data.weight ? parseFloat(data.weight) : null,
         birthday,
         sex,
         neutered,
         photo:
           localProfilePhoto && !localProfilePhoto.startsWith("data:")
             ? localProfilePhoto
-            : currentPet.photo || undefined,
+            : currentPet.photo || null,
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
@@ -332,9 +329,9 @@ const EditPetProfilePage = (): React.ReactElement => {
         animalTag: updatedPet.animalTag,
         breed: updatedPet.breed || "",
         weight: updatedPet.weight?.toString() || "",
-        birthdayYear: updatedBirthdayYear,
-        birthdayMonth: updatedBirthdayMonth,
-        birthdayDate: updatedBirthdayDate,
+        birthdayYear: updatedBirthdayYear || "",
+        birthdayMonth: updatedBirthdayMonth || "",
+        birthdayDate: updatedBirthdayDate || "",
         sex: (() => {
           if (updatedPet.sex === SexEnum.MALE) return "Male";
           if (updatedPet.sex === SexEnum.FEMALE) return "Female";
