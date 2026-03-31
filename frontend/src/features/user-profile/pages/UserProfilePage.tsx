@@ -64,6 +64,8 @@ const ProfilePage = (): React.ReactElement => {
             history.push("/not-found");
             return;
           }
+          
+          setUserData(data);
 
           if ((isAdmin && isViewedUserAdmin && !isOwnPage) || isViewedUserUnverified) {
             setTasks([]);
