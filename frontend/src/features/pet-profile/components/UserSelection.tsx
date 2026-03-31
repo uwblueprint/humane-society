@@ -1,3 +1,4 @@
+import { CheckIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Spinner,
@@ -11,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
-import Search from "../../../components/common/Search";
+import SearchTagSelect from "../../../components/common/SearchTagSelect";
 import ColourLevelBadge from "../../../components/common/ColourLevelBadge";
 import Pagination from "../../../components/common/Pagination";
 import { User } from "../../../types/UserTypes";
@@ -58,31 +59,21 @@ const UserSelection = ({
     <>
       {/* assign to label & search */}
       <Flex direction="column" gap="0.5rem">
-        <Text m={0} textStyle="body">
+        <Text color="gray.600" marginBottom="0.38rem" fontWeight="normal">
           Assign to:
         </Text>
-        {selectedUser ? (
-          <Flex
-            align="center"
-            padding="0.5rem 0.75rem"
-            border="1px solid"
-            borderColor="gray.200"
-            borderRadius="0.375rem"
-            backgroundColor="white"
-            width="100%"
-            height="2.5rem"
-            overflow="hidden"
-          >
-            {/* fill search bar when selected */}
-            <Flex
-              align="center"
-              gap="0.5rem"
-              padding="0.25rem 0.5rem"
-              borderRadius="full"
-              backgroundColor="blue.50"
-              cursor="pointer"
-              onClick={onClearSelection}
-            >
+        <SearchTagSelect
+          search={search}
+          onSearchChange={onSearch}
+          placeholder="Search for a user..."
+          isItemSelected={!!selectedUser}
+          selectedText={
+            selectedUser
+              ? `${selectedUser.firstName} ${selectedUser.lastName}`
+              : ""
+          }
+          selectedIcon={
+            selectedUser && (
               <Flex
                 width="1.5rem"
                 height="1.5rem"
@@ -109,31 +100,15 @@ const UserSelection = ({
                   type="user"
                 />
               </Flex>
-              <Text m={0} textStyle="body">
-                {`${selectedUser.firstName} ${selectedUser.lastName}`}
-              </Text>
-            </Flex>
-          </Flex>
-        ) : (
-          <Flex
-            backgroundColor="white"
-            width="100%"
-            sx={{ "> div": { maxWidth: "100%", width: "100%" } }}
-          >
-            <Search
-              search={search}
-              onChange={onSearch}
-              placeholder="Search for a user..."
-            />
-          </Flex>
-        )}
+            )
+          }
+          onClearSelection={onClearSelection}
+        />
       </Flex>
 
       {/* user table */}
       <Flex direction="column" gap="0.5rem">
-        <Text m={0} textStyle="body">
-          Suggestions:
-        </Text>
+        <Text color="gray.600">Suggestions:</Text>
         {errorMessage ? (
           <Text m={0} color="red.500">
             {errorMessage}
@@ -153,7 +128,7 @@ const UserSelection = ({
               <Tbody>
                 {pagedUsers.length === 0 ? (
                   <Tr>
-                    <Td colSpan={2}>
+                    <Td colSpan={3}>
                       <Text m={0}>No users found.</Text>
                     </Td>
                   </Tr>
@@ -204,6 +179,16 @@ const UserSelection = ({
                             size="small"
                           />
                         </Flex>
+                      </Td>
+                      <Td
+                        textAlign="center"
+                        width="60px"
+                        minWidth="40px"
+                        padding="0"
+                      >
+                        {selectedUser?.id === user.id && (
+                          <CheckIcon boxSize="20px" color="blue.700" />
+                        )}
                       </Td>
                     </Tr>
                   ))
