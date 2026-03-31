@@ -29,7 +29,8 @@ const ProfilePage = (): React.ReactElement => {
     { label: "PET NAME" },
     { label: "STATUS" },
   ];
-  const gridTemplateColumns = "20rem 10rem 10rem 15rem 15rem";
+  const gridTemplateColumns = "15rem 10rem 10rem 15rem 15rem";
+  
   const [tasks, setTasks] = useState<ScheduledTaskDTO[]>([]);
   const sortTask = (task: ScheduledTaskDTO): number => {
     const isCompleted = !!task.endTime;
