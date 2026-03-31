@@ -61,6 +61,8 @@ const ProfilePage = (): React.ReactElement => {
             history.push("/not-found");
             return;
           }
+          
+          setUserData(data);
 
           if ((isAdmin && isViewedUserAdmin && !isOwnPage) || isViewedUserUnverified) {
             setTasks([]);
@@ -68,7 +70,6 @@ const ProfilePage = (): React.ReactElement => {
             return;
           }
 
-          setUserData(data);
         } catch (error) {
           // console.error(`Failed to fetch user ${userId}:`, error);
           history.push("/not-found");
