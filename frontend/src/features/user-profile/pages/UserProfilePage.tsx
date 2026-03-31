@@ -21,7 +21,7 @@ const ProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
-  
+
   const taskTableColumns: TableColumn[] = [
     { label: "TASK" },
     { label: "TIME START" },
@@ -30,7 +30,7 @@ const ProfilePage = (): React.ReactElement => {
     { label: "STATUS" },
   ];
   const gridTemplateColumns = "15rem 10rem 10rem 15rem 15rem";
-  
+
   const [tasks, setTasks] = useState<ScheduledTaskDTO[]>([]);
   const sortTask = (task: ScheduledTaskDTO): number => {
     const isCompleted = !!task.endTime;
@@ -62,15 +62,16 @@ const ProfilePage = (): React.ReactElement => {
             history.push("/not-found");
             return;
           }
-          
+
           setUserData(data);
 
-          if ((isAdmin && isViewedUserAdmin && !isOwnPage) || isViewedUserUnverified) {
+          if (
+            (isAdmin && isViewedUserAdmin && !isOwnPage) ||
+            isViewedUserUnverified
+          ) {
             setTasks([]);
             setLoading(false);
-            return;
           }
-
         } catch (error) {
           // console.error(`Failed to fetch user ${userId}:`, error);
           history.push("/not-found");
@@ -162,10 +163,10 @@ const ProfilePage = (): React.ReactElement => {
                 columns={taskTableColumns}
                 gridTemplateColumns={gridTemplateColumns}
               />
+            </Flex>
+            {content}
           </Flex>
-          {content}
         </Flex>
-      </Flex>
       )}
     </>
   );
