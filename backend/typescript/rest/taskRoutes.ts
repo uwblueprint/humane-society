@@ -165,20 +165,44 @@ taskRouter.post(
       return;
     }
 
+    const { notes, userId, scheduledStartTime } = req.body;
+
+    let parsedScheduledStartTime: Date | undefined;
+
+    if (
+      (notes !== undefined && typeof notes !== "string") ||
+      (userId !== undefined && typeof userId !== "number") ||
+      (scheduledStartTime !== undefined &&
+        (typeof scheduledStartTime !== "string" ||
+          Number.isNaN(new Date(scheduledStartTime).getTime())))
+    ) {
+      res.status(400).send("Invalid request body");
+      return;
+    }
+
+    if (scheduledStartTime !== undefined) {
+      parsedScheduledStartTime = new Date(scheduledStartTime);
+    }
+
+    const task = await taskService.getTask(taskId);
+
     try {
       if (single) {
-        const temporaryTask =
-          await taskService.generateRecurringInstanceForData(taskId, date);
         await taskService.excludeDate(taskId, date);
+        const singleTask = await taskService.createTask({
+          userId: userId ?? task.userId,
+          petId: task.petId,
+          taskTemplateId: task.taskTemplateId,
+          scheduledStartTime:
+            scheduledStartTime !== undefined ? parsedScheduledStartTime : date,
+          startTime: task.startTime,
+          endTime: task.endTime,
+          notes: notes ?? task.notes,
+        });
         res.status(200).json({
-          task: {
-            ...temporaryTask,
-            ...(req.body ? req.body : undefined),
-            scheduledStartTime: date,
-          },
+          singleTask,
         });
       } else {
-        const task = await taskService.getTask(taskId);
         const recurrence = await taskService.getRecurrence(taskId);
         const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
 
@@ -201,12 +225,14 @@ taskRouter.post(
           endDate: newEndDate,
         });
         const newTask = await taskService.createTask({
-          petId: task.id,
+          userId: userId ?? task.userId,
+          petId: task.petId,
           taskTemplateId: task.taskTemplateId,
+          scheduledStartTime:
+            scheduledStartTime !== undefined ? parsedScheduledStartTime : date,
           startTime: task.startTime,
           endTime: task.endTime,
-          scheduledStartTime: date,
-          ...req.body,
+          notes: notes ?? task.notes,
         });
         const newRecurrence = await taskService.createRecurrence(
           newTask.id.toString(),
