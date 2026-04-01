@@ -102,6 +102,24 @@ const deletePet = async (petId: number | string): Promise<void> => {
   }
 };
 
+const createPet = async (petData: PetRequestDTO): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.post("/pets", petData, {
+      headers: { Authorization: bearerToken },
+    });
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error(`Failed to create pet. ${error}`);
+  }
+};
+
 const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -115,4 +133,12 @@ const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   return data;
 };
 
-export default { getPetTasks, getPet, getPets, getPetList, deletePet, update };
+export default {
+  getPetTasks,
+  getPet,
+  getPets,
+  getPetList,
+  deletePet,
+  createPet,
+  update,
+};
