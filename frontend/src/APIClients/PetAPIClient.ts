@@ -1,6 +1,6 @@
 import axios from "axios";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
-import { Pet, PetListSections } from "../types/PetTypes";
+import { Pet, PetListSections, PetRequestDTO } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
@@ -102,4 +102,17 @@ const deletePet = async (petId: number | string): Promise<void> => {
   }
 };
 
-export default { getPetTasks, getPet, getPets, getPetList, deletePet };
+const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  const { data } = await baseAPIClient.put(`/pets/${petId}`, formData, {
+    headers: { Authorization: bearerToken },
+  });
+
+  return data;
+};
+
+export default { getPetTasks, getPet, getPets, getPetList, deletePet, update };
