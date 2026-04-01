@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Flex, Grid, Icon, Text, Avatar } from "@chakra-ui/react";
+import { Box, Flex, Grid, Icon, Text } from "@chakra-ui/react";
 import ContentModal from "../../../components/common/ContentModal";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { InteractionDTO } from "../../../types/InteractionTypes";
 
 import { ReactComponent as AdminTag } from "../../../assets/icons/user-role/admin.svg";
@@ -60,10 +61,10 @@ const InteractionDetailsModal: React.FC<InteractionDetailsModalProps> = ({
           User
         </Text>
         <Flex align="center" gap="0.75rem" mt="0.5rem">
-          <Avatar
-            size="sm"
-            name={`${interaction.actor.firstName} ${interaction.actor.lastName}`}
-            src={interaction.actor.profilePhoto ?? undefined}
+          <ProfilePhoto
+            type="user"
+            size="small"
+            image={interaction.actor.profilePhoto ?? undefined}
           />
           <Text m={0} textStyle="body" color="gray.700">
             {interaction.actor.firstName} {interaction.actor.lastName}
