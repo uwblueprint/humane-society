@@ -174,7 +174,7 @@ const EditPetProfilePage = (): React.ReactElement => {
       try {
         const petData = await PetAPIClient.getPet(petId);
 
-        if (petData) {
+        if (petData.photo) {
           const photoUrl = await PetAPIClient.getProfilePhotoUrl(petData.id);
           setLocalProfilePhoto(photoUrl);
         }
