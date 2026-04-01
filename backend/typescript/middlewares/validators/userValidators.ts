@@ -107,7 +107,10 @@ export const updateUserDtoValidator = async (
   ) {
     return res.status(400).send(getApiValidationError("colorLevel", "integer"));
   }
-  if (!validateNumberConstraint(req.body.colorLevel, 1, 5)) {
+  if (
+    req.body.colorLevel !== undefined &&
+    req.body.colorLevel !== null &&
+    !validateNumberConstraint(req.body.colorLevel, 1, 5)) {
     return res.status(400).send(getConstraintError("colorLevel", 1, 5));
   }
   if (
