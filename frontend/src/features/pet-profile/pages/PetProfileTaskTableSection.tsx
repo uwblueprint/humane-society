@@ -67,7 +67,11 @@ const PetProfileTaskTableSection = ({
           borderRadius="0.75rem"
         >
           <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
-            <Icon as={taskTypeIcons[task.category]} boxSize="1.5rem" flexShrink={0} />
+            <Icon
+              as={taskTypeIcons[task.category]}
+              boxSize="1.5rem"
+              flexShrink={0}
+            />
             <Text textStyle="body" m={0} isTruncated>
               {task.taskName}
             </Text>

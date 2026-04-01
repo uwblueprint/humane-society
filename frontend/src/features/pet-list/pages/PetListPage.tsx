@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import Button from "../../../components/common/Button";
 import { TableWrapper } from "../../../components/common/table";
@@ -17,7 +18,6 @@ import { TaskCategory } from "../../../types/TaskTypes";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
 import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
 import PetListTable from "../components/PetListTable";
-import { useHistory } from "react-router-dom";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});

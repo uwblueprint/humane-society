@@ -231,7 +231,7 @@ const AddPetForm = (): React.ReactElement => {
     );
   }, [selectedBirthdayMonth, selectedBirthdayYear]);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
     // Only allow a user to progress if they have resolved all errors
     const isValid = await trigger([
       "name",
@@ -727,9 +727,7 @@ const AddPetForm = (): React.ReactElement => {
             toast({
               title: "Error",
               description:
-                error instanceof Error
-                  ? error.message
-                  : "Failed to create pet",
+                error instanceof Error ? error.message : "Failed to create pet",
               status: "error",
               duration: 3000,
               isClosable: true,
