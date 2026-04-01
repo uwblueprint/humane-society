@@ -26,7 +26,7 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { PetRequestDTO, PetStatus, SexEnum } from "../../../types/PetTypes";
+import { PetRequestDTO, PetStatus, SexEnum, Pet } from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
@@ -35,6 +35,7 @@ import {
 } from "../../../utils/CommonUtils";
 import QuitEditingModal from "./QuitEditingModal";
 import { PET_PROFILE_PAGE } from "../../../constants/Routes";
+import ProfilePhotoModal from "../../user-profile/components/ProfilePhotoModal";
 
 interface FormData {
   name: string;
@@ -119,6 +120,9 @@ const EditPetProfilePage = (): React.ReactElement => {
   const [isUploading, setIsUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
+  const [pet, setPet] = useState<Pet | undefined>(undefined)
+  const [editPetPhoto, setEditPetPhoto] = useState(false);
+  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<File | undefined>(undefined)
   const {
     isOpen: isDeleteConfirmModalOpen,
     onOpen: openDeleteConfirmModal,
@@ -170,9 +174,11 @@ const EditPetProfilePage = (): React.ReactElement => {
       try {
         const petData = await PetAPIClient.getPet(petId);
 
-        // Update local profile photo state
-        setLocalProfilePhoto(petData.photo);
-
+        if (petData) {
+          const photoUrl = await PetAPIClient.getProfilePhotoUrl(petData.id);
+          setLocalProfilePhoto(photoUrl);
+        }
+        setPet(petData)
         let birthdayYear: string | undefined;
         let birthdayMonth: string | undefined;
         let birthdayDate: string | undefined;
@@ -225,6 +231,17 @@ const EditPetProfilePage = (): React.ReactElement => {
       getBirthdayDateOptions(selectedBirthdayMonth, selectedBirthdayYear),
     );
   }, [selectedBirthdayMonth, selectedBirthdayYear]);
+
+  const handleEditPetPhoto = (file: File | null) => {
+    setEditPetPhoto(false)
+    if (file) {
+      setNewPetProfilePhoto(file)
+      const preview = URL.createObjectURL(file);
+      setLocalProfilePhoto(preview); // update UI preview
+    } else {
+      setLocalProfilePhoto(undefined); // default case
+    }
+  }
 
   const onSubmit = async (data: FormData) => {
     // Only allow a user to progress if they have resolved all errors
@@ -305,10 +322,24 @@ const EditPetProfilePage = (): React.ReactElement => {
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
+      
+      // Submit the pet profile photo
+      if (newPetProfilePhoto) {
+        await PetAPIClient.uploadProfilePhoto(
+          newPetProfilePhoto,
+          petId,
+          pet?.photo,
+        );
+      } else if (localProfilePhoto === undefined) {
+        await PetAPIClient.setDefaultProfilePhoto(petId);
+      }
 
       // Refetch updated pet and reset form
       const updatedPet = await PetAPIClient.getPet(petId);
-      setLocalProfilePhoto(updatedPet.photo);
+      if (typeof updatedPet.photo == "string") {
+        const updatedPhoto = await PetAPIClient.getProfilePhotoUrl(petId);
+        setLocalProfilePhoto(updatedPhoto);
+      }
 
       let updatedBirthdayYear: string | undefined;
       let updatedBirthdayMonth: string | undefined;
@@ -395,6 +426,7 @@ const EditPetProfilePage = (): React.ReactElement => {
       }
     } finally {
       setSubmitting(false);
+      history.push(`/pet-profile/${petId}`);
     }
   };
 
@@ -440,21 +472,6 @@ const EditPetProfilePage = (): React.ReactElement => {
     if (isValid) {
       setPage(2);
     }
-  };
-
-  const handleProfilePhotoChange = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    const reader = new FileReader();
-    setIsUploading(true);
-    reader.onloadend = () => {
-      setLocalProfilePhoto(reader.result as string);
-      setValue("profilePhoto", reader.result as string, {
-        shouldValidate: true,
-      });
-      setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
   };
 
   const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
@@ -588,16 +605,16 @@ const EditPetProfilePage = (): React.ReactElement => {
                         src={PencilIcon}
                         alt="edit"
                         style={{ stroke: "black" }}
+                        onClick={() => {setEditPetPhoto(true)}}
+                      />
+                      <ProfilePhotoModal 
+                      isOpen={editPetPhoto}
+                      profilePhoto={localProfilePhoto}
+                      onClose={() => { setEditPetPhoto(false) }}
+                      onConfirm={handleEditPetPhoto}
+                      type="pet"
                       />
                     </Flex>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      id="profile-photo-upload"
-                      onChange={(e) => handleProfilePhotoChange(e.target.files)}
-                      disabled={isUploading}
-                    />
                   </Flex>
                 </Flex>
 

@@ -174,13 +174,11 @@ petRouter.post("/:id/profile-photo/upload", upload.single("file"), async (req, r
       }
       throw error;
     }
-    // whats old storage path??
     if (oldStoragePath) {
       await fileStorageService.deleteFile(String(oldStoragePath));
     }
 
     res.status(200).json({
-      message: "File uploaded successfully",
       storagePath,
     });
   } catch (error: unknown) {
@@ -208,12 +206,10 @@ petRouter.post("/:id/profile-photo/default", async (req, res) => {
     }
 
     await petService.updatePet(id, {
-      photo: undefined,
+      photo: null,
     });
 
-    res.status(200).json({
-      message: "Pet set to default profile photo",
-    });
+    res.status(200).json();
   } catch (error: unknown) {
     res.status(500).send(getErrorMessage(error));
   }

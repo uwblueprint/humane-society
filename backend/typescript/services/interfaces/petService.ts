@@ -16,7 +16,7 @@ export interface PetRequestDTO {
   birthday?: string;
   weight?: number;
   sex?: Sex;
-  photo?: string;
+  photo?: string | null;
   careInfo?: {
     safetyInfo?: string;
     medicalInfo?: string;
