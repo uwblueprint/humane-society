@@ -120,6 +120,19 @@ const createPet = async (petData: PetRequestDTO): Promise<Pet> => {
   }
 };
 
+const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  const { data } = await baseAPIClient.put(`/pets/${petId}`, formData, {
+    headers: { Authorization: bearerToken },
+  });
+
+  return data;
+};
+
 export default {
   getPetTasks,
   getPet,
@@ -127,4 +140,5 @@ export default {
   getPetList,
   deletePet,
   createPet,
+  update,
 };

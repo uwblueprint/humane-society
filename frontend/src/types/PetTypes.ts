@@ -80,17 +80,17 @@ export interface PetRequestDTO {
   name: string;
   colorLevel: number;
   status: PetStatus;
-  breed?: string;
-  neutered?: boolean;
-  birthday?: string;
-  weight?: number;
+  breed?: string | null;
+  neutered?: boolean | null;
+  birthday?: string | null;
+  weight?: number | null;
   sex?: SexEnum;
-  photo?: string;
+  photo?: string | null;
   careInfo?: {
-    safetyInfo?: string;
-    medicalInfo?: string;
-    managementInfo?: string;
-  };
+    safetyInfo?: string | null;
+    medicalInfo?: string | null;
+    managementInfo?: string | null;
+  } | null;
 }
 
 export type PetListSections = Record<string, PetListItemDTO[]>;
