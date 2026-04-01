@@ -1,3 +1,4 @@
+import axios from "axios";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { Pet, PetListSections } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
@@ -84,4 +85,21 @@ const getPetList = async (userId: number): Promise<PetListSections> => {
   }
 };
 
-export default { getPetTasks, getPet, getPets, getPetList };
+const deletePet = async (petId: number | string): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.delete(`/pets/${petId}`, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error(`Failed to delete pet '${error}'`);
+  }
+};
+
+export default { getPetTasks, getPet, getPets, getPetList, deletePet };

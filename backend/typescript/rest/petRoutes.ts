@@ -63,9 +63,9 @@ petRouter.delete("/:id", async (req, res) => {
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
-      res.status(404).send(getErrorMessage(e));
+      res.status(404).json({ error: getErrorMessage(e) });
     } else {
-      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+      res.status(500).json({ error: getErrorMessage(e) });
     }
   }
 });
