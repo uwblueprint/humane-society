@@ -12,6 +12,7 @@ import petRouter from "./rest/petRoutes";
 import userRouter from "./rest/userRoutes";
 import taskRouter from "./rest/taskRoutes";
 import recurrenceRouter from "./rest/recurrenceRoutes";
+import interactionRouter from "./rest/interactionRoutes";
 
 const CORS_ALLOW_LIST = [
   "http://localhost:3000",
@@ -39,6 +40,7 @@ app.use("/pets", petRouter);
 app.use("/users", userRouter);
 app.use("/tasks", taskRouter);
 app.use("/recurrences", recurrenceRouter);
+app.use("/interactions", interactionRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 sequelize.authenticate();

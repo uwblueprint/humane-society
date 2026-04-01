@@ -1,7 +1,54 @@
 import Interaction from "../../models/interaction.model";
 import InteractionType from "../../models/interactionType.model";
+import User from "../../models/user.model";
 
 const InteractionService = {
+  async getInteractions() {
+    try {
+      const interactions = await Interaction.findAll({
+        include: [
+          {
+            model: User,
+            as: "actor",
+            attributes: [
+              "id",
+              "first_name",
+              "last_name",
+              "role",
+              "profile_photo",
+            ],
+          },
+          {
+            model: InteractionType,
+            attributes: ["action_type"],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+      });
+
+      return interactions.map((interaction) => ({
+        id: interaction.id,
+        shortDescription: interaction.short_description,
+        longDescription: interaction.long_description,
+        createdAt: interaction.getDataValue("created_at"),
+        interactionType: interaction.interaction_type?.action_type ?? "Unknown",
+        actor: interaction.actor
+          ? {
+              id: interaction.actor.id,
+              firstName: interaction.actor.first_name,
+              lastName: interaction.actor.last_name,
+              role: interaction.actor.role,
+              profilePhoto: interaction.actor.profile_photo ?? null,
+            }
+          : null,
+      }));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Error fetching interactions:", err);
+      throw err;
+    }
+  },
+
   async getInteractionTypeId(interactionTypeEnum: string) {
     try {
       const type = await InteractionType.findOne({
