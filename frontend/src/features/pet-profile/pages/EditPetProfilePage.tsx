@@ -117,7 +117,6 @@ const EditPetProfilePage = (): React.ReactElement => {
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
   >(undefined);
-  const [isUploading, setIsUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const [pet, setPet] = useState<Pet | undefined>(undefined)
@@ -336,7 +335,7 @@ const EditPetProfilePage = (): React.ReactElement => {
 
       // Refetch updated pet and reset form
       const updatedPet = await PetAPIClient.getPet(petId);
-      if (typeof updatedPet.photo == "string") {
+      if (typeof updatedPet.photo === "string") {
         const updatedPhoto = await PetAPIClient.getProfilePhotoUrl(petId);
         setLocalProfilePhoto(updatedPhoto);
       }

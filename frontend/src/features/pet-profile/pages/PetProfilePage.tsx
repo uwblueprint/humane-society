@@ -98,8 +98,8 @@ const PetProfilePage = (): React.ReactElement => {
         const data = await PetAPIClient.getPet(petId);
         setPetData(data);
         if (data.photo) {
-          const profilePhoto = await PetAPIClient.getProfilePhotoUrl(petId);
-          setProfilePhoto(profilePhoto);
+          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+          setProfilePhoto(photo);
         }
       } catch (error) {
         history.push("/not-found");
