@@ -9,6 +9,7 @@ import { MONTH_NUMBER_TO_NAME } from "../../../utils/CommonUtils";
 interface CalendarDateSelectorProps {
   selectedDate: Date;
   onChange: (date: Date) => void;
+  rightAction?: React.ReactNode;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -39,6 +40,7 @@ function getStartOfWeek(date: Date) {
 const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
   selectedDate,
   onChange,
+  rightAction,
 }) => {
   const [visibleWeekStart, setVisibleWeekStart] = useState<Date>(() =>
     getStartOfWeek(selectedDate),
@@ -72,8 +74,8 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
 
   return (
     <Flex flexDirection="column" gap="1.5rem" width="100%">
-      <Flex alignItems="center" gap="1rem">
-        <Text style={textStyles.h3} margin="0">
+      <Flex alignItems="center" gap="1rem" justifyContent={rightAction ? "space-between" : "flex-start"}>
+        <Text style={textStyles.h3} margin="0" flex={rightAction ? "1" : undefined}>
           {/* getMonth is zero-indexed, so we add one */}
           {MONTH_NUMBER_TO_NAME[visibleWeekStart.getMonth() + 1]}{" "}
           {visibleWeekStart.getFullYear()}
@@ -108,6 +110,7 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
             size="sm"
           />
         </Flex>
+        {rightAction && <Flex flex="1" justifyContent="flex-end">{rightAction}</Flex>}
       </Flex>
 
       <Flex justifyContent="space-between" gap="2rem">

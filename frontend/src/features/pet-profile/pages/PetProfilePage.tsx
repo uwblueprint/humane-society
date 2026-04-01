@@ -22,6 +22,7 @@ import { TableColumn, TableHeader } from "../../../components/common/table";
 import { getPetTasksByDate } from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
+import Button from "../../../components/common/Button";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -154,10 +155,16 @@ const PetProfilePage = (): React.ReactElement => {
           <Switch>
             <Route exact path={path}>
               <Flex flexDirection="column">
-                {canAddTask}
                 <CalendarDateSelector
                   selectedDate={selectedDate}
                   onChange={(date) => setSelectedDate(date)}
+                  rightAction={
+                    canAddTask ? (
+                      <Button variant="dark-blue" size="small">
+                        Add Task
+                      </Button>
+                    ) : undefined
+                  }
                 />
                 <Flex
                   backgroundColor="gray.50"
