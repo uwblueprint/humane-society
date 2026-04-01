@@ -1,4 +1,3 @@
-import { useToast } from "@chakra-ui/react";
 import React, { useEffect, useMemo, useState } from "react";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import Button from "../../../components/common/Button";
@@ -18,6 +17,7 @@ import { TaskCategory } from "../../../types/TaskTypes";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
 import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
 import PetListTable from "../components/PetListTable";
+import { useHistory } from "react-router-dom";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});
@@ -31,7 +31,7 @@ const PetListPage = (): React.ReactElement => {
   const isStaff = currentUserRole === STAFF;
   const petListFilterType = isAdmin ? "petListAdmin" : "petListVolunteer";
 
-  const toast = useToast();
+  const history = useHistory();
 
   const handleClearFilters = () => {
     setFilters({});
@@ -47,13 +47,7 @@ const PetListPage = (): React.ReactElement => {
   };
 
   const handleAddPet = () => {
-    toast({
-      title: "Add Pet",
-      description: "Add pet functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
+    history.push("/add-pet-form");
   };
 
   const getPets = async () => {

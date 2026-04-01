@@ -13,6 +13,8 @@ import {
 import { ChevronRightIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 import { PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
@@ -21,6 +23,7 @@ import NavBar from "../../../components/common/navbar/NavBar";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
+import { PetRequestDTO, PetStatus, SexEnum } from "../../../types/PetTypes";
 import { AnimalTag } from "../../../types/TaskTypes";
 import { getDaysInMonth } from "../../../utils/CommonUtils";
 import QuitEditingModal from "./QuitEditingModal";
@@ -83,12 +86,96 @@ const validateDate = (month: string, date: string, year: string) => {
   return true;
 };
 
+const BIRTHDAY_MONTHS = [
+  "--",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const COLOR_LEVEL_MAP: Record<string, number> = {
+  Green: 1,
+  Yellow: 2,
+  Orange: 3,
+  Red: 4,
+  Blue: 5,
+};
+
+const transformFormData = (
+  data: FormData,
+  profilePhoto: string | undefined,
+): PetRequestDTO => {
+  const { birthdayMonth, birthdayDate, birthdayYear } = data;
+  const birthdayComplete =
+    birthdayMonth &&
+    birthdayMonth !== "--" &&
+    birthdayDate &&
+    birthdayDate !== "--" &&
+    birthdayYear &&
+    birthdayYear !== "--";
+
+  let birthday: string | undefined;
+  if (birthdayComplete) {
+    const monthNum = BIRTHDAY_MONTHS.indexOf(birthdayMonth);
+    const mm = String(monthNum).padStart(2, "0");
+    const dd = String(Number(birthdayDate)).padStart(2, "0");
+    birthday = `${birthdayYear}-${mm}-${dd}`;
+  }
+
+  let sex: SexEnum | undefined;
+  if (data.sex === "Male") sex = SexEnum.MALE;
+  else if (data.sex === "Female") sex = SexEnum.FEMALE;
+
+  let neutered: boolean | undefined;
+  if (data.neutered === "Neutered" || data.neutered === "Spayed")
+    neutered = true;
+  else if (data.neutered === "Unneutered" || data.neutered === "Unspayed")
+    neutered = false;
+
+  const weight =
+    data.weight && data.weight !== "" ? parseFloat(data.weight) : undefined;
+
+  const careInfo =
+    data.safetyInfo || data.managementInfo || data.medicalInfo
+      ? {
+          safetyInfo: data.safetyInfo || undefined,
+          managementInfo: data.managementInfo || undefined,
+          medicalInfo: data.medicalInfo || undefined,
+        }
+      : undefined;
+
+  return {
+    name: data.name,
+    animalTag: data.animalTag as AnimalTag,
+    colorLevel: COLOR_LEVEL_MAP[data.colourLevel],
+    status: PetStatus.NEEDS_CARE,
+    breed: data.breed || undefined,
+    birthday,
+    sex,
+    neutered,
+    weight,
+    careInfo,
+    photo: profilePhoto || undefined,
+  };
+};
+
 const AddPetForm = (): React.ReactElement => {
   const toast = useToast();
+  const history = useHistory();
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
   >(undefined);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const {
     isOpen: isQuitEditingModalOpen,
@@ -163,25 +250,6 @@ const AddPetForm = (): React.ReactElement => {
     ]);
 
     if (isValid) {
-      // TODO: Remove this and submit actual data to backend endpoint
-      // eslint-disable-next-line no-console
-      console.log({
-        name: data.name,
-        colourLevel: data.colourLevel,
-        animalTag: data.animalTag,
-        breed: data.breed,
-        weight: data.weight,
-        birthdayMonth: data.birthdayMonth,
-        birthdayDate: data.birthdayDate,
-        birthdayYear: data.birthdayYear,
-        sex: data.sex,
-        neutered: data.neutered,
-        safetyInfo: data.safetyInfo,
-        managementInfo: data.managementInfo,
-        medicalInfo: data.medicalInfo,
-        profilePhoto: localProfilePhoto,
-      });
-
       openAddPetModal();
     }
   };
@@ -225,21 +293,7 @@ const AddPetForm = (): React.ReactElement => {
     <ColourStarIcon key="blue" colour="blue.400" />,
   ];
   const animalTagOptions = Object.values(AnimalTag);
-  const birthdayMonthOptions = [
-    "--",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const birthdayMonthOptions = BIRTHDAY_MONTHS;
   // Birthday year options range from the current year to 1900
   const currentYear = new Date().getFullYear();
   const birthdayYearOptions = [
@@ -662,18 +716,30 @@ const AddPetForm = (): React.ReactElement => {
       />
       <AddPetModal
         isOpen={isAddPetModalOpen}
-        handlePrimaryButtonClick={() => {
-          closeAddPetModal();
-          toast({
-            title: "Success",
-            description: "Form data logged to console",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-          // add implementation here
+        handlePrimaryButtonClick={async () => {
+          setIsSubmitting(true);
+          try {
+            const createdPet = await PetAPIClient.createPet(
+              transformFormData(getValues(), localProfilePhoto),
+            );
+            history.push(`/pet-profile/${createdPet.id}`);
+          } catch (error) {
+            toast({
+              title: "Error",
+              description:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to create pet",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
         handleSecondaryButtonClick={closeAddPetModal}
+        isLoading={isSubmitting}
       />
     </>
   );

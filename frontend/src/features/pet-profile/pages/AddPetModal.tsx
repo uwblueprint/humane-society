@@ -5,12 +5,14 @@ interface AddPetModalProps {
   isOpen: boolean; // Whether the modal should be visible
   handlePrimaryButtonClick: () => void; // Functionalituy for the first button
   handleSecondaryButtonClick: () => void; // Functionality for secondary button
+  isLoading?: boolean; // Whether the primary button should show a loading state
 }
 
 const AddPetModal: FC<AddPetModalProps> = ({
   isOpen,
   handlePrimaryButtonClick,
   handleSecondaryButtonClick,
+  isLoading = false,
 }) => {
   return (
     <PopupModal
@@ -22,6 +24,7 @@ const AddPetModal: FC<AddPetModalProps> = ({
       onPrimaryClick={handlePrimaryButtonClick}
       secondaryButtonText="Cancel"
       onSecondaryClick={handleSecondaryButtonClick}
+      isPrimaryLoading={isLoading}
     />
   );
 };
