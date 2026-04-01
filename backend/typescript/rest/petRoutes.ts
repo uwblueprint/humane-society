@@ -1,4 +1,6 @@
 import { Router } from "express";
+import fs from "fs";
+import multer from "multer";
 import {
   petRequestDtoValidators,
   /* // petFilterValidators, */
@@ -16,9 +18,11 @@ import {
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import logInteraction from "../middlewares/logInteraction";
-import fs from "fs";
-import { ACCEPTED_TYPES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from "../constants";
-import multer from "multer";
+import {
+  ACCEPTED_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+} from "../constants";
 import FileStorageService from "../services/implementations/fileStorageService";
 
 const petRouter: Router = Router();
@@ -125,70 +129,77 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
   }
 });
 
-petRouter.post("/:id/profile-photo/upload", upload.single("file"), async (req, res) => {
-  const { file } = req;
-  const { id } = req.params;
-  const { oldStoragePath } = req.body;
+petRouter.post(
+  "/:id/profile-photo/upload",
+  upload.single("file"),
+  async (req, res) => {
+    const { file } = req;
+    const { id } = req.params;
+    const { oldStoragePath } = req.body;
 
-  let storagePath: string | undefined;
-
-  try {
-    if (!file) {
-      res.status(400).json({ error: "No file uploaded" });
-      return;
-    }
-
-    if (!id) {
-      res.status(400).json({ error: "Missing pet id" });
-      return;
-    }
-
-    if (!ACCEPTED_TYPES.includes(file.mimetype)) {
-      res.status(400).json({
-        error: `Invalid file type, must be ${ACCEPTED_TYPES.join(", ")}`,
-      });
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      res.status(400).json({
-        error: `File size exceeds limit of ${MAX_FILE_SIZE_MB}MB`,
-      });
-      return;
-    }
-
-    const ext = file.mimetype.split("/")[1];
-    storagePath = `pets/${id}/profile-photo-${Date.now()}.${ext}`;
-
-    await fileStorageService.createFile(storagePath, file.path, file.mimetype);
+    let storagePath: string | undefined;
 
     try {
-
-      await petService.updatePet(id, {
-        photo: storagePath,
-      });
-
-    } catch (error: unknown) {
-      if (storagePath) {
-        await fileStorageService.deleteFile(storagePath);
+      if (!file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return;
       }
-      throw error;
-    }
-    if (oldStoragePath) {
-      await fileStorageService.deleteFile(String(oldStoragePath));
-    }
 
-    res.status(200).json({
-      storagePath,
-    });
-  } catch (error: unknown) {
-    res.status(500).send(getErrorMessage(error));
-  } finally { // whats this
-    if (file?.path && fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
+      if (!id) {
+        res.status(400).json({ error: "Missing pet id" });
+        return;
+      }
+
+      if (!ACCEPTED_TYPES.includes(file.mimetype)) {
+        res.status(400).json({
+          error: `Invalid file type, must be ${ACCEPTED_TYPES.join(", ")}`,
+        });
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        res.status(400).json({
+          error: `File size exceeds limit of ${MAX_FILE_SIZE_MB}MB`,
+        });
+        return;
+      }
+
+      const ext = file.mimetype.split("/")[1];
+      storagePath = `pets/${id}/profile-photo-${Date.now()}.${ext}`;
+
+      await fileStorageService.createFile(
+        storagePath,
+        file.path,
+        file.mimetype,
+      );
+
+      try {
+        await petService.updatePet(id, {
+          photo: storagePath,
+        });
+      } catch (error: unknown) {
+        if (storagePath) {
+          await fileStorageService.deleteFile(storagePath);
+        }
+        throw error;
+      }
+      if (oldStoragePath) {
+        await fileStorageService.deleteFile(String(oldStoragePath));
+      }
+
+      res.status(200).json({
+        storagePath,
+      });
+    } catch (error: unknown) {
+      res.status(500).send(getErrorMessage(error));
+    } finally {
+      // whats this
+      if (file?.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
     }
-  }
-});
+  },
+);
 
 petRouter.post("/:id/profile-photo/default", async (req, res) => {
   const { id } = req.params;
