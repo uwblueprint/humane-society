@@ -80,22 +80,12 @@ const UserSelection = ({
                 flexShrink={0}
                 borderRadius="full"
                 overflow="hidden"
-                sx={{
-                  "> *": {
-                    width: "2.25rem !important",
-                    height: "2.25rem !important",
-                  },
-                  img: {
-                    width: "1.75rem !important",
-                    height: "1.75rem !important",
-                  },
-                }}
               >
                 <ProfilePhoto
                   image={selectedUser.profilePhoto}
                   color={colorLevelMap[selectedUser.colorLevel]}
                   showColorBorder
-                  size="small"
+                  size="x-small"
                   type="user"
                 />
               </Flex>

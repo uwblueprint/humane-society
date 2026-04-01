@@ -8,7 +8,7 @@ import invitedDefaultUserProfile from "../../assets/icons/invited-default-user-p
 export interface ProfilePhotoProps {
   color?: ColorLevel;
   image?: string;
-  size?: "small" | "large" | "x-large" | "xx-large";
+  size?: "x-small" | "small" | "large" | "x-large" | "xx-large";
   type: "user" | "pet" | "invitedUser";
   showColorBorder?: boolean;
 }
@@ -35,6 +35,7 @@ const ProfilePhoto = ({
   showColorBorder,
 }: ProfilePhotoProps): React.ReactElement => {
   const sizeMap = {
+    "x-small": { container: "2.25rem", image: "1.92rem" },
     small: { container: "2.625rem", image: "2.25rem" },
     large: { container: "8.69rem", image: "8.06rem" },
     "x-large": { container: "12rem", image: "11.5rem" },
