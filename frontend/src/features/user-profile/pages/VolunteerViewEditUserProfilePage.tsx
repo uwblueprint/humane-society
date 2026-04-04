@@ -125,19 +125,50 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   const onSubmit = async (data: FormData) => {
+    const userId = Number(authenticatedUser?.id?.toString());
     // TODO: deprecate console use in frontend
     /* eslint-disable-next-line no-console */
-    console.log({
-      userId: data.userId,
+    const formattedData = {
       firstName: data.firstName,
       lastName: data.lastName,
       phoneNumber: data.phoneNumber,
-      email: data.email,
-      profilePhoto: localProfilePhoto,
-    });
+    };
+
+    // eslint-disable-next-line no-console
+    try {
+      await UserAPIClient.update(userId, formattedData);
+      const updatedUser = await UserAPIClient.get(userId);
+      reset({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNumber: updatedUser.phoneNumber || "",
+      });
+      toast({
+        title: "Success",
+        description: "User profile updated",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: "Fail",
+        description: "Failed to update user profile",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      console.log({
+        userId: data.userId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        email: data.email,
+        profilePhoto: localProfilePhoto,
+      });
+    }
 
     try {
-      const userId = Number(authenticatedUser?.id?.toString());
       setIsUploading(true);
 
       if (profilePhotoFile) {
