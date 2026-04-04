@@ -62,6 +62,7 @@ const PetProfilePage = (): React.ReactElement => {
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const [petData, setPetData] = useState<Pet | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -103,6 +104,10 @@ const PetProfilePage = (): React.ReactElement => {
       try {
         const data = await PetAPIClient.getPet(petId);
         setPetData(data);
+        if (data.photo) {
+          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+          setProfilePhoto(photo);
+        }
       } catch (error) {
         history.push("/not-found");
       } finally {
@@ -128,6 +133,7 @@ const PetProfilePage = (): React.ReactElement => {
   // Map numeric colorLevel to ColorLevel enum for sidebar props
   const sidebarProps = {
     ...petData,
+    photo: profilePhoto,
     colorLevel: colorLevelMap[petData.colorLevel],
   };
 

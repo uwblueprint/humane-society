@@ -102,7 +102,7 @@ const deletePet = async (petId: number | string): Promise<void> => {
   }
 };
 
-const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
+const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {  
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -115,4 +115,65 @@ const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   return data;
 };
 
-export default { getPetTasks, getPet, getPets, getPetList, deletePet, update };
+const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: string): Promise<string> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  
+  try {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    if (oldStoragePath) {
+      formData.append("oldStoragePath", oldStoragePath);
+    }
+    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/upload`, 
+      formData,
+      {
+      headers: { Authorization: bearerToken }, 
+    });
+
+    if (typeof res.data.storagePath !== "string") throw new Error(`Failed to get profile photo url`);
+
+    return res.data.storagePath;
+  } catch (error) {
+    throw new Error(`Failed to set new profile photo: ${error}`);
+  }
+}
+
+const setDefaultProfilePhoto = async (petId: number) => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/default`, {
+      headers: { Authorization: bearerToken },
+    });
+
+    if (res.status !== 200) throw new Error(`Failed to set default profile photo`);
+  } catch (error) {
+    throw new Error(`Failed to set default profile photo: ${error}`);
+  }
+}
+
+const getProfilePhotoUrl = async (petId: number): Promise<string> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const res = await baseAPIClient.get(`/pets/${petId}/profile-photo`, {
+      headers: { Authorization: bearerToken },
+    });
+
+    if (typeof res.data.url !== "string") throw new Error(`Failed to get profile photo url`);
+
+    return res.data.url;
+  } catch (error) {
+    throw new Error(`Failed to get profile photo url: ${error}`);
+  }
+}
+
+export default { getPetTasks, getPet, getPets, getPetList, getProfilePhotoUrl, setDefaultProfilePhoto, uploadProfilePhoto, update, deletePet };
