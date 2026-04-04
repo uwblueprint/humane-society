@@ -11,6 +11,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { ChevronRightIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -25,10 +26,11 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { SexEnum } from "../../../types/PetTypes";
+import { PetRequestDTO, PetStatus, SexEnum } from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
+  MONTH_NAME_TO_NUMBER,
   MONTH_NUMBER_TO_NAME,
 } from "../../../utils/CommonUtils";
 import QuitEditingModal from "./QuitEditingModal";
@@ -51,6 +53,10 @@ interface FormData {
   profilePhoto: string;
 }
 
+const colorLevelToNumber: Record<string, number> = Object.fromEntries(
+  Object.entries(colorLevelMap).map(([num, name]) => [name, Number(num)]),
+);
+
 const getSpayedNeuteredValue = (sex?: SexEnum, spayedNeutered?: boolean) => {
   if (spayedNeutered === undefined || spayedNeutered === null) {
     return "";
@@ -59,7 +65,7 @@ const getSpayedNeuteredValue = (sex?: SexEnum, spayedNeutered?: boolean) => {
     return spayedNeutered ? "Neutered" : "Unneutered";
   }
   // Must be female
-  return spayedNeutered ? "Spayed" : "Not spayed";
+  return spayedNeutered ? "Spayed" : "Unspayed";
 };
 
 // By default we give 31 days if no month is
@@ -111,6 +117,7 @@ const EditPetProfilePage = (): React.ReactElement => {
     string | undefined
   >(undefined);
   const [isUploading, setIsUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const {
     isOpen: isDeleteConfirmModalOpen,
@@ -190,9 +197,9 @@ const EditPetProfilePage = (): React.ReactElement => {
           animalTag: petData.animalTag,
           breed: petData.breed || "",
           weight: petData.weight?.toString() || "",
-          birthdayYear,
-          birthdayMonth,
-          birthdayDate,
+          birthdayYear: birthdayYear || "",
+          birthdayMonth: birthdayMonth || "",
+          birthdayDate: birthdayDate || "",
           sex: petData.sex === SexEnum.MALE ? "Male" : "Female",
           neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
           safetyInfo: petData.careInfo?.safetyInfo || "",
@@ -237,33 +244,157 @@ const EditPetProfilePage = (): React.ReactElement => {
       "medicalInfo",
     ]);
 
-    if (isValid) {
-      // TODO: Remove this and submit actual data to backend endpoint
-      // eslint-disable-next-line no-console
-      console.log({
+    if (!isValid) return;
+
+    // Build birthday string (YYYY-MM-DD) or null
+    let birthday: string | null = null;
+    if (
+      data.birthdayMonth &&
+      data.birthdayMonth !== "--" &&
+      data.birthdayDate &&
+      data.birthdayDate !== "--" &&
+      data.birthdayYear &&
+      data.birthdayYear !== "--"
+    ) {
+      const month = MONTH_NAME_TO_NUMBER[data.birthdayMonth]
+        .toString()
+        .padStart(2, "0");
+      const day = data.birthdayDate.padStart(2, "0");
+      birthday = `${data.birthdayYear}-${month}-${day}`;
+    }
+
+    // Convert neutered string to boolean or null
+    let neutered: boolean | null = null;
+    if (data.neutered === "Neutered" || data.neutered === "Spayed") {
+      neutered = true;
+    } else if (data.neutered === "Unneutered" || data.neutered === "Unspayed") {
+      neutered = false;
+    }
+
+    // Convert sex string to SexEnum (sex is NOT NULL in DB, send undefined to keep existing value)
+    let sex: SexEnum | undefined;
+    if (data.sex === "Male") sex = SexEnum.MALE;
+    else if (data.sex === "Female") sex = SexEnum.FEMALE;
+
+    // Build careInfo with null for blank fields
+    const careInfo = {
+      safetyInfo: data.safetyInfo || null,
+      medicalInfo: data.medicalInfo || null,
+      managementInfo: data.managementInfo || null,
+    };
+
+    setSubmitting(true);
+    try {
+      // Fetch current pet to preserve its status
+      const currentPet = await PetAPIClient.getPet(petId);
+
+      const formattedData: PetRequestDTO = {
         name: data.name,
-        colourLevel: data.colourLevel,
-        animalTag: data.animalTag,
-        breed: data.breed,
-        weight: data.weight,
-        birthdayMonth: data.birthdayMonth,
-        birthdayDate: data.birthdayDate,
-        birthdayYear: data.birthdayYear,
-        sex: data.sex,
-        neutered: data.neutered,
-        safetyInfo: data.safetyInfo,
-        managementInfo: data.managementInfo,
-        medicalInfo: data.medicalInfo,
-        profilePhoto: localProfilePhoto,
+        colorLevel: colorLevelToNumber[data.colourLevel],
+        animalTag: data.animalTag as AnimalTag,
+        status: currentPet.status as PetStatus,
+        breed: data.breed || null,
+        weight: data.weight ? parseFloat(data.weight) : null,
+        birthday,
+        sex,
+        neutered,
+        photo:
+          localProfilePhoto && !localProfilePhoto.startsWith("data:")
+            ? localProfilePhoto
+            : currentPet.photo || null,
+        careInfo,
+      };
+      await PetAPIClient.update(petId, formattedData);
+
+      // Refetch updated pet and reset form
+      const updatedPet = await PetAPIClient.getPet(petId);
+      setLocalProfilePhoto(updatedPet.photo);
+
+      let updatedBirthdayYear: string | undefined;
+      let updatedBirthdayMonth: string | undefined;
+      let updatedBirthdayDate: string | undefined;
+      if (updatedPet.birthday) {
+        const [year, month, day] = updatedPet.birthday.split("-");
+        updatedBirthdayYear = year;
+        updatedBirthdayMonth = MONTH_NUMBER_TO_NAME[Number(month)];
+        updatedBirthdayDate = day;
+        setBirthdayDateOptions(
+          getBirthdayDateOptions(updatedBirthdayMonth, updatedBirthdayYear),
+        );
+      }
+
+      reset({
+        name: updatedPet.name,
+        colourLevel: colorLevelMap[updatedPet.colorLevel],
+        animalTag: updatedPet.animalTag,
+        breed: updatedPet.breed || "",
+        weight: updatedPet.weight?.toString() || "",
+        birthdayYear: updatedBirthdayYear || "",
+        birthdayMonth: updatedBirthdayMonth || "",
+        birthdayDate: updatedBirthdayDate || "",
+        sex: (() => {
+          if (updatedPet.sex === SexEnum.MALE) return "Male";
+          if (updatedPet.sex === SexEnum.FEMALE) return "Female";
+          return "";
+        })(),
+        neutered: getSpayedNeuteredValue(updatedPet.sex, updatedPet.neutered),
+        safetyInfo: updatedPet.careInfo?.safetyInfo || "",
+        managementInfo: updatedPet.careInfo?.managementInfo || "",
+        medicalInfo: updatedPet.careInfo?.medicalInfo || "",
+        profilePhoto: updatedPet.photo || "",
       });
 
       toast({
         title: "Success",
-        description: "Form data logged to console",
+        description: "Pet profile updated successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 404) {
+          history.push("/not-found");
+          return;
+        }
+        if (status === 403) {
+          toast({
+            title: "Unauthorized",
+            description: "You do not have permission to update this pet",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else if (status === 400) {
+          toast({
+            title: "Validation Error",
+            description:
+              error.response?.data || "Please check your input and try again",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to update pet profile",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update pet profile",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -803,8 +934,13 @@ const EditPetProfilePage = (): React.ReactElement => {
                   >
                     Previous
                   </Button>
-                  <Button variant="green" size="medium" type="submit">
-                    Save
+                  <Button
+                    variant="green"
+                    size="medium"
+                    type="submit"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Saving..." : "Save"}
                   </Button>
                 </>
               )}
