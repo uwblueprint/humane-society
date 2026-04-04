@@ -13,6 +13,9 @@ const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
   const userId = Number(params.id);
   const [userData, setUserData] = useState<User | null>(null);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(
+    undefined,
+  );
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
@@ -35,6 +38,15 @@ const ProfilePage = (): React.ReactElement => {
           }
 
           setUserData(data);
+
+          if (data.profilePhoto) {
+            try {
+              const url = await UserAPIClient.getProfilePhotoUrl(data.id);
+              setProfilePhotoUrl(url);
+            } catch (error) {
+              setProfilePhotoUrl(undefined);
+            }
+          }
         } catch (error) {
           // console.error(`Failed to fetch user ${userId}:`, error);
           history.push("/not-found");
@@ -54,7 +66,7 @@ const ProfilePage = (): React.ReactElement => {
             id={userData.id}
             firstName={userData.firstName}
             lastName={userData.lastName}
-            profilePhoto={userData.profilePhoto}
+            profilePhoto={profilePhotoUrl}
             email={userData.email}
             phoneNumber={userData.phoneNumber}
             role={userData.role}
