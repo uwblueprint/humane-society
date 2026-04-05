@@ -60,6 +60,7 @@ class TaskService implements ITaskService {
         task_id: taskId,
         ...(days && { days }),
         cadence,
+        exclusions: [],
         ...(endDate && { end_date: endDate }),
       });
 
