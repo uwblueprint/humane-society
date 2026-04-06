@@ -77,7 +77,7 @@ const createTask = async (payload: {
   endTime: string;
   notes: string;
 }): Promise<void> => {
-  const bearerToken =`Bearer ${getLocalStorageObjProperty(
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
@@ -87,13 +87,13 @@ const createTask = async (payload: {
       headers: { Authorization: bearerToken },
     });
   } catch (error) {
-    throw new Error(`Failed to create task: ${error}`)
+    throw new Error(`Failed to create task: ${error}`);
   }
 };
 
 const createRecurringTask = async (payload: {
   task: {
-    userId: number | null; 
+    userId: number | null;
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;

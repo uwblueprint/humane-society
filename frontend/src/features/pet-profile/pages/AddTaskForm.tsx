@@ -10,10 +10,7 @@ import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
-import {
-  MONTH_NAME_TO_NUMBER,
-  MONTH_NUMBER_TO_NAME,
-} from "../../../utils/CommonUtils";
+import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
 
 interface AddTaskFormProps {
   petId: number;
@@ -198,8 +195,7 @@ const AddTaskForm = ({
   const handlePreviousPage = async () => {
     setCurrentStep(currentStep - 1);
   };
-
-  console.log("selectedUser:", selectedUser, "mismatch:", hasColorLevelMismatch);
+  
   return (
     <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
       {/* Back Button */}

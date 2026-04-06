@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Flex, Text, useToast } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import UserSelection from "../UserSelection";
 import UserAPIClient from "../../../../APIClients/UserAPIClient";
-import { User } from "../../../../../src/types/UserTypes";
-import { AlertCircleIcon } from "../../../../assets/icons";
+import { User } from "../../../../types/UserTypes";
 
 interface AddTaskForm3Props {
   petColorLevel: number;
@@ -13,8 +12,8 @@ interface AddTaskForm3Props {
 
 const AddTaskForm3 = ({
   petColorLevel,
-	selectedUser,
-	onSelectUser,
+  selectedUser,
+  onSelectUser,
 }: AddTaskForm3Props): React.ReactElement => {
   const toast = useToast();
   const [users, setUsers] = useState<User[]>([]);
@@ -63,41 +62,41 @@ const AddTaskForm3 = ({
   const hasColorLevelMismatch =
     selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
-	const handleSearch = (value: string) => {
-		onSelectUser(null);
-		setSearch(value);
-		setPage(1);
-	}
+  const handleSearch = (value: string) => {
+    onSelectUser(null);
+    setSearch(value);
+    setPage(1);
+  };
 
-	const handleRowClick = (user: User) => {
-		onSelectUser(user);
-	}
+  const handleRowClick = (user: User) => {
+    onSelectUser(user);
+  };
 
-	// CHECKIN: prob don't need this??
-	const handleClearSelection = () => {
-		onSelectUser(null);
-		setSearch("");
-	}
+  // CHECKIN: prob don't need this??
+  const handleClearSelection = () => {
+    onSelectUser(null);
+    setSearch("");
+  };
 
   return (
-		<Flex flexDirection="column" gap="1.5rem">
-			<UserSelection
-				search={search}
-				selectedUser={selectedUser}
-				pagedUsers={pagedUsers}
-				filteredUsers={filteredUsers}
-				page={page}
-				errorMessage={errorMessage}
-				usersPerPage={usersPerPage}
-				loading={loading}
-				onSearch={handleSearch}
-				onRowClick={handleRowClick}
-				onPageChange={setPage}
-				onClearSelection={handleClearSelection}
-				hasColorLevelMismatch={hasColorLevelMismatch}
-			/>
-		</Flex>
-	);
+    <Flex flexDirection="column" gap="1.5rem">
+      <UserSelection
+        search={search}
+        selectedUser={selectedUser}
+        pagedUsers={pagedUsers}
+        filteredUsers={filteredUsers}
+        page={page}
+        errorMessage={errorMessage}
+        usersPerPage={usersPerPage}
+        loading={loading}
+        onSearch={handleSearch}
+        onRowClick={handleRowClick}
+        onPageChange={setPage}
+        onClearSelection={handleClearSelection}
+        hasColorLevelMismatch={hasColorLevelMismatch}
+      />
+    </Flex>
+  );
 };
 
 export default AddTaskForm3;

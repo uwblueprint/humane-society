@@ -151,7 +151,6 @@ const UserSelection = ({
                           <Text m={0} textStyle="body">
                             {`${user.firstName} ${user.lastName}`}
                           </Text>
-                          
                         </Flex>
                       </Td>
                       <Td py="0.5rem" width="50%">
@@ -173,14 +172,18 @@ const UserSelection = ({
                           {selectedUser?.id === user.id &&
                             hasColorLevelMismatch && (
                               <Flex align="center" gap="0.375rem" ml="2rem">
-                                <WarningTwoIcon color="red.600" boxSize="1rem" />
+                                <WarningTwoIcon
+                                  color="red.600"
+                                  boxSize="1rem"
+                                />
                                 <Text
                                   m={0}
                                   textStyle="body"
                                   color="red.600"
                                   whiteSpace="nowrap"
                                 >
-                                  User's colour level is lower than the pet's.
+                                  User&apos;s colour level is lower than the
+                                  pet&apos;s.
                                 </Text>
                               </Flex>
                             )}
