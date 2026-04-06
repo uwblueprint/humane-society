@@ -77,6 +77,13 @@ const AssignTaskPage = (): React.ReactElement => {
     if (!selectedUser) return;
     try {
       await TaskAPIClient.assignUser(taskId, selectedUser.id);
+      toast({
+        title: "Success",
+        description: "Task assigned successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
       history.push(`/pet-profile/${petId}`);
     } catch (error) {
       toast({

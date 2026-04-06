@@ -102,11 +102,18 @@ const PetProfileTaskTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Text textStyle="body" m={0}>
-            {task.assignedUser
-              ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
-              : "Unassigned"}
-          </Text>
+          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+            <ProfilePhoto
+              image={task.assignedUser?.profilePhoto ?? undefined}
+              size="small"
+              type="user"
+            />
+            <Text textStyle="body" m={0} isTruncated>
+              {task.assignedUser
+                ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
+                : "Unassigned"}
+            </Text>
+          </Flex>
           <StatusBadge task={task} petId={petId} />
         </Grid>
       ))}
