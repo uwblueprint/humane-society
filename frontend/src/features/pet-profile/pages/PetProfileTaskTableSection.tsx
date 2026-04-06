@@ -10,6 +10,7 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface PetProfileTaskTableSectionProps {
   petId: number;
