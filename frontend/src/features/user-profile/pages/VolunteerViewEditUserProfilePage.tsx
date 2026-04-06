@@ -395,6 +395,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
         profilePhoto={localProfilePhoto}
         onClose={() => setIsProfilePhotoModalOpen(false)}
         onConfirm={handleProfilePhotoChange}
+        type="user"
       />
     </>
   );

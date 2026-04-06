@@ -50,7 +50,7 @@ const getAllTasks = async (): Promise<PetTask[]> => {
   }
 };
 
-export const getPetTasksByDate = async (
+const getPetTasksByDate = async (
   petId: number,
   date: string,
 ): Promise<ScheduledTaskDTO[]> => {
@@ -99,10 +99,28 @@ const getPetTasks = async (petId: number): Promise<PetTask[]> => {
   }
 };
 
+const assignUser = async (taskId: number, userId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/assign-user`,
+      { userId },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to assign user: ${error}`);
+  }
+};
+
 export default {
   getTask,
   getRecurrence,
   getAllTasks,
   getUserTasks,
   getPetTasks,
+  getPetTasksByDate,
+  assignUser,
 };

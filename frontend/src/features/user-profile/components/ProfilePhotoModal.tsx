@@ -19,6 +19,7 @@ type ModalView = "menu" | "upload" | "preview";
 interface ProfilePhotoModalProps {
   isOpen: boolean;
   profilePhoto: string | undefined;
+  type: "pet" | "user"
   onClose?: () => void;
   onConfirm?: (file: File | null) => void;
 }
@@ -26,6 +27,7 @@ interface ProfilePhotoModalProps {
 export default function ProfilePhotoModal({
   isOpen,
   profilePhoto,
+  type,
   onClose,
   onConfirm,
 }: ProfilePhotoModalProps) {
@@ -90,7 +92,7 @@ export default function ProfilePhotoModal({
 
   const menuContent = (
     <Flex justify="center" align="center" backgroundColor="gray.700">
-      <ProfilePhoto size={profilePhotoSize} type="user" image={profilePhoto} />
+      <ProfilePhoto size={profilePhotoSize} type={type} image={profilePhoto} />
     </Flex>
   );
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
@@ -12,11 +13,20 @@ import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface PetProfileTaskTableSectionProps {
+  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
 }
 
-const getStatusBadge = (task: ScheduledTaskDTO) => {
+const StatusBadge = ({
+  task,
+  petId,
+}: {
+  task: ScheduledTaskDTO;
+  petId: number;
+}) => {
+  const history = useHistory();
+
   if (task.endTime)
     return (
       <Button as="button" variant="gray-shaded" size="medium" type="button">
@@ -25,7 +35,15 @@ const getStatusBadge = (task: ScheduledTaskDTO) => {
     );
   if (!task.assignedUser)
     return (
-      <Button as="button" variant="dark-blue" size="medium" type="button">
+      <Button
+        as="button"
+        variant="dark-blue"
+        size="medium"
+        type="button"
+        onClick={() => {
+          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
+        }}
+      >
         Assign
       </Button>
     );
@@ -48,6 +66,7 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
+  petId,
   tasks,
   gridTemplateColumns,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
@@ -96,7 +115,7 @@ const PetProfileTaskTableSection = ({
                 : "Unassigned"}
             </Text>
           </Flex>
-          {getStatusBadge(task)}
+          <StatusBadge task={task} petId={petId} />
         </Grid>
       ))}
     </Flex>
