@@ -123,6 +123,7 @@ const AssignTaskPage = (): React.ReactElement => {
         onRowClick={handleRowClick}
         onPageChange={setPage}
         onClearSelection={handleClearSelection}
+        hasColorLevelMismatch={false}
       />
 
       {/* save button */}

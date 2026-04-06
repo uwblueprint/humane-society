@@ -93,14 +93,8 @@ const AddTaskForm3 = ({
 				onRowClick={handleRowClick}
 				onPageChange={setPage}
 				onClearSelection={handleClearSelection}
+				hasColorLevelMismatch={hasColorLevelMismatch}
 			/>
-
-			{hasColorLevelMismatch && (
-				// AlertCircleIcon
-				<Text m={0} color="red.600" textStyle="body">
-					User's colour level is lower than the pet's.
-				</Text>
-			)}
 		</Flex>
 	);
 };

@@ -1,4 +1,4 @@
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Spinner,
@@ -31,6 +31,7 @@ type UserSelectionProps = {
   onRowClick: (user: User) => void;
   onPageChange: (page: number) => void;
   onClearSelection: () => void;
+  hasColorLevelMismatch: boolean;
 };
 
 const UserSelection = ({
@@ -46,6 +47,7 @@ const UserSelection = ({
   onRowClick,
   onPageChange,
   onClearSelection,
+  hasColorLevelMismatch,
 }: UserSelectionProps): React.ReactElement => {
   if (loading) {
     return (
@@ -167,6 +169,20 @@ const UserSelection = ({
                             colourLevel={colorLevelMap[user.colorLevel]}
                             size="small"
                           />
+                          {selectedUser?.id === user.id &&
+                            hasColorLevelMismatch && (
+                              <Flex align="center" gap="0.375rem" ml="2rem">
+                                <WarningTwoIcon color="red.600" boxSize="1rem" />
+                                <Text
+                                  m={0}
+                                  textStyle="body"
+                                  color="red.600"
+                                  whiteSpace="nowrap"
+                                >
+                                  User's colour level is lower than the pet's.
+                                </Text>
+                              </Flex>
+                            )}
                         </Flex>
                       </Td>
                       <Td

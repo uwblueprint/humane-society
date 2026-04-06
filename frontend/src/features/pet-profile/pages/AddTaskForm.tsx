@@ -10,7 +10,7 @@ import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
-import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
+import { MONTH_NAME_TO_NUMBER, MONTH_NUMBER_TO_NAME } from "../../../utils/CommonUtils";
 
 interface AddTaskFormProps {
   petId: number;
@@ -59,6 +59,7 @@ const AddTaskForm = ({
 
   const selectedTemplate = watch("selectedTemplate");
   const isRepeating = watch("isRepeating");
+  const hasColorLevelMismatch = selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
   const handleNextPage1 = async () => {
     const isValid = await trigger("selectedTemplate");
@@ -92,6 +93,39 @@ const AddTaskForm = ({
     if (isValid) {
       setCurrentStep(3)
     }
+  };
+
+  const handleSave = async () => {
+    const {
+      selectedTemplate: template,
+      instructions,
+      startMonth,
+      startDay,
+      startYear,
+      startHour,
+      startMinute,
+      endHour,
+      endMinute,
+      //recurringDays, // TODO: FIX THIS NOT BEING IN THE ADDTASK DATA !
+      //recurringCadence,
+      endMonth,
+      endDay,
+      endYear,
+    } = getValues();
+
+    const scheduledStartTime = new Date(
+      Number(startYear),
+      MONTH_NAME_TO_NUMBER[startMonth] - 1,
+      Number(startDay),
+      Number(startHour),
+      Number(startMinute),
+    ).toISOString();
+
+    const startTime = `${startHour}:${startMinute}`;
+    const endTime = `${endHour}:${endMinute}`;
+    const userId = selectedUser?.id ?? null;
+
+
   };
 
   const handlePreviousPage = async () => {
@@ -196,6 +230,28 @@ const AddTaskForm = ({
               type="button"
             >
               Previous
+            </Button>
+          )}
+          {currentStep === 3 && !hasColorLevelMismatch && (
+            <Button
+              as="button"
+              variant="green"
+              size="medium"
+              onClick={handleSave}
+              type="button"
+            >
+              Save
+            </Button>
+          )}
+          {currentStep === 3 && hasColorLevelMismatch && (
+            <Button
+              as="button"
+              variant="green"
+              size="medium"
+              onClick={handleSave}
+              type="button"
+            >
+              Override
             </Button>
           )}
         </Flex>
