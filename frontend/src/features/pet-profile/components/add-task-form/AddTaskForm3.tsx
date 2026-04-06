@@ -13,10 +13,11 @@ interface AddTaskForm3Props {
 
 const AddTaskForm3 = ({
   petColorLevel,
+	selectedUser,
+	onSelectUser,
 }: AddTaskForm3Props): React.ReactElement => {
   const toast = useToast();
   const [users, setUsers] = useState<User[]>([]);
-	const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,18 +64,18 @@ const AddTaskForm3 = ({
     selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
 	const handleSearch = (value: string) => {
-		setSelectedUser(null);
+		onSelectUser(null);
 		setSearch(value);
 		setPage(1);
 	}
 
 	const handleRowClick = (user: User) => {
-		setSelectedUser(user);
+		onSelectUser(user);
 	}
 
 	// CHECKIN: prob don't need this??
 	const handleClearSelection = () => {
-		setSelectedUser(null);
+		onSelectUser(null);
 		setSearch("");
 	}
 

@@ -10,7 +10,10 @@ import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
-import { MONTH_NAME_TO_NUMBER, MONTH_NUMBER_TO_NAME } from "../../../utils/CommonUtils";
+import {
+  MONTH_NAME_TO_NUMBER,
+  MONTH_NUMBER_TO_NAME,
+} from "../../../utils/CommonUtils";
 
 interface AddTaskFormProps {
   petId: number;
@@ -27,7 +30,7 @@ const AddTaskForm = ({
   const toast = useToast();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedUser, onSelectUser] = useState<User | null>(null)
+  const [selectedUser, onSelectUser] = useState<User | null>(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -59,7 +62,8 @@ const AddTaskForm = ({
 
   const selectedTemplate = watch("selectedTemplate");
   const isRepeating = watch("isRepeating");
-  const hasColorLevelMismatch = selectedUser !== null && selectedUser.colorLevel < petColorLevel;
+  const hasColorLevelMismatch =
+    selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
   const handleNextPage1 = async () => {
     const isValid = await trigger("selectedTemplate");
@@ -91,7 +95,7 @@ const AddTaskForm = ({
 
     const isValid = await trigger(validateFields);
     if (isValid) {
-      setCurrentStep(3)
+      setCurrentStep(3);
     }
   };
 
@@ -106,12 +110,14 @@ const AddTaskForm = ({
       startMinute,
       endHour,
       endMinute,
-      //recurringDays, // TODO: FIX THIS NOT BEING IN THE ADDTASK DATA !
-      //recurringCadence,
+      recurringDays,
+      recurringCadences,
       endMonth,
       endDay,
       endYear,
     } = getValues();
+
+    if (!template) return;
 
     const scheduledStartTime = new Date(
       Number(startYear),
@@ -121,17 +127,79 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
-    const startTime = `${startHour}:${startMinute}`;
-    const endTime = `${endHour}:${endMinute}`;
+    const startTime = scheduledStartTime;
+
+    const endTime = new Date(
+      Number(startYear),
+      MONTH_NAME_TO_NUMBER[startMonth] - 1,
+      Number(startDay),
+      Number(endHour),
+      Number(endMinute),
+    ).toISOString();
     const userId = selectedUser?.id ?? null;
 
+    try {
+      if (!isRepeating) {
+        await TaskAPIClient.createTask({
+          userId,
+          petId,
+          taskTemplateId: template.id,
+          scheduledStartTime,
+          startTime,
+          endTime,
+          notes: instructions,
+        });
+      } else {
+        let endDate: string | null = null;
+        if (endMonth && endDay && endYear) {
+          endDate = new Date(
+            Number(endYear),
+            MONTH_NAME_TO_NUMBER[endMonth] - 1,
+            Number(endDay),
+          ).toISOString();
+        }
+        await TaskAPIClient.createRecurringTask({
+          task: {
+            userId,
+            petId,
+            taskTemplateId: template.id,
+            scheduledStartTime,
+            startTime,
+            endTime,
+            notes: instructions,
+          },
+          recurrence: {
+            days: recurringDays,
+            cadence: recurringCadences,
+            endDate,
+            exclusions: [],
+          },
+        });
+      }
 
+      toast({
+        title: "Task added!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      history.push(`/pet-profile/${petId}`);
+    } catch (error) {
+      toast({
+        title: "Failed to save task",
+        description: `${error}`,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    }
   };
 
   const handlePreviousPage = async () => {
     setCurrentStep(currentStep - 1);
   };
 
+  console.log("selectedUser:", selectedUser, "mismatch:", hasColorLevelMismatch);
   return (
     <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
       {/* Back Button */}
@@ -232,7 +300,7 @@ const AddTaskForm = ({
               Previous
             </Button>
           )}
-          {currentStep === 3 && !hasColorLevelMismatch && (
+          {currentStep === 3 && (
             <Button
               as="button"
               variant="green"
@@ -240,18 +308,7 @@ const AddTaskForm = ({
               onClick={handleSave}
               type="button"
             >
-              Save
-            </Button>
-          )}
-          {currentStep === 3 && hasColorLevelMismatch && (
-            <Button
-              as="button"
-              variant="green"
-              size="medium"
-              onClick={handleSave}
-              type="button"
-            >
-              Override
+              {hasColorLevelMismatch ? "Override" : "Save"}
             </Button>
           )}
         </Flex>

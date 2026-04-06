@@ -72,6 +72,7 @@ const createTask = async (payload: {
   userId: number | null;
   petId: number;
   taskTemplateId: number;
+  scheduledStartTime: string;
   startTime: string;
   endTime: string;
   notes: string;
@@ -95,10 +96,12 @@ const createRecurringTask = async (payload: {
     userId: number | null; 
     petId: number;
     taskTemplateId: number;
+    scheduledStartTime: string;
     startTime: string;
     endTime: string;
+    notes: string;
   };
-  reccurance: {
+  recurrence: {
     days: string[];
     cadence: string;
     endDate: string | null;
@@ -110,7 +113,7 @@ const createRecurringTask = async (payload: {
     "accessToken",
   )}`;
   try {
-    await baseAPIClient.post("/reccurances", payload, {
+    await baseAPIClient.post("/recurrences", payload, {
       headers: { Authorization: bearerToken },
     });
   } catch (error) {

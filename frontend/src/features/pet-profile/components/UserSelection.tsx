@@ -151,6 +151,7 @@ const UserSelection = ({
                           <Text m={0} textStyle="body">
                             {`${user.firstName} ${user.lastName}`}
                           </Text>
+                          
                         </Flex>
                       </Td>
                       <Td py="0.5rem" width="50%">
