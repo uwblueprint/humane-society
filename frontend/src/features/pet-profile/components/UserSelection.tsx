@@ -1,4 +1,4 @@
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Spinner,
@@ -31,6 +31,7 @@ type UserSelectionProps = {
   onRowClick: (user: User) => void;
   onPageChange: (page: number) => void;
   onClearSelection: () => void;
+  hasColorLevelMismatch: boolean;
 };
 
 const UserSelection = ({
@@ -46,6 +47,7 @@ const UserSelection = ({
   onRowClick,
   onPageChange,
   onClearSelection,
+  hasColorLevelMismatch,
 }: UserSelectionProps): React.ReactElement => {
   if (loading) {
     return (
@@ -75,28 +77,17 @@ const UserSelection = ({
           selectedIcon={
             selectedUser && (
               <Flex
-                width="1.5rem"
-                height="1.5rem"
+                width="2.25rem"
+                height="2.25rem"
                 flexShrink={0}
                 borderRadius="full"
                 overflow="hidden"
-                sx={{
-                  "> *": {
-                    width: "1.5rem !important",
-                    height: "1.5rem !important",
-                  },
-                  img: {
-                    width: "1.25rem !important",
-                    height: "1.25rem !important",
-                  },
-                  div: { borderRadius: "50% !important" },
-                }}
               >
                 <ProfilePhoto
                   image={selectedUser.profilePhoto}
                   color={colorLevelMap[selectedUser.colorLevel]}
                   showColorBorder
-                  size="small"
+                  size="x-small"
                   type="user"
                 />
               </Flex>
@@ -178,6 +169,24 @@ const UserSelection = ({
                             colourLevel={colorLevelMap[user.colorLevel]}
                             size="small"
                           />
+                          {selectedUser?.id === user.id &&
+                            hasColorLevelMismatch && (
+                              <Flex align="center" gap="0.375rem" ml="2rem">
+                                <WarningTwoIcon
+                                  color="red.600"
+                                  boxSize="1rem"
+                                />
+                                <Text
+                                  m={0}
+                                  textStyle="body"
+                                  color="red.600"
+                                  whiteSpace="nowrap"
+                                >
+                                  User&apos;s colour level is lower than the
+                                  pet&apos;s.
+                                </Text>
+                              </Flex>
+                            )}
                         </Flex>
                       </Td>
                       <Td

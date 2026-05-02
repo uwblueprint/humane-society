@@ -115,12 +115,67 @@ const assignUser = async (taskId: number, userId: number): Promise<void> => {
   }
 };
 
+const createTask = async (payload: {
+  userId: number | null;
+  petId: number;
+  taskTemplateId: number;
+  scheduledStartTime: string;
+  startTime?: string;
+  endTime?: string;
+  notes: string;
+}): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    await baseAPIClient.post("/tasks", payload, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to create task: ${error}`);
+  }
+};
+
+const createRecurringTask = async (payload: {
+  task: {
+    userId: number | null;
+    petId: number;
+    taskTemplateId: number;
+    scheduledStartTime: string;
+    startTime?: string;
+    endTime?: string;
+    notes: string;
+  };
+  recurrence: {
+    days: string[];
+    cadence: string;
+    endDate: string | null;
+    exclusions: string[];
+  };
+}): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.post("/recurrences", payload, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to create recurring task: ${error}`);
+  }
+};
+
 export default {
   getTask,
   getRecurrence,
   getAllTasks,
+  getPetTasksByDate,
   getUserTasks,
   getPetTasks,
-  getPetTasksByDate,
   assignUser,
+  createTask,
+  createRecurringTask,
 };

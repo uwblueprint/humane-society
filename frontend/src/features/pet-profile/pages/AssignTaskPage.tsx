@@ -130,11 +130,14 @@ const AssignTaskPage = (): React.ReactElement => {
         onRowClick={handleRowClick}
         onPageChange={setPage}
         onClearSelection={handleClearSelection}
+        hasColorLevelMismatch={false}
       />
 
       {/* save button */}
       <Flex justify="flex-end">
         <Button
+          as="button"
+          type="button"
           variant="green"
           onClick={handleSaveClick}
           disabled={!selectedUser}
