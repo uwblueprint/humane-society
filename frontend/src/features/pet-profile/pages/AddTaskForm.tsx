@@ -105,8 +105,6 @@ const AddTaskForm = ({
       startYear,
       startHour,
       startMinute,
-      endHour,
-      endMinute,
       recurringDays,
       recurringCadences,
       endMonth,
@@ -124,15 +122,6 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
-    const startTime = scheduledStartTime;
-
-    const endTime = new Date(
-      Number(startYear),
-      MONTH_NAME_TO_NUMBER[startMonth] - 1,
-      Number(startDay),
-      Number(endHour),
-      Number(endMinute),
-    ).toISOString();
     const userId = selectedUser?.id ?? null;
 
     try {
@@ -142,8 +131,6 @@ const AddTaskForm = ({
           petId,
           taskTemplateId: template.id,
           scheduledStartTime,
-          startTime,
-          endTime,
           notes: instructions,
         });
       } else {
@@ -161,8 +148,6 @@ const AddTaskForm = ({
             petId,
             taskTemplateId: template.id,
             scheduledStartTime,
-            startTime,
-            endTime,
             notes: instructions,
           },
           recurrence: {

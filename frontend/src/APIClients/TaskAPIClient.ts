@@ -120,8 +120,8 @@ const createTask = async (payload: {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime: string;
-  startTime: string;
-  endTime: string;
+  startTime?: string;
+  endTime?: string;
   notes: string;
 }): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -144,8 +144,8 @@ const createRecurringTask = async (payload: {
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
-    startTime: string;
-    endTime: string;
+    startTime?: string;
+    endTime?: string;
     notes: string;
   };
   recurrence: {
