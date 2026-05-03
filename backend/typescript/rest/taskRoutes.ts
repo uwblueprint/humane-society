@@ -24,6 +24,7 @@ import { sendResponseByMimeType } from "../utilities/responseUtil";
 import { Role } from "../types";
 import logInteraction from "../middlewares/logInteraction";
 import {
+  buildStartDates,
   isDateInRecurrence,
   resetDateToUTCMidnight,
 } from "../utilities/dateUtils";
@@ -184,17 +185,40 @@ taskRouter.post(
       parsedScheduledStartTime = new Date(scheduledStartTime);
     }
 
-    const task = await taskService.getTask(taskId);
-
     try {
+      const task = await taskService.getTask(taskId);
+      const recurrence = await taskService.getRecurrence(taskId);
+
+      if (!task.scheduledStartTime) {
+        throw new NotFoundError("Given task has no start date");
+      }
+
+      const actualStart = resetDateToUTCMidnight(task.scheduledStartTime);
+      const startDates =
+        recurrence.days && recurrence.days.length > 0
+          ? buildStartDates(actualStart, recurrence.days)
+          : [actualStart];
+      const matchesPattern = startDates.some((startDate) =>
+        isDateInRecurrence(startDate, date, recurrence.cadence),
+      );
+      if (!matchesPattern) {
+        throw new BadRequestError(
+          "Given date doesn't follow the recurrence rule",
+        );
+      }
+
+      const newScheduledStartTime =
+        parsedScheduledStartTime !== undefined
+          ? parsedScheduledStartTime
+          : date;
+
       if (single) {
         await taskService.excludeDate(taskId, date);
         const singleTask = await taskService.createTask({
           userId: userId ?? task.userId,
           petId: task.petId,
           taskTemplateId: task.taskTemplateId,
-          scheduledStartTime:
-            scheduledStartTime !== undefined ? parsedScheduledStartTime : date,
+          scheduledStartTime: newScheduledStartTime,
           startTime: task.startTime,
           endTime: task.endTime,
           notes: notes ?? task.notes,
@@ -203,33 +227,18 @@ taskRouter.post(
           singleTask,
         });
       } else {
-        const recurrence = await taskService.getRecurrence(taskId);
-        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+        const newEndDate = new Date(
+          resetDateToUTCMidnight(date).getTime() - 24 * 60 * 60 * 1000,
+        );
 
-        if (!task.scheduledStartTime) {
-          throw new NotFoundError("Given task has no start date");
-        }
-        if (
-          !isDateInRecurrence(
-            task.scheduledStartTime,
-            newEndDate,
-            recurrence.cadence,
-          )
-        ) {
-          throw new BadRequestError(
-            "Given date doesn't follow the recurrence rule",
-          );
-        }
-
-        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+        await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
         const newTask = await taskService.createTask({
           userId: userId ?? task.userId,
           petId: task.petId,
           taskTemplateId: task.taskTemplateId,
-          scheduledStartTime:
-            scheduledStartTime !== undefined ? parsedScheduledStartTime : date,
+          scheduledStartTime: newScheduledStartTime,
           startTime: task.startTime,
           endTime: task.endTime,
           notes: notes ?? task.notes,
@@ -246,6 +255,14 @@ taskRouter.post(
         });
       }
     } catch (e: unknown) {
+      if (e instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(e));
+        return;
+      }
+      if (e instanceof BadRequestError) {
+        res.status(400).send(getErrorMessage(e));
+        return;
+      }
       res.status(500).send(getErrorMessage(e));
     }
   },
