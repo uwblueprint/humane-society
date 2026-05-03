@@ -1,5 +1,5 @@
-import { useToast } from "@chakra-ui/react";
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import Button from "../../../components/common/Button";
 import { TableWrapper } from "../../../components/common/table";
@@ -31,7 +31,7 @@ const PetListPage = (): React.ReactElement => {
   const isStaff = currentUserRole === STAFF;
   const petListFilterType = isAdmin ? "petListAdmin" : "petListVolunteer";
 
-  const toast = useToast();
+  const history = useHistory();
 
   const handleClearFilters = () => {
     setFilters({});
@@ -47,13 +47,7 @@ const PetListPage = (): React.ReactElement => {
   };
 
   const handleAddPet = () => {
-    toast({
-      title: "Add Pet",
-      description: "Add pet functionality not implemented yet",
-      status: "info",
-      duration: 3000,
-      isClosable: true,
-    });
+    history.push("/add-pet-form");
   };
 
   const getPets = async () => {

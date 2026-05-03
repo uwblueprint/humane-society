@@ -5,6 +5,44 @@ import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
 
+/** Backend often responds with plain text for validation errors, not `{ error: string }`. */
+const getCreatePetErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error.message : "Something went wrong.";
+  }
+
+  const { response } = error;
+  if (!response) {
+    return "Network error. Check your connection and try again.";
+  }
+
+  const { status, data } = response;
+
+  if (status === 413) {
+    return "Upload too large. Remove or shrink the profile photo, or try again without a photo.";
+  }
+
+  if (typeof data === "string" && data.trim()) {
+    return data.trim();
+  }
+
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const body = data as Record<string, unknown>;
+    if (typeof body.error === "string") return body.error;
+    if (typeof body.message === "string") return body.message;
+  }
+
+  if (status >= 500) {
+    return "Server error while saving the pet. Please try again later.";
+  }
+
+  if (status === 400) {
+    return "Could not save the pet. Check name, colour level, animal tag, and other fields, then try again.";
+  }
+
+  return error.message;
+};
+
 const getPetTasks = async (petId: number): Promise<Task[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -102,7 +140,22 @@ const deletePet = async (petId: number | string): Promise<void> => {
   }
 };
 
-const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {  
+const createPet = async (petData: PetRequestDTO): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.post("/pets", petData, {
+      headers: { Authorization: bearerToken },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(getCreatePetErrorMessage(error));
+  }
+};
+
+const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -120,7 +173,7 @@ const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: st
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
-  
+
   try {
     const formData = new FormData();
 
@@ -128,10 +181,10 @@ const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: st
     if (oldStoragePath) {
       formData.append("oldStoragePath", oldStoragePath);
     }
-    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/upload`, 
+    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/upload`,
       formData,
       {
-      headers: { Authorization: bearerToken }, 
+      headers: { Authorization: bearerToken },
     });
 
     if (typeof res.data.storagePath !== "string") throw new Error(`Failed to get profile photo url`);
@@ -176,4 +229,4 @@ const getProfilePhotoUrl = async (petId: number): Promise<string> => {
   }
 }
 
-export default { getPetTasks, getPet, getPets, getPetList, getProfilePhotoUrl, setDefaultProfilePhoto, uploadProfilePhoto, update, deletePet };
+export default { getPetTasks, getPet, getPets, getPetList, getProfilePhotoUrl, setDefaultProfilePhoto, uploadProfilePhoto, createPet, update, deletePet };
