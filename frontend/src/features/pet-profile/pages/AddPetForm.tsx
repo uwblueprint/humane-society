@@ -153,10 +153,15 @@ const transformFormData = (
         }
       : undefined;
 
+  const colorLevel = COLOR_LEVEL_MAP[data.colourLevel];
+  if (colorLevel === undefined) {
+    throw new Error("Please select a colour level.");
+  }
+
   return {
     name: data.name,
     animalTag: data.animalTag as AnimalTag,
-    colorLevel: COLOR_LEVEL_MAP[data.colourLevel],
+    colorLevel,
     status: PetStatus.NEEDS_CARE,
     breed: data.breed || undefined,
     birthday,

@@ -5,6 +5,44 @@ import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
 
+/** Backend often responds with plain text for validation errors, not `{ error: string }`. */
+const getCreatePetErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error.message : "Something went wrong.";
+  }
+
+  const { response } = error;
+  if (!response) {
+    return "Network error. Check your connection and try again.";
+  }
+
+  const { status, data } = response;
+
+  if (status === 413) {
+    return "Upload too large. Remove or shrink the profile photo, or try again without a photo.";
+  }
+
+  if (typeof data === "string" && data.trim()) {
+    return data.trim();
+  }
+
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const body = data as Record<string, unknown>;
+    if (typeof body.error === "string") return body.error;
+    if (typeof body.message === "string") return body.message;
+  }
+
+  if (status >= 500) {
+    return "Server error while saving the pet. Please try again later.";
+  }
+
+  if (status === 400) {
+    return "Could not save the pet. Check name, colour level, animal tag, and other fields, then try again.";
+  }
+
+  return error.message;
+};
+
 const getPetTasks = async (petId: number): Promise<Task[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -113,10 +151,7 @@ const createPet = async (petData: PetRequestDTO): Promise<Pet> => {
     });
     return data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.data?.error) {
-      throw new Error(error.response.data.error);
-    }
-    throw new Error(`Failed to create pet. ${error}`);
+    throw new Error(getCreatePetErrorMessage(error));
   }
 };
 

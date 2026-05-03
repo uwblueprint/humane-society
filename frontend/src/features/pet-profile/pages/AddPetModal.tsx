@@ -3,8 +3,8 @@ import PopupModal from "../../../components/common/PopupModal";
 
 interface AddPetModalProps {
   isOpen: boolean; // Whether the modal should be visible
-  handlePrimaryButtonClick: () => void; // Functionalituy for the first button
-  handleSecondaryButtonClick: () => void; // Functionality for secondary button
+  handlePrimaryButtonClick: () => void; // Handler for the confirm button
+  handleSecondaryButtonClick: () => void; // Handler for cancel
   isLoading?: boolean; // Whether the primary button should show a loading state
 }
 
@@ -17,8 +17,8 @@ const AddPetModal: FC<AddPetModalProps> = ({
   return (
     <PopupModal
       open={isOpen}
-      title="Add Pet?"
-      message="Are you sure you want to add this pet? A verification link will be sent to them."
+      title="Add pet?"
+      message="Create this pet profile now? You can edit details later from the pet profile page."
       primaryButtonText="Add"
       primaryButtonColor="red"
       onPrimaryClick={handlePrimaryButtonClick}
