@@ -68,7 +68,6 @@ const getPetTasksByDate = async (
     throw new Error(`Failed to fetch tasks: ${error}`);
   }
 };
-
 const getUserTasks = async (userId: number): Promise<PetTask[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -81,6 +80,25 @@ const getUserTasks = async (userId: number): Promise<PetTask[]> => {
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch user tasks: ${error}`);
+  }
+};
+
+export const getTasksByDate = async (
+  date: string,
+  userId?: number,
+): Promise<ScheduledTaskDTO[]> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.get("/tasks/date", {
+      headers: { Authorization: bearerToken },
+      params: { userId, date },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch tasks: ${error}`);
   }
 };
 
@@ -173,7 +191,6 @@ export default {
   getRecurrence,
   getAllTasks,
   getPetTasksByDate,
-  getUserTasks,
   getPetTasks,
   assignUser,
   createTask,
