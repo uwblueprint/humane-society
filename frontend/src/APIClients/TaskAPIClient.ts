@@ -192,6 +192,7 @@ export default {
   getTask,
   getRecurrence,
   getAllTasks,
+  getUserTasks,
   getPetTasksByDate,
   getPetTasks,
   assignUser,
