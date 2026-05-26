@@ -24,7 +24,7 @@ const getStatusBadge = (task: ScheduledTaskDTO) => {
     );
   return (
     <Button as="button" variant="gray" size="medium" type="button">
-        Assigned
+      Assigned
     </Button>
   );
 };
