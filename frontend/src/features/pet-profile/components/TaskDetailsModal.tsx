@@ -15,6 +15,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -192,6 +193,7 @@ const TaskDetailsModal = ({
   onClose,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
+  const history = useHistory();
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -476,12 +478,31 @@ const TaskDetailsModal = ({
                 authenticatedUser?.role === UserRoles.BEHAVIOURIST) && (
                 <Flex direction="column" gap="1rem">
                   {status === null && (
-                    <Button variant="dark-blue" size="medium" width="100%">
+                    <Button
+                      variant="dark-blue"
+                      size="medium"
+                      width="100%"
+                      onClick={() =>
+                        history.push(
+                          `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                        )
+                      }
+                    >
                       Assign
                     </Button>
                   )}
                   {status === "Assigned" && (
-                    <Button variant="dark-blue" size="medium" width="100%">
+                    <Button
+                      variant="dark-blue"
+                      size="medium"
+                      width="100%"
+                      onClick={() =>
+                        history.push(
+                          `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                          { preselectedUser: assigneeData },
+                        )
+                      }
+                    >
                       Reassign
                     </Button>
                   )}
