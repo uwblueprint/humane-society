@@ -11,48 +11,137 @@ import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import { AuthenticatedUser } from "../../../types/AuthTypes";
+import UserRoles from "../../../constants/UserConstants";
+import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
   petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
+  authenticatedUser: AuthenticatedUser;
+  onTaskClick: (taskId: number) => void;
 }
 
 const StatusBadge = ({
   task,
   petId,
+  authenticatedUser,
+  onTaskClick,
 }: {
   task: ScheduledTaskDTO;
   petId: number;
+  authenticatedUser: AuthenticatedUser;
+  onTaskClick: (taskId: number) => void;
 }) => {
   const history = useHistory();
 
-  if (task.endTime)
+  const isAdminOrBehaviourist =
+    authenticatedUser?.role === UserRoles.ADMIN ||
+    authenticatedUser?.role === UserRoles.BEHAVIOURIST;
+
+  if (isAdminOrBehaviourist) {
+    if (task.endTime)
+      return (
+        <Button as="button" variant="gray-shaded" size="medium" type="button">
+          Completed
+        </Button>
+      );
+    if (!task.assignedUser)
+      return (
+        <Button
+          as="button"
+          variant="dark-blue"
+          size="medium"
+          type="button"
+          onClick={() =>
+            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
+          }
+        >
+          Assign
+        </Button>
+      );
+    if (task.assignedUser && !task.endTime)
+      return (
+        <Button as="button" variant="green" size="medium" type="button">
+          In Progress
+        </Button>
+      );
+    return <></>;
+  }
+
+  const status = getTaskDetailedStatus(task, authenticatedUser);
+  const isMyTask = task.userId === authenticatedUser?.id;
+
+  if (status === null)
     return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
+      <Button
+        as="button"
+        variant="gray"
+        size="medium"
+        type="button"
+        onClick={() => onTaskClick(task.id)}
+      >
+        Assign to Me
       </Button>
     );
-  if (!task.assignedUser)
+
+  if (status === "Assigned" && isMyTask && isToday(task.scheduledStartTime))
     return (
       <Button
         as="button"
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => {
-          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
-        }}
+        onClick={() => onTaskClick(task.id)}
       >
-        Assign
+        Start
       </Button>
     );
-  if (task.assignedUser && !task.endTime)
+
+  if (status === "Assigned" && isMyTask)
     return (
-      <Button as="button" variant="green" size="medium" type="button">
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Assigned
+      </Button>
+    );
+
+  if (status === "Assigned") return <></>;
+
+  if (status === "In-Progress")
+    return (
+      <Button
+        as="button"
+        variant="green"
+        size="medium"
+        type="button"
+        onClick={() => onTaskClick(task.id)}
+      >
         In Progress
       </Button>
     );
+
+  if (status === "Occupied")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Occupied
+      </Button>
+    );
+
+  if (status === "Completed")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Completed
+      </Button>
+    );
+
+  if (status === "Incomplete")
+    return (
+      <Button as="button" variant="red" size="medium" type="button">
+        Incomplete
+      </Button>
+    );
+
   return <></>;
 };
 
@@ -69,6 +158,8 @@ const PetProfileTaskTableSection = ({
   petId,
   tasks,
   gridTemplateColumns,
+  authenticatedUser,
+  onTaskClick,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   return (
     <Flex direction="column">
@@ -115,7 +206,12 @@ const PetProfileTaskTableSection = ({
                 : "Unassigned"}
             </Text>
           </Flex>
-          <StatusBadge task={task} petId={petId} />
+          <StatusBadge
+            task={task}
+            petId={petId}
+            authenticatedUser={authenticatedUser}
+            onTaskClick={onTaskClick}
+          />
         </Grid>
       ))}
     </Flex>

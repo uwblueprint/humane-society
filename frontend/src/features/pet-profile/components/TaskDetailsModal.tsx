@@ -34,6 +34,11 @@ import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
+import {
+  isPastDay,
+  isToday,
+  getTaskDetailedStatus,
+} from "../../../utils/taskStatusUtils";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -53,54 +58,12 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.MISC]: MiscIcon,
 };
 
-const isPastDay = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  // Compare dates only (ignoring time)
-  return (
-    new Date(date.getFullYear(), date.getMonth(), date.getDate()) <
-    new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  );
-};
-
-const isToday = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-};
-
 const userQualifiesForPet = (
   user: AuthenticatedUser | null | undefined,
   pet: Pet | null | undefined,
 ) => {
   if (!user || !pet) return false;
   return user.colorLevel >= pet.colorLevel;
-};
-
-const getTaskDetailedStatus = (
-  task: PetTask | null,
-  authenticatedUser?: AuthenticatedUser | null,
-) => {
-  if (!task) return null;
-  if (task.endTime) return "Completed";
-  if (isPastDay(task.scheduledStartTime)) return "Incomplete";
-  if (task.startTime) {
-    if (
-      authenticatedUser?.role === UserRoles.ADMIN ||
-      authenticatedUser?.role === UserRoles.BEHAVIOURIST
-    ) {
-      return "In-Progress";
-    }
-    return task.userId === authenticatedUser?.id ? "In-Progress" : "Occupied";
-  }
-  if (task.userId) return "Assigned";
-  return null;
 };
 
 interface AssigneeDisplayProps {
