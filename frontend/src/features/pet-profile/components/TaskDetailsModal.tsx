@@ -15,6 +15,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -191,6 +192,7 @@ const TaskDetailsModal = ({
   isOpen,
   onClose,
 }: TaskDetailsModalProps): React.ReactElement => {
+  const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
 
@@ -490,7 +492,16 @@ const TaskDetailsModal = ({
                       Complete Task
                     </Button>
                   )}
-                  <Button variant="blue-outline" size="medium" width="100%">
+                  <Button
+                    variant="blue-outline"
+                    size="medium"
+                    width="100%"
+                    onClick={() =>
+                      history.push(
+                        `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+                      )
+                    }
+                  >
                     Edit Task
                   </Button>
                 </Flex>
