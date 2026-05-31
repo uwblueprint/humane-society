@@ -14,6 +14,7 @@ import {
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
 import User from "../../models/user.model";
+import Pet from "../../models/pet.model";
 import {
   BadRequestError,
   getErrorMessage,
@@ -780,6 +781,7 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
+          { model: Pet, attributes: ["name"], required: false },
         ],
       });
 
@@ -796,6 +798,7 @@ class TaskService implements ITaskService {
           isRecurring: false,
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
+          petName: task.pet?.name,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -857,6 +860,7 @@ class TaskService implements ITaskService {
                   ],
                   required: false,
                 },
+                { model: Pet, attributes: ["name"], required: false },
               ],
             })
           : [];
@@ -872,6 +876,7 @@ class TaskService implements ITaskService {
             ...instance,
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
+            petName: enriched?.pet?.name,
             assignedUser: enriched?.user
               ? {
                   id: enriched.user.id,

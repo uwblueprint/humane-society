@@ -18,13 +18,13 @@ interface UserProfilePageTableSectionProps {
 const getStatusBadge = (task: ScheduledTaskDTO) => {
   if (task.endTime)
     return (
-      <Button as="button" variant="gray" size="medium" type="button">
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
         Completed
       </Button>
     );
   return (
-    <Button as="button" variant="gray" size="medium" type="button">
-      Assigned
+    <Button as="button" variant="green" size="medium" type="button">
+      In Progress
     </Button>
   );
 };
@@ -72,9 +72,7 @@ const UserProfilePageTableSection = ({
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
           <Text textStyle="body" m={0}>
-            {task.assignedUser
-              ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
-              : "Unassigned"}
+            {task.petName ?? "—"}
           </Text>
           {getStatusBadge(task)}
         </Grid>

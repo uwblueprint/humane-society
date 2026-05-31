@@ -83,7 +83,7 @@ const getUserTasks = async (userId: number): Promise<PetTask[]> => {
   }
 };
 
-export const getTasksByDate = async (
+const getTasksByDate = async (
   date: string,
   userId?: number,
 ): Promise<ScheduledTaskDTO[]> => {
@@ -188,6 +188,7 @@ const createRecurringTask = async (payload: {
 
 export default {
   getTask,
+  getTasksByDate,
   getRecurrence,
   getAllTasks,
   getUserTasks,
