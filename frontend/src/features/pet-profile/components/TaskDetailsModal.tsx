@@ -21,6 +21,7 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import PopupModal from "../../../components/common/PopupModal";
 import AuthContext from "../../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import { Pet } from "../../../types/PetTypes";
@@ -35,6 +36,7 @@ import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
+import { useHistory } from "react-router-dom";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -57,10 +59,10 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
 const isPastDay = (dateStr?: string) => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
-  const now = new Date();
+  const now = new Date(); 
   return (
     new Date(date.getFullYear(), date.getMonth(), date.getDate()) <
-    new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    new Date(now.getFullYear(), now.getMonth(), now.getDate()) 
   );
 };
 
@@ -193,6 +195,7 @@ const TaskDetailsModal = ({
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
+  const history = useHistory();
 
   const [loading, setLoading] = useState(true);
   const [taskData, setTaskData] = useState<PetTask | null>(null);
@@ -203,7 +206,15 @@ const TaskDetailsModal = ({
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRecurringChoice, setShowRecurringChoice] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const status = getTaskDetailedStatus(taskData, authenticatedUser);
+
+  const isAdminOrBehaviourist =
+    authenticatedUser?.role === UserRoles.ADMIN ||
+    authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const isVolunteerOrStaff =
     authenticatedUser?.role === UserRoles.VOLUNTEER ||
@@ -279,6 +290,83 @@ const TaskDetailsModal = ({
     fetchData();
   }, [taskId, isOpen, toast, authenticatedUser]);
 
+  const handleDeleteClick = () => {
+    if (recurrenceData) {
+      setShowRecurringChoice(true);
+    } else {
+      setShowDeleteConfirm(true);
+    }
+  };
+
+  const handleDeleteSingle = async () => {
+    if (!taskData) return;
+    setIsDeleting(true);
+    try {
+      if (recurrenceData) {
+        await TaskAPIClient.deleteRecurringTask(
+          taskId,
+          taskData.scheduledStartTime ?? "",
+          false,
+        );
+      } else {
+        await TaskAPIClient.deleteTask(taskId);
+      }
+      toast({
+        title: "Success",
+        description: "Task deleted successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setShowDeleteConfirm(false);
+      setShowRecurringChoice(false);
+      onClose();
+      history.push(`/pet-profile/${taskData.petId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete task.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    if (!taskData) return;
+    setIsDeleting(true);
+    try {
+      await TaskAPIClient.deleteRecurringTask(
+        taskId,
+        taskData.scheduledStartTime ?? "",
+        true,
+      );
+      toast({
+        title: "Success",
+        description: "All recurring tasks deleted successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setShowRecurringChoice(false);
+      onClose();
+      history.push(`/pet-profile/${taskData.petId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete recurring tasks.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -319,10 +407,7 @@ const TaskDetailsModal = ({
   };
 
   const renderActions = () => {
-    if (
-      authenticatedUser?.role === UserRoles.ADMIN ||
-      authenticatedUser?.role === UserRoles.BEHAVIOURIST
-    ) {
+    if (isAdminOrBehaviourist) {
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
@@ -343,6 +428,14 @@ const TaskDetailsModal = ({
           <Button variant="blue-outline" size="medium" width="100%">
             Edit Task
           </Button>
+          <Button
+            variant="red"
+            size="medium"
+            width="100%"
+            onClick={handleDeleteClick}
+          >
+            Delete Task
+          </Button>
         </Flex>
       );
     }
@@ -356,7 +449,7 @@ const TaskDetailsModal = ({
               size="medium"
               width="100%"
               disabled={
-                isPastDay(taskData?.scheduledStartTime) ||
+                !!isPastDay(taskData?.scheduledStartTime) ||
                 !userQualifiesForPet(authenticatedUser, petData) ||
                 !hasCompletedAllAssignedTasks
               }
@@ -394,168 +487,196 @@ const TaskDetailsModal = ({
   const actions = renderActions();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent
-        bg="gray.50"
-        maxHeight="min(831px, calc(100vh - 8rem))"
-        display="flex"
-        flexDirection="column"
-      >
-        <ModalHeader paddingBlock="2rem" paddingInline="2.5rem" flexShrink={0}>
-          <Flex align="center" justify="space-between">
-            <Flex align="center" gap="1rem">
-              {templateData && (
-                <Icon
-                  as={taskCategoryIcons[templateData.category]}
-                  boxSize="1.75rem"
-                />
-              )}
-              <Text m={0} textStyle="h2Mobile" color="gray.700">
-                {templateData?.name || "Task Details"}
-              </Text>
-            </Flex>
-            <IconButton
-              icon={<CloseIcon boxSize={4} />}
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              aria-label="Close modal"
-            />
-          </Flex>
-        </ModalHeader>
-
-        <ModalBody
-          flex="1"
+    <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent
+          bg="gray.50"
+          maxHeight="min(831px, calc(100vh - 8rem))"
           display="flex"
           flexDirection="column"
-          gap="2rem"
-          paddingTop="0"
-          paddingBottom="2.5rem"
-          paddingInline="2.5rem"
-          overflowY="auto"
         >
-          <Flex flexDirection="column" gap="1rem">
-            <Text textStyle="h3" fontWeight="600" m={0}>
-              Task for
-            </Text>
-            <Flex align="center" gap="1rem">
-              <ProfilePhoto
-                image={petData?.photo}
-                color={petData ? colorLevelMap[petData.colorLevel] : undefined}
-                size="small"
-                type="pet"
-                showColorBorder
+          <ModalHeader paddingBlock="2rem" paddingInline="2.5rem" flexShrink={0}>
+            <Flex align="center" justify="space-between">
+              <Flex align="center" gap="1rem">
+                {templateData && (
+                  <Icon
+                    as={taskCategoryIcons[templateData.category]}
+                    boxSize="1.75rem"
+                  />
+                )}
+                <Text m={0} textStyle="h2Mobile" color="gray.700">
+                  {templateData?.name || "Task Details"}
+                </Text>
+              </Flex>
+              <IconButton
+                icon={<CloseIcon boxSize={4} />}
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                aria-label="Close modal"
               />
-              <Text textStyle="body" m={0}>
-                {petData?.name}
+            </Flex>
+          </ModalHeader>
+
+          <ModalBody
+            flex="1"
+            display="flex"
+            flexDirection="column"
+            gap="2rem"
+            paddingTop="0"
+            paddingBottom="2.5rem"
+            paddingInline="2.5rem"
+            overflowY="auto"
+          >
+            <Flex flexDirection="column" gap="1rem">
+              <Text textStyle="h3" fontWeight="600" m={0}>
+                Task for
+              </Text>
+              <Flex align="center" gap="1rem">
+                <ProfilePhoto
+                  image={petData?.photo}
+                  color={petData ? colorLevelMap[petData.colorLevel] : undefined}
+                  size="small"
+                  type="pet"
+                  showColorBorder
+                />
+                <Text textStyle="body" m={0}>
+                  {petData?.name}
+                </Text>
+              </Flex>
+            </Flex>
+
+            <Flex flexDirection="column" gap="1rem">
+              <Text textStyle="h3" fontWeight="600" m={0}>
+                Task Instructions
+              </Text>
+              <Text color="gray.700" marginBottom="0" textStyle="body">
+                {templateData?.instructions || "No instructions to display."}
               </Text>
             </Flex>
-          </Flex>
 
-          <Flex flexDirection="column" gap="1rem">
-            <Text textStyle="h3" fontWeight="600" m={0}>
-              Task Instructions
-            </Text>
-            <Text color="gray.700" marginBottom="0" textStyle="body">
-              {templateData?.instructions || "No instructions to display."}
-            </Text>
-          </Flex>
+            <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
+              <GridItem>
+                <Flex flexDirection="column" gap="1rem">
+                  <Text textStyle="h3" fontWeight="600" m={0}>
+                    Start Date
+                  </Text>
+                  <Text textStyle="body" margin="0">
+                    {formatDate(taskData?.scheduledStartTime)}
+                  </Text>
+                </Flex>
+              </GridItem>
+              <GridItem>
+                <Flex flexDirection="column" gap="1rem">
+                  <Text textStyle="h3" fontWeight="600" m={0}>
+                    End Date
+                  </Text>
+                  <Text textStyle="body" margin="0">
+                    {formatDate(recurrenceData?.endDate)}
+                  </Text>
+                </Flex>
+              </GridItem>
+              <GridItem>
+                <Flex flexDirection="column" gap="1rem">
+                  <Text textStyle="h3" fontWeight="600" m={0}>
+                    Time Start
+                  </Text>
+                  <Text textStyle="body" margin="0">
+                    {formatTime(taskData?.scheduledStartTime)}
+                  </Text>
+                </Flex>
+              </GridItem>
+              <GridItem>
+                <Flex flexDirection="column" gap="1rem">
+                  <Text textStyle="h3" fontWeight="600" m={0}>
+                    Time End
+                  </Text>
+                  <Text textStyle="body" margin="0">
+                    {formatTime(taskData?.endTime)}
+                  </Text>
+                </Flex>
+              </GridItem>
+              {recurrenceData && (
+                <>
+                  <GridItem>
+                    <Flex flexDirection="column" gap="1rem">
+                      <Text textStyle="h3" fontWeight="600" m={0}>
+                        Recurrence
+                      </Text>
+                      <Text textStyle="body" margin="0">
+                        {getRecurrenceDisplay()}
+                      </Text>
+                    </Flex>
+                  </GridItem>
+                  <GridItem>
+                    <Flex flexDirection="column" gap="1rem">
+                      <Text textStyle="h3" fontWeight="600" m={0}>
+                        Cadence
+                      </Text>
+                      <Text textStyle="body" margin="0">
+                        {recurrenceData.cadence || "-"}
+                      </Text>
+                    </Flex>
+                  </GridItem>
+                </>
+              )}
+            </Grid>
 
-          <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
-            <GridItem>
-              <Flex flexDirection="column" gap="1rem">
-                <Text textStyle="h3" fontWeight="600" m={0}>
-                  Start Date
-                </Text>
-                <Text textStyle="body" margin="0">
-                  {formatDate(taskData?.scheduledStartTime)}
-                </Text>
-              </Flex>
-            </GridItem>
-            <GridItem>
-              <Flex flexDirection="column" gap="1rem">
-                <Text textStyle="h3" fontWeight="600" m={0}>
-                  End Date
-                </Text>
-                <Text textStyle="body" margin="0">
-                  {formatDate(recurrenceData?.endDate)}
-                </Text>
-              </Flex>
-            </GridItem>
-            <GridItem>
-              <Flex flexDirection="column" gap="1rem">
-                <Text textStyle="h3" fontWeight="600" m={0}>
-                  Time Start
-                </Text>
-                <Text textStyle="body" margin="0">
-                  {formatTime(taskData?.scheduledStartTime)}
-                </Text>
-              </Flex>
-            </GridItem>
-            <GridItem>
-              <Flex flexDirection="column" gap="1rem">
-                <Text textStyle="h3" fontWeight="600" m={0}>
-                  Time End
-                </Text>
-                <Text textStyle="body" margin="0">
-                  {formatTime(taskData?.endTime)}
-                </Text>
-              </Flex>
-            </GridItem>
-            {recurrenceData && (
-              <>
-                <GridItem>
-                  <Flex flexDirection="column" gap="1rem">
-                    <Text textStyle="h3" fontWeight="600" m={0}>
-                      Recurrence
-                    </Text>
-                    <Text textStyle="body" margin="0">
-                      {getRecurrenceDisplay()}
-                    </Text>
-                  </Flex>
-                </GridItem>
-                <GridItem>
-                  <Flex flexDirection="column" gap="1rem">
-                    <Text textStyle="h3" fontWeight="600" m={0}>
-                      Cadence
-                    </Text>
-                    <Text textStyle="body" margin="0">
-                      {recurrenceData.cadence || "-"}
-                    </Text>
-                  </Flex>
-                </GridItem>
-              </>
-            )}
-          </Grid>
+            <Flex flexDirection="column" gap="1rem">
+              <Text textStyle="h3" fontWeight="600" m={0}>
+                Assigned to
+              </Text>
+              <AssigneeDisplay
+                assigneeData={assigneeData}
+                authenticatedUser={authenticatedUser}
+                taskData={taskData}
+              />
+            </Flex>
+          </ModalBody>
 
-          <Flex flexDirection="column" gap="1rem">
-            <Text textStyle="h3" fontWeight="600" m={0}>
-              Assigned to
-            </Text>
-            <AssigneeDisplay
-              assigneeData={assigneeData}
-              authenticatedUser={authenticatedUser}
-              taskData={taskData}
-            />
-          </Flex>
-        </ModalBody>
+          {actions && (
+            <ModalFooter
+              paddingInline="2.5rem"
+              paddingBottom="2.5rem"
+              paddingTop="1rem"
+              flexShrink={0}
+              bg="gray.50"
+              borderTop="1px solid"
+              borderColor="gray.200"
+            >
+              {actions}
+            </ModalFooter>
+          )}
+        </ModalContent>
+      </Modal>
 
-        {actions && (
-          <ModalFooter
-            paddingInline="2.5rem"
-            paddingBottom="2.5rem"
-            paddingTop="1rem"
-            flexShrink={0}
-            bg="gray.50"
-            borderTop="1px solid"
-            borderColor="gray.200"
-          >
-            {actions}
-          </ModalFooter>
-        )}
-      </ModalContent>
-    </Modal>
+      {/* Delete confirmation for one-time tasks */}
+      <PopupModal
+        open={showDeleteConfirm}
+        title="Delete Task?"
+        message="Are you sure you want to delete this task? This cannot be undone."
+        primaryButtonText="Delete"
+        primaryButtonColor="red"
+        onPrimaryClick={handleDeleteSingle}
+        secondaryButtonText="Cancel"
+        onSecondaryClick={() => setShowDeleteConfirm(false)}
+        isPrimaryLoading={isDeleting}
+      />
+
+      {/* Recurring task choice modal */}
+      <PopupModal
+        open={showRecurringChoice}
+        title="Delete Recurring Task?"
+        message="Do you want to delete just this occurrence or the entire series?"
+        primaryButtonText="Delete Series"
+        primaryButtonColor="red"
+        onPrimaryClick={handleDeleteSeries}
+        secondaryButtonText="Delete This One"
+        onSecondaryClick={handleDeleteSingle}
+        isPrimaryLoading={isDeleting}
+      />
+    </>
   );
 };
 
