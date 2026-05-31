@@ -9,9 +9,9 @@ import CalendarDateSelector from "../components/CalendarDateSelector";
 import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
 import { TableColumn, TableHeader } from "../../../components/common/table";
-import { getTasksByDate } from "../../../APIClients/TaskAPIClient";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserProfilePageTableSection from "./UserProfilePageTableSection";
+import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 
 const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
@@ -108,7 +108,7 @@ const ProfilePage = (): React.ReactElement => {
           String(selectedDate.getMonth() + 1).padStart(2, "0"),
           String(selectedDate.getDate()).padStart(2, "0"),
         ].join("-");
-        const fetchedTasks = await getTasksByDate(dateString, userId);
+        const fetchedTasks = await TaskAPIClient.getTasksByDate(dateString, userId);
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
