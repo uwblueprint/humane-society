@@ -133,7 +133,8 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     };
 
     try {
-      const updatedUser = await UserAPIClient.update(userId, formattedData);      reset({
+      const updatedUser = await UserAPIClient.update(userId, formattedData);
+      reset({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         phoneNumber: updatedUser.phoneNumber || "",
@@ -164,13 +165,13 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           userId,
           user?.profilePhoto,
         );
-      toast({
-        title: "Upload successful",
-        description: "Your profile photo has been updated.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+        toast({
+          title: "Upload successful",
+          description: "Your profile photo has been updated.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } else if (localProfilePhoto === undefined) {
         await UserAPIClient.setDefaultProfilePhoto(userId);
       }
