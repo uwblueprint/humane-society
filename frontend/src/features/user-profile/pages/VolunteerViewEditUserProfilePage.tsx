@@ -126,19 +126,14 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
 
   const onSubmit = async (data: FormData) => {
     const userId = Number(authenticatedUser?.id?.toString());
-    // TODO: deprecate console use in frontend
-    /* eslint-disable-next-line no-console */
     const formattedData = {
       firstName: data.firstName,
       lastName: data.lastName,
       phoneNumber: data.phoneNumber,
     };
 
-    // eslint-disable-next-line no-console
     try {
-      await UserAPIClient.update(userId, formattedData);
-      const updatedUser = await UserAPIClient.get(userId);
-      reset({
+      const updatedUser = await UserAPIClient.update(userId, formattedData);      reset({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         phoneNumber: updatedUser.phoneNumber || "",
@@ -158,14 +153,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
         duration: 3000,
         isClosable: true,
       });
-      console.log({
-        userId: data.userId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber,
-        email: data.email,
-        profilePhoto: localProfilePhoto,
-      });
     }
 
     try {
@@ -177,10 +164,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           userId,
           user?.profilePhoto,
         );
-      } else if (localProfilePhoto === undefined) {
-        await UserAPIClient.setDefaultProfilePhoto(userId);
-      }
-
       toast({
         title: "Upload successful",
         description: "Your profile photo has been updated.",
@@ -188,6 +171,9 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
         duration: 3000,
         isClosable: true,
       });
+      } else if (localProfilePhoto === undefined) {
+        await UserAPIClient.setDefaultProfilePhoto(userId);
+      }
 
       history.push(`/profile/${userId}`);
     } catch (error) {
