@@ -39,6 +39,16 @@ export const taskRequestDtoValidator = async (
   }
 
   if (
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    !validateDate(body.scheduledEndTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledEndTime", "Date"));
+  }
+
+  if (
     body.startTime !== undefined &&
     body.startTime !== null &&
     !validateDate(body.startTime)
@@ -106,6 +116,16 @@ export const taskUpdateDtoValidator = async (
     return res
       .status(400)
       .send(getApiValidationError("scheduledStartTime", "Date"));
+  }
+
+  if (
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    !validateDate(body.scheduledEndTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledEndTime", "Date"));
   }
 
   if (
