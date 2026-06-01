@@ -133,31 +133,14 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     };
 
     try {
+      setIsUploading(true);
+
       const updatedUser = await UserAPIClient.update(userId, formattedData);
       reset({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         phoneNumber: updatedUser.phoneNumber || "",
       });
-      toast({
-        title: "Success",
-        description: "User profile updated",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (err) {
-      toast({
-        title: "Fail",
-        description: "Failed to update user profile",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-
-    try {
-      setIsUploading(true);
 
       if (profilePhotoFile) {
         await UserAPIClient.uploadProfilePhoto(
@@ -165,23 +148,26 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           userId,
           user?.profilePhoto,
         );
-        toast({
-          title: "Upload successful",
-          description: "Your profile photo has been updated.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
       } else if (localProfilePhoto === undefined) {
         await UserAPIClient.setDefaultProfilePhoto(userId);
       }
 
+      toast({
+        title: "Success",
+        description: "User profile updated",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
       history.push(`/profile/${userId}`);
     } catch (error) {
       toast({
-        title: "Upload failed",
+        title: "Fail",
         description:
-          error instanceof Error ? error.message : "An error occurred",
+          error instanceof Error
+            ? error.message
+            : "Failed to update user profile",
         status: "error",
         duration: 3000,
         isClosable: true,
