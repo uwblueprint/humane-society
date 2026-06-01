@@ -120,6 +120,7 @@ const createTask = async (payload: {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime: string;
+  scheduledEndTime?: string;
   startTime?: string;
   endTime?: string;
   notes: string;
@@ -144,6 +145,7 @@ const createRecurringTask = async (payload: {
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
+    scheduledEndTime?: string;
     startTime?: string;
     endTime?: string;
     notes: string;

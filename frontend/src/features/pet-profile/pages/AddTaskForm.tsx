@@ -105,6 +105,8 @@ const AddTaskForm = ({
       startYear,
       startHour,
       startMinute,
+      endHour,
+      endMinute,
       recurringDays,
       recurringCadences,
       endMonth,
@@ -122,6 +124,14 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
+    const scheduledEndTime = new Date(
+      Number(startYear),
+      MONTH_NAME_TO_NUMBER[startMonth] - 1,
+      Number(startDay),
+      Number(endHour),
+      Number(endMinute),
+    ).toISOString();
+
     const userId = selectedUser?.id ?? null;
 
     try {
@@ -131,6 +141,7 @@ const AddTaskForm = ({
           petId,
           taskTemplateId: template.id,
           scheduledStartTime,
+          scheduledEndTime,
           notes: instructions,
         });
       } else {
@@ -148,6 +159,7 @@ const AddTaskForm = ({
             petId,
             taskTemplateId: template.id,
             scheduledStartTime,
+            scheduledEndTime,
             notes: instructions,
           },
           recurrence: {
@@ -180,7 +192,7 @@ const AddTaskForm = ({
   const handlePreviousPage = async () => {
     setCurrentStep(currentStep - 1);
   };
-  
+
   return (
     <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
       {/* Back Button */}
