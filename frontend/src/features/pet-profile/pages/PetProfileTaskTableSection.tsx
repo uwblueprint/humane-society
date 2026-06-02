@@ -1,7 +1,7 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
@@ -13,20 +13,17 @@ import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
 }
 
 const StatusBadge = ({
   task,
-  petId,
+  onAssignClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
+  onAssignClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   if (task.endTime)
     return (
       <Button as="button" variant="gray-shaded" size="medium" type="button">
@@ -40,9 +37,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => {
-          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
-        }}
+        onClick={() => onAssignClick(task.id)}
       >
         Assign
       </Button>
@@ -66,10 +61,11 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+
   return (
     <Flex direction="column">
       {tasks.map((task) => (
@@ -115,9 +111,16 @@ const PetProfileTaskTableSection = ({
                 : "Unassigned"}
             </Text>
           </Flex>
-          <StatusBadge task={task} petId={petId} />
+          <StatusBadge task={task} onAssignClick={setSelectedTaskId} />
         </Grid>
       ))}
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={selectedTaskId !== null}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </Flex>
   );
 };
