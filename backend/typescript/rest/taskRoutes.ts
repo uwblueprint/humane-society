@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import {
+  isAuthorizedByRole,
+  isAuthorizedToAssignTask,
+} from "../middlewares/auth";
 import {
   taskRequestDtoValidator,
   taskUpdateDtoValidator,
@@ -308,10 +311,12 @@ taskRouter.patch(
   },
 );
 
-/* Updates/Sets User assigned to an Task */
+/* Updates/Sets User assigned to an Task.
+ * Admins/Animal Behaviourists may assign anyone; other roles (e.g. Volunteers)
+ * may only self-assign (assignee in body must be their own user id). */
 taskRouter.patch(
   "/:id/assign-user",
-  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  isAuthorizedToAssignTask("userId"),
   taskUserPatchValidator,
   async (req, res) => {
     const { id } = req.params;
