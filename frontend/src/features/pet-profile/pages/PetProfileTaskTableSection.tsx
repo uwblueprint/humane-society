@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
@@ -13,7 +12,6 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
@@ -22,17 +20,13 @@ interface PetProfileTaskTableSectionProps {
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
@@ -51,9 +45,7 @@ const StatusBadge = ({
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
+          onClick={() => onTaskClick(task.id)}
         >
           Assign
         </Button>
@@ -143,7 +135,6 @@ const StatusBadge = ({
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
@@ -235,7 +226,6 @@ const PetProfileTaskTableSection = ({
             </Flex>
             <StatusBadge
               task={task}
-              petId={petId}
               authenticatedUser={authenticatedUser}
               onTaskClick={onTaskClick}
             />
