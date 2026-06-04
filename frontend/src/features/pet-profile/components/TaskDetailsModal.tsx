@@ -149,12 +149,14 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  onTaskCompleted: () => void;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  onTaskCompleted,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
@@ -197,6 +199,26 @@ const TaskDetailsModal = ({
     (t) => !isToday(t.scheduledStartTime) || !!t.endTime,
   );
 
+  const handleCompleteTask = async () => {
+    try {
+      await TaskAPIClient.completeTask(taskId);
+      toast({
+        title: "Task completed",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onTaskCompleted();
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to complete task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
   useEffect(() => {
     if (!isOpen) return;
 
@@ -324,7 +346,12 @@ const TaskDetailsModal = ({
             </Button>
           )}
           {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={handleCompleteTask}
+            >
               Complete Task
             </Button>
           )}
