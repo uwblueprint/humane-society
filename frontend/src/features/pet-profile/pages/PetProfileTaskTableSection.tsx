@@ -72,7 +72,9 @@ const PetProfileTaskTableSection = ({
   tasks,
   gridTemplateColumns,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
-  const [selectedTask, setSelectedTask] = useState<ScheduledTaskDTO | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ScheduledTaskDTO | null>(
+    null,
+  );
 
   return (
     <Flex direction="column">
@@ -129,15 +131,17 @@ const PetProfileTaskTableSection = ({
           taskId={selectedTask.id}
           isOpen={selectedTask !== null}
           onClose={() => setSelectedTask(null)}
-        viewedDate={
-  selectedTask.scheduledStartTime
-    ? new Date(Date.UTC(
-        new Date(selectedTask.scheduledStartTime).getUTCFullYear(),
-        new Date(selectedTask.scheduledStartTime).getUTCMonth(),
-        new Date(selectedTask.scheduledStartTime).getUTCDate()
-      ))
-    : undefined
-}
+          viewedDate={
+            selectedTask.scheduledStartTime
+              ? new Date(
+                  Date.UTC(
+                    new Date(selectedTask.scheduledStartTime).getUTCFullYear(),
+                    new Date(selectedTask.scheduledStartTime).getUTCMonth(),
+                    new Date(selectedTask.scheduledStartTime).getUTCDate(),
+                  ),
+                )
+              : undefined
+          }
         />
       )}
     </Flex>

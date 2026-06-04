@@ -15,7 +15,9 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -36,7 +38,6 @@ import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
-import { useHistory } from "react-router-dom";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -91,7 +92,8 @@ const getTaskDetailedStatus = (
   viewedDate?: Date,
 ) => {
   if (!task) return null;
-  const scheduledStartTime = viewedDate?.toISOString() || task.scheduledStartTime;
+  const scheduledStartTime =
+    viewedDate?.toISOString() || task.scheduledStartTime;
   if (task.endTime) return "Completed";
   if (isPastDay(scheduledStartTime)) return "Incomplete";
   if (task.startTime) {
@@ -129,7 +131,9 @@ const AssigneeDisplay = ({
   const showStatusLabel =
     status &&
     (status !== "Assigned" ||
-      (isVolunteerOrStaff && isSelf && !isToday(viewedDate?.toISOString() || taskData?.scheduledStartTime)));
+      (isVolunteerOrStaff &&
+        isSelf &&
+        !isToday(viewedDate?.toISOString() || taskData?.scheduledStartTime)));
 
   const hideAssigneeDetails = isVolunteerOrStaff && !isSelf;
 
@@ -208,13 +212,18 @@ const TaskDetailsModal = ({
   const [templateData, setTemplateData] = useState<Task | null>(null);
   const [petData, setPetData] = useState<Pet | null>(null);
   const [assigneeData, setAssigneeData] = useState<User | null>(null);
-  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
+    null,
+  );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showRecurringDeleteModal, setShowRecurringDeleteModal] = useState(false);
-  const [deleteRecurringOption, setDeleteRecurringOption] = useState<"single" | "series">("single");
+  const [showRecurringDeleteModal, setShowRecurringDeleteModal] =
+    useState(false);
+  const [deleteRecurringOption, setDeleteRecurringOption] = useState<
+    "single" | "series"
+  >("single");
   const [isDeleting, setIsDeleting] = useState(false);
 
   const status = getTaskDetailedStatus(taskData, authenticatedUser, viewedDate);
@@ -453,7 +462,9 @@ const TaskDetailsModal = ({
               size="medium"
               width="100%"
               disabled={
-                !!isPastDay(viewedDate?.toISOString() || taskData?.scheduledStartTime) ||
+                !!isPastDay(
+                  viewedDate?.toISOString() || taskData?.scheduledStartTime,
+                ) ||
                 !userQualifiesForPet(authenticatedUser, petData) ||
                 !hasCompletedAllAssignedTasks
               }
@@ -461,16 +472,19 @@ const TaskDetailsModal = ({
               Assign to Me
             </Button>
           )}
-          {status === "Assigned" && isToday(viewedDate?.toISOString() || taskData?.scheduledStartTime) && (
-            <Button
-              variant="dark-blue"
-              size="medium"
-              width="100%"
-              disabled={isPetOccupied || hasInProgressTask}
-            >
-              Start
-            </Button>
-          )}
+          {status === "Assigned" &&
+            isToday(
+              viewedDate?.toISOString() || taskData?.scheduledStartTime,
+            ) && (
+              <Button
+                variant="dark-blue"
+                size="medium"
+                width="100%"
+                disabled={isPetOccupied || hasInProgressTask}
+              >
+                Start
+              </Button>
+            )}
           {status === "In-Progress" && (
             <Flex gap="1rem">
               <Button variant="blue-outline" size="medium" width="100%">
@@ -500,7 +514,11 @@ const TaskDetailsModal = ({
           display="flex"
           flexDirection="column"
         >
-          <ModalHeader paddingBlock="2rem" paddingInline="2.5rem" flexShrink={0}>
+          <ModalHeader
+            paddingBlock="2rem"
+            paddingInline="2.5rem"
+            flexShrink={0}
+          >
             <Flex align="center" justify="space-between">
               <Flex align="center" gap="1rem">
                 {templateData && (
@@ -540,7 +558,9 @@ const TaskDetailsModal = ({
               <Flex align="center" gap="1rem">
                 <ProfilePhoto
                   image={petData?.photo}
-                  color={petData ? colorLevelMap[petData.colorLevel] : undefined}
+                  color={
+                    petData ? colorLevelMap[petData.colorLevel] : undefined
+                  }
                   size="small"
                   type="pet"
                   showColorBorder
@@ -725,7 +745,11 @@ const TaskDetailsModal = ({
                   flexShrink={0}
                 >
                   {deleteRecurringOption === "single" && (
-                    <Flex boxSize="0.625rem" borderRadius="full" bg="blue.500" />
+                    <Flex
+                      boxSize="0.625rem"
+                      borderRadius="full"
+                      bg="blue.500"
+                    />
                   )}
                 </Flex>
                 <Text
@@ -755,7 +779,11 @@ const TaskDetailsModal = ({
                   flexShrink={0}
                 >
                   {deleteRecurringOption === "series" && (
-                    <Flex boxSize="0.625rem" borderRadius="full" bg="blue.500" />
+                    <Flex
+                      boxSize="0.625rem"
+                      borderRadius="full"
+                      bg="blue.500"
+                    />
                   )}
                 </Flex>
                 <Text
