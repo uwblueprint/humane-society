@@ -18,6 +18,7 @@ interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   pet: Pet;
+  onTaskCompleted: () => void;
 }
 
 const StatusBadge = ({
@@ -73,6 +74,7 @@ const PetProfileTaskTableSection = ({
   tasks,
   gridTemplateColumns,
   pet,
+  onTaskCompleted,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [showSurvey, setShowSurvey] = useState(false);
@@ -133,6 +135,7 @@ const PetProfileTaskTableSection = ({
           onTaskCompleted={() => {
             setSelectedTaskId(null);
             setShowSurvey(true);
+            onTaskCompleted();
           }}
         />
       )}
