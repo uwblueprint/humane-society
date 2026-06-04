@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
+import { Pet } from "../../../types/PetTypes";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import TaskDetailsModal from "../components/TaskDetailsModal";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
@@ -11,10 +12,12 @@ import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import SurveyModal from "../components/surveyModal";
 
 interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
+  pet: Pet;
 }
 
 const StatusBadge = ({
@@ -44,7 +47,13 @@ const StatusBadge = ({
     );
   if (task.assignedUser && !task.endTime)
     return (
-      <Button as="button" variant="green" size="medium" type="button">
+      <Button
+        as="button"
+        variant="green"
+        size="medium"
+        type="button"
+        onClick={() => onAssignClick(task.id)}
+      >
         In Progress
       </Button>
     );
@@ -63,8 +72,10 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 const PetProfileTaskTableSection = ({
   tasks,
   gridTemplateColumns,
+  pet,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
 
   return (
     <Flex direction="column">
@@ -119,6 +130,17 @@ const PetProfileTaskTableSection = ({
           taskId={selectedTaskId}
           isOpen={selectedTaskId !== null}
           onClose={() => setSelectedTaskId(null)}
+          onTaskCompleted={() => {
+            setSelectedTaskId(null);
+            setShowSurvey(true);
+          }}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={pet.animalTag}
         />
       )}
     </Flex>

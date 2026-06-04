@@ -147,6 +147,7 @@ const PetProfilePage = (): React.ReactElement => {
       <PetProfileTaskTableSection
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
+        pet={petData}
       />
     );
   }
