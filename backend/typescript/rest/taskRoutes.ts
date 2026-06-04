@@ -404,11 +404,12 @@ taskRouter.delete(
   async (req, res) => {
     const { taskId } = req.params;
 
+    const dateQuery = req.query.date;
     const date =
-      typeof req.query.date === "string" &&
-      !Number.isNaN(new Date(req.query.date).getTime())
-        ? new Date(req.query.date)
+      typeof dateQuery === "string" && !Number.isNaN(Date.parse(dateQuery))
+        ? resetDateToUTCMidnight(new Date(dateQuery))
         : undefined;
+
     const single =
       req.query.single === "true" || req.query.single === "false"
         ? req.query.single === "true"
@@ -434,6 +435,7 @@ taskRouter.delete(
         resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
         resetDateToUTCMidnight(date).getTime()
       ) {
+        // Delete entire series only if the target date is the very first instance
         await taskService.deleteRecurrence(taskId);
         const deletedTaskId = await taskService.deleteTask(taskId);
         res.status(200).json({
@@ -441,10 +443,23 @@ taskRouter.delete(
           taskId: deletedTaskId,
         });
       } else {
-        const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+        // Truncate series: set end date to one day before the target date
+        const newEndDate = new Date(
+          resetDateToUTCMidnight(date).getTime() - 24 * 60 * 60 * 1000,
+        );
+
+        console.log(`Truncating series ${taskId} at ${date.toISOString()}. New end date: ${newEndDate.toISOString()}`);
+
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
+
+        await taskService.deleteFutureTasks(
+          task.taskTemplateId,
+          task.petId,
+          date,
+        );
+
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,

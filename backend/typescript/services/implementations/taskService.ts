@@ -281,17 +281,27 @@ class TaskService implements ITaskService {
       if (recurrenceTask.days && recurrenceTask.days.length > 0) {
         startDates = buildStartDates(actualStart, recurrenceTask.days);
       }
-
       let validExclusion = false;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const startDate of startDates) {
-        if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
-          validExclusion = true;
-          break;
-        }
-      }
+
+// The task's own scheduled start date is always a valid exclusion
+if (exclusion.getTime() === actualStart.getTime()) {
+  validExclusion = true;
+} else {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const startDate of startDates) {
+    if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
+      validExclusion = true;
+      break;
+    }
+  }
+}
 
       if (!validExclusion) {
+        Logger.error(
+          `Invalid exclusion date: ${exclusion.toISOString()}. Start dates: ${JSON.stringify(
+            startDates,
+          )}. Cadence: ${recurrenceTask.cadence}`,
+        );
         throw new BadRequestError("An invalid exclusion date was given");
       }
 
@@ -304,6 +314,10 @@ class TaskService implements ITaskService {
         },
         { where: { task_id: recurrenceId }, returning: true },
       );
+
+      if (!updatedRecurrenceTask[1] || updatedRecurrenceTask[1].length === 0) {
+        throw new NotFoundError(`Recurrence id ${recurrenceId} not found`);
+      }
 
       return {
         id: updatedRecurrenceTask[1][0].task_id,
@@ -339,9 +353,12 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < actualStart)
+      if (date < resetDateToUTCMidnight(actualStart))
         throw new Error("Date is before recurrence start date.");
-      if (recurrence.end_date && date > new Date(recurrence.end_date))
+      if (
+        recurrence.end_date &&
+        resetDateToUTCMidnight(date) > resetDateToUTCMidnight(new Date(recurrence.end_date))
+      )
         throw new Error("Date is after recurrence end date.");
       if (
         recurrence.exclusions?.some(
@@ -361,12 +378,21 @@ class TaskService implements ITaskService {
       // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
+          // Return the task with the scheduledStartTime set to the specific instance's date
+          const instanceScheduledStartTime = new Date(date);
+          instanceScheduledStartTime.setUTCHours(actualStart.getUTCHours());
+          instanceScheduledStartTime.setUTCMinutes(actualStart.getUTCMinutes());
+          instanceScheduledStartTime.setUTCSeconds(actualStart.getUTCSeconds());
+          instanceScheduledStartTime.setUTCMilliseconds(
+            actualStart.getUTCMilliseconds(),
+          );
+
           return {
             id: task.id,
             userId: task.user_id,
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
-            scheduledStartTime: task.scheduled_start_time,
+            scheduledStartTime: instanceScheduledStartTime,
             startTime: task.start_time,
             endTime: task.end_time,
             notes: task.notes,
@@ -743,6 +769,29 @@ class TaskService implements ITaskService {
     }
   }
 
+  async deleteFutureTasks(
+    taskTemplateId: number,
+    petId: number,
+    date: Date,
+  ): Promise<void> {
+    try {
+      await PgTask.destroy({
+        where: {
+          task_template_id: taskTemplateId,
+          pet_id: petId,
+          scheduled_start_time: {
+            [Op.gte]: resetDateToUTCMidnight(date),
+          },
+        },
+      });
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
+      );
+      throw error;
+    }
+  }
+
   async getTasksForDate(
     date: string,
     filters?: { userId?: number; petId?: number },
@@ -780,11 +829,13 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
+          { model: PgRecurrenceTask, required: false },
         ],
       });
 
-      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
-        (task) => ({
+      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks
+        .filter((task) => !task.recurrence)
+        .map((task) => ({
           id: task.id,
           userId: task.user_id,
           petId: task.pet_id,
@@ -804,8 +855,7 @@ class TaskService implements ITaskService {
                 profilePhoto: task.user.profile_photo,
               }
             : null,
-        }),
-      );
+        }));
 
       const recurringWhereClause: Record<string, unknown> = {};
       if (filters?.userId !== undefined) {

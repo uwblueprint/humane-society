@@ -43,7 +43,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
       height="100vh"
       width="100vw"
       bg="rgba(26, 32, 44, 0.6)"
-      zIndex="1000"
+      zIndex="1500"
       justifyContent="center"
       alignItems="center"
     >
