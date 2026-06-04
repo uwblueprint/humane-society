@@ -1,6 +1,6 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -26,6 +26,7 @@ import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
+import SurveyModal from "../components/surveyModal";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -68,37 +69,38 @@ const PetProfilePage = (): React.ReactElement => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!petId || Number.isNaN(petId)) {
-        history.push("/not-found");
-        return;
-      }
+  const fetchTasks = useCallback(async () => {
+    if (!petId || Number.isNaN(petId)) {
+      history.push("/not-found");
+      return;
+    }
+    try {
+      const dateString = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+      const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+        petId,
+        dateString,
+      );
+      const sortedTasks = [...fetchedTasks].sort(
+        (a, b) => sortTask(a) - sortTask(b),
+      );
+      setTasks(sortedTasks);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [petId, selectedDate, history]);
 
-      try {
-        const dateString = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
-          petId,
-          dateString,
-        );
-        const sortedTasks = [...fetchedTasks].sort(
-          (a, b) => sortTask(a) - sortTask(b),
-        );
-        setTasks(sortedTasks);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    };
+  useEffect(() => {
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [fetchTasks, location.key]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -248,6 +250,28 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onTaskCompleted={() => {
+            setSelectedTaskId(null);
+            setShowSurvey(true);
+          }}
+        />
+      )}
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={selectedTaskId !== null}
+          onClose={() => setSelectedTaskId(null)}
+          onTaskCompleted={() => {
+            setSelectedTaskId(null);
+            setShowSurvey(true);
+          }}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={petData.animalTag}
         />
       )}
     </>
