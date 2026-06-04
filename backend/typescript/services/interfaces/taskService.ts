@@ -194,6 +194,20 @@ export interface ITaskService {
   deleteTask(id: string): Promise<string>;
 
   /**
+   * delete any "realized" standalone task records on or after the target date
+   * @param taskTemplateId task template id
+   * @param petId pet id
+   * @param date target date
+   * @returns void
+   * @throws Error if deletion fails
+   */
+  deleteFutureTasks(
+    taskTemplateId: number,
+    petId: number,
+    date: Date,
+  ): Promise<void>;
+
+  /**
    * retrieve all tasks for a specific date, combining one-time and recurring instances
    * @param date date in YYYY-MM-DD format
    * @param filters optional userId and/or petId filters

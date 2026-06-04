@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import PgTask from "../../../models/task.model";
 import PgRecurrenceTask from "../../../models/recurrence_task.model";
 import { BadRequestError, NotFoundError } from "../../../utilities/errorUtils";
@@ -547,6 +548,25 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       await expect(service.excludeDate("123", date!)).rejects.toThrow(
         "database exploded",
       );
+    });
+  });
+
+  describe("deleteFutureTasks", () => {
+    it("deletes standalone tasks on or after target date", async () => {
+      const date = new Date("2026-03-17T00:00:00Z");
+      mockPgTask.destroy.mockResolvedValue(1);
+
+      await service.deleteFutureTasks(1, 2, date);
+
+      expect(mockPgTask.destroy).toHaveBeenCalledWith({
+        where: {
+          task_template_id: 1,
+          pet_id: 2,
+          scheduled_start_time: {
+            [Op.gte]: resetDateToUTCMidnight(date),
+          },
+        },
+      });
     });
   });
 });
