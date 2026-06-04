@@ -283,18 +283,20 @@ class TaskService implements ITaskService {
       }
       let validExclusion = false;
 
-// The task's own scheduled start date is always a valid exclusion
-if (exclusion.getTime() === actualStart.getTime()) {
-  validExclusion = true;
-} else {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const startDate of startDates) {
-    if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
-      validExclusion = true;
-      break;
-    }
-  }
-}
+      // The task's own scheduled start date is always a valid exclusion
+      if (exclusion.getTime() === actualStart.getTime()) {
+        validExclusion = true;
+      } else {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const startDate of startDates) {
+          if (
+            isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)
+          ) {
+            validExclusion = true;
+            break;
+          }
+        }
+      }
 
       if (!validExclusion) {
         Logger.error(
@@ -357,7 +359,8 @@ if (exclusion.getTime() === actualStart.getTime()) {
         throw new Error("Date is before recurrence start date.");
       if (
         recurrence.end_date &&
-        resetDateToUTCMidnight(date) > resetDateToUTCMidnight(new Date(recurrence.end_date))
+        resetDateToUTCMidnight(date) >
+          resetDateToUTCMidnight(new Date(recurrence.end_date))
       )
         throw new Error("Date is after recurrence end date.");
       if (

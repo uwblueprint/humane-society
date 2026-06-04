@@ -447,9 +447,6 @@ taskRouter.delete(
         const newEndDate = new Date(
           resetDateToUTCMidnight(date).getTime() - 24 * 60 * 60 * 1000,
         );
-
-        console.log(`Truncating series ${taskId} at ${date.toISOString()}. New end date: ${newEndDate.toISOString()}`);
-
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
