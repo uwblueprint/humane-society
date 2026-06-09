@@ -302,6 +302,7 @@ userRouter.delete("/", async (req, res) => {
           return;
         }
         await userService.deleteUserById(Number(userId));
+        await logInteraction(req);
         res.status(204).send();
       } catch (error: unknown) {
         if (error instanceof NotFoundError) {
@@ -329,6 +330,7 @@ userRouter.delete("/", async (req, res) => {
           return;
         }
         await userService.deleteUserByEmail(email);
+        await logInteraction(req);
         res.status(204).send();
       } catch (error: unknown) {
         res.status(500).json({ error: getErrorMessage(error) });
