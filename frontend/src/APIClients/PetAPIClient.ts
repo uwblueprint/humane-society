@@ -4,6 +4,7 @@ import { Pet, PetListSections, PetRequestDTO } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
+import { InteractionType } from "../types/InteractionTypes";
 
 /** Backend often responds with plain text for validation errors, not `{ error: string }`. */
 const getCreatePetErrorMessage = (error: unknown): string => {
@@ -123,7 +124,15 @@ const getPetList = async (userId: number): Promise<PetListSections> => {
   }
 };
 
-const deletePet = async (petId: number | string): Promise<void> => {
+const deletePet = async (
+  petId: number | string,
+  body?: {
+    actorId: number;
+    targetId: number;
+    animalTag: string;
+    petName: string;
+  },
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -131,6 +140,7 @@ const deletePet = async (petId: number | string): Promise<void> => {
   try {
     await baseAPIClient.delete(`/pets/${petId}`, {
       headers: { Authorization: bearerToken },
+      data: { ...body, interactionType: InteractionType.DELETED_PET },
     });
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.error) {
@@ -166,6 +176,168 @@ const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   });
 
   return data;
+};
+
+const updateName = async (
+  petId: number,
+  body: {
+    name: string;
+    actorId: number;
+    targetId: number;
+    // NOTE: backend CHANGED_PET_NAME case reads old/newUserName (quirk in logInteraction)
+    oldUserName: string;
+    newUserName: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/name`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_NAME },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet name: ${error}`);
+  }
+};
+
+const updateColorLevel = async (
+  petId: number,
+  body: {
+    colorLevel: number;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldColorLevel: string;
+    newColorLevel: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/color-level`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_COLOR_LEVEL },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet color level: ${error}`);
+  }
+};
+
+const updateNeuterStatus = async (
+  petId: number,
+  body: {
+    neutered: boolean;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/neuter-status`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_NEUTER_STATUS },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet neuter status: ${error}`);
+  }
+};
+
+const updateSafetyInfo = async (
+  petId: number,
+  body: {
+    safetyInfo: string;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/safety-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_SAFETY_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet safety info: ${error}`);
+  }
+};
+
+const updateMedicalInfo = async (
+  petId: number,
+  body: {
+    medicalInfo: string;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/medical-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_MEDICAL_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet medical info: ${error}`);
+  }
+};
+
+const updateManagementInfo = async (
+  petId: number,
+  body: {
+    managementInfo: string;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/management-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_MANAGEMENT_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet management info: ${error}`);
+  }
 };
 
 const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: string): Promise<string> => {
@@ -229,4 +401,21 @@ const getProfilePhotoUrl = async (petId: number): Promise<string> => {
   }
 }
 
-export default { getPetTasks, getPet, getPets, getPetList, getProfilePhotoUrl, setDefaultProfilePhoto, uploadProfilePhoto, createPet, update, deletePet };
+export default {
+  getPetTasks,
+  getPet,
+  getPets,
+  getPetList,
+  getProfilePhotoUrl,
+  setDefaultProfilePhoto,
+  uploadProfilePhoto,
+  createPet,
+  update,
+  updateName,
+  updateColorLevel,
+  updateNeuterStatus,
+  updateSafetyInfo,
+  updateMedicalInfo,
+  updateManagementInfo,
+  deletePet,
+};
