@@ -282,12 +282,16 @@ class TaskService implements ITaskService {
         startDates = buildStartDates(actualStart, recurrenceTask.days);
       }
 
-      let validExclusion = false;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const startDate of startDates) {
-        if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
-          validExclusion = true;
-          break;
+      let validExclusion = exclusion.getTime() === actualStart.getTime();
+      if (!validExclusion) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const startDate of startDates) {
+          if (
+            isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)
+          ) {
+            validExclusion = true;
+            break;
+          }
         }
       }
 
@@ -772,8 +776,12 @@ class TaskService implements ITaskService {
       }
 
       const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
-        where: whereClause,
+        where: {
+          ...whereClause,
+          "$recurrence.task_id$": { [Op.is]: null },
+        },
         include: [
+          { model: PgRecurrenceTask, required: false },
           { model: TaskTemplate, attributes: ["task_name", "category"] },
           {
             model: User,
@@ -895,6 +903,37 @@ class TaskService implements ITaskService {
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
+      );
+      throw error;
+    }
+  }
+
+  async deleteFutureTasks(
+    taskTemplateId: number,
+    petId: number,
+    date: Date,
+    excludeTaskId?: number,
+  ): Promise<void> {
+    try {
+      const normalizedDate = resetDateToUTCMidnight(date);
+      const whereClause: Record<string, unknown> = {
+        task_template_id: taskTemplateId,
+        pet_id: petId,
+        scheduled_start_time: {
+          [Op.gte]: normalizedDate,
+        },
+      };
+
+      if (excludeTaskId) {
+        whereClause.id = {
+          [Op.ne]: excludeTaskId,
+        };
+      }
+
+      await PgTask.destroy({ where: whereClause });
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }
