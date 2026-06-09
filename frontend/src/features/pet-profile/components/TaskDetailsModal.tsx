@@ -321,6 +321,28 @@ const TaskDetailsModal = ({
     return "Recurring";
   };
 
+  const handleStart = async () => {
+    try {
+      await TaskAPIClient.startTask(taskId, new Date().toISOString());
+      const updated = await TaskAPIClient.getTask(taskId);
+      setTaskData(updated);
+      toast({
+        title: "Task started",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to start task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -520,6 +542,7 @@ const TaskDetailsModal = ({
                         size="medium"
                         width="100%"
                         disabled={isPetOccupied || hasInProgressTask}
+                        onClick={handleStart}
                       >
                         Start
                       </Button>

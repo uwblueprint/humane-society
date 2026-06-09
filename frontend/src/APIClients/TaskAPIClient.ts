@@ -115,6 +115,22 @@ const assignUser = async (taskId: number, userId: number): Promise<void> => {
   }
 };
 
+const startTask = async (taskId: number, startTime: string): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/start`,
+      { startTime },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to assign user: ${error}`);
+  }
+};
+
 const createTask = async (payload: {
   userId: number | null;
   petId: number;
@@ -176,6 +192,7 @@ export default {
   getUserTasks,
   getPetTasks,
   assignUser,
+  startTask,
   createTask,
   createRecurringTask,
 };
