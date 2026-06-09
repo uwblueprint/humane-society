@@ -58,7 +58,10 @@ const colorLevelToNumber: Record<string, number> = Object.fromEntries(
   Object.entries(colorLevelMap).map(([num, name]) => [name, Number(num)]),
 );
 
-const getSpayedNeuteredValue = (sex?: SexEnum, spayedNeutered?: boolean) => {
+const getSpayedNeuteredValue = (
+  sex?: SexEnum | null,
+  spayedNeutered?: boolean | null,
+) => {
   if (spayedNeutered === undefined || spayedNeutered === null) {
     return "";
   }
@@ -205,7 +208,12 @@ const EditPetProfilePage = (): React.ReactElement => {
           birthdayYear: birthdayYear || "",
           birthdayMonth: birthdayMonth || "",
           birthdayDate: birthdayDate || "",
-          sex: petData.sex === SexEnum.MALE ? "Male" : "Female",
+          sex:
+            petData.sex === SexEnum.MALE
+              ? "Male"
+              : petData.sex === SexEnum.FEMALE
+              ? "Female"
+              : "",
           neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
           safetyInfo: petData.careInfo?.safetyInfo || "",
           managementInfo: petData.careInfo?.managementInfo || "",
@@ -287,10 +295,12 @@ const EditPetProfilePage = (): React.ReactElement => {
       neutered = false;
     }
 
-    // Convert sex string to SexEnum (sex is NOT NULL in DB, send undefined to keep existing value)
-    let sex: SexEnum | undefined;
+    // Convert sex string to SexEnum. Send `null` when user clears the field
+    // so backend will set the DB value to NULL.
+    let sex: SexEnum | null;
     if (data.sex === "Male") sex = SexEnum.MALE;
     else if (data.sex === "Female") sex = SexEnum.FEMALE;
+    else sex = null;
 
     // Build careInfo with null for blank fields
     const careInfo = {
