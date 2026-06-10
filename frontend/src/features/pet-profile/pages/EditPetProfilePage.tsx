@@ -13,10 +13,11 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { ChevronRightIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
+import AuthContext from "../../../contexts/AuthContext";
 import { PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
@@ -113,6 +114,8 @@ const EditPetProfilePage = (): React.ReactElement => {
   const petId = Number(params.id);
   const history = useHistory();
   const toast = useToast();
+  const { authenticatedUser } = useContext(AuthContext);
+  const originalValues = useRef<FormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -196,7 +199,7 @@ const EditPetProfilePage = (): React.ReactElement => {
         }
 
         // Prepopulate form with pet data
-        reset({
+        const formValues = {
           name: petData.name,
           colourLevel: colorLevelMap[petData.colorLevel],
           animalTag: petData.animalTag,
@@ -211,7 +214,9 @@ const EditPetProfilePage = (): React.ReactElement => {
           managementInfo: petData.careInfo?.managementInfo || "",
           medicalInfo: petData.careInfo?.medicalInfo || "",
           profilePhoto: petData.photo || "",
-        });
+        };
+        reset(formValues);
+        originalValues.current = formValues;
       } catch (error) {
         history.push("/not-found");
       } finally {
@@ -321,7 +326,73 @@ const EditPetProfilePage = (): React.ReactElement => {
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
-      
+
+      // PATCH calls for tracked fields — each one triggers interaction logging
+      const orig = originalValues.current;
+      const actorId = authenticatedUser!.id;
+      const patches: Promise<void>[] = [];
+
+      if (orig && data.name !== orig.name) {
+        patches.push(PetAPIClient.updateName(petId, {
+          name: data.name,
+          actorId,
+          targetId: petId,
+          oldUserName: orig.name,
+          newUserName: data.name,
+        }));
+      }
+      if (orig && data.colourLevel !== orig.colourLevel) {
+        patches.push(PetAPIClient.updateColorLevel(petId, {
+          colorLevel: colorLevelToNumber[data.colourLevel],
+          actorId,
+          targetId: petId,
+          petName: orig.name,
+          oldColorLevel: orig.colourLevel,
+          newColorLevel: data.colourLevel,
+        }));
+      }
+      if (orig && data.neutered !== orig.neutered) {
+        patches.push(PetAPIClient.updateNeuterStatus(petId, {
+          neutered,
+          actorId,
+          targetId: petId,
+          petName: orig.name,
+          oldText: orig.neutered,
+          newText: data.neutered,
+        }));
+      }
+      if (orig && data.safetyInfo !== orig.safetyInfo) {
+        patches.push(PetAPIClient.updateSafetyInfo(petId, {
+          safetyInfo: data.safetyInfo || null,
+          actorId,
+          targetId: petId,
+          petName: orig.name,
+          oldText: orig.safetyInfo,
+          newText: data.safetyInfo,
+        }));
+      }
+      if (orig && data.medicalInfo !== orig.medicalInfo) {
+        patches.push(PetAPIClient.updateMedicalInfo(petId, {
+          medicalInfo: data.medicalInfo || null,
+          actorId,
+          targetId: petId,
+          petName: orig.name,
+          oldText: orig.medicalInfo,
+          newText: data.medicalInfo,
+        }));
+      }
+      if (orig && data.managementInfo !== orig.managementInfo) {
+        patches.push(PetAPIClient.updateManagementInfo(petId, {
+          managementInfo: data.managementInfo || null,
+          actorId,
+          targetId: petId,
+          petName: orig.name,
+          oldText: orig.managementInfo,
+          newText: data.managementInfo,
+        }));
+      }
+      await Promise.all(patches);
+
       // Submit the pet profile photo
       if (newPetProfilePhoto) {
         await PetAPIClient.uploadProfilePhoto(
@@ -431,7 +502,12 @@ const EditPetProfilePage = (): React.ReactElement => {
 
   const handleDeletePet = async () => {
     try {
-      await PetAPIClient.deletePet(petId);
+      await PetAPIClient.deletePet(petId, {
+        actorId: authenticatedUser!.id,
+        targetId: petId,
+        petName: pet!.name,
+        animalTag: pet!.animalTag,
+      });
       toast({
         title: "Success",
         description: "Pet deleted successfully.",

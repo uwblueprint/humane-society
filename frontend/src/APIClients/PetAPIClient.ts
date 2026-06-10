@@ -235,7 +235,7 @@ const updateColorLevel = async (
 const updateNeuterStatus = async (
   petId: number,
   body: {
-    neutered: boolean;
+    neutered: boolean | null;
     actorId: number;
     targetId: number;
     petName: string;
@@ -262,7 +262,7 @@ const updateNeuterStatus = async (
 const updateSafetyInfo = async (
   petId: number,
   body: {
-    safetyInfo: string;
+    safetyInfo: string | null;
     actorId: number;
     targetId: number;
     petName: string;
@@ -289,7 +289,7 @@ const updateSafetyInfo = async (
 const updateMedicalInfo = async (
   petId: number,
   body: {
-    medicalInfo: string;
+    medicalInfo: string | null;
     actorId: number;
     targetId: number;
     petName: string;
@@ -316,7 +316,7 @@ const updateMedicalInfo = async (
 const updateManagementInfo = async (
   petId: number,
   body: {
-    managementInfo: string;
+    managementInfo: string | null;
     actorId: number;
     targetId: number;
     petName: string;
@@ -411,11 +411,11 @@ export default {
   uploadProfilePhoto,
   createPet,
   update,
+  deletePet,
   updateName,
   updateColorLevel,
   updateNeuterStatus,
   updateSafetyInfo,
   updateMedicalInfo,
   updateManagementInfo,
-  deletePet,
 };
