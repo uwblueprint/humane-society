@@ -1,5 +1,6 @@
 import { Flex, Icon, SimpleGrid, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -13,7 +14,6 @@ import useOpenController from "../../../components/common/useOpenController";
 import { PetInfo } from "../../../types/PetTypes";
 import { TaskCategory } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
-import { useHistory } from "react-router-dom";
 
 interface PetListTableSectionProps {
   pets: PetInfo[];
