@@ -16,19 +16,24 @@ interface UserProfilePageTableSectionProps {
 }
 
 const getStatusBadge = (task: ScheduledTaskDTO) => {
-  if (task.endTime)
-    return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
-      </Button>
-    );
+  let label = "Assigned";
+  if (task.scheduledStartTime) {
+    const d = new Date(task.scheduledStartTime);
+    const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+
+    if (task.endTime && new Date(task.endTime) < midnight) {
+      label = "Completed";
+    } else if (new Date() >= midnight) {
+      label = "Incomplete";
+    }
+  }
+
   return (
-    <Button as="button" variant="green" size="medium" type="button">
-      In Progress
+    <Button as="button" variant="gray-shaded" size="medium" type="button">
+      {label}
     </Button>
   );
 };
-
 const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.WALK]: WalkIcon,
   [TaskCategory.GAMES]: GamesIcon,
