@@ -336,7 +336,7 @@ const TaskDetailsModal = ({
               Reassign
             </Button>
           )}
-          {status === "In-Progress" && (
+          {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
             <Button variant="dark-blue" size="medium" width="100%">
               Complete Task
             </Button>
@@ -349,6 +349,7 @@ const TaskDetailsModal = ({
     }
 
     if (isVolunteerOrStaff) {
+    // Volunteer and Staff Task Actions
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
@@ -437,6 +438,7 @@ const TaskDetailsModal = ({
           paddingInline="2.5rem"
           overflowY="auto"
         >
+          {/* Task For Section */}
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task for
@@ -454,7 +456,7 @@ const TaskDetailsModal = ({
               </Text>
             </Flex>
           </Flex>
-
+           {/* Task Instructions Section */}
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task Instructions
@@ -463,7 +465,7 @@ const TaskDetailsModal = ({
               {templateData?.instructions || "No instructions to display."}
             </Text>
           </Flex>
-
+           {/* Schedule Section */}
           <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
             <GridItem>
               <Flex flexDirection="column" gap="1rem">
@@ -544,6 +546,8 @@ const TaskDetailsModal = ({
           gap="1rem"
           alignItems="stretch"
         >
+        {/* Assigned To Section */}
+
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Assigned to
