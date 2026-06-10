@@ -190,16 +190,23 @@ const startTask = async (
     taskTemplateName: string;
     petName: string;
     actorName: string;
+    isRestart?: boolean;
   },
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
+  const { isRestart, ...rest } = body;
   try {
     await baseAPIClient.patch(
       `/tasks/${taskId}/start`,
-      { ...body, interactionType: InteractionType.STARTED_TASK },
+      {
+        ...rest,
+        interactionType: isRestart
+          ? InteractionType.RESTARTED_TASK
+          : InteractionType.STARTED_TASK,
+      },
       { headers: { Authorization: bearerToken } },
     );
   } catch (error) {
