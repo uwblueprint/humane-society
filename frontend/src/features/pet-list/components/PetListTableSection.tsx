@@ -13,6 +13,7 @@ import useOpenController from "../../../components/common/useOpenController";
 import { PetInfo } from "../../../types/PetTypes";
 import { TaskCategory } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
+import { useHistory } from "react-router-dom";
 
 interface PetListTableSectionProps {
   pets: PetInfo[];
@@ -38,6 +39,7 @@ export const PetListTableSection = ({
     taskCategories.slice(0, 4);
   const getExtraTasks = (taskCategories: TaskCategory[]) =>
     taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
+  const history = useHistory();
 
   return (
     <Tbody>
@@ -67,6 +69,9 @@ export const PetListTableSection = ({
             borderTop="1px solid"
             borderBottom="1px solid"
             borderColor="gray.200"
+            cursor="pointer"
+            onClick={() => history.push(`/pet-profile/${pet.id}`)}
+            _hover={{ backgroundColor: "gray.50" }}
           >
             <Td pl="2.625rem" pr="2rem" py="1rem">
               {/* Pet & Status */}
