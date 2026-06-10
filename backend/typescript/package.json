@@ -2,6 +2,7 @@
   "name": "typescript-backend",
   "version": "1.0.0",
   "description": "",
+  "packageManager": "yarn@1.22.22",
   "main": "server.ts",
   "scripts": {
     "test": "jest --runInBand --forceExit --detectOpenHandles",
