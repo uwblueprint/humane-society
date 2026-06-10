@@ -330,7 +330,7 @@ const EditPetProfilePage = (): React.ReactElement => {
       // PATCH calls for tracked fields — each one triggers interaction logging
       const orig = originalValues.current;
       const actorId = authenticatedUser!.id;
-      const patches: Promise<void>[] = [];
+      const patches: Promise<unknown>[] = [];
 
       if (orig && data.name !== orig.name) {
         patches.push(PetAPIClient.updateName(petId, {

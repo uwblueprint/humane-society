@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Flex,
   Text,
@@ -38,6 +38,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
   const toast = useToast();
+  const originalValues = useRef<{ firstName: string; lastName: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -100,6 +101,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           password: "",
           profilePhoto: userData.profilePhoto || "",
         });
+        originalValues.current = { firstName: userData.firstName, lastName: userData.lastName };
       } catch (error) {
         toast({
           title: "Error",
@@ -125,34 +127,35 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   const onSubmit = async (data: FormData) => {
-    // TODO: deprecate console use in frontend
-    /* eslint-disable-next-line no-console */
-    console.log({
-      userId: data.userId,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phoneNumber: data.phoneNumber,
-      email: data.email,
-      profilePhoto: localProfilePhoto,
-    });
+    const userId = Number(authenticatedUser?.id?.toString());
+    const orig = originalValues.current;
 
     try {
-      const userId = Number(authenticatedUser?.id?.toString());
-      setIsUploading(true);
+      const ops: Promise<unknown>[] = [];
 
-      if (profilePhotoFile) {
-        await UserAPIClient.uploadProfilePhoto(
-          profilePhotoFile,
-          userId,
-          user?.profilePhoto,
-        );
-      } else if (localProfilePhoto === undefined) {
-        await UserAPIClient.setDefaultProfilePhoto(userId);
+      if (orig && (data.firstName !== orig.firstName || data.lastName !== orig.lastName)) {
+        ops.push(UserAPIClient.updateName(userId, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          actorId: userId,
+          targetId: userId,
+          oldUserName: `${orig.firstName} ${orig.lastName}`,
+          newUserName: `${data.firstName} ${data.lastName}`,
+        }));
       }
 
+      if (profilePhotoFile) {
+        ops.push(UserAPIClient.uploadProfilePhoto(profilePhotoFile, userId, user?.profilePhoto));
+      } else if (localProfilePhoto === undefined) {
+        ops.push(UserAPIClient.setDefaultProfilePhoto(userId));
+      }
+
+      setIsUploading(true);
+      await Promise.all(ops);
+
       toast({
-        title: "Upload successful",
-        description: "Your profile photo has been updated.",
+        title: "Success",
+        description: "Your profile has been updated.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -161,9 +164,8 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
       history.push(`/profile/${userId}`);
     } catch (error) {
       toast({
-        title: "Upload failed",
-        description:
-          error instanceof Error ? error.message : "An error occurred",
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An error occurred",
         status: "error",
         duration: 3000,
         isClosable: true,
