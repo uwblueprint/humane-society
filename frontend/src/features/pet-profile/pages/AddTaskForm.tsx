@@ -32,6 +32,7 @@ const AddTaskForm = ({
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
+  const [existingUserId, setExistingUserId] = useState<number | null>(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -68,6 +69,7 @@ const AddTaskForm = ({
       try {
         const task = await TaskAPIClient.getTask(Number(taskId));
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
+        setExistingUserId(task.userId ?? null);
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -124,19 +126,7 @@ const AddTaskForm = ({
   const hasColorLevelMismatch =
     selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
-  const handleNextPage1 = async () => {
-    const isValid = await trigger("selectedTemplate");
-    if (isValid && selectedTemplate) {
-      setValue("taskName", selectedTemplate.name);
-      setValue("taskCategory", selectedTemplate.category);
-      if (!isEditMode) {
-        setValue("instructions", selectedTemplate.instructions);
-      }
-      setCurrentStep(2);
-    }
-  };
-
-  const handleNextPage2 = async () => {
+  const validateStep2Fields = async (): Promise<boolean> => {
     const validateFields: (keyof AddTaskFormData)[] = [
       "instructions",
       "startMonth",
@@ -153,14 +143,33 @@ const AddTaskForm = ({
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
         : []),
     ];
+    return trigger(validateFields);
+  };
 
-    const isValid = await trigger(validateFields);
+  const handleNextPage1 = async () => {
+    const isValid = await trigger("selectedTemplate");
+    if (isValid && selectedTemplate) {
+      setValue("taskName", selectedTemplate.name);
+      setValue("taskCategory", selectedTemplate.category);
+      if (!isEditMode) {
+        setValue("instructions", selectedTemplate.instructions);
+      }
+      setCurrentStep(2);
+    }
+  };
+
+  const handleNextPage2 = async () => {
+    const isValid = await validateStep2Fields();
     if (isValid) {
       setCurrentStep(3);
     }
   };
 
   const handleSave = async () => {
+    if (isEditMode) {
+      const isValid = await validateStep2Fields();
+      if (!isValid) return;
+    }
     const {
       selectedTemplate: template,
       instructions,
@@ -186,7 +195,7 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
-    const userId = selectedUser?.id ?? null;
+    const userId = isEditMode ? existingUserId : selectedUser?.id ?? null;
 
     try {
       if (isEditMode) {
@@ -252,7 +261,7 @@ const AddTaskForm = ({
   const handlePreviousPage = async () => {
     setCurrentStep(currentStep - 1);
   };
-  
+
   return (
     <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
       {/* Back Button */}

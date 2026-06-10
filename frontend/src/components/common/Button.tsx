@@ -1,5 +1,6 @@
 import React from "react";
 import { Button as ChakraButton, ButtonProps } from "@chakra-ui/react";
+import { isWhiteSpaceLike } from "typescript";
 
 interface CustomButtonProps extends ButtonProps {
   size?: "x-small" | "small" | "medium" | "large";
