@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   Link,
   Modal,
@@ -10,6 +9,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
+import Button from "../../../components/common/Button";
 import { AnimalTag } from "../../../types/TaskTypes";
 
 const SURVEY_LINKS: Partial<Record<AnimalTag, string>> = {
@@ -33,12 +33,22 @@ const SurveyModal = ({
 }: SurveyModalProps): React.ReactElement => {
   const surveyLink = SURVEY_LINKS[animalTag];
   const [linkClicked, setLinkClicked] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      closeOnOverlayClick={false}
+      closeOnEsc={false}
+    >
       <ModalOverlay />
       <ModalContent bg="gray.50" maxHeight="min(831px, calc(100vh - 8rem))">
-        <ModalHeader paddingBlock="2rem" paddingInline="2.5rem">
+        <ModalHeader
+          paddingBlock="2rem"
+          paddingInline="2.5rem"
+          textStyle={{ base: "h2", md: "h1" }}
+        >
           Thank you!
         </ModalHeader>
         <Flex direction="column" height="100%" overflowY="auto">
@@ -55,7 +65,7 @@ const SurveyModal = ({
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task Completion Feedback
             </Text>
-            <Text color="gray.700" marginBottom="0" textStyle="body">
+            <Text color="gray.700" m={0} textStyle="body">
               Thanks for completing a task. Please fill out the form below to
               provide feedback about the pet and task.
             </Text>
@@ -63,15 +73,38 @@ const SurveyModal = ({
               <Link
                 href={surveyLink}
                 isExternal
-                color="blue.600"
+                color="blue.700"
+                textDecoration="underline"
+                alignSelf="center"
                 onClick={() => setLinkClicked(true)}
               >
-                Jotform link here
+                JotForm link here
               </Link>
             )}
-            <Button onClick={onClose} isDisabled={!linkClicked}>
+            <Button
+              as="button"
+              variant={linkClicked ? "dark-blue" : "gray-shaded"}
+              size="medium"
+              type="button"
+              onClick={() => {
+                if (!linkClicked) {
+                  setShowReminder(true);
+                } else {
+                  onClose();
+                }
+              }}
+            >
               I have completed the form
             </Button>
+            {showReminder && !linkClicked && (
+              <Text
+                color="red.400figma says you shouldn't be able to click out of the survey modal until they clcik the link, this doesn't happen in the current PR. pls fix."
+                textStyle="body"
+                m={0}
+              >
+                Please fill out the form before continuing.
+              </Text>
+            )}
           </ModalBody>
         </Flex>
       </ModalContent>
