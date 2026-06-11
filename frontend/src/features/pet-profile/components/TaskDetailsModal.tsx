@@ -15,6 +15,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -35,7 +36,6 @@ import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
-import { useHistory } from "react-router-dom";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -467,7 +467,6 @@ const TaskDetailsModal = ({
                   </Text>
                 </Flex>
               </Flex>
-
               <Flex flexDirection="column" gap="1rem">
                 <Text textStyle="h3" fontWeight="600" m={0}>
                   Task Instructions
@@ -571,7 +570,16 @@ const TaskDetailsModal = ({
                         Complete Task
                       </Button>
                     )}
-                    <Button variant="blue-outline" size="medium" width="100%">
+                    <Button
+                      variant="blue-outline"
+                      size="medium"
+                      width="100%"
+                      onClick={() =>
+                        history.push(
+                          `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+                        )
+                      }
+                    >
                       Edit Task
                     </Button>
                     <Button
