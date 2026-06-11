@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import Button from "../../../components/common/Button";
+import PopupModal from "../../../components/common/PopupModal";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
 import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
 import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
@@ -12,6 +13,7 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
+import { RecurrenceTask } from "../../../types/TaskTypes";
 
 interface AddTaskFormProps {
   petId: number;
@@ -33,6 +35,11 @@ const AddTaskForm = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
   const [existingUserId, setExistingUserId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRecurringDeleteModal, setShowRecurringDeleteModal] = useState(false);
+  const [deleteRecurringOption, setDeleteRecurringOption] = useState<"single" | "series">("single");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -70,6 +77,7 @@ const AddTaskForm = ({
         const task = await TaskAPIClient.getTask(Number(taskId));
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
         setExistingUserId(task.userId ?? null);
+        setRecurrenceData(recurrence);
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -162,6 +170,72 @@ const AddTaskForm = ({
     const isValid = await validateStep2Fields();
     if (isValid) {
       setCurrentStep(3);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (recurrenceData) {
+      setDeleteRecurringOption("single");
+      setShowRecurringDeleteModal(true);
+    } else {
+      setShowDeleteConfirm(true);
+    }
+  };
+
+  const handleDeleteSingle = async () => {
+    if (!taskId) return;
+    setIsDeleting(true);
+    try {
+      await TaskAPIClient.deleteTask(Number(taskId));
+      toast({
+        title: "Task deleted!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      history.push(`/pet-profile/${petId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete task.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleDeleteRecurring = async () => {
+    if (!taskId) return;
+    setIsDeleting(true);
+    try {
+      const scheduledStartTime = new Date().toISOString();
+      await TaskAPIClient.deleteRecurringTask(
+        Number(taskId),
+        scheduledStartTime,
+        deleteRecurringOption === "single",
+      );
+      toast({
+        title: "Task deleted!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      history.push(`/pet-profile/${petId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete task.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowRecurringDeleteModal(false);
     }
   };
 
@@ -314,7 +388,7 @@ const AddTaskForm = ({
           </Text>
           <Spacer />
           {currentStep === 1 && isEditMode && (
-            <Button as="button" variant="red" size="medium" type="button">
+            <Button as="button" variant="red" size="medium" type="button" onClick={handleDeleteClick}>
               Delete Task
             </Button>
           )}
@@ -391,6 +465,130 @@ const AddTaskForm = ({
           )}
         </Flex>
       </Box>
+
+      <PopupModal
+        open={showDeleteConfirm}
+        title="Delete Task?"
+        message="Are you sure you want to delete this task? This process cannot be undone."
+        primaryButtonText="Delete"
+        primaryButtonColor="red"
+        onPrimaryClick={handleDeleteSingle}
+        secondaryButtonText="Cancel"
+        onSecondaryClick={() => setShowDeleteConfirm(false)}
+        isPrimaryLoading={isDeleting}
+      />
+
+      {showRecurringDeleteModal && (
+        <Flex
+          top="0"
+          left="0"
+          position="fixed"
+          height="100vh"
+          width="100vw"
+          bg="rgba(26, 32, 44, 0.6)"
+          zIndex="1500"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Flex
+            bg="white"
+            align="center"
+            direction="column"
+            gap={{ base: "1.25rem", md: "1.875rem" }}
+            width={{ base: "20.375rem", md: "33.625rem" }}
+            pt={{ base: "2rem", md: "3.6875rem" }}
+            pb={{ base: "2rem", md: "3.6875rem" }}
+            pl={{ base: "2rem", md: "3rem" }}
+            pr={{ base: "2rem", md: "3rem" }}
+            borderRadius="md"
+            boxShadow="lg"
+          >
+            <Text
+              textStyle={{ base: "h3", md: "h1" }}
+              color="blue.700"
+              textAlign="center"
+              m={0}
+            >
+              Delete Task?
+            </Text>
+
+            <Flex direction="column" gap="0.75rem" width="100%">
+              <Flex
+                align="center"
+                gap="0.75rem"
+                cursor="pointer"
+                onClick={() => setDeleteRecurringOption("single")}
+              >
+                <Flex
+                  boxSize="1.25rem"
+                  borderRadius="full"
+                  border="2px solid"
+                  borderColor={deleteRecurringOption === "single" ? "blue.500" : "gray.300"}
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  {deleteRecurringOption === "single" && (
+                    <Flex boxSize="0.625rem" borderRadius="full" bg="blue.500" />
+                  )}
+                </Flex>
+                <Text textStyle={{ base: "bodyMobile", md: "body" }} color="gray.600" m={0}>
+                  This task
+                </Text>
+              </Flex>
+
+              <Flex
+                align="center"
+                gap="0.75rem"
+                cursor="pointer"
+                onClick={() => setDeleteRecurringOption("series")}
+              >
+                <Flex
+                  boxSize="1.25rem"
+                  borderRadius="full"
+                  border="2px solid"
+                  borderColor={deleteRecurringOption === "series" ? "blue.500" : "gray.300"}
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  {deleteRecurringOption === "series" && (
+                    <Flex boxSize="0.625rem" borderRadius="full" bg="blue.500" />
+                  )}
+                </Flex>
+                <Text textStyle={{ base: "bodyMobile", md: "body" }} color="gray.600" m={0}>
+                  This and following tasks
+                </Text>
+              </Flex>
+            </Flex>
+
+            <Flex
+              width="100%"
+              height={{ base: "5rem", md: "3rem" }}
+              minH="2rem"
+              direction={{ base: "column-reverse", md: "row" }}
+              gap={{ base: "1rem", md: "1.5rem" }}
+              justifyContent="center"
+            >
+              <Button
+                variant="gray"
+                size="medium"
+                onClick={() => setShowRecurringDeleteModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="red"
+                size="medium"
+                onClick={handleDeleteRecurring}
+                isLoading={isDeleting}
+              >
+                Delete
+              </Button>
+            </Flex>
+          </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 };
