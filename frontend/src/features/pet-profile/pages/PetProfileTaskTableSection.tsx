@@ -1,7 +1,8 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
+import { Pet } from "../../../types/PetTypes";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
 import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
@@ -11,22 +12,22 @@ import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import SurveyModal from "../components/surveyModal";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
+  pet: Pet;
+  onTaskCompleted: () => void;
 }
 
 const StatusBadge = ({
   task,
-  petId,
+  onAssignClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
+  onAssignClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   if (task.endTime)
     return (
       <Button as="button" variant="gray-shaded" size="medium" type="button">
@@ -40,16 +41,20 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => {
-          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
-        }}
+        onClick={() => onAssignClick(task.id)}
       >
         Assign
       </Button>
     );
   if (task.assignedUser && !task.endTime)
     return (
-      <Button as="button" variant="green" size="medium" type="button">
+      <Button
+        as="button"
+        variant="green"
+        size="medium"
+        type="button"
+        onClick={() => onAssignClick(task.id)}
+      >
         In Progress
       </Button>
     );
@@ -66,10 +71,14 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
+  pet,
+  onTaskCompleted,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
+
   return (
     <Flex direction="column">
       {tasks.map((task) => (
@@ -115,9 +124,28 @@ const PetProfileTaskTableSection = ({
                 : "Unassigned"}
             </Text>
           </Flex>
-          <StatusBadge task={task} petId={petId} />
+          <StatusBadge task={task} onAssignClick={setSelectedTaskId} />
         </Grid>
       ))}
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={selectedTaskId !== null}
+          onClose={() => setSelectedTaskId(null)}
+          onTaskCompleted={() => {
+            setSelectedTaskId(null);
+            setShowSurvey(true);
+            onTaskCompleted();
+          }}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={pet.animalTag}
+        />
+      )}
     </Flex>
   );
 };
