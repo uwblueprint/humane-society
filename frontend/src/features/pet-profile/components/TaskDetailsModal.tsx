@@ -274,7 +274,6 @@ const TaskDetailsModal = ({
         duration: 3000,
         isClosable: true,
       });
-      setIsConfirmOpen(false);
       await fetchData(false); // silent refresh so the modal reflects the new assigned state
     } catch (error) {
       toast({
@@ -285,6 +284,7 @@ const TaskDetailsModal = ({
         isClosable: true,
       });
     } finally {
+      setIsConfirmOpen(false);
       setIsAssigning(false);
     }
   };
