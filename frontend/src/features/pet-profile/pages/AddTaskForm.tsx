@@ -124,13 +124,17 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
-    const scheduledEndTime = new Date(
+    const scheduledEndDate = new Date(
       Number(startYear),
       MONTH_NAME_TO_NUMBER[startMonth] - 1,
       Number(startDay),
       Number(endHour),
       Number(endMinute),
-    ).toISOString();
+    );
+    if (scheduledEndDate <= new Date(scheduledStartTime)) {
+      scheduledEndDate.setDate(scheduledEndDate.getDate() + 1);
+    }
+    const scheduledEndTime = scheduledEndDate.toISOString();
 
     const userId = selectedUser?.id ?? null;
 
