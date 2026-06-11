@@ -17,7 +17,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import { PencilIcon } from "../../../assets/icons";
+import { FemaleIcon, MaleIcon, PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Input from "../../../components/common/Input";
@@ -213,7 +213,7 @@ const EditPetProfilePage = (): React.ReactElement => {
               ? "Male"
               : petData.sex === SexEnum.FEMALE
               ? "Female"
-              : "",
+              : "--",
           neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
           safetyInfo: petData.careInfo?.safetyInfo || "",
           managementInfo: petData.careInfo?.managementInfo || "",
@@ -375,7 +375,7 @@ const EditPetProfilePage = (): React.ReactElement => {
         sex: (() => {
           if (updatedPet.sex === SexEnum.MALE) return "Male";
           if (updatedPet.sex === SexEnum.FEMALE) return "Female";
-          return "";
+          return "--";
         })(),
         neutered: getSpayedNeuteredValue(updatedPet.sex, updatedPet.neutered),
         safetyInfo: updatedPet.careInfo?.safetyInfo || "",
@@ -516,6 +516,11 @@ const EditPetProfilePage = (): React.ReactElement => {
     ),
   ];
   const sexOptions = ["--", "Male", "Female"];
+  const sexIcons = [
+    <Image key="unknown" src={MaleIcon} boxSize="1.2rem" />,
+    <Image key="male" src={MaleIcon} boxSize="1.2rem" />,
+    <Image key="female" src={FemaleIcon} boxSize="1.2rem" />,
+  ];
   const spayedNeuteredOptions = [
     "--",
     "Neutered",

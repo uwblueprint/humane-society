@@ -73,7 +73,7 @@ const getSpayStatusLabel = (spayedNeutered?: boolean) => {
 };
 
 const getSexLabel = (sex?: SexEnum | null) => {
-  if (sex === undefined || sex === null) return "Unknown sex";
+  if (sex === undefined || sex === null) return "--";
   return sex === SexEnum.MALE ? "Male" : "Female";
 };
 
@@ -243,13 +243,11 @@ function PetProfileSidebar({
               width="100%"
               height="100%"
             >
-              {sex !== null && sex !== undefined && (
-                <Image
-                  src={sex === SexEnum.MALE ? MaleIcon : FemaleIcon}
-                  alt="sex"
-                  boxSize="1.2rem"
-                />
-              )}
+              <Image
+                src={sex === SexEnum.FEMALE ? FemaleIcon : MaleIcon}
+                alt="sex"
+                boxSize="1.2rem"
+              />
               <Text
                 textStyle="body"
                 fontSize="1rem"

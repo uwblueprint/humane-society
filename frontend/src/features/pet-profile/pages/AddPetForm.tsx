@@ -15,7 +15,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import { PencilIcon } from "../../../assets/icons";
+import { FemaleIcon, MaleIcon, PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Input from "../../../components/common/Input";
@@ -308,6 +308,11 @@ const AddPetForm = (): React.ReactElement => {
     ),
   ];
   const sexOptions = ["--", "Male", "Female"];
+  const sexIcons = [
+    <Image key="unknown" src={MaleIcon} boxSize="1.2rem" />,
+    <Image key="male" src={MaleIcon} boxSize="1.2rem" />,
+    <Image key="female" src={FemaleIcon} boxSize="1.2rem" />,
+  ];
   const spayedNeuteredOptions = [
     "--",
     "Neutered",
