@@ -544,8 +544,8 @@ const TaskDetailsModal = ({
 
       <PopupModal
         open={isConfirmOpen}
-        title="Assign to Me?"
-        message="Are you sure you want to assign this task to yourself?"
+        title="Confirmation"
+        message="Are you sure you want to assign yourself this task? This process can not be undone."
         primaryButtonText="Assign to Me"
         onPrimaryClick={handleSelfAssignConfirm}
         isPrimaryLoading={isAssigning}
