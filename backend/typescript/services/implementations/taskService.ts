@@ -343,7 +343,7 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < actualStart)
+      if (date < resetDateToUTCMidnight(actualStart))
         throw new Error("Date is before recurrence start date.");
       if (recurrence.end_date && date > new Date(recurrence.end_date))
         throw new Error("Date is after recurrence end date.");
@@ -365,12 +365,18 @@ class TaskService implements ITaskService {
       // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
+          const instanceDate = new Date(date);
+          instanceDate.setUTCHours(actualStart.getUTCHours());
+          instanceDate.setUTCMinutes(actualStart.getUTCMinutes());
+          instanceDate.setUTCSeconds(actualStart.getUTCSeconds());
+          instanceDate.setUTCMilliseconds(actualStart.getUTCMilliseconds());
+
           return {
             id: task.id,
             userId: task.user_id,
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
-            scheduledStartTime: task.scheduled_start_time,
+            scheduledStartTime: instanceDate,
             startTime: task.start_time,
             endTime: task.end_time,
             notes: task.notes,

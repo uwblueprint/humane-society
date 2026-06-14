@@ -2,7 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import PopupModal from "../../../components/common/PopupModal";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
@@ -31,6 +31,9 @@ const AddTaskForm = ({
   const history = useHistory();
   const toast = useToast();
   const { taskId } = useParams<{ taskId: string }>();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const instanceDate = queryParams.get("date");
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
@@ -87,7 +90,7 @@ const AddTaskForm = ({
         setValue("taskCategory", template.category);
 
         if (task.scheduledStartTime) {
-          const date = new Date(task.scheduledStartTime);
+          const date = new Date(instanceDate || task.scheduledStartTime);
           setValue(
             "startMonth",
             date.toLocaleString("default", { month: "long" }),
@@ -212,7 +215,15 @@ const AddTaskForm = ({
     if (!taskId) return;
     setIsDeleting(true);
     try {
-      const scheduledStartTime = new Date().toISOString();
+      const scheduledStartTime =
+        instanceDate ||
+        (getValues("startYear") &&
+          new Date(
+            Number(getValues("startYear")),
+            MONTH_NAME_TO_NUMBER[getValues("startMonth")] - 1,
+            Number(getValues("startDay")),
+          ).toISOString()) ||
+        new Date().toISOString();
       await TaskAPIClient.deleteRecurringTask(
         Number(taskId),
         scheduledStartTime,

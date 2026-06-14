@@ -21,7 +21,7 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
-import PopupModal from "../../../components/common/PopupModal";
+
 import AuthContext from "../../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import { Pet } from "../../../types/PetTypes";
@@ -186,12 +186,14 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  instanceDate?: string;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  instanceDate,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
@@ -207,15 +209,6 @@ const TaskDetailsModal = ({
   );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showRecurringDeleteModal, setShowRecurringDeleteModal] =
-    useState(false);
-  // FIX 2: Restored the missing `<` angle bracket for the useState generic type
-  const [deleteRecurringOption, setDeleteRecurringOption] = useState<
-    "single" | "series"
-  >("single");
-  const [isDeleting, setIsDeleting] = useState(false);
-
   const status = getTaskDetailedStatus(taskData, authenticatedUser);
 
   const isAdminOrBehaviourist =
@@ -295,80 +288,6 @@ const TaskDetailsModal = ({
 
     fetchData();
   }, [taskId, isOpen, toast, authenticatedUser]);
-
-  const handleDeleteClick = () => {
-    if (recurrenceData) {
-      setDeleteRecurringOption("single");
-      setShowRecurringDeleteModal(true);
-    } else {
-      setShowDeleteConfirm(true);
-    }
-  };
-
-  const handleDeleteSingle = async () => {
-    if (!taskData) return;
-    setIsDeleting(true);
-    try {
-      await TaskAPIClient.deleteTask(taskId);
-      toast({
-        title: "Success",
-        description: "Task deleted successfully.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-      setShowDeleteConfirm(false);
-      history.push(`/pet-profile/${taskData.petId}`, { refresh: Date.now() });
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete task.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteRecurring = async () => {
-    if (!taskData || isDeleting) return;
-    setIsDeleting(true);
-    try {
-      await TaskAPIClient.deleteRecurringTask(
-        taskId,
-        taskData.scheduledStartTime
-          ? new Date(taskData.scheduledStartTime).toISOString().split("T")[0]
-          : "",
-        deleteRecurringOption === "single",
-      );
-      toast({
-        title: "Success",
-        description:
-          deleteRecurringOption === "single"
-            ? "Task deleted successfully."
-            : "All recurring tasks deleted successfully.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-      setShowRecurringDeleteModal(false);
-      history.push(`/pet-profile/${taskData.petId}`, { refresh: Date.now() });
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete task.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -576,19 +495,13 @@ const TaskDetailsModal = ({
                       width="100%"
                       onClick={() =>
                         history.push(
-                          `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+                          `/pet-profile/${taskData?.petId}/edit-task/${taskId}${
+                            instanceDate ? `?date=${instanceDate}` : ""
+                          }`,
                         )
                       }
                     >
                       Edit Task
-                    </Button>
-                    <Button
-                      variant="red"
-                      size="medium"
-                      width="100%"
-                      onClick={handleDeleteClick}
-                    >
-                      Delete Task
                     </Button>
                   </Flex>
                 )}
@@ -647,158 +560,6 @@ const TaskDetailsModal = ({
         </ModalContent>
       </Modal>
 
-      <PopupModal
-        open={showDeleteConfirm}
-        title="Delete Task?"
-        message="Are you sure you want to delete this task? This process cannot be undone."
-        primaryButtonText="Delete"
-        primaryButtonColor="red"
-        onPrimaryClick={handleDeleteSingle}
-        secondaryButtonText="Cancel"
-        onSecondaryClick={() => setShowDeleteConfirm(false)}
-        isPrimaryLoading={isDeleting}
-      />
-
-      {showRecurringDeleteModal && (
-        <Flex
-          top="0"
-          left="0"
-          position="fixed"
-          height="100vh"
-          width="100vw"
-          bg="rgba(26, 32, 44, 0.6)"
-          zIndex="1500"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Flex
-            bg="white"
-            align="center"
-            direction="column"
-            gap={{ base: "1.25rem", md: "1.875rem" }}
-            width={{ base: "20.375rem", md: "33.625rem" }}
-            pt={{ base: "2rem", md: "3.6875rem" }}
-            pb={{ base: "2rem", md: "3.6875rem" }}
-            pl={{ base: "2rem", md: "3rem" }}
-            pr={{ base: "2rem", md: "3rem" }}
-            borderRadius="md"
-            boxShadow="lg"
-          >
-            <Text
-              textStyle={{ base: "h3", md: "h1" }}
-              color="blue.700"
-              textAlign="center"
-              m={0}
-            >
-              Delete Task?
-            </Text>
-
-            <Flex direction="column" gap="0.75rem" width="100%">
-              <Flex
-                align="center"
-                gap="0.75rem"
-                cursor="pointer"
-                onClick={() => setDeleteRecurringOption("single")}
-              >
-                <Flex
-                  boxSize="1.25rem"
-                  borderRadius="full"
-                  border="2px solid"
-                  borderColor={
-                    deleteRecurringOption === "single"
-                      ? "blue.500"
-                      : "gray.300"
-                  }
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                >
-                  {deleteRecurringOption === "single" && (
-                    <Flex
-                      boxSize="0.625rem"
-                      borderRadius="full"
-                      bg="blue.500"
-                    />
-                  )}
-                </Flex>
-                <Text
-                  textStyle={{ base: "bodyMobile", md: "body" }}
-                  color="gray.600"
-                  m={0}
-                >
-                  This task
-                </Text>
-              </Flex>
-
-              <Flex
-                align="center"
-                gap="0.75rem"
-                cursor="pointer"
-                onClick={() => setDeleteRecurringOption("series")}
-              >
-                <Flex
-                  boxSize="1.25rem"
-                  borderRadius="full"
-                  border="2px solid"
-                  borderColor={
-                    deleteRecurringOption === "series"
-                      ? "blue.500"
-                      : "gray.300"
-                  }
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                >
-                  {deleteRecurringOption === "series" && (
-                    <Flex
-                      boxSize="0.625rem"
-                      borderRadius="full"
-                      bg="blue.500"
-                    />
-                  )}
-                </Flex>
-                <Text
-                  textStyle={{ base: "bodyMobile", md: "body" }}
-                  color="gray.600"
-                  m={0}
-                >
-                  This and following tasks
-                </Text>
-              </Flex>
-            </Flex>
-
-            <Flex
-              width="100%"
-              height={{ base: "5rem", md: "3rem" }}
-              minH="2rem"
-              direction={{ base: "column-reverse", md: "row" }}
-              gap={{ base: "1rem", md: "1.5rem" }}
-              justifyContent="center"
-            >
-              <Button
-                variant="gray"
-                size="medium"
-                flex="1"
-                height={{ base: "2rem", md: "3rem" }}
-                onClick={() => setShowRecurringDeleteModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="red"
-                size="medium"
-                flex="1"
-                height={{ base: "2rem", md: "3rem" }}
-                onClick={handleDeleteRecurring}
-                isLoading={isDeleting}
-                disabled={isDeleting}
-              >
-                Delete
-              </Button>
-            </Flex>
-          </Flex>
-        </Flex>
-      )}
     </>
   );
 };
