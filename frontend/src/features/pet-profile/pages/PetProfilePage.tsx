@@ -1,6 +1,6 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -70,35 +70,36 @@ const PetProfilePage = (): React.ReactElement => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!petId || Number.isNaN(petId)) {
-        history.push("/not-found");
-        return;
-      }
+  const fetchTasks = useCallback(async () => {
+    if (!petId || Number.isNaN(petId)) {
+      history.push("/not-found");
+      return;
+    }
 
-      try {
-        const dateString = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
-          petId,
-          dateString,
-        );
-        const sortedTasks = [...fetchedTasks].sort(
-          (a, b) => sortTask(a) - sortTask(b),
-        );
-        setTasks(sortedTasks);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    };
+    try {
+      const dateString = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+      const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+        petId,
+        dateString,
+      );
+      const sortedTasks = [...fetchedTasks].sort(
+        (a, b) => sortTask(a) - sortTask(b),
+      );
+      setTasks(sortedTasks);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [petId, selectedDate, history]);
+
+  useEffect(() => {
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [fetchTasks, location.key]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -249,6 +250,7 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onTaskUpdated={fetchTasks}
         />
       )}
     </>

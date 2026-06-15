@@ -115,6 +115,26 @@ const assignUser = async (taskId: number, userId: number): Promise<void> => {
   }
 };
 
+const selfAssign = async (taskId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
+  if (userId == null) {
+    throw new Error("User ID not found in local storage");
+  }
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/assign-user`,
+      { userId: Number(userId) },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to self-assign task: ${error}`);
+  }
+};
+
 const createTask = async (payload: {
   userId: number | null;
   petId: number;
@@ -176,6 +196,7 @@ export default {
   getUserTasks,
   getPetTasks,
   assignUser,
+  selfAssign,
   createTask,
   createRecurringTask,
 };
