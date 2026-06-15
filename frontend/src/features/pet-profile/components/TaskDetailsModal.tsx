@@ -148,12 +148,14 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  onTaskUpdated?: () => void;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  onTaskUpdated,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
@@ -275,6 +277,7 @@ const TaskDetailsModal = ({
         isClosable: true,
       });
       await fetchData(false); // silent refresh so the modal reflects the new assigned state
+      onTaskUpdated?.(); // refresh the parent task table so the row reflects the assignment
     } catch (error) {
       toast({
         title: "Error",
@@ -544,6 +547,7 @@ const TaskDetailsModal = ({
 
       <PopupModal
         open={isConfirmOpen}
+        zIndex={1500}
         title="Confirmation"
         message="Are you sure you want to assign yourself this task? This process can not be undone."
         primaryButtonText="Assign to Me"

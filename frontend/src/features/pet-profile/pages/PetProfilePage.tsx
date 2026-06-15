@@ -249,10 +249,8 @@ const PetProfilePage = (): React.ReactElement => {
         <TaskDetailsModal
           taskId={selectedTaskId}
           isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            fetchTasks();
-          }}
+          onClose={() => setIsModalOpen(false)}
+          onTaskUpdated={fetchTasks}
         />
       )}
     </>
