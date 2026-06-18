@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
@@ -8,13 +8,14 @@ import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
 import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
 import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
-import TaskDetailsModal from "../components/TaskDetailsModal";
 
 interface PetProfileTaskTableSectionProps {
   petId: number;
@@ -94,10 +95,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
-        }}
+        onClick={() => onTaskClick(task.id)}
       >
         Start
       </Button>
@@ -165,70 +163,101 @@ const PetProfileTaskTableSection = ({
   authenticatedUser,
   onTaskClick,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
-  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-
   return (
     <Flex direction="column">
-      {tasks.map((task) => (
-        <Grid
-          key={task.id}
-          gridTemplateColumns={gridTemplateColumns}
-          padding="1rem 1.5rem"
-          alignItems="center"
-          borderBottom="1px solid"
-          borderColor="gray.200"
-          backgroundColor="white"
-          marginBottom="0.5rem"
-          marginTop="0.5rem"
-          borderRadius="0.75rem"
-          onClick={() => setSelectedTaskId(task.id)}
-          cursor="pointer"
-        >
-          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
-            <Icon
-              as={taskTypeIcons[task.category]}
-              boxSize="1.5rem"
-              flexShrink={0}
-            />
-            <Text textStyle="body" m={0} isTruncated>
-              {task.taskName}
+      {tasks.map((task) => {
+        const isMyTask = task.userId === authenticatedUser?.id;
+        const isVolunteerOrStaff =
+          authenticatedUser?.role === UserRoles.VOLUNTEER ||
+          authenticatedUser?.role === UserRoles.STAFF;
+        const hideAssigneeDetails = isVolunteerOrStaff && !isMyTask;
+
+        const renderAssignee = () => {
+          if (!task.assignedUser) {
+            return (
+              <>
+                <Flex
+                  boxSize="2.25rem"
+                  borderRadius="full"
+                  border="1px solid"
+                  borderColor="gray.300"
+                  alignItems="center"
+                  justifyContent="center"
+                  bg="gray.700"
+                  flexShrink={0}
+                >
+                  <Icon as={RoundQuestionMarkIcon} boxSize="1.25rem" />
+                </Flex>
+                <Text textStyle="body" m={0} isTruncated>
+                  Unassigned
+                </Text>
+              </>
+            );
+          }
+          if (hideAssigneeDetails) {
+            return <Icon as={OutlinedUserProfileIcon} boxSize="2.25rem" />;
+          }
+          return (
+            <>
+              <ProfilePhoto
+                image={task.assignedUser.profilePhoto ?? undefined}
+                size="small"
+                type="user"
+              />
+              <Text textStyle="body" m={0} isTruncated>
+                {isVolunteerOrStaff && isMyTask
+                  ? "Me"
+                  : `${task.assignedUser.firstName} ${task.assignedUser.lastName}`}
+              </Text>
+            </>
+          );
+        };
+
+        return (
+          <Grid
+            key={task.id}
+            gridTemplateColumns={gridTemplateColumns}
+            padding="1rem 1.5rem"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            backgroundColor="white"
+            marginBottom="0.5rem"
+            marginTop="0.5rem"
+            borderRadius="0.75rem"
+            onClick={() => onTaskClick(task.id)}
+            cursor="pointer"
+          >
+            <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+              <Icon
+                as={taskTypeIcons[task.category]}
+                boxSize="1.5rem"
+                flexShrink={0}
+              />
+              <Text textStyle="body" m={0} isTruncated>
+                {task.taskName}
+              </Text>
+            </Flex>
+            <Text textStyle="body" m={0}>
+              {task.scheduledStartTime
+                ? formatTimeFromISO(task.scheduledStartTime.toString())
+                : "—"}
             </Text>
-          </Flex>
-          <Text textStyle="body" m={0}>
-            {task.scheduledStartTime
-              ? formatTimeFromISO(task.scheduledStartTime.toString())
-              : "—"}
-          </Text>
-          <Text textStyle="body" m={0}>
-            {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
-          </Text>
-          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
-            <ProfilePhoto
-              image={task.assignedUser?.profilePhoto ?? undefined}
-              size="small"
-              type="user"
-            />
-            <Text textStyle="body" m={0} isTruncated>
-              {task.assignedUser
-                ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
-                : "Unassigned"}
+            <Text textStyle="body" m={0}>
+              {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
             </Text>
-          </Flex>
-          <StatusBadge
-            task={task}
-            petId={petId}
-            authenticatedUser={authenticatedUser}
-            onTaskClick={onTaskClick}
-          />
-        </Grid>
-      ))}
-      {selectedTaskId !== null && (
-        <TaskDetailsModal
-          taskId={selectedTaskId}
-          isOpen={selectedTaskId !== null}
-          onClose={() => setSelectedTaskId(null)}
-        />
-      )}
+            <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+              {renderAssignee()}
+            </Flex>
+            <StatusBadge
+              task={task}
+              petId={petId}
+              authenticatedUser={authenticatedUser}
+              onTaskClick={onTaskClick}
+            />
+          </Grid>
+        );
+      })}
     </Flex>
   );
 };
