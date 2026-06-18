@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
@@ -14,6 +14,7 @@ import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 
 interface PetProfileTaskTableSectionProps {
   petId: number;
@@ -93,7 +94,10 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
+        }}
       >
         Start
       </Button>
@@ -161,6 +165,8 @@ const PetProfileTaskTableSection = ({
   authenticatedUser,
   onTaskClick,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+
   return (
     <Flex direction="column">
       {tasks.map((task) => (
@@ -175,6 +181,8 @@ const PetProfileTaskTableSection = ({
           marginBottom="0.5rem"
           marginTop="0.5rem"
           borderRadius="0.75rem"
+          onClick={() => setSelectedTaskId(task.id)}
+          cursor="pointer"
         >
           <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
             <Icon
@@ -214,6 +222,13 @@ const PetProfileTaskTableSection = ({
           />
         </Grid>
       ))}
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={selectedTaskId !== null}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </Flex>
   );
 };
