@@ -76,7 +76,7 @@ const UserManagementPage = (): React.ReactElement => {
               }
             }
             return user;
-          })
+          }),
         );
         setUsers(usersWithPhotoUrls);
       }

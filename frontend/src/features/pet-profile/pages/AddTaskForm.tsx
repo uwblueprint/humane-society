@@ -180,7 +180,7 @@ const AddTaskForm = ({
   const handlePreviousPage = async () => {
     setCurrentStep(currentStep - 1);
   };
-  
+
   return (
     <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
       {/* Back Button */}

@@ -17,7 +17,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import { FemaleIcon, MaleIcon, PencilIcon } from "../../../assets/icons";
+import { PencilIcon } from "../../../assets/icons";
 import Button from "../../../components/common/Button";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Input from "../../../components/common/Input";
@@ -26,7 +26,12 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { PetRequestDTO, PetStatus, SexEnum, Pet } from "../../../types/PetTypes";
+import {
+  PetRequestDTO,
+  PetStatus,
+  SexEnum,
+  Pet,
+} from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
@@ -122,9 +127,11 @@ const EditPetProfilePage = (): React.ReactElement => {
   >(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
-  const [pet, setPet] = useState<Pet | undefined>(undefined)
+  const [pet, setPet] = useState<Pet | undefined>(undefined);
   const [editPetPhoto, setEditPetPhoto] = useState(false);
-  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<File | undefined>(undefined)
+  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<
+    File | undefined
+  >(undefined);
   const {
     isOpen: isDeleteConfirmModalOpen,
     onOpen: openDeleteConfirmModal,
@@ -180,7 +187,7 @@ const EditPetProfilePage = (): React.ReactElement => {
           const photoUrl = await PetAPIClient.getProfilePhotoUrl(petData.id);
           setLocalProfilePhoto(photoUrl);
         }
-        setPet(petData)
+        setPet(petData);
         let birthdayYear: string | undefined;
         let birthdayMonth: string | undefined;
         let birthdayDate: string | undefined;
@@ -208,12 +215,11 @@ const EditPetProfilePage = (): React.ReactElement => {
           birthdayYear: birthdayYear || "",
           birthdayMonth: birthdayMonth || "",
           birthdayDate: birthdayDate || "",
-          sex:
-            petData.sex === SexEnum.MALE
-              ? "Male"
-              : petData.sex === SexEnum.FEMALE
-              ? "Female"
-              : "--",
+          sex: (() => {
+            if (petData.sex === SexEnum.MALE) return "Male";
+            if (petData.sex === SexEnum.FEMALE) return "Female";
+            return "--";
+          })(),
           neutered: getSpayedNeuteredValue(petData.sex, petData.neutered),
           safetyInfo: petData.careInfo?.safetyInfo || "",
           managementInfo: petData.careInfo?.managementInfo || "",
@@ -240,15 +246,15 @@ const EditPetProfilePage = (): React.ReactElement => {
   }, [selectedBirthdayMonth, selectedBirthdayYear]);
 
   const handleEditPetPhoto = (file: File | null) => {
-    setEditPetPhoto(false)
+    setEditPetPhoto(false);
     if (file) {
-      setNewPetProfilePhoto(file)
+      setNewPetProfilePhoto(file);
       const preview = URL.createObjectURL(file);
       setLocalProfilePhoto(preview); // update UI preview
     } else {
       setLocalProfilePhoto(undefined); // default case
     }
-  }
+  };
 
   const onSubmit = async (data: FormData) => {
     // Only allow a user to progress if they have resolved all errors
@@ -331,7 +337,7 @@ const EditPetProfilePage = (): React.ReactElement => {
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
-      
+
       // Submit the pet profile photo
       if (newPetProfilePhoto) {
         await PetAPIClient.uploadProfilePhoto(
@@ -516,11 +522,6 @@ const EditPetProfilePage = (): React.ReactElement => {
     ),
   ];
   const sexOptions = ["--", "Male", "Female"];
-  const sexIcons = [
-    <Image key="unknown" src={MaleIcon} boxSize="1.2rem" />,
-    <Image key="male" src={MaleIcon} boxSize="1.2rem" />,
-    <Image key="female" src={FemaleIcon} boxSize="1.2rem" />,
-  ];
   const spayedNeuteredOptions = [
     "--",
     "Neutered",
@@ -619,14 +620,18 @@ const EditPetProfilePage = (): React.ReactElement => {
                         src={PencilIcon}
                         alt="edit"
                         style={{ stroke: "black" }}
-                        onClick={() => {setEditPetPhoto(true)}}
+                        onClick={() => {
+                          setEditPetPhoto(true);
+                        }}
                       />
-                      <ProfilePhotoModal 
-                      isOpen={editPetPhoto}
-                      profilePhoto={localProfilePhoto}
-                      onClose={() => { setEditPetPhoto(false) }}
-                      onConfirm={handleEditPetPhoto}
-                      type="pet"
+                      <ProfilePhotoModal
+                        isOpen={editPetPhoto}
+                        profilePhoto={localProfilePhoto}
+                        onClose={() => {
+                          setEditPetPhoto(false);
+                        }}
+                        onConfirm={handleEditPetPhoto}
+                        type="pet"
                       />
                     </Flex>
                   </Flex>
