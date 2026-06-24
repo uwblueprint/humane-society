@@ -39,6 +39,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
   isRecurring: boolean;
   taskName?: string;
   category?: TaskCategory;
+  petName?: string;
   assignedUser?: {
     id: number;
     firstName: string;
