@@ -58,22 +58,10 @@ const ProfilePage = (): React.ReactElement => {
 
           const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
           const isOwnPage = authenticatedUser?.id === userId;
-          const isViewedUserAdmin = data?.role === UserRoles.ADMIN;
-          const isViewedUserUnverified = data?.status === "Invited";
 
           if (!isAdmin && !isOwnPage) {
             history.push("/not-found");
             return;
-          }
-
-          setUserData(data);
-
-          if (
-            (isAdmin && isViewedUserAdmin && !isOwnPage) ||
-            isViewedUserUnverified
-          ) {
-            setTasks([]);
-            setLoading(false);
           }
 
           setUserData(data);
@@ -102,13 +90,31 @@ const ProfilePage = (): React.ReactElement => {
         return;
       }
 
+      if (!userData) return;
+
+      const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
+      const isOwnPage = authenticatedUser?.id === userId;
+      const isViewedUserAdmin = userData.role === UserRoles.ADMIN;
+      const isViewedUserUnverified = userData.status === "Invited";
+
+      if (
+        (isAdmin && isViewedUserAdmin && !isOwnPage) ||
+        isViewedUserUnverified
+      ) {
+        setTasks([]);
+        return;
+      }
+
       try {
         const dateString = [
           selectedDate.getFullYear(),
           String(selectedDate.getMonth() + 1).padStart(2, "0"),
           String(selectedDate.getDate()).padStart(2, "0"),
         ].join("-");
-        const fetchedTasks = await TaskAPIClient.getTasksByDate(dateString, userId);
+        const fetchedTasks = await TaskAPIClient.getTasksByDate(
+          dateString,
+          userId,
+        );
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
@@ -119,7 +125,7 @@ const ProfilePage = (): React.ReactElement => {
     };
     fetchTasks();
     setLoading(false);
-  }, [userId, selectedDate, history, userData]);
+  }, [userId, selectedDate, history, userData, authenticatedUser]);
 
   let content;
   if (loading) {
