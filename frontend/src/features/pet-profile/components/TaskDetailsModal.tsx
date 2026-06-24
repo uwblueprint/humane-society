@@ -8,6 +8,7 @@ import {
   Modal,
   ModalBody,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spinner,
@@ -57,7 +58,6 @@ const isPastDay = (dateStr?: string) => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
   const now = new Date();
-  // Compare dates only (ignoring time)
   return (
     new Date(date.getFullYear(), date.getMonth(), date.getDate()) <
     new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -199,13 +199,15 @@ const TaskDetailsModal = ({
   const [templateData, setTemplateData] = useState<Task | null>(null);
   const [petData, setPetData] = useState<Pet | null>(null);
   const [assigneeData, setAssigneeData] = useState<User | null>(null);
-  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
-    null,
-  );
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
 
   const status = getTaskDetailedStatus(taskData, authenticatedUser);
+
+  const isAdminOrBehaviourist =
+    authenticatedUser?.role === UserRoles.ADMIN ||
+    authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const isVolunteerOrStaff =
     authenticatedUser?.role === UserRoles.VOLUNTEER ||
@@ -223,7 +225,6 @@ const TaskDetailsModal = ({
     (t) => t.startTime && !t.endTime && !isPastDay(t.scheduledStartTime),
   );
 
-  // Indicates if all assigned tasks for the user on the current day are complete
   const hasCompletedAllAssignedTasks = userTasks.every(
     (t) => !isToday(t.scheduledStartTime) || !!t.endTime,
   );
@@ -321,11 +322,90 @@ const TaskDetailsModal = ({
     return "Recurring";
   };
 
+  const renderActions = () => {
+    if (isAdminOrBehaviourist) {
+      return (
+        <Flex direction="column" gap="1rem" width="100%">
+          {status === null && (
+            <Button variant="dark-blue" size="medium" width="100%">
+              Assign
+            </Button>
+          )}
+          {status === "Assigned" && (
+            <Button variant="dark-blue" size="medium" width="100%">
+              Reassign
+            </Button>
+          )}
+          {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
+            <Button variant="dark-blue" size="medium" width="100%">
+              Complete Task
+            </Button>
+          )}
+          <Button variant="blue-outline" size="medium" width="100%">
+            Edit Task
+          </Button>
+        </Flex>
+      );
+    }
+
+    if (isVolunteerOrStaff) {
+    // Volunteer and Staff Task Actions
+      return (
+        <Flex direction="column" gap="1rem" width="100%">
+          {status === null && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              disabled={
+                !!isPastDay(taskData?.scheduledStartTime) ||
+                !userQualifiesForPet(authenticatedUser, petData) ||
+                !hasCompletedAllAssignedTasks
+              }
+            >
+              Assign to Me
+            </Button>
+          )}
+          {status === "Assigned" && isToday(taskData?.scheduledStartTime) && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              disabled={isPetOccupied || hasInProgressTask}
+            >
+              Start
+            </Button>
+          )}
+          {status === "In-Progress" && (
+            <Flex gap="1rem">
+              <Button variant="blue-outline" size="medium" width="100%">
+                Restart
+              </Button>
+              <Button variant="dark-blue" size="medium" width="100%">
+                Complete Task
+              </Button>
+            </Flex>
+          )}
+        </Flex>
+      );
+    }
+
+    return null;
+  };
+
+  const actions = renderActions();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent bg="gray.50" maxHeight="min(831px, calc(100vh - 8rem))">
-        <ModalHeader paddingBlock="2rem" paddingInline="2.5rem">
+      <ModalContent
+        bg="gray.50"
+        maxHeight="min(831px, calc(100vh - 8rem))"
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+      >
+        <ModalHeader paddingBlock="2rem" paddingInline="2.5rem" flexShrink={0}>
           <Flex align="center" justify="space-between">
             <Flex align="center" gap="1rem">
               {templateData && (
@@ -348,197 +428,138 @@ const TaskDetailsModal = ({
           </Flex>
         </ModalHeader>
 
-        <Flex direction="column" height="100%" overflowY="auto">
-          <ModalBody
-            flex="1"
-            display="flex"
-            flexDirection="column"
-            gap="2rem"
-            paddingTop="0"
-            paddingBottom="2.5rem"
-            paddingInline="2.5rem"
-            overflowY="auto"
-          >
-            {/* Task For Section */}
-            <Flex flexDirection="column" gap="1rem">
-              <Text textStyle="h3" fontWeight="600" m={0}>
-                Task for
+        <ModalBody
+          flex="1"
+          display="flex"
+          flexDirection="column"
+          gap="2rem"
+          paddingTop="0"
+          paddingBottom="1rem"
+          paddingInline="2.5rem"
+          overflowY="auto"
+        >
+          {/* Task For Section */}
+          <Flex flexDirection="column" gap="1rem">
+            <Text textStyle="h3" fontWeight="600" m={0}>
+              Task for
+            </Text>
+            <Flex align="center" gap="1rem">
+              <ProfilePhoto
+                image={petData?.photo}
+                color={petData ? colorLevelMap[petData.colorLevel] : undefined}
+                size="small"
+                type="pet"
+                showColorBorder
+              />
+              <Text textStyle="body" m={0}>
+                {petData?.name}
               </Text>
-              <Flex align="center" gap="1rem">
-                <ProfilePhoto
-                  image={petData?.photo}
-                  color={
-                    petData ? colorLevelMap[petData.colorLevel] : undefined
-                  }
-                  size="small"
-                  type="pet"
-                  showColorBorder
-                />
-                <Text textStyle="body" m={0}>
-                  {petData?.name}
+            </Flex>
+          </Flex>
+           {/* Task Instructions Section */}
+          <Flex flexDirection="column" gap="1rem">
+            <Text textStyle="h3" fontWeight="600" m={0}>
+              Task Instructions
+            </Text>
+            <Text color="gray.700" marginBottom="0" textStyle="body">
+              {templateData?.instructions || "No instructions to display."}
+            </Text>
+          </Flex>
+           {/* Schedule Section */}
+          <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
+            <GridItem>
+              <Flex flexDirection="column" gap="1rem">
+                <Text textStyle="h3" fontWeight="600" m={0}>
+                  Start Date
+                </Text>
+                <Text textStyle="body" margin="0">
+                  {formatDate(taskData?.scheduledStartTime)}
                 </Text>
               </Flex>
-            </Flex>
+            </GridItem>
+            <GridItem>
+              <Flex flexDirection="column" gap="1rem">
+                <Text textStyle="h3" fontWeight="600" m={0}>
+                  End Date
+                </Text>
+                <Text textStyle="body" margin="0">
+                  {formatDate(recurrenceData?.endDate)}
+                </Text>
+              </Flex>
+            </GridItem>
+            <GridItem>
+              <Flex flexDirection="column" gap="1rem">
+                <Text textStyle="h3" fontWeight="600" m={0}>
+                  Time Start
+                </Text>
+                <Text textStyle="body" margin="0">
+                  {formatTime(taskData?.scheduledStartTime)}
+                </Text>
+              </Flex>
+            </GridItem>
+            <GridItem>
+              <Flex flexDirection="column" gap="1rem">
+                <Text textStyle="h3" fontWeight="600" m={0}>
+                  Time End
+                </Text>
+                <Text textStyle="body" margin="0">
+                  {formatTime(taskData?.endTime)}
+                </Text>
+              </Flex>
+            </GridItem>
+            {recurrenceData && (
+              <>
+                <GridItem>
+                  <Flex flexDirection="column" gap="1rem">
+                    <Text textStyle="h3" fontWeight="600" m={0}>
+                      Recurrence
+                    </Text>
+                    <Text textStyle="body" margin="0">
+                      {getRecurrenceDisplay()}
+                    </Text>
+                  </Flex>
+                </GridItem>
+                <GridItem>
+                  <Flex flexDirection="column" gap="1rem">
+                    <Text textStyle="h3" fontWeight="600" m={0}>
+                      Cadence
+                    </Text>
+                    <Text textStyle="body" margin="0">
+                      {recurrenceData.cadence || "-"}
+                    </Text>
+                  </Flex>
+                </GridItem>
+              </>
+            )}
+          </Grid>
+        </ModalBody>
 
-            {/* Task Instructions Section */}
-            <Flex flexDirection="column" gap="1rem">
-              <Text textStyle="h3" fontWeight="600" m={0}>
-                Task Instructions
-              </Text>
-              <Text color="gray.700" marginBottom="0" textStyle="body">
-                {templateData?.instructions || "No instructions to display."}
-              </Text>
-            </Flex>
+        <ModalFooter
+          paddingInline="2.5rem"
+          paddingBottom="2.5rem"
+          paddingTop="1rem"
+          flexShrink={0}
+          bg="gray.50"
+          borderTop="1px solid"
+          borderColor="gray.200"
+          flexDirection="column"
+          gap="1rem"
+          alignItems="stretch"
+        >
+        {/* Assigned To Section */}
 
-            {/* Schedule Section */}
-            <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
-              <GridItem>
-                <Flex flexDirection="column" gap="1rem">
-                  <Text textStyle="h3" fontWeight="600" m={0}>
-                    Start Date
-                  </Text>
-                  <Text textStyle="body" margin="0">
-                    {formatDate(taskData?.scheduledStartTime)}
-                  </Text>
-                </Flex>
-              </GridItem>
-              <GridItem>
-                <Flex flexDirection="column" gap="1rem">
-                  <Text textStyle="h3" fontWeight="600" m={0}>
-                    End Date
-                  </Text>
-                  <Text textStyle="body" margin="0">
-                    {formatDate(recurrenceData?.endDate)}
-                  </Text>
-                </Flex>
-              </GridItem>
-
-              <GridItem>
-                <Flex flexDirection="column" gap="1rem">
-                  <Text textStyle="h3" fontWeight="600" m={0}>
-                    Time Start
-                  </Text>
-                  <Text textStyle="body" margin="0">
-                    {formatTime(taskData?.scheduledStartTime)}
-                  </Text>
-                </Flex>
-              </GridItem>
-              <GridItem>
-                <Flex flexDirection="column" gap="1rem">
-                  <Text textStyle="h3" fontWeight="600" m={0}>
-                    Time End
-                  </Text>
-                  <Text textStyle="body" margin="0">
-                    {formatTime(taskData?.endTime)}
-                  </Text>
-                </Flex>
-              </GridItem>
-
-              {recurrenceData && (
-                <>
-                  <GridItem>
-                    <Flex flexDirection="column" gap="1rem">
-                      <Text textStyle="h3" fontWeight="600" m={0}>
-                        Recurrence
-                      </Text>
-                      <Text textStyle="body" margin="0">
-                        {getRecurrenceDisplay()}
-                      </Text>
-                    </Flex>
-                  </GridItem>
-                  <GridItem>
-                    <Flex flexDirection="column" gap="1rem">
-                      <Text textStyle="h3" fontWeight="600" m={0}>
-                        Cadence
-                      </Text>
-                      <Text textStyle="body" margin="0">
-                        {recurrenceData.cadence || "-"}
-                      </Text>
-                    </Flex>
-                  </GridItem>
-                </>
-              )}
-            </Grid>
-
-            <Flex flexDirection="column" gap="1rem">
-              {/* Assigned To Section */}
-              <Text textStyle="h3" fontWeight="600" m={0}>
-                Assigned to
-              </Text>
-              <AssigneeDisplay
-                assigneeData={assigneeData}
-                authenticatedUser={authenticatedUser}
-                taskData={taskData}
-              />
-
-              {/* Admin and Behaviourist Task Actions */}
-              {(authenticatedUser?.role === UserRoles.ADMIN ||
-                authenticatedUser?.role === UserRoles.BEHAVIOURIST) && (
-                <Flex direction="column" gap="1rem">
-                  {status === null && (
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Assign
-                    </Button>
-                  )}
-                  {status === "Assigned" && (
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Reassign
-                    </Button>
-                  )}
-                  {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Complete Task
-                    </Button>
-                  )}
-                  <Button variant="blue-outline" size="medium" width="100%">
-                    Edit Task
-                  </Button>
-                </Flex>
-              )}
-
-              {/* Volunteer and Staff Task Actions */}
-              {isVolunteerOrStaff && (
-                <Flex direction="column" gap="1rem">
-                  {status === null && (
-                    <Button
-                      variant="dark-blue"
-                      size="medium"
-                      width="100%"
-                      disabled={
-                        isPastDay(taskData?.scheduledStartTime) ||
-                        !userQualifiesForPet(authenticatedUser, petData) ||
-                        !hasCompletedAllAssignedTasks
-                      }
-                    >
-                      Assign to Me
-                    </Button>
-                  )}
-                  {status === "Assigned" &&
-                    isToday(taskData?.scheduledStartTime) && (
-                      <Button
-                        variant="dark-blue"
-                        size="medium"
-                        width="100%"
-                        disabled={isPetOccupied || hasInProgressTask}
-                      >
-                        Start
-                      </Button>
-                    )}
-                  {status === "In-Progress" && (
-                    <Flex gap="1rem">
-                      <Button variant="blue-outline" size="medium" width="100%">
-                        Restart
-                      </Button>
-                      <Button variant="dark-blue" size="medium" width="100%">
-                        Complete Task
-                      </Button>
-                    </Flex>
-                  )}
-                </Flex>
-              )}
-            </Flex>
-          </ModalBody>
-        </Flex>
+          <Flex flexDirection="column" gap="1rem">
+            <Text textStyle="h3" fontWeight="600" m={0}>
+              Assigned to
+            </Text>
+            <AssigneeDisplay
+              assigneeData={assigneeData}
+              authenticatedUser={authenticatedUser}
+              taskData={taskData}
+            />
+          </Flex>
+          {actions}
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
 
 interface PetProfileTaskTableSectionProps {
@@ -35,7 +36,8 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           history.push(`/pet-profile/${petId}/assign-task/${task.id}`);
         }}
       >
@@ -56,6 +58,8 @@ const PetProfileTaskTableSection = ({
   tasks,
   gridTemplateColumns,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+
   return (
     <Flex direction="column">
       {tasks.map((task) => (
@@ -70,6 +74,8 @@ const PetProfileTaskTableSection = ({
           marginBottom="0.5rem"
           marginTop="0.5rem"
           borderRadius="0.75rem"
+          onClick={() => setSelectedTaskId(task.id)}
+          cursor="pointer"
         >
           <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
             <Icon
@@ -104,6 +110,13 @@ const PetProfileTaskTableSection = ({
           <StatusBadge task={task} petId={petId} />
         </Grid>
       ))}
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={selectedTaskId !== null}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </Flex>
   );
 };
