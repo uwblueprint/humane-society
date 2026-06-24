@@ -1,16 +1,11 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
-import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
 
 interface PetProfileTaskTableSectionProps {
   petId: number;
@@ -56,15 +51,6 @@ const StatusBadge = ({
   return <></>;
 };
 
-const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
-  [TaskCategory.WALK]: WalkIcon,
-  [TaskCategory.GAMES]: GamesIcon,
-  [TaskCategory.PEN_TIME]: PenTimeIcon,
-  [TaskCategory.HUSBANDRY]: HusbandryIcon,
-  [TaskCategory.TRAINING]: TrainingIcon,
-  [TaskCategory.MISC]: MiscIcon,
-};
-
 const PetProfileTaskTableSection = ({
   petId,
   tasks,
@@ -87,7 +73,7 @@ const PetProfileTaskTableSection = ({
         >
           <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
             <Icon
-              as={taskTypeIcons[task.category]}
+              as={taskCategoryIcons[task.category]}
               boxSize="1.5rem"
               flexShrink={0}
             />

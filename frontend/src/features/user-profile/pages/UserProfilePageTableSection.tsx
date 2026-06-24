@@ -1,14 +1,9 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
-import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
+import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
 
 interface UserProfilePageTableSectionProps {
   tasks: ScheduledTaskDTO[];
@@ -34,15 +29,6 @@ const getStatusBadge = (task: ScheduledTaskDTO) => {
     </Button>
   );
 };
-const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
-  [TaskCategory.WALK]: WalkIcon,
-  [TaskCategory.GAMES]: GamesIcon,
-  [TaskCategory.PEN_TIME]: PenTimeIcon,
-  [TaskCategory.HUSBANDRY]: HusbandryIcon,
-  [TaskCategory.TRAINING]: TrainingIcon,
-  [TaskCategory.MISC]: MiscIcon,
-};
-
 const UserProfilePageTableSection = ({
   tasks,
   gridTemplateColumns,
@@ -63,7 +49,7 @@ const UserProfilePageTableSection = ({
           borderRadius="0.75rem"
         >
           <Flex align="center" gap="0.75rem">
-            <Icon as={taskTypeIcons[task.category]} boxSize="1.5rem" />
+            <Icon as={taskCategoryIcons[task.category]} boxSize="1.5rem" />
             <Text textStyle="body" m={0}>
               {task.taskName}
             </Text>
