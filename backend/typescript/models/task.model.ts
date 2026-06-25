@@ -48,6 +48,9 @@ export default class Task extends Model {
   scheduled_start_time?: Date;
 
   @Column({})
+  scheduled_end_time?: Date;
+
+  @Column({})
   start_time?: Date;
 
   @Column({})
