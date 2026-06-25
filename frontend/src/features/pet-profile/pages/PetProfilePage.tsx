@@ -62,7 +62,9 @@ const PetProfilePage = (): React.ReactElement => {
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const [petData, setPetData] = useState<Pet | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

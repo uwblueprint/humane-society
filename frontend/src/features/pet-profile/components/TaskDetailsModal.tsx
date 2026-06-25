@@ -55,7 +55,6 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.MISC]: MiscIcon,
 };
 
-// FIX 1: Restored the missing `<` operator in the comparison
 const isPastDay = (dateStr?: string): boolean => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
@@ -513,7 +512,6 @@ const TaskDetailsModal = ({
                         variant="dark-blue"
                         size="medium"
                         width="100%"
-                        // FIX 3: isPastDay now correctly returns boolean, resolving the type mismatch
                         disabled={
                           isPastDay(taskData?.scheduledStartTime) ||
                           !userQualifiesForPet(authenticatedUser, petData) ||
@@ -543,11 +541,7 @@ const TaskDetailsModal = ({
                         >
                           Restart
                         </Button>
-                        <Button
-                          variant="dark-blue"
-                          size="medium"
-                          width="100%"
-                        >
+                        <Button variant="dark-blue" size="medium" width="100%">
                           Complete Task
                         </Button>
                       </Flex>
@@ -559,7 +553,6 @@ const TaskDetailsModal = ({
           </Flex>
         </ModalContent>
       </Modal>
-
     </>
   );
 };

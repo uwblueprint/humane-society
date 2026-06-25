@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -922,21 +922,28 @@ class TaskService implements ITaskService {
   ): Promise<void> {
     try {
       const normalizedDate = resetDateToUTCMidnight(date);
-      const whereClause: Record<string, unknown> = {
-        task_template_id: taskTemplateId,
-        pet_id: petId,
-        scheduled_start_time: {
-          [Op.gte]: normalizedDate,
+      const idConditions: unknown[] = [
+        {
+          [Op.notIn]: Sequelize.literal(
+            "(SELECT task_id FROM recurrence_tasks)",
+          ),
         },
-      };
+      ];
 
       if (excludeTaskId) {
-        whereClause.id = {
-          [Op.ne]: excludeTaskId,
-        };
+        idConditions.push({ [Op.ne]: excludeTaskId });
       }
 
-      await PgTask.destroy({ where: whereClause });
+      await PgTask.destroy({
+        where: {
+          task_template_id: taskTemplateId,
+          pet_id: petId,
+          scheduled_start_time: {
+            [Op.gte]: normalizedDate,
+          },
+          id: { [Op.and]: idConditions },
+        },
+      });
     } catch (error: unknown) {
       Logger.error(
         `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
