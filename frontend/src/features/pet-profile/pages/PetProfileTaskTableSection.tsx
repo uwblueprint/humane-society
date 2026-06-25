@@ -73,6 +73,9 @@ const PetProfileTaskTableSection = ({
   gridTemplateColumns,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedInstanceDate, setSelectedInstanceDate] = useState<
+    string | undefined
+  >(undefined);
 
   return (
     <Flex direction="column">
@@ -88,7 +91,10 @@ const PetProfileTaskTableSection = ({
           marginBottom="0.5rem"
           marginTop="0.5rem"
           borderRadius="0.75rem"
-          onClick={() => setSelectedTaskId(task.id)}
+          onClick={() => {
+            setSelectedTaskId(task.id);
+            setSelectedInstanceDate(task.scheduledStartTime?.toString());
+          }}
           cursor="pointer"
         >
           <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
@@ -129,6 +135,7 @@ const PetProfileTaskTableSection = ({
           taskId={selectedTaskId}
           isOpen={selectedTaskId !== null}
           onClose={() => setSelectedTaskId(null)}
+          instanceDate={selectedInstanceDate}
         />
       )}
     </Flex>

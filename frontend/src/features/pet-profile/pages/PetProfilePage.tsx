@@ -62,7 +62,9 @@ const PetProfilePage = (): React.ReactElement => {
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const [petData, setPetData] = useState<Pet | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -220,6 +222,19 @@ const PetProfilePage = (): React.ReactElement => {
                   petId={petData.id}
                   petName={petData.name}
                   petColorLevel={petData.colorLevel}
+                />
+              )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+            <PrivateRoute
+              path={`${url}/edit-task/:taskId`}
+              component={() => (
+                <AddTaskForm
+                  petId={petData.id}
+                  petName={petData.name}
+                  petColorLevel={petData.colorLevel}
+                  isEditMode
                 />
               )}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}

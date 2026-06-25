@@ -240,7 +240,7 @@ const EditPetProfilePage = (): React.ReactElement => {
     } else {
       setLocalProfilePhoto(undefined); // default case
     }
-  }
+  };
 
   const onSubmit = async (data: FormData) => {
     // Only allow a user to progress if they have resolved all errors
@@ -321,7 +321,7 @@ const EditPetProfilePage = (): React.ReactElement => {
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
-      
+
       // Submit the pet profile photo
       if (newPetProfilePhoto) {
         await PetAPIClient.uploadProfilePhoto(

@@ -16,11 +16,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+
 import AuthContext from "../../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import { Pet } from "../../../types/PetTypes";
@@ -54,7 +56,7 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.MISC]: MiscIcon,
 };
 
-const isPastDay = (dateStr?: string) => {
+const isPastDay = (dateStr?: string): boolean => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
   const now = new Date();
@@ -184,25 +186,29 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  instanceDate?: string;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  instanceDate,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
+  const history = useHistory();
 
   const [loading, setLoading] = useState(true);
   const [taskData, setTaskData] = useState<PetTask | null>(null);
   const [templateData, setTemplateData] = useState<Task | null>(null);
   const [petData, setPetData] = useState<Pet | null>(null);
   const [assigneeData, setAssigneeData] = useState<User | null>(null);
-  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
+    null,
+  );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
-
   const status = getTaskDetailedStatus(taskData, authenticatedUser);
 
   const isAdminOrBehaviourist =
@@ -341,7 +347,18 @@ const TaskDetailsModal = ({
               Complete Task
             </Button>
           )}
-          <Button variant="blue-outline" size="medium" width="100%">
+          <Button
+            variant="blue-outline"
+            size="medium"
+            width="100%"
+            onClick={() =>
+              history.push(
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}${
+                  instanceDate ? `?date=${instanceDate}` : ""
+                }`,
+              )
+            }
+          >
             Edit Task
           </Button>
         </Flex>
@@ -349,7 +366,7 @@ const TaskDetailsModal = ({
     }
 
     if (isVolunteerOrStaff) {
-    // Volunteer and Staff Task Actions
+      // Volunteer and Staff Task Actions
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
@@ -456,7 +473,7 @@ const TaskDetailsModal = ({
               </Text>
             </Flex>
           </Flex>
-           {/* Task Instructions Section */}
+          {/* Task Instructions Section */}
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task Instructions
@@ -465,7 +482,7 @@ const TaskDetailsModal = ({
               {templateData?.instructions || "No instructions to display."}
             </Text>
           </Flex>
-           {/* Schedule Section */}
+          {/* Schedule Section */}
           <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
             <GridItem>
               <Flex flexDirection="column" gap="1rem">
@@ -546,7 +563,7 @@ const TaskDetailsModal = ({
           gap="1rem"
           alignItems="stretch"
         >
-        {/* Assigned To Section */}
+          {/* Assigned To Section */}
 
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
