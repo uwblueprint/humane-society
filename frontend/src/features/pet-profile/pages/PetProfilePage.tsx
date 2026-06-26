@@ -22,6 +22,7 @@ import AddTaskForm from "./AddTaskForm";
 import { TableColumn, TableHeader } from "../../../components/common/table";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
@@ -62,8 +63,12 @@ const PetProfilePage = (): React.ReactElement => {
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const [petData, setPetData] = useState<Pet | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(true);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -148,6 +153,11 @@ const PetProfilePage = (): React.ReactElement => {
         petId={petId}
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
+        authenticatedUser={authenticatedUser}
+        onTaskClick={(taskId) => {
+          setSelectedTaskId(taskId);
+          setIsModalOpen(true);
+        }}
       />
     );
   }
@@ -234,6 +244,13 @@ const PetProfilePage = (): React.ReactElement => {
           </Switch>
         </Flex>
       </Flex>
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </>
   );
 };
