@@ -59,7 +59,7 @@ jobs:
 
       - name: Install Node.js dependencies
         if: steps.changes.outputs.frontend == 'true' || steps.changes.outputs.typescript-backend == 'true'
-        run: yarn --cwd ./frontend --prefer-offline && yarn --cwd ./backend/typescript --prefer-offline
+        run: yarn --cwd ./frontend --frozen-lockfile --prefer-offline && yarn --cwd ./backend/typescript --frozen-lockfile --prefer-offline
 
       - name: Lint frontend
         if: steps.changes.outputs.frontend == 'true'
