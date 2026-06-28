@@ -1,5 +1,6 @@
 import { Flex, Icon, SimpleGrid, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { ReactComponent as ExpandIcon } from "../../../assets/icons/expand.svg";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -38,6 +39,7 @@ export const PetListTableSection = ({
     taskCategories.slice(0, 4);
   const getExtraTasks = (taskCategories: TaskCategory[]) =>
     taskCategories.length > 4 ? `+${taskCategories.length - 4}` : null;
+  const history = useHistory();
 
   return (
     <Tbody>
@@ -67,6 +69,9 @@ export const PetListTableSection = ({
             borderTop="1px solid"
             borderBottom="1px solid"
             borderColor="gray.200"
+            cursor="pointer"
+            onClick={() => history.push(`/pet-profile/${pet.id}`)}
+            _hover={{ backgroundColor: "gray.50" }}
           >
             <Td pl="2.625rem" pr="2rem" py="1rem">
               {/* Pet & Status */}
