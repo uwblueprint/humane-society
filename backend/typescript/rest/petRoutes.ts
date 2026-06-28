@@ -74,6 +74,7 @@ petRouter.delete("/:id", async (req, res) => {
 
   try {
     const deletedId = await petService.deletePet(id);
+    await logInteraction(req);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
@@ -290,6 +291,21 @@ petRouter.get("/:id", async (req, res) => {
     } else {
       res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
+  }
+});
+
+/* Change pet name by id */
+petRouter.patch("/:id/name", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      name: req.body.name,
+    } as Partial<PetRequestDTO>);
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
   }
 });
 
