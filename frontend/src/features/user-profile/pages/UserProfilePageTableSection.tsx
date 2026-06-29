@@ -1,5 +1,6 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
@@ -10,29 +11,38 @@ interface UserProfilePageTableSectionProps {
   gridTemplateColumns: string;
 }
 
-const getStatusBadge = (task: ScheduledTaskDTO) => {
-  let label = "Assigned";
-  if (task.scheduledStartTime) {
-    const d = new Date(task.scheduledStartTime);
-    const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-
-    if (task.endTime && new Date(task.endTime) < midnight) {
-      label = "Completed";
-    } else if (new Date() >= midnight) {
-      label = "Incomplete";
-    }
-  }
-
-  return (
-    <Button as="button" variant="gray-shaded" size="medium" type="button">
-      {label}
-    </Button>
-  );
-};
 const UserProfilePageTableSection = ({
   tasks,
   gridTemplateColumns,
 }: UserProfilePageTableSectionProps): React.ReactElement => {
+  const history = useHistory();
+
+  const getStatusBadge = (task: ScheduledTaskDTO) => {
+    let label = "Assigned";
+    if (task.scheduledStartTime) {
+      const d = new Date(task.scheduledStartTime);
+      const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+
+      if (task.endTime && new Date(task.endTime) < midnight) {
+        label = "Completed";
+      } else if (new Date() >= midnight) {
+        label = "Incomplete";
+      }
+    }
+
+    return (
+      <Button
+        as="button"
+        variant="gray-shaded"
+        size="medium"
+        type="button"
+        onClick={() => history.push(`/pet-profile/${task.petId}`)}
+      >
+        {label}
+      </Button>
+    );
+  };
+
   return (
     <Flex direction="column">
       {tasks.map((task) => (
