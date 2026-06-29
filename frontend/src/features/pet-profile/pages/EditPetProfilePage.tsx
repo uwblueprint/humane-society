@@ -26,7 +26,12 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { PetRequestDTO, PetStatus, SexEnum, Pet } from "../../../types/PetTypes";
+import {
+  PetRequestDTO,
+  PetStatus,
+  SexEnum,
+  Pet,
+} from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
@@ -119,9 +124,11 @@ const EditPetProfilePage = (): React.ReactElement => {
   >(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
-  const [pet, setPet] = useState<Pet | undefined>(undefined)
+  const [pet, setPet] = useState<Pet | undefined>(undefined);
   const [editPetPhoto, setEditPetPhoto] = useState(false);
-  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<File | undefined>(undefined)
+  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<
+    File | undefined
+  >(undefined);
   const {
     isOpen: isDeleteConfirmModalOpen,
     onOpen: openDeleteConfirmModal,
@@ -177,7 +184,7 @@ const EditPetProfilePage = (): React.ReactElement => {
           const photoUrl = await PetAPIClient.getProfilePhotoUrl(petData.id);
           setLocalProfilePhoto(photoUrl);
         }
-        setPet(petData)
+        setPet(petData);
         let birthdayYear: string | undefined;
         let birthdayMonth: string | undefined;
         let birthdayDate: string | undefined;
@@ -232,9 +239,9 @@ const EditPetProfilePage = (): React.ReactElement => {
   }, [selectedBirthdayMonth, selectedBirthdayYear]);
 
   const handleEditPetPhoto = (file: File | null) => {
-    setEditPetPhoto(false)
+    setEditPetPhoto(false);
     if (file) {
-      setNewPetProfilePhoto(file)
+      setNewPetProfilePhoto(file);
       const preview = URL.createObjectURL(file);
       setLocalProfilePhoto(preview); // update UI preview
     } else {
@@ -604,14 +611,18 @@ const EditPetProfilePage = (): React.ReactElement => {
                         src={PencilIcon}
                         alt="edit"
                         style={{ stroke: "black" }}
-                        onClick={() => {setEditPetPhoto(true)}}
+                        onClick={() => {
+                          setEditPetPhoto(true);
+                        }}
                       />
-                      <ProfilePhotoModal 
-                      isOpen={editPetPhoto}
-                      profilePhoto={localProfilePhoto}
-                      onClose={() => { setEditPetPhoto(false) }}
-                      onConfirm={handleEditPetPhoto}
-                      type="pet"
+                      <ProfilePhotoModal
+                        isOpen={editPetPhoto}
+                        profilePhoto={localProfilePhoto}
+                        onClose={() => {
+                          setEditPetPhoto(false);
+                        }}
+                        onConfirm={handleEditPetPhoto}
+                        type="pet"
                       />
                     </Flex>
                   </Flex>

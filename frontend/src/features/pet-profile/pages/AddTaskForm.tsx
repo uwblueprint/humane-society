@@ -210,8 +210,6 @@ const AddTaskForm = ({
     }
     const scheduledEndTime = scheduledEndDate.toISOString();
 
-    const userId = selectedUser?.id ?? null;
-
     try {
       if (isEditMode) {
         await TaskAPIClient.updateTask(Number(taskId), {
