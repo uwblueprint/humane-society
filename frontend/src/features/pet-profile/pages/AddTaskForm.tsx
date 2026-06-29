@@ -1,14 +1,15 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import Button from "../../../components/common/Button";
 import AddTaskTemplateSelection from "../components/add-task-form/TaskTemplateSelection";
 import AddTaskForm2 from "../components/add-task-form/AddTaskForm2";
 import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
+import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
 
@@ -16,18 +17,22 @@ interface AddTaskFormProps {
   petId: number;
   petName: string;
   petColorLevel: number;
+  isEditMode?: boolean;
 }
 
 const AddTaskForm = ({
   petId,
   petName,
   petColorLevel,
+  isEditMode = false,
 }: AddTaskFormProps): React.ReactElement => {
   const history = useHistory();
   const toast = useToast();
+  const { taskId } = useParams<{ taskId: string }>();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
+  const [existingUserId, setExistingUserId] = useState<number | null>(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -57,22 +62,71 @@ const AddTaskForm = ({
       },
     });
 
+  useEffect(() => {
+    if (!isEditMode || !taskId) return;
+
+    const fetchTaskData = async () => {
+      try {
+        const task = await TaskAPIClient.getTask(Number(taskId));
+        const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
+        setExistingUserId(task.userId ?? null);
+        const template = await TaskTemplateAPIClient.getTaskTemplate(
+          task.taskTemplateId,
+        );
+
+        setValue("selectedTemplate", template);
+        setValue("taskName", template.name);
+        setValue("taskCategory", template.category);
+
+        if (task.scheduledStartTime) {
+          const date = new Date(task.scheduledStartTime);
+          setValue(
+            "startMonth",
+            date.toLocaleString("default", { month: "long" }),
+          );
+          setValue("startDay", String(date.getDate()));
+          setValue("startYear", String(date.getFullYear()));
+          setValue("startHour", String(date.getHours()).padStart(2, "0"));
+          setValue("startMinute", String(date.getMinutes()).padStart(2, "0"));
+        }
+
+        if (task.notes) {
+          setValue("instructions", task.notes);
+        }
+
+        if (recurrence) {
+          setValue("isRepeating", true);
+          setValue("recurringDays", recurrence.days ?? []);
+          setValue("recurringCadences", recurrence.cadence);
+          if (recurrence.endDate) {
+            const end = new Date(recurrence.endDate);
+            setValue(
+              "endMonth",
+              end.toLocaleString("default", { month: "long" }),
+            );
+            setValue("endDay", String(end.getDate()));
+            setValue("endYear", String(end.getFullYear()));
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Failed to load task",
+          description: `${error}`,
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
+      }
+    };
+    fetchTaskData();
+  }, [isEditMode, setValue, taskId, toast]);
+
   const selectedTemplate = watch("selectedTemplate");
   const isRepeating = watch("isRepeating");
   const hasColorLevelMismatch =
     selectedUser !== null && selectedUser.colorLevel < petColorLevel;
 
-  const handleNextPage1 = async () => {
-    const isValid = await trigger("selectedTemplate");
-    if (isValid && selectedTemplate) {
-      setValue("taskName", selectedTemplate.name);
-      setValue("taskCategory", selectedTemplate.category);
-      setValue("instructions", selectedTemplate.instructions);
-      setCurrentStep(2);
-    }
-  };
-
-  const handleNextPage2 = async () => {
+  const validateStep2Fields = async (): Promise<boolean> => {
     const validateFields: (keyof AddTaskFormData)[] = [
       "instructions",
       "startMonth",
@@ -89,14 +143,33 @@ const AddTaskForm = ({
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
         : []),
     ];
+    return trigger(validateFields);
+  };
 
-    const isValid = await trigger(validateFields);
+  const handleNextPage1 = async () => {
+    const isValid = await trigger("selectedTemplate");
+    if (isValid && selectedTemplate) {
+      setValue("taskName", selectedTemplate.name);
+      setValue("taskCategory", selectedTemplate.category);
+      if (!isEditMode) {
+        setValue("instructions", selectedTemplate.instructions);
+      }
+      setCurrentStep(2);
+    }
+  };
+
+  const handleNextPage2 = async () => {
+    const isValid = await validateStep2Fields();
     if (isValid) {
       setCurrentStep(3);
     }
   };
 
   const handleSave = async () => {
+    if (isEditMode) {
+      const isValid = await validateStep2Fields();
+      if (!isValid) return;
+    }
     const {
       selectedTemplate: template,
       instructions,
@@ -124,6 +197,7 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
+    const userId = isEditMode ? existingUserId : selectedUser?.id ?? null;
     const scheduledEndDate = new Date(
       Number(startYear),
       MONTH_NAME_TO_NUMBER[startMonth] - 1,
@@ -136,10 +210,16 @@ const AddTaskForm = ({
     }
     const scheduledEndTime = scheduledEndDate.toISOString();
 
-    const userId = selectedUser?.id ?? null;
-
     try {
-      if (!isRepeating) {
+      if (isEditMode) {
+        await TaskAPIClient.updateTask(Number(taskId), {
+          userId,
+          petId,
+          taskTemplateId: template.id,
+          scheduledStartTime,
+          notes: instructions,
+        });
+      } else if (!isRepeating) {
         await TaskAPIClient.createTask({
           userId,
           petId,
@@ -176,7 +256,7 @@ const AddTaskForm = ({
       }
 
       toast({
-        title: "Task added!",
+        title: isEditMode ? "Task updated!" : "Task added!",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -214,7 +294,7 @@ const AddTaskForm = ({
       </Flex>
 
       <Text textStyle="h2" m={0}>
-        Add Task
+        {isEditMode ? "Edit a Task" : "Add Task"}
       </Text>
 
       <Box>
@@ -235,7 +315,7 @@ const AddTaskForm = ({
           />
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 3 && !isEditMode && (
           <AddTaskForm3
             petColorLevel={petColorLevel}
             selectedUser={selectedUser}
@@ -245,9 +325,14 @@ const AddTaskForm = ({
 
         <Flex align="stretch" mt="2rem" gap="1rem">
           <Text margin="0" alignSelf="center">
-            {currentStep}/3
+            {currentStep}/{isEditMode ? "2" : "3"}
           </Text>
           <Spacer />
+          {currentStep === 1 && isEditMode && (
+            <Button as="button" variant="red" size="medium" type="button">
+              Delete Task
+            </Button>
+          )}
           {currentStep === 1 && (
             <Button
               as="button"
@@ -273,7 +358,7 @@ const AddTaskForm = ({
               Previous
             </Button>
           )}
-          {currentStep === 2 && (
+          {currentStep === 2 && !isEditMode && (
             <Button
               as="button"
               variant="gray"
@@ -283,6 +368,17 @@ const AddTaskForm = ({
               type="button"
             >
               Next
+            </Button>
+          )}
+          {currentStep === 2 && isEditMode && (
+            <Button
+              as="button"
+              variant="green"
+              size="medium"
+              onClick={handleSave}
+              type="button"
+            >
+              Save
             </Button>
           )}
           {currentStep === 3 && (
