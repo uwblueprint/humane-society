@@ -178,6 +178,8 @@ const AddTaskForm = ({
       startYear,
       startHour,
       startMinute,
+      endHour,
+      endMinute,
       recurringDays,
       recurringCadences,
       endMonth,
@@ -196,6 +198,19 @@ const AddTaskForm = ({
     ).toISOString();
 
     const userId = isEditMode ? existingUserId : selectedUser?.id ?? null;
+    const scheduledEndDate = new Date(
+      Number(startYear),
+      MONTH_NAME_TO_NUMBER[startMonth] - 1,
+      Number(startDay),
+      Number(endHour),
+      Number(endMinute),
+    );
+    if (scheduledEndDate <= new Date(scheduledStartTime)) {
+      scheduledEndDate.setDate(scheduledEndDate.getDate() + 1);
+    }
+    const scheduledEndTime = scheduledEndDate.toISOString();
+
+    const userId = selectedUser?.id ?? null;
 
     try {
       if (isEditMode) {
@@ -212,6 +227,7 @@ const AddTaskForm = ({
           petId,
           taskTemplateId: template.id,
           scheduledStartTime,
+          scheduledEndTime,
           notes: instructions,
         });
       } else {
@@ -229,6 +245,7 @@ const AddTaskForm = ({
             petId,
             taskTemplateId: template.id,
             scheduledStartTime,
+            scheduledEndTime,
             notes: instructions,
           },
           recurrence: {
