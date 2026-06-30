@@ -1,6 +1,6 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -18,11 +18,11 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
+  petId: number;
 }
 
 const StatusBadge = ({
@@ -157,11 +157,11 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
   onTaskClick,
+  petId,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   return (
     <Flex direction="column">

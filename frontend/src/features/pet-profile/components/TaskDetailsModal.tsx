@@ -16,6 +16,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -156,6 +157,7 @@ const TaskDetailsModal = ({
   onClose,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
+  const history = useHistory();
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -163,7 +165,9 @@ const TaskDetailsModal = ({
   const [templateData, setTemplateData] = useState<Task | null>(null);
   const [petData, setPetData] = useState<Pet | null>(null);
   const [assigneeData, setAssigneeData] = useState<User | null>(null);
-  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
+    null,
+  );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
 
@@ -296,7 +300,17 @@ const TaskDetailsModal = ({
             </Button>
           )}
           {status === "Assigned" && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() =>
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  { preselectedUser: assigneeData },
+                )
+              }
+            >
               Reassign
             </Button>
           )}
@@ -313,7 +327,7 @@ const TaskDetailsModal = ({
     }
 
     if (isVolunteerOrStaff) {
-    // Volunteer and Staff Task Actions
+      // Volunteer and Staff Task Actions
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
@@ -420,7 +434,7 @@ const TaskDetailsModal = ({
               </Text>
             </Flex>
           </Flex>
-           {/* Task Instructions Section */}
+          {/* Task Instructions Section */}
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task Instructions
@@ -429,7 +443,7 @@ const TaskDetailsModal = ({
               {templateData?.instructions || "No instructions to display."}
             </Text>
           </Flex>
-           {/* Schedule Section */}
+          {/* Schedule Section */}
           <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
             <GridItem>
               <Flex flexDirection="column" gap="1rem">
@@ -510,7 +524,7 @@ const TaskDetailsModal = ({
           gap="1rem"
           alignItems="stretch"
         >
-        {/* Assigned To Section */}
+          {/* Assigned To Section */}
 
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
