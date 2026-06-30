@@ -70,7 +70,7 @@ const getSpayedNeuteredValue = (
   if (spayedNeutered === undefined || spayedNeutered === null) {
     return "";
   }
-  if (sex === undefined || sex === SexEnum.MALE) {
+  if (sex === undefined || sex === null || sex === SexEnum.MALE) {
     return spayedNeutered ? "Neutered" : "Unneutered";
   }
   // Must be female
