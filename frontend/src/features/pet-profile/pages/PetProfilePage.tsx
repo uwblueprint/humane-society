@@ -157,6 +157,7 @@ const PetProfilePage = (): React.ReactElement => {
           setSelectedTaskId(taskId);
           setIsModalOpen(true);
         }}
+        petId={petId}
       />
     );
   }
