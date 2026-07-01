@@ -38,32 +38,34 @@ const StatusBadge = ({
 }) => {
   const history = useHistory();
 
+  const status = getTaskDetailedStatus(task, authenticatedUser);
+
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
+  if (status === "Completed")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Completed
+      </Button>
+    );
+
+  if (status === "Incomplete")
+    return (
+      <Button as="button" variant="red" size="medium" type="button">
+        Incomplete
+      </Button>
+    );
+
   if (isAdminOrBehaviourist) {
-    if (task.endTime)
+    if (status === null)
       return (
-        <Button as="button" variant="gray-shaded" size="medium" type="button">
-          Completed
-        </Button>
-      );
-    if (!task.assignedUser)
-      return (
-        <Button
-          as="button"
-          variant="dark-blue"
-          size="medium"
-          type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
-        >
+        <Button as="button" variant="dark-blue" size="medium" type="button">
           Assign
         </Button>
       );
-    if (task.assignedUser && !task.endTime)
+    if (status === "In-Progress")
       return (
         <Button as="button" variant="green" size="medium" type="button">
           In Progress
@@ -72,7 +74,6 @@ const StatusBadge = ({
     return <></>;
   }
 
-  const status = getTaskDetailedStatus(task, authenticatedUser);
   const isMyTask = task.userId === authenticatedUser?.id;
 
   if (status === null)
@@ -129,21 +130,6 @@ const StatusBadge = ({
         Occupied
       </Button>
     );
-
-  if (status === "Completed")
-    return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
-      </Button>
-    );
-
-  if (status === "Incomplete")
-    return (
-      <Button as="button" variant="red" size="medium" type="button">
-        Incomplete
-      </Button>
-    );
-
   return <></>;
 };
 
