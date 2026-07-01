@@ -23,6 +23,7 @@ import { TableColumn, TableHeader } from "../../../components/common/table";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
 import TaskDetailsModal from "../components/TaskDetailsModal";
+import AssignTaskModal from "../components/AssignTaskModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
@@ -69,6 +70,9 @@ const PetProfilePage = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAssignTaskId, setSelectedAssignTaskId] = useState<number | null>(null);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [taskRefreshKey, setTaskRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -98,7 +102,7 @@ const PetProfilePage = (): React.ReactElement => {
     };
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [petId, selectedDate, history, location.key, taskRefreshKey]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -157,6 +161,10 @@ const PetProfilePage = (): React.ReactElement => {
         onTaskClick={(taskId) => {
           setSelectedTaskId(taskId);
           setIsModalOpen(true);
+        }}
+        onAssignClick={(taskId) => {
+          setSelectedAssignTaskId(taskId);
+          setIsAssignModalOpen(true);
         }}
       />
     );
@@ -249,6 +257,19 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onAssignClick={(taskId) => {
+            setIsModalOpen(false);
+            setSelectedAssignTaskId(taskId);
+            setIsAssignModalOpen(true);
+          }}
+        />
+      )}
+      {selectedAssignTaskId !== null && (
+        <AssignTaskModal
+          taskId={selectedAssignTaskId}
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onSuccess={() => setTaskRefreshKey((k) => k + 1)}
         />
       )}
     </>
