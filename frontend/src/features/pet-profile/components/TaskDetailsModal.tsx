@@ -148,12 +148,14 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  onAssignClick?: (taskId: number) => void;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  onAssignClick,
 }: TaskDetailsModalProps): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
@@ -291,12 +293,22 @@ const TaskDetailsModal = ({
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => onAssignClick?.(taskId)}
+            >
               Assign
             </Button>
           )}
           {status === "Assigned" && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => onAssignClick?.(taskId)}
+            >
               Reassign
             </Button>
           )}

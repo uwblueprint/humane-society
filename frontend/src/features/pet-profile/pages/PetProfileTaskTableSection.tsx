@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
@@ -18,26 +17,24 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
+  onAssignClick: (taskId: number) => void;
 }
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
+  onAssignClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
+  onAssignClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
@@ -56,9 +53,10 @@ const StatusBadge = ({
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            onAssignClick(task.id);
+          }}
         >
           Assign
         </Button>
@@ -157,11 +155,11 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
   onTaskClick,
+  onAssignClick,
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   return (
     <Flex direction="column">
@@ -251,9 +249,9 @@ const PetProfileTaskTableSection = ({
             </Flex>
             <StatusBadge
               task={task}
-              petId={petId}
               authenticatedUser={authenticatedUser}
               onTaskClick={onTaskClick}
+              onAssignClick={onAssignClick}
             />
           </Grid>
         );
