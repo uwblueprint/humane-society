@@ -19,7 +19,7 @@ type ModalView = "menu" | "upload" | "preview";
 interface ProfilePhotoModalProps {
   isOpen: boolean;
   profilePhoto: string | undefined;
-  type: "pet" | "user"
+  type: "pet" | "user";
   onClose?: () => void;
   onConfirm?: (file: File | null) => void;
 }

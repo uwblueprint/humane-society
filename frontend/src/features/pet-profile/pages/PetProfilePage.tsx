@@ -70,7 +70,9 @@ const PetProfilePage = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAssignTaskId, setSelectedAssignTaskId] = useState<number | null>(null);
+  const [selectedAssignTaskId, setSelectedAssignTaskId] = useState<
+    number | null
+  >(null);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [taskRefreshKey, setTaskRefreshKey] = useState(0);
 

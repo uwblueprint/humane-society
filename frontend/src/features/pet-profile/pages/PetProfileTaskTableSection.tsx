@@ -17,7 +17,6 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
