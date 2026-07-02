@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
@@ -18,7 +17,6 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
@@ -27,17 +25,13 @@ interface PetProfileTaskTableSectionProps {
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   const status = getTaskDetailedStatus(task, authenticatedUser);
 
   const isAdminOrBehaviourist =
@@ -143,7 +137,6 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
@@ -237,7 +230,6 @@ const PetProfileTaskTableSection = ({
             </Flex>
             <StatusBadge
               task={task}
-              petId={petId}
               authenticatedUser={authenticatedUser}
               onTaskClick={onTaskClick}
             />
