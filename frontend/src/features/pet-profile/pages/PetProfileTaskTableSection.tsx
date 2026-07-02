@@ -1,5 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
@@ -18,7 +17,6 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
@@ -27,43 +25,41 @@ interface PetProfileTaskTableSectionProps {
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
+  const status = getTaskDetailedStatus(task, authenticatedUser);
 
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
+  if (status === "Completed")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Completed
+      </Button>
+    );
+
+  if (status === "Incomplete")
+    return (
+      <Button as="button" variant="red" size="medium" type="button">
+        Incomplete
+      </Button>
+    );
+
   if (isAdminOrBehaviourist) {
-    if (task.endTime)
+    if (status === null)
       return (
-        <Button as="button" variant="gray-shaded" size="medium" type="button">
-          Completed
-        </Button>
-      );
-    if (!task.assignedUser)
-      return (
-        <Button
-          as="button"
-          variant="dark-blue"
-          size="medium"
-          type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
-        >
+        <Button as="button" variant="dark-blue" size="medium" type="button">
           Assign
         </Button>
       );
-    if (task.assignedUser && !task.endTime)
+    if (status === "In-Progress")
       return (
         <Button as="button" variant="green" size="medium" type="button">
           In Progress
@@ -72,7 +68,6 @@ const StatusBadge = ({
     return <></>;
   }
 
-  const status = getTaskDetailedStatus(task, authenticatedUser);
   const isMyTask = task.userId === authenticatedUser?.id;
 
   if (status === null)
@@ -129,21 +124,6 @@ const StatusBadge = ({
         Occupied
       </Button>
     );
-
-  if (status === "Completed")
-    return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
-      </Button>
-    );
-
-  if (status === "Incomplete")
-    return (
-      <Button as="button" variant="red" size="medium" type="button">
-        Incomplete
-      </Button>
-    );
-
   return <></>;
 };
 
@@ -157,7 +137,6 @@ const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
@@ -251,7 +230,6 @@ const PetProfileTaskTableSection = ({
             </Flex>
             <StatusBadge
               task={task}
-              petId={petId}
               authenticatedUser={authenticatedUser}
               onTaskClick={onTaskClick}
             />
