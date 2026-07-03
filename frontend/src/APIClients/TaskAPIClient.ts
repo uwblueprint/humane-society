@@ -127,7 +127,7 @@ const startTask = async (taskId: number, startTime: string): Promise<void> => {
       { headers: { Authorization: bearerToken } },
     );
   } catch (error) {
-    throw new Error(`Failed to assign user: ${error}`);
+    throw new Error(`Failed to start task: ${error}`);
   }
 };
 
