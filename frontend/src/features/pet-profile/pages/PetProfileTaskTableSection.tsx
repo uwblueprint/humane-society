@@ -1,6 +1,5 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
-import { useHistory } from "react-router-dom";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
 import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
@@ -13,7 +12,6 @@ import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
@@ -22,17 +20,13 @@ interface PetProfileTaskTableSectionProps {
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
@@ -51,16 +45,20 @@ const StatusBadge = ({
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
+          onClick={() => onTaskClick(task.id)}
         >
           Assign
         </Button>
       );
     if (task.assignedUser && !task.endTime)
       return (
-        <Button as="button" variant="green" size="medium" type="button">
+        <Button
+          as="button"
+          variant="green"
+          size="medium"
+          type="button"
+          onClick={() => onTaskClick(task.id)}
+        >
           In Progress
         </Button>
       );
@@ -143,7 +141,6 @@ const StatusBadge = ({
 };
 
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
@@ -235,7 +232,6 @@ const PetProfileTaskTableSection = ({
             </Flex>
             <StatusBadge
               task={task}
-              petId={petId}
               authenticatedUser={authenticatedUser}
               onTaskClick={onTaskClick}
             />
