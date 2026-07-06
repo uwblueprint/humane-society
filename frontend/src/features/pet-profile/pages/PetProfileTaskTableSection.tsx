@@ -208,6 +208,8 @@ const PetProfileTaskTableSection = ({
             marginBottom="0.5rem"
             marginTop="0.5rem"
             borderRadius="0.75rem"
+            onClick={() => onTaskClick(task.id)}
+            cursor="pointer"
           >
             <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
               <Icon
