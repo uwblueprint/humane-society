@@ -395,7 +395,12 @@ const TaskDetailsModal = ({
               <Button variant="blue-outline" size="medium" width="100%">
                 Restart
               </Button>
-              <Button variant="dark-blue" size="medium" width="100%">
+              <Button
+                variant="dark-blue"
+                size="medium"
+                width="100%"
+                onClick={handleCompleteTask}
+              >
                 Complete Task
               </Button>
             </Flex>

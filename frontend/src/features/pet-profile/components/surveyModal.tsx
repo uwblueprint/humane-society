@@ -34,14 +34,16 @@ const SurveyModal = ({
   const surveyLink = SURVEY_LINKS[animalTag];
   const [linkClicked, setLinkClicked] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
+  const handleAttemptClose = () => {
+    if (!linkClicked) {
+      setShowReminder(true);
+    } else {
+      onClose();
+    }
+  };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      closeOnOverlayClick={false}
-      closeOnEsc={false}
-    >
+    <Modal isOpen={isOpen} onClose={handleAttemptClose} closeOnEsc={false}>
       <ModalOverlay />
       <ModalContent bg="gray.50" maxHeight="min(831px, calc(100vh - 8rem))">
         <ModalHeader
@@ -86,22 +88,12 @@ const SurveyModal = ({
               variant={linkClicked ? "dark-blue" : "gray-shaded"}
               size="medium"
               type="button"
-              onClick={() => {
-                if (!linkClicked) {
-                  setShowReminder(true);
-                } else {
-                  onClose();
-                }
-              }}
+              onClick={() => handleAttemptClose()}
             >
               I have completed the form
             </Button>
             {showReminder && !linkClicked && (
-              <Text
-                color="red.400figma says you shouldn't be able to click out of the survey modal until they clcik the link, this doesn't happen in the current PR. pls fix."
-                textStyle="body"
-                m={0}
-              >
+              <Text color="red.400" textStyle="body" m={0}>
                 Please fill out the form before continuing.
               </Text>
             )}
