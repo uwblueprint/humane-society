@@ -52,7 +52,13 @@ const StatusBadge = ({
       );
     if (task.assignedUser && !task.endTime)
       return (
-        <Button as="button" variant="green" size="medium" type="button">
+        <Button
+          as="button"
+          variant="green"
+          size="medium"
+          type="button"
+          onClick={() => onTaskClick(task.id)}
+        >
           In Progress
         </Button>
       );

@@ -250,19 +250,10 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onTaskCompleted={() => {
+          onTaskCompleted={async () => {
+            await fetchTasks();
             setSelectedTaskId(null);
-            setShowSurvey(true);
-          }}
-        />
-      )}
-      {selectedTaskId !== null && (
-        <TaskDetailsModal
-          taskId={selectedTaskId}
-          isOpen={selectedTaskId !== null}
-          onClose={() => setSelectedTaskId(null)}
-          onTaskCompleted={() => {
-            setSelectedTaskId(null);
+            setIsModalOpen(false);
             setShowSurvey(true);
           }}
         />
