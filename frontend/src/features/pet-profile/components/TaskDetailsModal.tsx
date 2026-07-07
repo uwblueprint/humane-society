@@ -158,6 +158,7 @@ const TaskDetailsModal = ({
 }: TaskDetailsModalProps): React.ReactElement => {
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
+  const history = useHistory();
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -295,12 +296,33 @@ const TaskDetailsModal = ({
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                );
+              }}
+            >
               Assign
             </Button>
           )}
           {status === "Assigned" && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  { preselectedUser: assigneeData },
+                );
+              }}
+            >
               Reassign
             </Button>
           )}
