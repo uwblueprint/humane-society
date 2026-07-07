@@ -321,11 +321,12 @@ const TaskDetailsModal = ({
               variant="dark-blue"
               size="medium"
               width="100%"
-              onClick={() =>
+              onClick={() => {
+                onClose();
                 history.push(
                   `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
-                )
-              }
+                );
+              }}
             >
               Assign
             </Button>
@@ -335,12 +336,13 @@ const TaskDetailsModal = ({
               variant="dark-blue"
               size="medium"
               width="100%"
-              onClick={() =>
+              onClick={() => {
+                onClose();
                 history.push(
                   `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
                   { preselectedUser: assigneeData },
-                )
-              }
+                );
+              }}
             >
               Reassign
             </Button>
