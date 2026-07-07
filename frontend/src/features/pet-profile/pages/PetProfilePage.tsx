@@ -151,7 +151,6 @@ const PetProfilePage = (): React.ReactElement => {
   } else {
     content = (
       <PetProfileTaskTableSection
-        petId={petId}
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}

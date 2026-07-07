@@ -5,6 +5,7 @@ export interface TaskRequestDTO {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime?: Date;
+  scheduledEndTime?: Date;
   startTime?: Date;
   endTime?: Date;
   notes?: string;
@@ -16,6 +17,7 @@ export interface TaskResponseDTO {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime?: Date;
+  scheduledEndTime?: Date;
   startTime?: Date;
   endTime?: Date;
   notes?: string;
@@ -37,6 +39,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
   isRecurring: boolean;
   taskName?: string;
   category?: TaskCategory;
+  petName?: string;
   assignedUser?: {
     id: number;
     firstName: string;

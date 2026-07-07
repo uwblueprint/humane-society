@@ -1,22 +1,17 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
-import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
+import { ScheduledTaskDTO } from "../../../types/TaskTypes";
+import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
 
 interface PetProfileTaskTableSectionProps {
-  petId: number;
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
@@ -25,17 +20,13 @@ interface PetProfileTaskTableSectionProps {
 
 const StatusBadge = ({
   task,
-  petId,
   authenticatedUser,
   onTaskClick,
 }: {
   task: ScheduledTaskDTO;
-  petId: number;
   authenticatedUser: AuthenticatedUser;
   onTaskClick: (taskId: number) => void;
 }) => {
-  const history = useHistory();
-
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
@@ -54,16 +45,20 @@ const StatusBadge = ({
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() =>
-            history.push(`/pet-profile/${petId}/assign-task/${task.id}`)
-          }
+          onClick={() => onTaskClick(task.id)}
         >
           Assign
         </Button>
       );
     if (task.assignedUser && !task.endTime)
       return (
-        <Button as="button" variant="green" size="medium" type="button">
+        <Button
+          as="button"
+          variant="green"
+          size="medium"
+          type="button"
+          onClick={() => onTaskClick(task.id)}
+        >
           In Progress
         </Button>
       );
@@ -145,17 +140,7 @@ const StatusBadge = ({
   return <></>;
 };
 
-const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
-  [TaskCategory.WALK]: WalkIcon,
-  [TaskCategory.GAMES]: GamesIcon,
-  [TaskCategory.PEN_TIME]: PenTimeIcon,
-  [TaskCategory.HUSBANDRY]: HusbandryIcon,
-  [TaskCategory.TRAINING]: TrainingIcon,
-  [TaskCategory.MISC]: MiscIcon,
-};
-
 const PetProfileTaskTableSection = ({
-  petId,
   tasks,
   gridTemplateColumns,
   authenticatedUser,
@@ -163,57 +148,98 @@ const PetProfileTaskTableSection = ({
 }: PetProfileTaskTableSectionProps): React.ReactElement => {
   return (
     <Flex direction="column">
-      {tasks.map((task) => (
-        <Grid
-          key={task.id}
-          gridTemplateColumns={gridTemplateColumns}
-          padding="1rem 1.5rem"
-          alignItems="center"
-          borderBottom="1px solid"
-          borderColor="gray.200"
-          backgroundColor="white"
-          marginBottom="0.5rem"
-          marginTop="0.5rem"
-          borderRadius="0.75rem"
-        >
-          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
-            <Icon
-              as={taskTypeIcons[task.category]}
-              boxSize="1.5rem"
-              flexShrink={0}
-            />
-            <Text textStyle="body" m={0} isTruncated>
-              {task.taskName}
+      {tasks.map((task) => {
+        const isMyTask = task.userId === authenticatedUser?.id;
+        const isVolunteerOrStaff =
+          authenticatedUser?.role === UserRoles.VOLUNTEER ||
+          authenticatedUser?.role === UserRoles.STAFF;
+        const hideAssigneeDetails = isVolunteerOrStaff && !isMyTask;
+
+        const renderAssignee = () => {
+          if (!task.assignedUser) {
+            return (
+              <>
+                <Flex
+                  boxSize="2.25rem"
+                  borderRadius="full"
+                  border="1px solid"
+                  borderColor="gray.300"
+                  alignItems="center"
+                  justifyContent="center"
+                  bg="gray.700"
+                  flexShrink={0}
+                >
+                  <Icon as={RoundQuestionMarkIcon} boxSize="1.25rem" />
+                </Flex>
+                <Text textStyle="body" m={0} isTruncated>
+                  Unassigned
+                </Text>
+              </>
+            );
+          }
+          if (hideAssigneeDetails) {
+            return <Icon as={OutlinedUserProfileIcon} boxSize="2.25rem" />;
+          }
+          return (
+            <>
+              <ProfilePhoto
+                image={task.assignedUser.profilePhoto ?? undefined}
+                size="small"
+                type="user"
+              />
+              <Text textStyle="body" m={0} isTruncated>
+                {isVolunteerOrStaff && isMyTask
+                  ? "Me"
+                  : `${task.assignedUser.firstName} ${task.assignedUser.lastName}`}
+              </Text>
+            </>
+          );
+        };
+
+        return (
+          <Grid
+            key={task.id}
+            gridTemplateColumns={gridTemplateColumns}
+            padding="1rem 1.5rem"
+            alignItems="center"
+            borderBottom="1px solid"
+            borderColor="gray.200"
+            backgroundColor="white"
+            marginBottom="0.5rem"
+            marginTop="0.5rem"
+            borderRadius="0.75rem"
+            onClick={() => onTaskClick(task.id)}
+            cursor="pointer"
+          >
+            <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+              <Icon
+                as={taskCategoryIcons[task.category]}
+                boxSize="1.5rem"
+                flexShrink={0}
+              />
+              <Text textStyle="body" m={0} isTruncated>
+                {task.taskName}
+              </Text>
+            </Flex>
+            <Text textStyle="body" m={0}>
+              {task.scheduledStartTime
+                ? formatTimeFromISO(task.scheduledStartTime.toString())
+                : "—"}
             </Text>
-          </Flex>
-          <Text textStyle="body" m={0}>
-            {task.scheduledStartTime
-              ? formatTimeFromISO(task.scheduledStartTime.toString())
-              : "—"}
-          </Text>
-          <Text textStyle="body" m={0}>
-            {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
-          </Text>
-          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
-            <ProfilePhoto
-              image={task.assignedUser?.profilePhoto ?? undefined}
-              size="small"
-              type="user"
-            />
-            <Text textStyle="body" m={0} isTruncated>
-              {task.assignedUser
-                ? `${task.assignedUser.firstName} ${task.assignedUser.lastName}`
-                : "Unassigned"}
+            <Text textStyle="body" m={0}>
+              {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
             </Text>
-          </Flex>
-          <StatusBadge
-            task={task}
-            petId={petId}
-            authenticatedUser={authenticatedUser}
-            onTaskClick={onTaskClick}
-          />
-        </Grid>
-      ))}
+            <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+              {renderAssignee()}
+            </Flex>
+            <StatusBadge
+              task={task}
+              authenticatedUser={authenticatedUser}
+              onTaskClick={onTaskClick}
+            />
+          </Grid>
+        );
+      })}
     </Flex>
   );
 };

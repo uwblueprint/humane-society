@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Flex, Text, useToast } from "@chakra-ui/react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import Button from "../../../components/common/Button";
@@ -10,13 +10,16 @@ import UserSelection from "../components/UserSelection";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
+  const location = useLocation<{ preselectedUser?: User }>();
   const params = useParams<{ id: string; taskId: string }>();
   const petId = Number(params.id);
   const taskId = Number(params.taskId);
   const toast = useToast();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(
+    location.state?.preselectedUser ?? null,
+  );
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
