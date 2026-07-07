@@ -158,7 +158,6 @@ const TaskDetailsModal = ({
 }: TaskDetailsModalProps): React.ReactElement => {
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
-  const history = useHistory();
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
