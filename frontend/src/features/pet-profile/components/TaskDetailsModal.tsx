@@ -156,8 +156,8 @@ const TaskDetailsModal = ({
   isOpen,
   onClose,
 }: TaskDetailsModalProps): React.ReactElement => {
-  const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
+  const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -330,7 +330,17 @@ const TaskDetailsModal = ({
               Complete Task
             </Button>
           )}
-          <Button variant="blue-outline" size="medium" width="100%">
+          <Button
+            variant="blue-outline"
+            size="medium"
+            width="100%"
+            onClick={() => {
+              onClose();
+              history.push(
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+              );
+            }}
+          >
             Edit Task
           </Button>
         </Flex>
