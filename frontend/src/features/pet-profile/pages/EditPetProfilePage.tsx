@@ -27,7 +27,12 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { PetRequestDTO, PetStatus, SexEnum, Pet } from "../../../types/PetTypes";
+import {
+  PetRequestDTO,
+  PetStatus,
+  SexEnum,
+  Pet,
+} from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
@@ -122,9 +127,11 @@ const EditPetProfilePage = (): React.ReactElement => {
   >(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
-  const [pet, setPet] = useState<Pet | undefined>(undefined)
+  const [pet, setPet] = useState<Pet | undefined>(undefined);
   const [editPetPhoto, setEditPetPhoto] = useState(false);
-  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<File | undefined>(undefined)
+  const [newPetProfilePhoto, setNewPetProfilePhoto] = useState<
+    File | undefined
+  >(undefined);
   const {
     isOpen: isDeleteConfirmModalOpen,
     onOpen: openDeleteConfirmModal,
@@ -180,7 +187,7 @@ const EditPetProfilePage = (): React.ReactElement => {
           const photoUrl = await PetAPIClient.getProfilePhotoUrl(petData.id);
           setLocalProfilePhoto(photoUrl);
         }
-        setPet(petData)
+        setPet(petData);
         let birthdayYear: string | undefined;
         let birthdayMonth: string | undefined;
         let birthdayDate: string | undefined;
@@ -237,15 +244,15 @@ const EditPetProfilePage = (): React.ReactElement => {
   }, [selectedBirthdayMonth, selectedBirthdayYear]);
 
   const handleEditPetPhoto = (file: File | null) => {
-    setEditPetPhoto(false)
+    setEditPetPhoto(false);
     if (file) {
-      setNewPetProfilePhoto(file)
+      setNewPetProfilePhoto(file);
       const preview = URL.createObjectURL(file);
       setLocalProfilePhoto(preview); // update UI preview
     } else {
       setLocalProfilePhoto(undefined); // default case
     }
-  }
+  };
 
   const onSubmit = async (data: FormData) => {
     // Only allow a user to progress if they have resolved all errors
@@ -333,63 +340,75 @@ const EditPetProfilePage = (): React.ReactElement => {
       const patches: Promise<unknown>[] = [];
 
       if (orig && data.name !== orig.name) {
-        patches.push(PetAPIClient.updateName(petId, {
-          name: data.name,
-          actorId,
-          targetId: petId,
-          oldUserName: orig.name,
-          newUserName: data.name,
-        }));
+        patches.push(
+          PetAPIClient.updateName(petId, {
+            name: data.name,
+            actorId,
+            targetId: petId,
+            oldUserName: orig.name,
+            newUserName: data.name,
+          }),
+        );
       }
       if (orig && data.colourLevel !== orig.colourLevel) {
-        patches.push(PetAPIClient.updateColorLevel(petId, {
-          colorLevel: colorLevelToNumber[data.colourLevel],
-          actorId,
-          targetId: petId,
-          petName: orig.name,
-          oldColorLevel: orig.colourLevel,
-          newColorLevel: data.colourLevel,
-        }));
+        patches.push(
+          PetAPIClient.updateColorLevel(petId, {
+            colorLevel: colorLevelToNumber[data.colourLevel],
+            actorId,
+            targetId: petId,
+            petName: orig.name,
+            oldColorLevel: orig.colourLevel,
+            newColorLevel: data.colourLevel,
+          }),
+        );
       }
       if (orig && data.neutered !== orig.neutered) {
-        patches.push(PetAPIClient.updateNeuterStatus(petId, {
-          neutered,
-          actorId,
-          targetId: petId,
-          petName: orig.name,
-          oldText: orig.neutered,
-          newText: data.neutered,
-        }));
+        patches.push(
+          PetAPIClient.updateNeuterStatus(petId, {
+            neutered,
+            actorId,
+            targetId: petId,
+            petName: orig.name,
+            oldText: orig.neutered,
+            newText: data.neutered,
+          }),
+        );
       }
       if (orig && data.safetyInfo !== orig.safetyInfo) {
-        patches.push(PetAPIClient.updateSafetyInfo(petId, {
-          safetyInfo: data.safetyInfo || null,
-          actorId,
-          targetId: petId,
-          petName: orig.name,
-          oldText: orig.safetyInfo,
-          newText: data.safetyInfo,
-        }));
+        patches.push(
+          PetAPIClient.updateSafetyInfo(petId, {
+            safetyInfo: data.safetyInfo || null,
+            actorId,
+            targetId: petId,
+            petName: orig.name,
+            oldText: orig.safetyInfo,
+            newText: data.safetyInfo,
+          }),
+        );
       }
       if (orig && data.medicalInfo !== orig.medicalInfo) {
-        patches.push(PetAPIClient.updateMedicalInfo(petId, {
-          medicalInfo: data.medicalInfo || null,
-          actorId,
-          targetId: petId,
-          petName: orig.name,
-          oldText: orig.medicalInfo,
-          newText: data.medicalInfo,
-        }));
+        patches.push(
+          PetAPIClient.updateMedicalInfo(petId, {
+            medicalInfo: data.medicalInfo || null,
+            actorId,
+            targetId: petId,
+            petName: orig.name,
+            oldText: orig.medicalInfo,
+            newText: data.medicalInfo,
+          }),
+        );
       }
       if (orig && data.managementInfo !== orig.managementInfo) {
-        patches.push(PetAPIClient.updateManagementInfo(petId, {
-          managementInfo: data.managementInfo || null,
-          actorId,
-          targetId: petId,
-          petName: orig.name,
-          oldText: orig.managementInfo,
-          newText: data.managementInfo,
-        }));
+        patches.push(
+          PetAPIClient.updateManagementInfo(petId, {
+            managementInfo: data.managementInfo || null,
+            actorId,
+            targetId: petId,
+            petName: orig.name,
+            oldText: orig.managementInfo,
+            newText: data.managementInfo,
+          }),
+        );
       }
       await Promise.all(patches);
 
@@ -680,14 +699,18 @@ const EditPetProfilePage = (): React.ReactElement => {
                         src={PencilIcon}
                         alt="edit"
                         style={{ stroke: "black" }}
-                        onClick={() => {setEditPetPhoto(true)}}
+                        onClick={() => {
+                          setEditPetPhoto(true);
+                        }}
                       />
-                      <ProfilePhotoModal 
-                      isOpen={editPetPhoto}
-                      profilePhoto={localProfilePhoto}
-                      onClose={() => { setEditPetPhoto(false) }}
-                      onConfirm={handleEditPetPhoto}
-                      type="pet"
+                      <ProfilePhotoModal
+                        isOpen={editPetPhoto}
+                        profilePhoto={localProfilePhoto}
+                        onClose={() => {
+                          setEditPetPhoto(false);
+                        }}
+                        onConfirm={handleEditPetPhoto}
+                        type="pet"
                       />
                     </Flex>
                   </Flex>

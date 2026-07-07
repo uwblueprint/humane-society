@@ -38,7 +38,9 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
   const toast = useToast();
-  const originalValues = useRef<{ firstName: string; lastName: string } | null>(null);
+  const originalValues = useRef<{ firstName: string; lastName: string } | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -101,7 +103,10 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           password: "",
           profilePhoto: userData.profilePhoto || "",
         });
-        originalValues.current = { firstName: userData.firstName, lastName: userData.lastName };
+        originalValues.current = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        };
       } catch (error) {
         toast({
           title: "Error",
@@ -129,43 +134,80 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const onSubmit = async (data: FormData) => {
     const userId = Number(authenticatedUser?.id?.toString());
     const orig = originalValues.current;
+    const formattedData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phoneNumber,
+    };
 
     try {
-      const ops: Promise<unknown>[] = [];
-
-      if (orig && (data.firstName !== orig.firstName || data.lastName !== orig.lastName)) {
-        ops.push(UserAPIClient.updateName(userId, {
+      // Name change goes through the granular route so it writes an interaction
+      // log; the general update below still persists phone (and name) without
+      // double-logging since the PUT route doesn't log.
+      if (
+        orig &&
+        (data.firstName !== orig.firstName || data.lastName !== orig.lastName)
+      ) {
+        await UserAPIClient.updateName(userId, {
           firstName: data.firstName,
           lastName: data.lastName,
           actorId: userId,
           targetId: userId,
           oldUserName: `${orig.firstName} ${orig.lastName}`,
           newUserName: `${data.firstName} ${data.lastName}`,
-        }));
+        });
       }
-
-      if (profilePhotoFile) {
-        ops.push(UserAPIClient.uploadProfilePhoto(profilePhotoFile, userId, user?.profilePhoto));
-      } else if (localProfilePhoto === undefined) {
-        ops.push(UserAPIClient.setDefaultProfilePhoto(userId));
-      }
-
-      setIsUploading(true);
-      await Promise.all(ops);
-
+      const updatedUser = await UserAPIClient.update(userId, formattedData);
+      reset({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNumber: updatedUser.phoneNumber || "",
+      });
       toast({
         title: "Success",
-        description: "Your profile has been updated.",
+        description: "User profile updated",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
+    } catch (err) {
+      toast({
+        title: "Fail",
+        description: "Failed to update user profile",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      // Profile save failed — don't attempt the photo upload or redirect.
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+
+      if (profilePhotoFile) {
+        await UserAPIClient.uploadProfilePhoto(
+          profilePhotoFile,
+          userId,
+          user?.profilePhoto,
+        );
+        toast({
+          title: "Upload successful",
+          description: "Your profile photo has been updated.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else if (localProfilePhoto === undefined) {
+        await UserAPIClient.setDefaultProfilePhoto(userId);
+      }
 
       history.push(`/profile/${userId}`);
     } catch (error) {
       toast({
         title: "Update failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         status: "error",
         duration: 3000,
         isClosable: true,

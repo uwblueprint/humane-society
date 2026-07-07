@@ -14,6 +14,7 @@ import {
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
 import User from "../../models/user.model";
+import Pet from "../../models/pet.model";
 import {
   BadRequestError,
   getErrorMessage,
@@ -367,6 +368,7 @@ class TaskService implements ITaskService {
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
             scheduledStartTime: task.scheduled_start_time,
+            scheduledEndTime: task.scheduled_end_time,
             startTime: task.start_time,
             endTime: task.end_time,
             notes: task.notes,
@@ -403,6 +405,7 @@ class TaskService implements ITaskService {
       petId: task.pet_id,
       taskTemplateId: task.task_template_id,
       scheduledStartTime: task.scheduled_start_time,
+      scheduledEndTime: task.scheduled_end_time,
       startTime: task.start_time,
       endTime: task.end_time,
       notes: task.notes,
@@ -420,6 +423,7 @@ class TaskService implements ITaskService {
         petId: task.pet_id,
         taskTemplateId: task.task_template_id,
         scheduledStartTime: task.scheduled_start_time,
+        scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
         endTime: task.end_time,
         notes: task.notes,
@@ -449,6 +453,7 @@ class TaskService implements ITaskService {
         petId: task.pet_id,
         taskTemplateId: task.task_template_id,
         scheduledStartTime: task.scheduled_start_time,
+        scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
         endTime: task.end_time,
         notes: task.notes,
@@ -478,6 +483,7 @@ class TaskService implements ITaskService {
         petId: task.pet_id,
         taskTemplateId: task.task_template_id,
         scheduledStartTime: task.scheduled_start_time,
+        scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
         endTime: task.end_time,
         notes: task.notes,
@@ -498,6 +504,7 @@ class TaskService implements ITaskService {
         pet_id: task.petId,
         task_template_id: task.taskTemplateId,
         scheduled_start_time: task.scheduledStartTime,
+        scheduled_end_time: task.scheduledEndTime,
         start_time: task.startTime,
         end_time: task.endTime,
         notes: task.notes,
@@ -512,6 +519,7 @@ class TaskService implements ITaskService {
       petId: newTask.pet_id,
       taskTemplateId: newTask.task_template_id,
       scheduledStartTime: newTask.scheduled_start_time,
+      scheduledEndTime: newTask.scheduled_end_time,
       startTime: newTask.start_time,
       endTime: newTask.end_time,
       notes: newTask.notes,
@@ -531,6 +539,7 @@ class TaskService implements ITaskService {
           pet_id: task.petId,
           task_template_id: task.taskTemplateId,
           scheduled_start_time: task.scheduledStartTime,
+          scheduled_end_time: task.scheduledEndTime,
           start_time: task.startTime,
           end_time: task.endTime,
           notes: task.notes,
@@ -552,6 +561,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -586,6 +596,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -620,6 +631,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -654,6 +666,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -688,6 +701,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -722,6 +736,7 @@ class TaskService implements ITaskService {
       petId: resultingTask.pet_id,
       taskTemplateId: resultingTask.task_template_id,
       scheduledStartTime: resultingTask.scheduled_start_time,
+      scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
@@ -780,6 +795,7 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
+          { model: Pet, attributes: ["name"], required: false },
         ],
       });
 
@@ -790,12 +806,14 @@ class TaskService implements ITaskService {
           petId: task.pet_id,
           taskTemplateId: task.task_template_id,
           scheduledStartTime: task.scheduled_start_time,
+          scheduledEndTime: task.scheduled_end_time,
           startTime: task.start_time,
           endTime: task.end_time,
           notes: task.notes,
           isRecurring: false,
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
+          petName: task.pet?.name,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -857,6 +875,7 @@ class TaskService implements ITaskService {
                   ],
                   required: false,
                 },
+                { model: Pet, attributes: ["name"], required: false },
               ],
             })
           : [];
@@ -872,6 +891,7 @@ class TaskService implements ITaskService {
             ...instance,
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
+            petName: enriched?.pet?.name,
             assignedUser: enriched?.user
               ? {
                   id: enriched.user.id,
