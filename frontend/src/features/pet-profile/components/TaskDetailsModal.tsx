@@ -313,11 +313,12 @@ const TaskDetailsModal = ({
             variant="blue-outline"
             size="medium"
             width="100%"
-            onClick={() =>
+            onClick={() => {
+              onClose();
               history.push(
                 `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
-              )
-            }
+              );
+            }}
           >
             Edit Task
           </Button>
