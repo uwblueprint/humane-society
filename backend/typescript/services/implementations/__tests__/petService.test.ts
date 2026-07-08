@@ -6,12 +6,6 @@
 // the model queries on the SAME connection/database, we redirect the
 // ../../models `sequelize` export to `testSql`. The requireActual ordering below
 // ensures the model classes are (re)bound to `testSql` last.
-jest.mock("../../../models", () => {
-  const real = jest.requireActual("../../../models");
-  const { testSql } = jest.requireActual("../../../testUtils/testDb");
-  return { __esModule: true, ...real, sequelize: testSql };
-});
-
 import PgPet from "../../../models/pet.model";
 import { NotFoundError } from "../../../utilities/errorUtils";
 import { AnimalTag, PetStatus } from "../../../types";
@@ -19,6 +13,14 @@ import { IPetService } from "../../interfaces/petService";
 import PetService from "../petService";
 
 import { testSql } from "../../../testUtils/testDb";
+
+jest.mock("../../../models", () => {
+  const real = jest.requireActual("../../../models");
+  const { testSql: testSqlInstance } = jest.requireActual(
+    "../../../testUtils/testDb",
+  );
+  return { __esModule: true, ...real, sequelize: testSqlInstance };
+});
 
 const createPet = () =>
   PgPet.create({
