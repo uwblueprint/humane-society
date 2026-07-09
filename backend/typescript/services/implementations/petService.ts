@@ -120,7 +120,6 @@ class PetService implements IPetService {
         {
           animal_tag: pet.animalTag,
           name: pet.name,
-          status: pet.status,
           color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,
@@ -251,7 +250,6 @@ class PetService implements IPetService {
         {
           animal_tag: pet.animalTag,
           name: pet.name,
-          status: pet.status,
           color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,

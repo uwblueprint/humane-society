@@ -10,7 +10,6 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
-  status: PetStatus;
   breed?: string;
   neutered?: boolean;
   birthday?: string;
