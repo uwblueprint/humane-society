@@ -412,13 +412,13 @@ const logInteraction = async (req: Request) => {
         }
         if (oldInstructions && !newInstructions) {
           shortDescription = `Removed '${oldInstructions}' from ${taskTemplateName}'s instructions`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '${oldInstructions}' to ''.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '${oldInstructions}' to ''.`;
         } else if (!oldInstructions && newInstructions) {
           shortDescription = `Added '${newInstructions}' to ${taskTemplateName}'s instructions`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '' to '${newInstructions}'.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '' to '${newInstructions}'.`;
         } else {
           shortDescription = `Changed task template instructions of ${taskTemplateName} to ${newInstructions}`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '${oldInstructions}' to '${newInstructions}'.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '${oldInstructions}' to '${newInstructions}'.`;
         }
         break;
 
