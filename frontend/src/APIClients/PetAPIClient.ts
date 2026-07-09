@@ -83,26 +83,6 @@ const getPet = async (petId: number): Promise<Pet> => {
   }
 };
 
-const getPets = async (): Promise<Pet[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-
-  try {
-    const { data } = await baseAPIClient.get("/pets", {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(
-      `Failed to get pets. ${
-        error instanceof Error ? error.message : "Unknown error occurred."
-      }`,
-    );
-  }
-};
-
 const getPetList = async (userId: number): Promise<PetListSections> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -244,7 +224,6 @@ const getProfilePhotoUrl = async (petId: number): Promise<string> => {
 export default {
   getPetTasks,
   getPet,
-  getPets,
   getPetList,
   getProfilePhotoUrl,
   setDefaultProfilePhoto,

@@ -110,41 +110,6 @@ class PetService implements IPetService {
     };
   }
 
-  async getPets(): Promise<PetResponseDTO[]> {
-    let pets: Array<PgPet>;
-    try {
-      pets = await PgPet.findAll({
-        include: [
-          {
-            model: PgPetCareInfo,
-          },
-        ],
-      });
-    } catch (error: unknown) {
-      Logger.error(`Failed to get pets. Reason = ${getErrorMessage(error)}`);
-      throw error;
-    }
-
-    return pets.map((pet) => ({
-      id: pet.id,
-      name: pet.name,
-      animalTag: pet.animal_tag,
-      colorLevel: pet.color_level,
-      status: pet.status,
-      breed: pet.breed,
-      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : undefined,
-      weight: pet.weight,
-      sex: pet.sex,
-      photo: pet.photo,
-      careInfo: {
-        id: pet.petCareInfo?.id,
-        safetyInfo: pet.petCareInfo?.safety_info,
-        medicalInfo: pet.petCareInfo?.medical_info,
-        managementInfo: pet.petCareInfo?.management_info,
-      },
-    }));
-  }
-
   async createPet(pet: PetRequestDTO): Promise<PetResponseDTO> {
     let newPet: PgPet | undefined;
     let newPetCareInfo: PgPetCareInfo | undefined;
@@ -374,19 +339,6 @@ class PetService implements IPetService {
       throw error;
     }
     return id;
-  }
-
-  sortPetListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
-    const statusToPriority: Record<PetStatus, number> = {
-      [PetStatus.NEEDS_CARE]: 0,
-      [PetStatus.OCCUPIED]: 1,
-      [PetStatus.DOES_NOT_NEED_CARE]: 2,
-    };
-    // put pets with 'needs care' status first, then occupied, then does not need care
-    const statusSortFunction = (a: PetListItemDTO, b: PetListItemDTO) => {
-      return statusToPriority[a.status] - statusToPriority[b.status];
-    };
-    return petList.sort(statusSortFunction);
   }
 
   // Within section order by care urgency

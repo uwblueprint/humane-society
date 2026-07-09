@@ -105,14 +105,6 @@ export interface IPetService {
   getPet(id: string): Promise<PetRawDTO>;
 
   /**
-   * retrieve all Pets
-   * @param
-   * @returns returns array of Pets
-   * @throws Error if retrieval fails
-   */
-  getPets(): Promise<PetResponseDTO[]>;
-
-  /**
    * create a Pet with the fields given in the DTO, return created Pet
    * @param pet new Pet
    * @returns the created Pet
