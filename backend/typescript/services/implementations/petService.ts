@@ -483,8 +483,8 @@ class PetService implements IPetService {
     if (isStaff || isAB) {
       sections["Assigned to You"] = [];
     }
-    sections["Has Unassigned Tasks"] = [];
-    sections["All Tasks Assigned"] = [];
+    sections["Unassigned Tasks"] = [];
+    sections["Assigned Tasks"] = [];
     sections["No Tasks"] = [];
 
     allPets.forEach((pet) => {
@@ -494,15 +494,15 @@ class PetService implements IPetService {
         return;
       }
 
-      // Next priority: Has Unassigned Tasks
+      // Next priority: Unassigned Tasks
       if (pet.allTasksAssigned === false) {
-        pushOnce("Has Unassigned Tasks", pet, added);
+        pushOnce("Unassigned Tasks", pet, added);
         return;
       }
 
-      // Then: All Tasks Assigned (TODAY)
+      // Then: Assigned Tasks (TODAY)
       if (pet.allTasksAssigned === true) {
-        pushOnce("All Tasks Assigned", pet, added);
+        pushOnce("Assigned Tasks", pet, added);
         return;
       }
 

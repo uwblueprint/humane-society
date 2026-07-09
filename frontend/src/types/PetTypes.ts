@@ -42,8 +42,8 @@ export type CareInfo = {
 export type PetListSectionKey =
   | "Assigned to You"
   | "Other Pets"
-  | "Has Unassigned Tasks"
-  | "All Tasks Assigned"
+  | "Unassigned Tasks"
+  | "Assigned Tasks"
   | "No Tasks";
 
 // For frontend pet list display
