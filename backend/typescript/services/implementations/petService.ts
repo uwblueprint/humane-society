@@ -644,15 +644,9 @@ class PetService implements IPetService {
         }
 
         // Update lastCaredFor
-        // If task is ongoing / pet is occupied
-        if (petTask.start_time && !petTask.end_time) {
-          petData.lastCaredFor = LastCaredFor.OCCUPIED;
-
-          // If task has not started
-        } else if (!petTask.end_time && !petTask.start_time) {
-          // lastCaredFor stays the same
-          // If task has ended
-        } else if (petTask.end_time) {
+        // Only completed tasks count as "cared for" - incomplete tasks
+        // (whether started or not) leave lastCaredFor unchanged
+        if (petTask.end_time) {
           const endTime = DateTime.fromJSDate(petTask.end_time).setZone(
             TIME_ZONE,
           );
