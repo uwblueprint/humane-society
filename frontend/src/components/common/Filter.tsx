@@ -252,8 +252,18 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                 textStyle="body"
                                 as="span"
                                 color="gray.700"
+                                display={{ base: "none", md: "inline" }}
                               >
                                 {filter.name}
+                              </Text>
+                              <Text
+                                m={0}
+                                textStyle="body"
+                                as="span"
+                                color="gray.700"
+                                display={{ base: "inline", md: "none" }}
+                              >
+                                {filter.mobileLabel ?? filter.name}
                               </Text>
                               {selectedLabels && (
                                 <>

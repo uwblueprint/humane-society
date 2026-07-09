@@ -74,6 +74,7 @@ const filterConfig: Record<string, FilterSection[]> = {
   taskManagement: [
     {
       name: "Task Category",
+      mobileLabel: "Filter",
       value: "category",
       options: Object.values(TaskCategory),
     },
