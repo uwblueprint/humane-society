@@ -80,7 +80,6 @@ export interface PetQuery {
 export interface PetTask {
   pet_id: number;
   name: string;
-  status: PetStatus;
   photo?: string;
   color_level: number;
   animal_tag?: AnimalTag;
