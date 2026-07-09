@@ -446,7 +446,6 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
-    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     const sections: PetListSections = {
       "Assigned to You": [],
@@ -476,24 +475,19 @@ class PetService implements IPetService {
         );
         if (!canCare) return false;
 
-        // Only show pets with tasks scheduled for today
-        if (!petsWithTasksScheduledToday.has(pet.id)) return false;
-
-        // If assigned to me, always include (even if occupied)
-        if (pet.isAssignedToMe) return true;
-
-        // Include if pet needs care or is occupied but has tasks that still need to be assigned
-        return (
-          pet.status === PetStatus.NEEDS_CARE ||
-          (pet.status === PetStatus.OCCUPIED && pet.allTasksAssigned === false)
-        );
+        // Only show pets with >=1 incomplete task scheduled today
+        // (allTasksAssigned is null when a pet has no incomplete tasks today)
+        return pet.allTasksAssigned !== null;
       })
       .forEach((pet) => {
         if (pet.isAssignedToMe) {
+          // Has an incomplete task today assigned to me
           pushOnce("Assigned to You", pet, added);
-        } else {
+        } else if (pet.allTasksAssigned === false) {
+          // Has an incomplete, unassigned task today - self-assignable
           pushOnce("Other Pets", pet, added);
         }
+        // Otherwise, every incomplete task today is assigned to someone else - excluded
       });
 
     // Sort each section by care urgency
@@ -586,7 +580,6 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
-    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     if (user.role === Role.VOLUNTEER) {
       return this.buildSectionsVolunteer(
@@ -594,7 +587,6 @@ class PetService implements IPetService {
         user,
         petColorLevelMap,
         petAnimalTagMap,
-        petsWithTasksScheduledToday,
       );
     }
 
@@ -638,8 +630,6 @@ class PetService implements IPetService {
       // Keep raw maps for volunteer gating
       const petIdToColorLevel: Record<number, number> = {};
       const petIdToAnimalTag: Record<number, AnimalTag> = {};
-      // Track pets with tasks scheduled for today (for volunteer filtering)
-      const petsWithTasksScheduledToday = new Set<number>();
       // Track incomplete / in-progress tasks scheduled today, to derive pet status
       const petIdToHasIncompleteTaskToday: Record<number, boolean> = {};
       const petIdToHasInProgressTaskToday: Record<number, boolean> = {};
@@ -676,11 +666,6 @@ class PetService implements IPetService {
           !!scheduledTime &&
           scheduledTime >= beginningOfToday &&
           scheduledTime < endOfToday;
-
-        // Track pets with tasks scheduled for today
-        if (isToday) {
-          petsWithTasksScheduledToday.add(petTask.pet_id);
-        }
 
         // Track incomplete / in-progress tasks scheduled today, to derive pet status
         if (isToday && !petTask.end_time) {
@@ -793,7 +778,6 @@ class PetService implements IPetService {
         user,
         petIdToColorLevel,
         petIdToAnimalTag,
-        petsWithTasksScheduledToday,
       );
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));
