@@ -31,7 +31,6 @@ const getStatusBadge = (task: ScheduledTaskDTO) => {
     </Button>
   );
 };
-
 const UserProfilePageTableSection = ({
   tasks,
   gridTemplateColumns,

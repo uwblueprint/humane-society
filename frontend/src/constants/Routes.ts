@@ -18,6 +18,8 @@ export const ADD_PET_FORM = "/add-pet-form";
 
 export const ADD_TASK_PAGE = "/add-task";
 
+export const EDIT_TASK_PAGE = "/edit-task";
+
 export const USER_MANAGEMENT_PAGE = "/admin/users";
 
 export const INVITE_USER_PAGE = "/admin/users/invite";

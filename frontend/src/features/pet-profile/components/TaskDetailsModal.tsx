@@ -16,6 +16,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
@@ -35,6 +36,11 @@ import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
+import {
+  isPastDay,
+  isToday,
+  getTaskDetailedStatus,
+} from "../../../utils/taskStatusUtils";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -54,53 +60,12 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.MISC]: MiscIcon,
 };
 
-const isPastDay = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  return (
-    new Date(date.getFullYear(), date.getMonth(), date.getDate()) <
-    new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  );
-};
-
-const isToday = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-};
-
 const userQualifiesForPet = (
   user: AuthenticatedUser | null | undefined,
   pet: Pet | null | undefined,
 ) => {
   if (!user || !pet) return false;
   return user.colorLevel >= pet.colorLevel;
-};
-
-const getTaskDetailedStatus = (
-  task: PetTask | null,
-  authenticatedUser?: AuthenticatedUser | null,
-) => {
-  if (!task) return null;
-  if (task.endTime) return "Completed";
-  if (isPastDay(task.scheduledStartTime)) return "Incomplete";
-  if (task.startTime) {
-    if (
-      authenticatedUser?.role === UserRoles.ADMIN ||
-      authenticatedUser?.role === UserRoles.BEHAVIOURIST
-    ) {
-      return "In-Progress";
-    }
-    return task.userId === authenticatedUser?.id ? "In-Progress" : "Occupied";
-  }
-  if (task.userId) return "Assigned";
-  return null;
 };
 
 interface AssigneeDisplayProps {
@@ -191,6 +156,7 @@ const TaskDetailsModal = ({
   isOpen,
   onClose,
 }: TaskDetailsModalProps): React.ReactElement => {
+  const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
 
@@ -199,7 +165,9 @@ const TaskDetailsModal = ({
   const [templateData, setTemplateData] = useState<Task | null>(null);
   const [petData, setPetData] = useState<Pet | null>(null);
   const [assigneeData, setAssigneeData] = useState<User | null>(null);
-  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(null);
+  const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
+    null,
+  );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
 
@@ -327,12 +295,33 @@ const TaskDetailsModal = ({
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                );
+              }}
+            >
               Assign
             </Button>
           )}
           {status === "Assigned" && (
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  { preselectedUser: assigneeData },
+                );
+              }}
+            >
               Reassign
             </Button>
           )}
@@ -341,7 +330,17 @@ const TaskDetailsModal = ({
               Complete Task
             </Button>
           )}
-          <Button variant="blue-outline" size="medium" width="100%">
+          <Button
+            variant="blue-outline"
+            size="medium"
+            width="100%"
+            onClick={() => {
+              onClose();
+              history.push(
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+              );
+            }}
+          >
             Edit Task
           </Button>
         </Flex>
@@ -349,7 +348,7 @@ const TaskDetailsModal = ({
     }
 
     if (isVolunteerOrStaff) {
-    // Volunteer and Staff Task Actions
+      // Volunteer and Staff Task Actions
       return (
         <Flex direction="column" gap="1rem" width="100%">
           {status === null && (
@@ -456,7 +455,7 @@ const TaskDetailsModal = ({
               </Text>
             </Flex>
           </Flex>
-           {/* Task Instructions Section */}
+          {/* Task Instructions Section */}
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
               Task Instructions
@@ -465,7 +464,7 @@ const TaskDetailsModal = ({
               {templateData?.instructions || "No instructions to display."}
             </Text>
           </Flex>
-           {/* Schedule Section */}
+          {/* Schedule Section */}
           <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
             <GridItem>
               <Flex flexDirection="column" gap="1rem">
@@ -546,7 +545,7 @@ const TaskDetailsModal = ({
           gap="1rem"
           alignItems="stretch"
         >
-        {/* Assigned To Section */}
+          {/* Assigned To Section */}
 
           <Flex flexDirection="column" gap="1rem">
             <Text textStyle="h3" fontWeight="600" m={0}>
