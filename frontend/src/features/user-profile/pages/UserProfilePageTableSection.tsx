@@ -5,6 +5,7 @@ import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
+import { PET_PROFILE_PAGE } from "../../../constants/Routes";
 
 interface UserProfilePageTableSectionProps {
   tasks: ScheduledTaskDTO[];
@@ -50,7 +51,8 @@ const UserProfilePageTableSection = ({
           marginBottom="0.5rem"
           marginTop="0.5rem"
           borderRadius="0.75rem"
-          onClick={() => history.push(`/pet-profile/${task.petId}`)}
+          cursor="pointer"
+          onClick={() => history.push(`${PET_PROFILE_PAGE}/${task.petId}`)}
         >
           <Flex align="center" gap="0.75rem">
             <Icon as={taskCategoryIcons[task.category]} boxSize="1.5rem" />
