@@ -180,8 +180,7 @@ const logInteraction = async (req: Request) => {
         if (
           !taskTemplateName ||
           !petName ||
-          !oldInstructions ||
-          !newInstructions
+          (!oldInstructions && !newInstructions)
         ) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
