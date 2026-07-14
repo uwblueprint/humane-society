@@ -77,6 +77,7 @@ const PetProfilePage = (): React.ReactElement => {
       history.push("/not-found");
       return;
     }
+
     try {
       const dateString = [
         selectedDate.getFullYear(),
@@ -237,6 +238,19 @@ const PetProfilePage = (): React.ReactElement => {
               exact
             />
             <PrivateRoute
+              path={`${url}/edit-task/:taskId`}
+              component={() => (
+                <AddTaskForm
+                  petId={petData.id}
+                  petName={petData.name}
+                  petColorLevel={petData.colorLevel}
+                  isEditMode
+                />
+              )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+            <PrivateRoute
               path={`${path}/assign-task/:taskId`}
               component={AssignTaskPage}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
@@ -256,6 +270,7 @@ const PetProfilePage = (): React.ReactElement => {
             setIsModalOpen(false);
             setShowSurvey(true);
           }}
+          onTaskUpdated={fetchTasks}
         />
       )}
       {showSurvey && (
