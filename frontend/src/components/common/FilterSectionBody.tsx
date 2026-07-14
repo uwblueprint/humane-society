@@ -2,12 +2,14 @@ import React from "react";
 import { Flex, Checkbox, Text } from "@chakra-ui/react";
 import { FilterSection } from "../../types/FilterTypes";
 import DateFilterCalendar from "./DateFilterCalendar";
+import GroupedCheckboxFilter from "./GroupedCheckboxFilter";
 
 type FilterSectionBodyProps = {
   filter: FilterSection;
   selectedValues: string[];
   onOptionChange: (option: string) => void;
   onDateChange: (date: string | undefined) => void;
+  onBulkOptionChange: (options: string[], select: boolean) => void;
 };
 
 const FilterSectionBody: React.FC<FilterSectionBodyProps> = ({
@@ -15,12 +17,24 @@ const FilterSectionBody: React.FC<FilterSectionBodyProps> = ({
   selectedValues,
   onOptionChange,
   onDateChange,
+  onBulkOptionChange,
 }) => {
   if (filter.kind === "date") {
     return (
       <DateFilterCalendar
         selected={selectedValues[0]}
         onChange={onDateChange}
+      />
+    );
+  }
+
+  if (filter.kind === "grouped-checkbox" && filter.groups) {
+    return (
+      <GroupedCheckboxFilter
+        groups={filter.groups}
+        selectedValues={selectedValues}
+        onOptionChange={onOptionChange}
+        onBulkOptionChange={onBulkOptionChange}
       />
     );
   }
@@ -44,7 +58,12 @@ const FilterSectionBody: React.FC<FilterSectionBodyProps> = ({
             isChecked={selectedValues.includes(option)}
             onChange={() => onOptionChange(option)}
           />
-          <Text m={0} textStyle={{ base: "body" }} color="gray.700">
+          <Text
+            m={0}
+            textStyle={{ base: "body" }}
+            color="gray.700"
+            whiteSpace="nowrap"
+          >
             {option}
           </Text>
         </Flex>

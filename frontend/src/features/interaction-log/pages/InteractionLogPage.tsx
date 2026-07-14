@@ -85,6 +85,8 @@ const InteractionLogPage = (): React.ReactElement => {
           if (!vals || vals.length === 0) return true;
           if (key === "interactionType")
             return vals.includes(log.interactionType);
+          if (key === "animalTag")
+            return log.animalTag ? vals.includes(log.animalTag) : false;
           if (key === "role") return vals.includes(log.actor.role);
           if (key === "date") {
             const d = new Date(log.createdAt);

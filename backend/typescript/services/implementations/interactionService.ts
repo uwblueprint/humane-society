@@ -1,6 +1,7 @@
 import Interaction from "../../models/interaction.model";
 import InteractionType from "../../models/interactionType.model";
 import User from "../../models/user.model";
+import Pet from "../../models/pet.model";
 
 const InteractionService = {
   async getInteractions() {
@@ -22,6 +23,11 @@ const InteractionService = {
             model: InteractionType,
             attributes: ["action_type"],
           },
+          {
+            model: Pet,
+            as: "target_pet",
+            attributes: ["id", "animal_tag"],
+          },
         ],
         order: [["created_at", "DESC"]],
       });
@@ -32,6 +38,7 @@ const InteractionService = {
         longDescription: interaction.long_description,
         createdAt: interaction.getDataValue("created_at"),
         interactionType: interaction.interaction_type?.action_type ?? "Unknown",
+        animalTag: interaction.target_pet?.animal_tag ?? null,
         actor: interaction.actor
           ? {
               id: interaction.actor.id,

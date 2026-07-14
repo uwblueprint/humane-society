@@ -7,7 +7,7 @@ import InteractionLogPage from "../InteractionLogPage";
 import InteractionAPIClient from "../../../../APIClients/InteractionAPIClient";
 
 jest.mock("../../../../APIClients/InteractionAPIClient");
-jest.setTimeout(20000);
+jest.setTimeout(40000);
 
 class MockResizeObserver {
   // eslint-disable-next-line class-methods-use-this

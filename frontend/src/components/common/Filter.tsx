@@ -36,8 +36,8 @@ const MOBILE_COMBINED_PANEL_TYPES: FilterType[] = ["interactionLog"];
 const formatDateLabel = (iso: string): string => {
   const date = new Date(`${iso}T00:00:00`);
   return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     year: "numeric",
   });
 };
@@ -49,6 +49,32 @@ const getSelectedLabels = (
   if (filter.kind === "date") {
     return selectedValues[0] ? formatDateLabel(selectedValues[0]) : "";
   }
+
+  if (filter.kind === "grouped-checkbox" && filter.groups) {
+    const groupLabels: string[] = [];
+    const singleOptions: string[] = [];
+
+    filter.groups.forEach((group) => {
+      const isFullySelected = group.options.every((option) =>
+        selectedValues.includes(option),
+      );
+      if (isFullySelected) {
+        groupLabels.push(group.label);
+      } else {
+        group.options.forEach((option) => {
+          if (selectedValues.includes(option)) {
+            singleOptions.push(option);
+          }
+        });
+      }
+    });
+
+    const items = [...groupLabels, ...singleOptions];
+    if (items.length === 0) return "";
+    if (items.length === 1) return items[0];
+    return `${items[0]}, +${items.length - 1}`;
+  }
+
   return filter.options
     .filter((option) => selectedValues.includes(option))
     .join(", ");
@@ -166,6 +192,18 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
     onChange(newFilters);
   };
 
+  const handleBulkChange = (
+    filterName: string,
+    options: string[],
+    select: boolean,
+  ) => {
+    const current = selected[filterName] || [];
+    const updated = select
+      ? Array.from(new Set([...current, ...options]))
+      : current.filter((v) => !options.includes(v));
+    onChange({ ...selected, [filterName]: updated });
+  };
+
   const handleClearFilter = (filterName: string, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -206,6 +244,7 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
           selected={selected}
           onOptionChange={handleOptionChange}
           onDateChange={handleDateChange}
+          onBulkOptionChange={handleBulkChange}
         />
       )}
       <Flex
@@ -353,6 +392,11 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                           bg="gray.50"
                           border="none"
                           boxShadow="sm"
+                          minWidth={
+                            filter.kind === "grouped-checkbox"
+                              ? "29rem"
+                              : undefined
+                          }
                         >
                           <PopoverArrow
                             bg="gray.50"
@@ -404,6 +448,13 @@ const Filter: React.FC<FilterProps> = ({ type, onChange, selected }) => {
                                 }
                                 onDateChange={(date) =>
                                   handleDateChange(filter.value, date)
+                                }
+                                onBulkOptionChange={(options, select) =>
+                                  handleBulkChange(
+                                    filter.value,
+                                    options,
+                                    select,
+                                  )
                                 }
                               />
                             </Flex>

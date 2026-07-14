@@ -21,6 +21,11 @@ type MobileFilterPanelProps = {
   selected: Record<string, string[]>;
   onOptionChange: (filterName: string, option: string) => void;
   onDateChange: (filterName: string, date: string | undefined) => void;
+  onBulkOptionChange: (
+    filterName: string,
+    options: string[],
+    select: boolean,
+  ) => void;
 };
 
 const MobileFilterPanel: React.FC<MobileFilterPanelProps> = ({
@@ -30,6 +35,7 @@ const MobileFilterPanel: React.FC<MobileFilterPanelProps> = ({
   selected,
   onOptionChange,
   onDateChange,
+  onBulkOptionChange,
 }) => {
   if (!isOpen) return null;
 
@@ -100,6 +106,9 @@ const MobileFilterPanel: React.FC<MobileFilterPanelProps> = ({
                         onOptionChange(filter.value, option)
                       }
                       onDateChange={(date) => onDateChange(filter.value, date)}
+                      onBulkOptionChange={(options, select) =>
+                        onBulkOptionChange(filter.value, options, select)
+                      }
                     />
                   </AccordionPanel>
                 </AccordionItem>
