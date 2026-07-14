@@ -90,6 +90,12 @@ const AddTaskForm = ({
           setValue("startMinute", String(date.getMinutes()).padStart(2, "0"));
         }
 
+        if (task.scheduledEndTime) {
+          const endDate = new Date(task.scheduledEndTime);
+          setValue("endHour", String(endDate.getHours()).padStart(2, "0"));
+          setValue("endMinute", String(endDate.getMinutes()).padStart(2, "0"));
+        }
+
         if (task.notes) {
           setValue("instructions", task.notes);
         }
@@ -217,6 +223,7 @@ const AddTaskForm = ({
           petId,
           taskTemplateId: template.id,
           scheduledStartTime,
+          scheduledEndTime,
           notes: instructions,
         });
       } else if (!isRepeating) {

@@ -195,7 +195,7 @@ const updateTask = async (
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
-    // scheduledEndTime:
+    scheduledEndTime: string;
     notes: string;
   },
 ): Promise<void> => {
