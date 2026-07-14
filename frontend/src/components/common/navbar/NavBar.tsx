@@ -18,10 +18,13 @@ import {
   UserManagementIcon,
 } from "../../../assets/icons";
 import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
-import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
+import AUTHENTICATED_USER_KEY, {
+  STAFF_BEHAVIOURISTS_ADMIN,
+} from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   const isAdmin = getCurrentUserRole() === "Administrator";
+  const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(getCurrentUserRole() ?? "");
   const history = useHistory();
 
   const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
@@ -72,13 +75,15 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
               ariaLabel="Tasks"
               route={TASK_MANAGEMENT_PAGE}
             />
-            <NavLink
-              text="Logs"
-              icon={LogIcon}
-              ariaLabel="InteractionLogs"
-              route={INTERACTION_LOG_PAGE}
-            />
           </>
+        )}
+        {canViewLogs && (
+          <NavLink
+            text="Logs"
+            icon={LogIcon}
+            ariaLabel="InteractionLogs"
+            route={INTERACTION_LOG_PAGE}
+          />
         )}
         <NavLink
           text="Profile"

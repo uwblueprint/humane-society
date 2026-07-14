@@ -1,10 +1,24 @@
+import { Op } from "sequelize";
 import Interaction from "../../models/interaction.model";
 import InteractionType from "../../models/interactionType.model";
 import User from "../../models/user.model";
+import { InteractionTypeEnum, Role } from "../../types";
+
+// Interactions about another user's personal information. Staff are not
+// permitted to see these (permissions sheet); Admin and Animal Behaviourist are.
+const USER_INFO_INTERACTION_TYPES: string[] = [
+  InteractionTypeEnum.CHANGED_USER_NAME,
+  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
+  InteractionTypeEnum.CHANGED_USER_ROLE,
+];
 
 const InteractionService = {
-  async getInteractions() {
+  async getInteractions(requesterRole?: Role) {
     try {
+      // Staff must not receive interactions about other users' information.
+      // Filtering here (server-side) ensures the data never leaves the backend.
+      const excludeUserInfoTypes = requesterRole === Role.STAFF;
+
       const interactions = await Interaction.findAll({
         include: [
           {
@@ -21,6 +35,14 @@ const InteractionService = {
           {
             model: InteractionType,
             attributes: ["action_type"],
+            ...(excludeUserInfoTypes
+              ? {
+                  required: true,
+                  where: {
+                    action_type: { [Op.notIn]: USER_INFO_INTERACTION_TYPES },
+                  },
+                }
+              : {}),
           },
         ],
         order: [["created_at", "DESC"]],

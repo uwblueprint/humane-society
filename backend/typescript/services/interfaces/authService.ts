@@ -78,6 +78,14 @@ interface IAuthService {
   isAuthorizedByRole(accessToken: string, roles: Set<Role>): Promise<boolean>;
 
   /**
+   * Get the role of the user the provided access token was issued to
+   * @param accessToken user's access token
+   * @returns the user's role
+   * @throws Error if token is invalid or the user's role cannot be resolved
+   */
+  getUserRoleByToken(accessToken: string): Promise<Role>;
+
+  /**
    * Determine if the provided access token is valid and issued to the requested user
    * @param accessToken user's access token
    * @param requestedUserId userId of requested user

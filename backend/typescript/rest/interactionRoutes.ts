@@ -33,7 +33,13 @@ interactionRouter.get("/", async (req, res) => {
       return;
     }
 
-    const interactions = await InteractionService.getInteractions();
+    // Staff must not receive interactions about other users' information, so we
+    // resolve the requester's role and let the service filter those types out.
+    const requesterRole = await authService.getUserRoleByToken(accessToken);
+
+    const interactions = await InteractionService.getInteractions(
+      requesterRole,
+    );
     res.status(200).json(interactions);
   } catch (error: unknown) {
     res.status(500).json({
