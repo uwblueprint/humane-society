@@ -236,6 +236,19 @@ const PetProfilePage = (): React.ReactElement => {
               exact
             />
             <PrivateRoute
+              path={`${url}/edit-task/:taskId`}
+              component={() => (
+                <AddTaskForm
+                  petId={petData.id}
+                  petName={petData.name}
+                  petColorLevel={petData.colorLevel}
+                  isEditMode
+                />
+              )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+            <PrivateRoute
               path={`${path}/assign-task/:taskId`}
               component={AssignTaskPage}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}

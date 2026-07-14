@@ -208,6 +208,31 @@ const createRecurringTask = async (payload: {
   }
 };
 
+const updateTask = async (
+  taskId: number,
+  payload: {
+    userId: number | null;
+    petId: number;
+    taskTemplateId: number;
+    scheduledStartTime: string;
+    // scheduledEndTime:
+    notes: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    await baseAPIClient.patch(`/tasks/${taskId}`, payload, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to create task: ${error}`);
+  }
+};
+
 export default {
   getTask,
   getTasksByDate,
@@ -220,4 +245,5 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  updateTask,
 };
