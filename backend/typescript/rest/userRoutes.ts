@@ -17,6 +17,7 @@ import IUserService from "../services/interfaces/userService";
 import { Role, UserDTO } from "../types";
 
 import {
+  ConflictError,
   getErrorMessage,
   NotFoundError,
   INTERNAL_SERVER_ERROR_MESSAGE,
@@ -304,7 +305,7 @@ userRouter.delete("/", async (req, res) => {
         await userService.deleteUserById(Number(userId));
         res.status(204).send();
       } catch (error: unknown) {
-        if (error instanceof NotFoundError) {
+        if (error instanceof NotFoundError || error instanceof ConflictError) {
           res.status(400).json({ error: getErrorMessage(error) });
         } else {
           res.status(500).json({ error: getErrorMessage(error) });
@@ -331,7 +332,11 @@ userRouter.delete("/", async (req, res) => {
         await userService.deleteUserByEmail(email);
         res.status(204).send();
       } catch (error: unknown) {
-        res.status(500).json({ error: getErrorMessage(error) });
+        if (error instanceof NotFoundError || error instanceof ConflictError) {
+          res.status(400).json({ error: getErrorMessage(error) });
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
       }
     }
     return;

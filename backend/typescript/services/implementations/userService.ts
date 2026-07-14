@@ -7,11 +7,41 @@ import {
   UserDTO,
   UserStatus,
 } from "../../types";
-import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
+import {
+  ConflictError,
+  getErrorMessage,
+  NotFoundError,
+} from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import PgUser from "../../models/user.model";
+import Task from "../../models/task.model";
+import Interaction from "../../models/interaction.model";
 
 const Logger = logger(__filename);
+
+// Distinct, frontend-matchable message thrown when a user cannot be deleted
+// because deleting them would violate the RESTRICT foreign keys on
+// tasks.user_id (assigned tasks) and/or interactions.actor_id (interaction
+// logs). Kept separate from the "Inactive/Invited" status guard message.
+export const DELETE_BLOCKED_BY_REFERENCES_ERROR =
+  "Cannot delete user with assigned tasks and/or interaction logs.";
+
+// Pre-check that mirrors the RESTRICT foreign keys referencing a user, so we
+// can surface a clear error instead of a raw Postgres FK-constraint error.
+// Note: interactions.target_user_id is ON DELETE SET NULL, so it does not
+// block deletion and is intentionally excluded here.
+const assertUserHasNoBlockingReferences = async (
+  userId: number,
+): Promise<void> => {
+  const [assignedTaskCount, interactionCount] = await Promise.all([
+    Task.count({ where: { user_id: userId } }),
+    Interaction.count({ where: { actor_id: userId } }),
+  ]);
+
+  if (assignedTaskCount > 0 || interactionCount > 0) {
+    throw new ConflictError(DELETE_BLOCKED_BY_REFERENCES_ERROR);
+  }
+};
 
 class UserService implements IUserService {
   /* eslint-disable class-methods-use-this */
@@ -337,6 +367,8 @@ class UserService implements IUserService {
         throw new Error(`userid ${userId} not found.`);
       }
 
+      await assertUserHasNoBlockingReferences(deletedUser.id);
+
       const numDestroyed: number = await PgUser.destroy({
         where: { id: userId },
       });
@@ -393,6 +425,8 @@ class UserService implements IUserService {
       if (!deletedUser) {
         throw new Error(`userid ${firebaseUser.uid} not found.`);
       }
+
+      await assertUserHasNoBlockingReferences(deletedUser.id);
 
       const numDestroyed: number = await PgUser.destroy({
         where: { auth_id: firebaseUser.uid },
