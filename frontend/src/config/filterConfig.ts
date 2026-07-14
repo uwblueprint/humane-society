@@ -1,4 +1,5 @@
 import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
+import INTERACTION_TYPES from "../constants/InteractionConstants";
 import { FilterSection } from "../types/FilterTypes";
 import { PetStatus } from "../types/PetTypes";
 import { AnimalTag, ColorLevel, TaskCategory } from "../types/TaskTypes";
@@ -80,14 +81,25 @@ const filterConfig: Record<string, FilterSection[]> = {
   ],
   interactionLog: [
     {
+      name: "Interaction",
+      value: "interactionType",
+      options: INTERACTION_TYPES,
+    },
+    {
       name: "Animal Tag",
       value: "animalTag",
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategory",
-      options: Object.values(TaskCategory),
+      name: "Role",
+      value: "role",
+      options: Array.from(ALL_ROLES),
+    },
+    {
+      name: "Date",
+      value: "date",
+      kind: "date",
+      options: [],
     },
   ],
 };
