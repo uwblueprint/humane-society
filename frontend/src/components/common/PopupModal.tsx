@@ -17,6 +17,7 @@ interface PopupModalProps {
   // Secondary button props
   secondaryButtonText?: string; // Optional: text for the secondary button (if shown)
   onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
+  zIndex?: number; // Optional: stacking order; raise above other modals when nested inside one
 }
 
 const PopupModal: React.FC<PopupModalProps> = ({
@@ -29,6 +30,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
   secondaryButtonText,
   onSecondaryClick,
   isPrimaryLoading = false,
+  zIndex = 1000,
 }) => {
   const hasPrimaryButton = primaryButtonText && onPrimaryClick;
   const hasSecondaryButton = secondaryButtonText && onSecondaryClick;
@@ -43,7 +45,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
       height="100vh"
       width="100vw"
       bg="rgba(26, 32, 44, 0.6)"
-      zIndex="1000"
+      zIndex={zIndex}
       justifyContent="center"
       alignItems="center"
     >
