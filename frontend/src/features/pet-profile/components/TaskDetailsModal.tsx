@@ -358,8 +358,8 @@ const TaskDetailsModal = ({
           authenticatedUser?.lastName ?? ""
         }`,
       });
-      const updated = await TaskAPIClient.getTask(taskId);
-      setTaskData(updated);
+      await fetchData(false);
+      onTaskUpdated?.();
       toast({
         title: "Task started",
         status: "success",
