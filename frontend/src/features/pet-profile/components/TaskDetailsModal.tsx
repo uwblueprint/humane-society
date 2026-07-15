@@ -21,7 +21,6 @@ import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
-
 import AuthContext from "../../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import { Pet } from "../../../types/PetTypes";
@@ -151,7 +150,6 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
-  instanceDate?: string;
   onTaskCompleted: () => void;
   onTaskUpdated?: () => void;
 }
@@ -160,13 +158,12 @@ const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
-  instanceDate,
   onTaskCompleted,
   onTaskUpdated,
 }: TaskDetailsModalProps): React.ReactElement => {
+  const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
-  const history = useHistory();
 
   const [loading, setLoading] = useState(true);
   const [taskData, setTaskData] = useState<PetTask | null>(null);
@@ -401,9 +398,7 @@ const TaskDetailsModal = ({
             onClick={() => {
               onClose();
               history.push(
-                `/pet-profile/${taskData?.petId}/edit-task/${taskId}${
-                  instanceDate ? `?date=${instanceDate}` : ""
-                }`,
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
               );
             }}
           >

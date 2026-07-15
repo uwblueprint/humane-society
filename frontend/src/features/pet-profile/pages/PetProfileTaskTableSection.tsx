@@ -15,7 +15,7 @@ interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number, instanceDate?: string) => void;
+  onTaskClick: (taskId: number) => void;
 }
 
 const StatusBadge = ({
@@ -25,11 +25,8 @@ const StatusBadge = ({
 }: {
   task: ScheduledTaskDTO;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number, instanceDate?: string) => void;
+  onTaskClick: (taskId: number) => void;
 }) => {
-  const handleClick = () =>
-    onTaskClick(task.id, task.scheduledStartTime?.toString());
-
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
@@ -48,7 +45,7 @@ const StatusBadge = ({
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={handleClick}
+          onClick={() => onTaskClick(task.id)}
         >
           Assign
         </Button>
@@ -60,7 +57,7 @@ const StatusBadge = ({
           variant="green"
           size="medium"
           type="button"
-          onClick={handleClick}
+          onClick={() => onTaskClick(task.id)}
         >
           In Progress
         </Button>
@@ -78,7 +75,7 @@ const StatusBadge = ({
         variant="gray"
         size="medium"
         type="button"
-        onClick={handleClick}
+        onClick={() => onTaskClick(task.id)}
       >
         Assign to Me
       </Button>
@@ -91,7 +88,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={handleClick}
+        onClick={() => onTaskClick(task.id)}
       >
         Start
       </Button>
@@ -113,7 +110,7 @@ const StatusBadge = ({
         variant="green"
         size="medium"
         type="button"
-        onClick={handleClick}
+        onClick={() => onTaskClick(task.id)}
       >
         In Progress
       </Button>
@@ -211,9 +208,7 @@ const PetProfileTaskTableSection = ({
             marginBottom="0.5rem"
             marginTop="0.5rem"
             borderRadius="0.75rem"
-            onClick={() =>
-              onTaskClick(task.id, task.scheduledStartTime?.toString())
-            }
+            onClick={() => onTaskClick(task.id)}
             cursor="pointer"
           >
             <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
