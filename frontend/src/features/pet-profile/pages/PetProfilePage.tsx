@@ -26,6 +26,7 @@ import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
+import SurveyModal from "../components/surveyModal";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -68,6 +69,7 @@ const PetProfilePage = (): React.ReactElement => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
@@ -262,7 +264,20 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onTaskCompleted={async () => {
+            await fetchTasks();
+            setSelectedTaskId(null);
+            setIsModalOpen(false);
+            setShowSurvey(true);
+          }}
           onTaskUpdated={fetchTasks}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={petData.animalTag}
         />
       )}
     </>

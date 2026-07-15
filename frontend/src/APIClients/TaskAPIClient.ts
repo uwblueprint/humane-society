@@ -383,6 +383,22 @@ const createRecurringTask = async (payload: {
   }
 };
 
+const completeTask = async (taskId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/end`,
+      { endTime: new Date().toISOString() },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to complete task: ${error}`);
+  }
+};
+
 const updateTask = async (
   taskId: number,
   payload: {
@@ -398,7 +414,6 @@ const updateTask = async (
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
-
   try {
     await baseAPIClient.patch(`/tasks/${taskId}`, payload, {
       headers: { Authorization: bearerToken },
@@ -425,5 +440,6 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  completeTask,
   updateTask,
 };
