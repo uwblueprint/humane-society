@@ -308,6 +308,26 @@ const deleteTask = async (
   }
 };
 
+const selfAssign = async (taskId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
+  if (userId == null) {
+    throw new Error("User ID not found in local storage");
+  }
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/assign-user`,
+      { userId: Number(userId) },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to self-assign task: ${error}`);
+  }
+};
+
 const createTask = async (payload: {
   userId: number | null;
   petId: number;
@@ -363,6 +383,31 @@ const createRecurringTask = async (payload: {
   }
 };
 
+const updateTask = async (
+  taskId: number,
+  payload: {
+    userId: number | null;
+    petId: number;
+    taskTemplateId: number;
+    scheduledStartTime: string;
+    // scheduledEndTime:
+    notes: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    await baseAPIClient.patch(`/tasks/${taskId}`, payload, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to create task: ${error}`);
+  }
+};
+
 export default {
   getTask,
   getTasksByDate,
@@ -377,6 +422,8 @@ export default {
   endTask,
   updateNotes,
   deleteTask,
+  selfAssign,
   createTask,
   createRecurringTask,
+  updateTask,
 };
