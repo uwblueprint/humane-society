@@ -8,7 +8,7 @@ import { ReactComponent as TrainingIcon } from "../../assets/icons/training.svg"
 import { ReactComponent as WalkIcon } from "../../assets/icons/walk.svg";
 import { TaskCategory } from "../../types/TaskTypes";
 
-const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
+export const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.WALK]: WalkIcon,
   [TaskCategory.GAMES]: GamesIcon,
   [TaskCategory.PEN_TIME]: PenTimeIcon,

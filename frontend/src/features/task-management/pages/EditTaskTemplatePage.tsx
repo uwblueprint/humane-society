@@ -11,10 +11,11 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useHistory, useParams } from "react-router-dom";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import AuthContext from "../../../contexts/AuthContext";
 import DeleteTaskTemplateModal from "../components/DeleteTaskTemplateModal";
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -43,6 +44,9 @@ const EditTaskTemplatePage = (): React.ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { authenticatedUser } = useContext(AuthContext);
+  const originalValues = useRef<TaskTemplateFormData | null>(null);
+  const [taskTemplateName, setTaskTemplateName] = useState("");
 
   const {
     control,
@@ -85,11 +89,14 @@ const EditTaskTemplatePage = (): React.ReactElement => {
         );
 
         // Prepopulate form with task template data
-        reset({
+        const formValues = {
           taskName: taskTemplateData.name,
           taskCategory: taskTemplateData.category,
           taskInstructions: taskTemplateData.instructions,
-        });
+        };
+        reset(formValues);
+        originalValues.current = formValues;
+        setTaskTemplateName(taskTemplateData.name);
       } catch (error) {
         toast({
           title: "Error",
@@ -127,17 +134,42 @@ const EditTaskTemplatePage = (): React.ReactElement => {
 
   const onSubmit = async (data: TaskTemplateFormData) => {
     setIsSubmitting(true);
+    const orig = originalValues.current;
+    const actorId = authenticatedUser!.id;
 
     try {
-      // Since the task category is required, we will always have a task category
-      // to submit
-      await TaskTemplateAPIClient.editTaskTemplate(taskTemplateId, {
-        taskName: data.taskName,
-        category: data.taskCategory as TaskCategory,
-        instructions: data.taskInstructions,
-      });
+      const patches: Promise<unknown>[] = [];
 
-      // Navigate back to task management page
+      if (orig && data.taskName !== orig.taskName) {
+        patches.push(TaskTemplateAPIClient.updateName(taskTemplateId, {
+          name: data.taskName,
+          actorId,
+          targetId: taskTemplateId,
+          oldTaskTemplateName: orig.taskName,
+          newTaskTemplateName: data.taskName,
+        }));
+      }
+
+      if (orig && data.taskInstructions !== orig.taskInstructions) {
+        patches.push(TaskTemplateAPIClient.updateInstructions(taskTemplateId, {
+          instructions: data.taskInstructions,
+          actorId,
+          targetId: taskTemplateId,
+          taskTemplateName: orig.taskName,
+          oldInstructions: orig.taskInstructions,
+          newInstructions: data.taskInstructions,
+        }));
+      }
+
+      if (orig && data.taskCategory !== orig.taskCategory) {
+        patches.push(TaskTemplateAPIClient.editTaskTemplate(taskTemplateId, {
+          taskName: data.taskName,
+          category: data.taskCategory as TaskCategory,
+          instructions: data.taskInstructions,
+        }));
+      }
+
+      await Promise.all(patches);
       history.push(TASK_MANAGEMENT_PAGE);
     } catch (error) {
       toast({
@@ -327,6 +359,7 @@ const EditTaskTemplatePage = (): React.ReactElement => {
 
       <DeleteTaskTemplateModal
         taskTemplateId={taskTemplateId}
+        taskTemplateName={taskTemplateName}
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onDeleteSuccess={() => history.push(TASK_MANAGEMENT_PAGE)}

@@ -8,15 +8,16 @@ import {
   Modal,
   ModalBody,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spinner,
   Text,
   useToast,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
@@ -32,8 +33,14 @@ import {
 } from "../../../types/TaskTypes";
 import { User } from "../../../types/UserTypes";
 import Button from "../../../components/common/Button";
+import PopupModal from "../../../components/common/PopupModal";
 import StatusLabel from "../../../components/common/StatusLabel";
 import UserRoles from "../../../constants/UserConstants";
+import {
+  isPastDay,
+  isToday,
+  getTaskDetailedStatus,
+} from "../../../utils/taskStatusUtils";
 
 import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
 import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
@@ -43,6 +50,7 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 
 const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.WALK]: WalkIcon,
@@ -53,54 +61,12 @@ const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.MISC]: MiscIcon,
 };
 
-const isPastDay = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  // Compare dates only (ignoring time)
-  return (
-    new Date(date.getFullYear(), date.getMonth(), date.getDate()) <
-    new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  );
-};
-
-const isToday = (dateStr?: string) => {
-  if (!dateStr) return false;
-  const date = new Date(dateStr);
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-};
-
 const userQualifiesForPet = (
   user: AuthenticatedUser | null | undefined,
   pet: Pet | null | undefined,
 ) => {
   if (!user || !pet) return false;
   return user.colorLevel >= pet.colorLevel;
-};
-
-const getTaskDetailedStatus = (
-  task: PetTask | null,
-  authenticatedUser?: AuthenticatedUser | null,
-) => {
-  if (!task) return null;
-  if (task.endTime) return "Completed";
-  if (isPastDay(task.scheduledStartTime)) return "Incomplete";
-  if (task.startTime) {
-    if (
-      authenticatedUser?.role === UserRoles.ADMIN ||
-      authenticatedUser?.role === UserRoles.BEHAVIOURIST
-    ) {
-      return "In-Progress";
-    }
-    return task.userId === authenticatedUser?.id ? "In-Progress" : "Occupied";
-  }
-  if (task.userId) return "Assigned";
-  return null;
 };
 
 interface AssigneeDisplayProps {
@@ -184,13 +150,18 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  onTaskCompleted: () => void;
+  onTaskUpdated?: () => void;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  onTaskCompleted,
+  onTaskUpdated,
 }: TaskDetailsModalProps): React.ReactElement => {
+  const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
 
@@ -204,8 +175,14 @@ const TaskDetailsModal = ({
   );
   const [userTasks, setUserTasks] = useState<PetTask[]>([]);
   const [petTasks, setPetTasks] = useState<PetTask[]>([]);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const status = getTaskDetailedStatus(taskData, authenticatedUser);
+
+  const isAdminOrBehaviourist =
+    authenticatedUser?.role === UserRoles.ADMIN ||
+    authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const isVolunteerOrStaff =
     authenticatedUser?.role === UserRoles.VOLUNTEER ||
@@ -223,16 +200,33 @@ const TaskDetailsModal = ({
     (t) => t.startTime && !t.endTime && !isPastDay(t.scheduledStartTime),
   );
 
-  // Indicates if all assigned tasks for the user on the current day are complete
   const hasCompletedAllAssignedTasks = userTasks.every(
     (t) => !isToday(t.scheduledStartTime) || !!t.endTime,
   );
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const fetchData = async () => {
-      setLoading(true);
+  const handleCompleteTask = async () => {
+    try {
+      await TaskAPIClient.completeTask(taskId);
+      toast({
+        title: "Task completed",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onTaskCompleted();
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to complete task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+  const fetchData = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) setLoading(true);
       try {
         const tTask = await TaskAPIClient.getTask(taskId);
         setTaskData(tTask);
@@ -275,12 +269,43 @@ const TaskDetailsModal = ({
           isClosable: true,
         });
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
-    };
+    },
+    [taskId, toast, authenticatedUser],
+  );
 
+  useEffect(() => {
+    if (!isOpen) return;
     fetchData();
-  }, [taskId, isOpen, toast, authenticatedUser]);
+  }, [isOpen, fetchData]);
+
+  const handleSelfAssignConfirm = async () => {
+    setIsAssigning(true);
+    try {
+      await TaskAPIClient.selfAssign(taskId);
+      toast({
+        title: "Success",
+        description: "Task assigned successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      await fetchData(false); // silent refresh so the modal reflects the new assigned state
+      onTaskUpdated?.(); // refresh the parent task table so the row reflects the assignment
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign task.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsConfirmOpen(false);
+      setIsAssigning(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -343,41 +368,167 @@ const TaskDetailsModal = ({
     }
   };
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent bg="gray.50" maxHeight="min(831px, calc(100vh - 8rem))">
-        <ModalHeader paddingBlock="2rem" paddingInline="2.5rem">
-          <Flex align="center" justify="space-between">
-            <Flex align="center" gap="1rem">
-              {templateData && (
-                <Icon
-                  as={taskCategoryIcons[templateData.category]}
-                  boxSize="1.75rem"
-                />
-              )}
-              <Text m={0} textStyle="h2Mobile" color="gray.700">
-                {templateData?.name || "Task Details"}
-              </Text>
-            </Flex>
-            <IconButton
-              icon={<CloseIcon boxSize={4} />}
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              aria-label="Close modal"
-            />
-          </Flex>
-        </ModalHeader>
+  const renderActions = () => {
+    if (isAdminOrBehaviourist) {
+      return (
+        <Flex direction="column" gap="1rem" width="100%">
+          {status === null && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                );
+              }}
+            >
+              Assign
+            </Button>
+          )}
+          {status === "Assigned" && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => {
+                onClose();
+                history.push(
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  { preselectedUser: assigneeData },
+                );
+              }}
+            >
+              Reassign
+            </Button>
+          )}
+          {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={handleCompleteTask}
+            >
+              Complete Task
+            </Button>
+          )}
+          <Button
+            variant="blue-outline"
+            size="medium"
+            width="100%"
+            onClick={() => {
+              onClose();
+              history.push(
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+              );
+            }}
+          >
+            Edit Task
+          </Button>
+        </Flex>
+      );
+    }
 
-        <Flex direction="column" height="100%" overflowY="auto">
+    if (isVolunteerOrStaff) {
+      // Volunteer and Staff Task Actions
+      return (
+        <Flex direction="column" gap="1rem" width="100%">
+          {status === null && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={() => setIsConfirmOpen(true)}
+              disabled={
+                !!isPastDay(taskData?.scheduledStartTime) ||
+                !userQualifiesForPet(authenticatedUser, petData) ||
+                !hasCompletedAllAssignedTasks
+              }
+            >
+              Assign to Me
+            </Button>
+          )}
+          {status === "Assigned" && isToday(taskData?.scheduledStartTime) && (
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              disabled={isPetOccupied || hasInProgressTask}
+              onClick={handleStart}
+            >
+              Start
+            </Button>
+          )}
+          {status === "In-Progress" && (
+            <Flex gap="1rem">
+              <Button variant="blue-outline" size="medium" width="100%">
+                Restart
+              </Button>
+              <Button
+                variant="dark-blue"
+                size="medium"
+                width="100%"
+                onClick={handleCompleteTask}
+              >
+                Complete Task
+              </Button>
+            </Flex>
+          )}
+        </Flex>
+      );
+    }
+
+    return null;
+  };
+
+  const actions = renderActions();
+
+  return (
+    <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent
+          bg="gray.50"
+          maxHeight="min(831px, calc(100vh - 8rem))"
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+        >
+          <ModalHeader
+            paddingBlock="2rem"
+            paddingInline="2.5rem"
+            flexShrink={0}
+          >
+            <Flex align="center" justify="space-between">
+              <Flex align="center" gap="1rem">
+                {templateData && (
+                  <Icon
+                    as={taskCategoryIcons[templateData.category]}
+                    boxSize="1.75rem"
+                  />
+                )}
+                <Text m={0} textStyle="h2Mobile" color="gray.700">
+                  {templateData?.name || "Task Details"}
+                </Text>
+              </Flex>
+              <IconButton
+                icon={<CloseIcon boxSize={4} />}
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                aria-label="Close modal"
+              />
+            </Flex>
+          </ModalHeader>
+
           <ModalBody
             flex="1"
             display="flex"
             flexDirection="column"
             gap="2rem"
             paddingTop="0"
-            paddingBottom="2.5rem"
+            paddingBottom="1rem"
             paddingInline="2.5rem"
             overflowY="auto"
           >
@@ -401,7 +552,6 @@ const TaskDetailsModal = ({
                 </Text>
               </Flex>
             </Flex>
-
             {/* Task Instructions Section */}
             <Flex flexDirection="column" gap="1rem">
               <Text textStyle="h3" fontWeight="600" m={0}>
@@ -411,7 +561,6 @@ const TaskDetailsModal = ({
                 {templateData?.instructions || "No instructions to display."}
               </Text>
             </Flex>
-
             {/* Schedule Section */}
             <Grid templateColumns="repeat(2, 1fr)" rowGap="2rem">
               <GridItem>
@@ -434,7 +583,6 @@ const TaskDetailsModal = ({
                   </Text>
                 </Flex>
               </GridItem>
-
               <GridItem>
                 <Flex flexDirection="column" gap="1rem">
                   <Text textStyle="h3" fontWeight="600" m={0}>
@@ -455,7 +603,6 @@ const TaskDetailsModal = ({
                   </Text>
                 </Flex>
               </GridItem>
-
               {recurrenceData && (
                 <>
                   <GridItem>
@@ -481,9 +628,23 @@ const TaskDetailsModal = ({
                 </>
               )}
             </Grid>
+          </ModalBody>
+
+          <ModalFooter
+            paddingInline="2.5rem"
+            paddingBottom="2.5rem"
+            paddingTop="1rem"
+            flexShrink={0}
+            bg="gray.50"
+            borderTop="1px solid"
+            borderColor="gray.200"
+            flexDirection="column"
+            gap="1rem"
+            alignItems="stretch"
+          >
+            {/* Assigned To Section */}
 
             <Flex flexDirection="column" gap="1rem">
-              {/* Assigned To Section */}
               <Text textStyle="h3" fontWeight="600" m={0}>
                 Assigned to
               </Text>
@@ -492,78 +653,24 @@ const TaskDetailsModal = ({
                 authenticatedUser={authenticatedUser}
                 taskData={taskData}
               />
-
-              {/* Admin and Behaviourist Task Actions */}
-              {(authenticatedUser?.role === UserRoles.ADMIN ||
-                authenticatedUser?.role === UserRoles.BEHAVIOURIST) && (
-                <Flex direction="column" gap="1rem">
-                  {status === null && (
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Assign
-                    </Button>
-                  )}
-                  {status === "Assigned" && (
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Reassign
-                    </Button>
-                  )}
-                  {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
-                    <Button variant="dark-blue" size="medium" width="100%">
-                      Complete Task
-                    </Button>
-                  )}
-                  <Button variant="blue-outline" size="medium" width="100%">
-                    Edit Task
-                  </Button>
-                </Flex>
-              )}
-
-              {/* Volunteer and Staff Task Actions */}
-              {isVolunteerOrStaff && (
-                <Flex direction="column" gap="1rem">
-                  {status === null && (
-                    <Button
-                      variant="dark-blue"
-                      size="medium"
-                      width="100%"
-                      disabled={
-                        isPastDay(taskData?.scheduledStartTime) ||
-                        !userQualifiesForPet(authenticatedUser, petData) ||
-                        !hasCompletedAllAssignedTasks
-                      }
-                    >
-                      Assign to Me
-                    </Button>
-                  )}
-                  {status === "Assigned" &&
-                    isToday(taskData?.scheduledStartTime) && (
-                      <Button
-                        variant="dark-blue"
-                        size="medium"
-                        width="100%"
-                        disabled={isPetOccupied || hasInProgressTask}
-                        onClick={handleStart}
-                      >
-                        Start
-                      </Button>
-                    )}
-                  {status === "In-Progress" && (
-                    <Flex gap="1rem">
-                      <Button variant="blue-outline" size="medium" width="100%">
-                        Restart
-                      </Button>
-                      <Button variant="dark-blue" size="medium" width="100%">
-                        Complete Task
-                      </Button>
-                    </Flex>
-                  )}
-                </Flex>
-              )}
             </Flex>
-          </ModalBody>
-        </Flex>
-      </ModalContent>
-    </Modal>
+            {actions}
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <PopupModal
+        open={isConfirmOpen}
+        zIndex={1500}
+        title="Confirmation"
+        message="Are you sure you want to assign yourself this task? This process can not be undone."
+        primaryButtonText="Assign to Me"
+        onPrimaryClick={handleSelfAssignConfirm}
+        isPrimaryLoading={isAssigning}
+        secondaryButtonText="Cancel"
+        onSecondaryClick={() => setIsConfirmOpen(false)}
+      />
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -22,9 +22,11 @@ import AddTaskForm from "./AddTaskForm";
 import { TableColumn, TableHeader } from "../../../components/common/table";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import PetProfileTaskTableSection from "./PetProfileTaskTableSection";
+import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
+import SurveyModal from "../components/surveyModal";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -62,38 +64,44 @@ const PetProfilePage = (): React.ReactElement => {
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
   const [petData, setPetData] = useState<Pet | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(true);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchTasks = useCallback(async () => {
+    if (!petId || Number.isNaN(petId)) {
+      history.push("/not-found");
+      return;
+    }
+
+    try {
+      const dateString = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+      const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+        petId,
+        dateString,
+      );
+      const sortedTasks = [...fetchedTasks].sort(
+        (a, b) => sortTask(a) - sortTask(b),
+      );
+      setTasks(sortedTasks);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [petId, selectedDate, history]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (!petId || Number.isNaN(petId)) {
-        history.push("/not-found");
-        return;
-      }
-
-      try {
-        const dateString = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
-          petId,
-          dateString,
-        );
-        const sortedTasks = [...fetchedTasks].sort(
-          (a, b) => sortTask(a) - sortTask(b),
-        );
-        setTasks(sortedTasks);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    };
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [fetchTasks, location.key]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -145,9 +153,13 @@ const PetProfilePage = (): React.ReactElement => {
   } else {
     content = (
       <PetProfileTaskTableSection
-        petId={petId}
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
+        authenticatedUser={authenticatedUser}
+        onTaskClick={(taskId) => {
+          setSelectedTaskId(taskId);
+          setIsModalOpen(true);
+        }}
       />
     );
   }
@@ -226,6 +238,19 @@ const PetProfilePage = (): React.ReactElement => {
               exact
             />
             <PrivateRoute
+              path={`${url}/edit-task/:taskId`}
+              component={() => (
+                <AddTaskForm
+                  petId={petData.id}
+                  petName={petData.name}
+                  petColorLevel={petData.colorLevel}
+                  isEditMode
+                />
+              )}
+              allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
+              exact
+            />
+            <PrivateRoute
               path={`${path}/assign-task/:taskId`}
               component={AssignTaskPage}
               allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
@@ -234,6 +259,27 @@ const PetProfilePage = (): React.ReactElement => {
           </Switch>
         </Flex>
       </Flex>
+      {selectedTaskId !== null && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onTaskCompleted={async () => {
+            await fetchTasks();
+            setSelectedTaskId(null);
+            setIsModalOpen(false);
+            setShowSurvey(true);
+          }}
+          onTaskUpdated={fetchTasks}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={petData.animalTag}
+        />
+      )}
     </>
   );
 };

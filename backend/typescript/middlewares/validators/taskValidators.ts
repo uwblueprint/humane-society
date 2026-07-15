@@ -39,6 +39,28 @@ export const taskRequestDtoValidator = async (
   }
 
   if (
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    !validateDate(body.scheduledEndTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledEndTime", "Date"));
+  }
+
+  if (
+    body.scheduledStartTime !== undefined &&
+    body.scheduledStartTime !== null &&
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    new Date(body.scheduledEndTime) <= new Date(body.scheduledStartTime)
+  ) {
+    return res
+      .status(400)
+      .send("scheduledEndTime must be after scheduledStartTime");
+  }
+
+  if (
     body.startTime !== undefined &&
     body.startTime !== null &&
     !validateDate(body.startTime)
@@ -109,6 +131,28 @@ export const taskUpdateDtoValidator = async (
   }
 
   if (
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    !validateDate(body.scheduledEndTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("scheduledEndTime", "Date"));
+  }
+
+  if (
+    body.scheduledStartTime !== undefined &&
+    body.scheduledStartTime !== null &&
+    body.scheduledEndTime !== undefined &&
+    body.scheduledEndTime !== null &&
+    new Date(body.scheduledEndTime) <= new Date(body.scheduledStartTime)
+  ) {
+    return res
+      .status(400)
+      .send("scheduledEndTime must be after scheduledStartTime");
+  }
+
+  if (
     body.startTime !== undefined &&
     body.startTime !== null &&
     !validateDate(body.startTime)
@@ -142,7 +186,7 @@ export const taskUserPatchValidator = async (
 ) => {
   const { body } = req;
 
-  if (!validatePrimitive(body.userId, "integer")) {
+  if (body.userId !== null && !validatePrimitive(body.userId, "integer")) {
     return res.status(400).send(getApiValidationError("userId", "integer"));
   }
 
