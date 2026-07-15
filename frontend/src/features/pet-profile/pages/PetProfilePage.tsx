@@ -69,6 +69,9 @@ const PetProfilePage = (): React.ReactElement => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedInstanceDate, setSelectedInstanceDate] = useState<
+    string | undefined
+  >(undefined);
   const [showSurvey, setShowSurvey] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -156,8 +159,9 @@ const PetProfilePage = (): React.ReactElement => {
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}
-        onTaskClick={(taskId) => {
+        onTaskClick={(taskId, instanceDate) => {
           setSelectedTaskId(taskId);
+          setSelectedInstanceDate(instanceDate);
           setIsModalOpen(true);
         }}
       />
@@ -264,6 +268,7 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          instanceDate={selectedInstanceDate}
           onTaskCompleted={async () => {
             await fetchTasks();
             setSelectedTaskId(null);

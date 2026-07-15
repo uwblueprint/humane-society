@@ -382,6 +382,24 @@ const createRecurringTask = async (payload: {
     throw new Error(`Failed to create recurring task: ${error}`);
   }
 };
+const deleteRecurringTask = async (
+  taskId: number,
+  date: string,
+  single: boolean,
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.delete(`/tasks/recurrences/${taskId}`, {
+      headers: { Authorization: bearerToken },
+      params: { date, single },
+    });
+  } catch (error) {
+    throw new Error(`Failed to delete recurring task: ${error}`);
+  }
+};
 
 const completeTask = async (taskId: number): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -406,7 +424,6 @@ const updateTask = async (
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
-    // scheduledEndTime:
     notes: string;
   },
 ): Promise<void> => {
@@ -419,7 +436,7 @@ const updateTask = async (
       headers: { Authorization: bearerToken },
     });
   } catch (error) {
-    throw new Error(`Failed to create task: ${error}`);
+    throw new Error(`Failed to update task: ${error}`);
   }
 };
 
@@ -440,6 +457,7 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  deleteRecurringTask,
   completeTask,
   updateTask,
 };
