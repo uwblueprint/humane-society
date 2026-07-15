@@ -108,6 +108,7 @@ taskTemplateRouter.delete("/:id", async (req, res) => {
 
   try {
     const deletedId = await taskTemplateService.deleteTaskTemplate(id);
+    await logInteraction(req);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {

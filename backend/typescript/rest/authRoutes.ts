@@ -5,6 +5,7 @@ import {
   isAuthorizedByUserId,
   isAuthorizedByRole,
 } from "../middlewares/auth";
+import logInteraction from "../middlewares/logInteraction";
 import {
   loginRequestValidator,
   loginWithSignInLinkRequestValidator,
@@ -201,6 +202,7 @@ authRouter.post("/invite-user", inviteUserDtoValidator, async (req, res) => {
       req.body.email,
       String(user.role),
     );
+    await logInteraction(req);
     if (user.status === UserStatus.INVITED) {
       res
         .status(204)
