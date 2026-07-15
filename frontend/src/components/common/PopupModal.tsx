@@ -6,16 +6,19 @@ import React from "react";
 import { Flex, Text, Button } from "@chakra-ui/react";
 
 interface PopupModalProps {
-  open: boolean;
-  title: string;
-  message?: string;
+  open: boolean; // Controls whether the modal is visible
+  title: string; // Title displayed at the top of the modal
+  message?: string; // Main message or body text of the modal
   children?: React.ReactNode;
-  primaryButtonText?: string;
-  onPrimaryClick?: () => void;
-  primaryButtonColor?: "blue" | "red";
-  isPrimaryLoading?: boolean;
-  secondaryButtonText?: string;
-  onSecondaryClick?: () => void;
+  // Primary button props
+  primaryButtonText?: string; // Text for the primary action button
+  onPrimaryClick?: () => void; // Function to call when the primary button is clicked
+  primaryButtonColor?: "blue" | "red"; // Optional: sets primary button color; defaults to "blue"
+  isPrimaryLoading?: boolean; // Optional: disables primary button while loading
+  // Secondary button props
+  secondaryButtonText?: string; // Optional: text for the secondary button (if shown)
+  onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
+  zIndex?: number; // Optional: stacking order; raise above other modals when nested inside one
 }
 
 const PopupModal: React.FC<PopupModalProps> = ({
@@ -29,6 +32,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
   secondaryButtonText,
   onSecondaryClick,
   isPrimaryLoading = false,
+  zIndex = 1000,
 }) => {
   const hasPrimaryButton = primaryButtonText && onPrimaryClick;
   const hasSecondaryButton = secondaryButtonText && onSecondaryClick;
@@ -43,7 +47,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
       height="100vh"
       width="100vw"
       bg="rgba(26, 32, 44, 0.6)"
-      zIndex="1000"
+      zIndex={zIndex}
       justifyContent="center"
       alignItems="center"
     >

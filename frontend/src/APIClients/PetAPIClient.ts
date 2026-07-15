@@ -4,6 +4,7 @@ import { Pet, PetListSections, PetRequestDTO } from "../types/PetTypes";
 import { Task } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
+import { InteractionType } from "../types/InteractionTypes";
 
 /** Backend often responds with plain text for validation errors, not `{ error: string }`. */
 const getCreatePetErrorMessage = (error: unknown): string => {
@@ -123,7 +124,15 @@ const getPetList = async (userId: number): Promise<PetListSections> => {
   }
 };
 
-const deletePet = async (petId: number | string): Promise<void> => {
+const deletePet = async (
+  petId: number | string,
+  body?: {
+    actorId: number;
+    targetId: number;
+    animalTag: string;
+    petName: string;
+  },
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -131,6 +140,7 @@ const deletePet = async (petId: number | string): Promise<void> => {
   try {
     await baseAPIClient.delete(`/pets/${petId}`, {
       headers: { Authorization: bearerToken },
+      data: { ...body, interactionType: InteractionType.DELETED_PET },
     });
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.error) {
@@ -168,7 +178,173 @@ const update = async (petId: number, formData: PetRequestDTO): Promise<Pet> => {
   return data;
 };
 
-const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: string): Promise<string> => {
+const updateName = async (
+  petId: number,
+  body: {
+    name: string;
+    actorId: number;
+    targetId: number;
+    // NOTE: backend CHANGED_PET_NAME case reads old/newUserName (quirk in logInteraction)
+    oldUserName: string;
+    newUserName: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/name`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_NAME },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet name: ${error}`);
+  }
+};
+
+const updateColorLevel = async (
+  petId: number,
+  body: {
+    colorLevel: number;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldColorLevel: string;
+    newColorLevel: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/color-level`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_COLOR_LEVEL },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet color level: ${error}`);
+  }
+};
+
+const updateNeuterStatus = async (
+  petId: number,
+  body: {
+    neutered: boolean | null;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/neuter-status`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_NEUTER_STATUS },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet neuter status: ${error}`);
+  }
+};
+
+const updateSafetyInfo = async (
+  petId: number,
+  body: {
+    safetyInfo: string | null;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/safety-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_SAFETY_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet safety info: ${error}`);
+  }
+};
+
+const updateMedicalInfo = async (
+  petId: number,
+  body: {
+    medicalInfo: string | null;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/medical-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_MEDICAL_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet medical info: ${error}`);
+  }
+};
+
+const updateManagementInfo = async (
+  petId: number,
+  body: {
+    managementInfo: string | null;
+    actorId: number;
+    targetId: number;
+    petName: string;
+    oldText: string;
+    newText: string;
+  },
+): Promise<Pet> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/pets/${petId}/management-info`,
+      { ...body, interactionType: InteractionType.CHANGED_PET_MANAGEMENT_INFO },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update pet management info: ${error}`);
+  }
+};
+
+const uploadProfilePhoto = async (
+  file: File,
+  petId: number,
+  oldStoragePath?: string,
+): Promise<string> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -181,19 +357,22 @@ const uploadProfilePhoto = async (file: File, petId: number, oldStoragePath?: st
     if (oldStoragePath) {
       formData.append("oldStoragePath", oldStoragePath);
     }
-    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/upload`,
+    const res = await baseAPIClient.post(
+      `/pets/${petId}/profile-photo/upload`,
       formData,
       {
-      headers: { Authorization: bearerToken },
-    });
+        headers: { Authorization: bearerToken },
+      },
+    );
 
-    if (typeof res.data.storagePath !== "string") throw new Error(`Failed to get profile photo url`);
+    if (typeof res.data.storagePath !== "string")
+      throw new Error(`Failed to get profile photo url`);
 
     return res.data.storagePath;
   } catch (error) {
     throw new Error(`Failed to set new profile photo: ${error}`);
   }
-}
+};
 
 const setDefaultProfilePhoto = async (petId: number) => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -201,15 +380,19 @@ const setDefaultProfilePhoto = async (petId: number) => {
     "accessToken",
   )}`;
   try {
-    const res = await baseAPIClient.post(`/pets/${petId}/profile-photo/default`, {
-      headers: { Authorization: bearerToken },
-    });
+    const res = await baseAPIClient.post(
+      `/pets/${petId}/profile-photo/default`,
+      {
+        headers: { Authorization: bearerToken },
+      },
+    );
 
-    if (res.status !== 200) throw new Error(`Failed to set default profile photo`);
+    if (res.status !== 200)
+      throw new Error(`Failed to set default profile photo`);
   } catch (error) {
     throw new Error(`Failed to set default profile photo: ${error}`);
   }
-}
+};
 
 const getProfilePhotoUrl = async (petId: number): Promise<string> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -221,12 +404,30 @@ const getProfilePhotoUrl = async (petId: number): Promise<string> => {
       headers: { Authorization: bearerToken },
     });
 
-    if (typeof res.data.url !== "string") throw new Error(`Failed to get profile photo url`);
+    if (typeof res.data.url !== "string")
+      throw new Error(`Failed to get profile photo url`);
 
     return res.data.url;
   } catch (error) {
     throw new Error(`Failed to get profile photo url: ${error}`);
   }
-}
+};
 
-export default { getPetTasks, getPet, getPets, getPetList, getProfilePhotoUrl, setDefaultProfilePhoto, uploadProfilePhoto, createPet, update, deletePet };
+export default {
+  getPetTasks,
+  getPet,
+  getPets,
+  getPetList,
+  getProfilePhotoUrl,
+  setDefaultProfilePhoto,
+  uploadProfilePhoto,
+  createPet,
+  update,
+  deletePet,
+  updateName,
+  updateColorLevel,
+  updateNeuterStatus,
+  updateSafetyInfo,
+  updateMedicalInfo,
+  updateManagementInfo,
+};

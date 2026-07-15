@@ -287,6 +287,7 @@ const AddTaskForm = ({
       Number(startMinute),
     ).toISOString();
 
+    const userId = isEditMode ? existingUserId : selectedUser?.id ?? null;
     const scheduledEndDate = new Date(
       Number(startYear),
       MONTH_NAME_TO_NUMBER[startMonth] - 1,
@@ -298,8 +299,6 @@ const AddTaskForm = ({
       scheduledEndDate.setDate(scheduledEndDate.getDate() + 1);
     }
     const scheduledEndTime = scheduledEndDate.toISOString();
-
-    const userId = isEditMode ? existingUserId : selectedUser?.id ?? null;
 
     try {
       if (isEditMode) {

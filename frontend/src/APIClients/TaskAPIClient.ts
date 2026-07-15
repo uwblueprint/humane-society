@@ -2,6 +2,7 @@ import baseAPIClient from "./BaseAPIClient";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import { ScheduledTaskDTO, PetTask, RecurrenceTask } from "../types/TaskTypes";
+import { InteractionType } from "../types/InteractionTypes";
 
 const getTask = async (taskId: number): Promise<PetTask> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
@@ -68,7 +69,6 @@ const getPetTasksByDate = async (
     throw new Error(`Failed to fetch tasks: ${error}`);
   }
 };
-
 const getUserTasks = async (userId: number): Promise<PetTask[]> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -81,6 +81,25 @@ const getUserTasks = async (userId: number): Promise<PetTask[]> => {
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch user tasks: ${error}`);
+  }
+};
+
+const getTasksByDate = async (
+  date: string,
+  userId?: number,
+): Promise<ScheduledTaskDTO[]> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.get("/tasks/date", {
+      headers: { Authorization: bearerToken },
+      params: { userId, date },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch tasks: ${error}`);
   }
 };
 
@@ -99,19 +118,213 @@ const getPetTasks = async (petId: number): Promise<PetTask[]> => {
   }
 };
 
-const assignUser = async (taskId: number, userId: number): Promise<void> => {
+// Resolve which assignment interaction occurred from the before/after state.
+const resolveAssignInteractionType = (
+  previousUserId: number | null,
+  newUserId: number | null,
+  actorId: number,
+): InteractionType | null => {
+  if (previousUserId === newUserId) return null; // no change
+  if (previousUserId === null && newUserId !== null) {
+    return newUserId === actorId
+      ? InteractionType.SELF_ASSIGNED_TASK
+      : InteractionType.ASSIGNED_TASK;
+  }
+  if (previousUserId !== null && newUserId === null) {
+    return InteractionType.UNASSIGNED_TASK;
+  }
+  return InteractionType.CHANGED_TASK_ASSIGNEE;
+};
+
+const assignUser = async (
+  taskId: number,
+  userId: number | null,
+  interaction?: {
+    previousUserId: number | null;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    oldUserName?: string;
+    newUserName?: string;
+    actorName?: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const payload: Record<string, unknown> = { userId };
+    if (interaction) {
+      const interactionType = resolveAssignInteractionType(
+        interaction.previousUserId,
+        userId,
+        interaction.actorId,
+      );
+      Object.assign(payload, interaction, { interactionType });
+    }
+    await baseAPIClient.patch(`/tasks/${taskId}/assign-user`, payload, {
+      headers: { Authorization: bearerToken },
+    });
+  } catch (error) {
+    throw new Error(`Failed to assign user: ${error}`);
+  }
+};
+
+const scheduleTask = async (
+  taskId: number,
+  body: {
+    scheduledStartTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    oldDate: string;
+    newDate: string;
+  },
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
   try {
     await baseAPIClient.patch(
-      `/tasks/${taskId}/assign-user`,
-      { userId },
+      `/tasks/${taskId}/start-date`,
+      { ...body, interactionType: InteractionType.CHANGED_TASK_START_DATE },
       { headers: { Authorization: bearerToken } },
     );
   } catch (error) {
-    throw new Error(`Failed to assign user: ${error}`);
+    throw new Error(`Failed to schedule task: ${error}`);
+  }
+};
+
+const startTask = async (
+  taskId: number,
+  body: {
+    startTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    actorName: string;
+    isRestart?: boolean;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const { isRestart, ...rest } = body;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/start`,
+      {
+        ...rest,
+        interactionType: isRestart
+          ? InteractionType.RESTARTED_TASK
+          : InteractionType.STARTED_TASK,
+      },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to start task: ${error}`);
+  }
+};
+
+const endTask = async (
+  taskId: number,
+  body: {
+    endTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    actorName: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/end`,
+      { ...body, interactionType: InteractionType.COMPLETED_TASK },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to end task: ${error}`);
+  }
+};
+
+const updateNotes = async (
+  taskId: number,
+  body: {
+    notes: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    oldInstructions: string;
+    newInstructions: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/notes`,
+      { ...body, interactionType: InteractionType.CHANGED_TASK_INSTRUCTIONS },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to update task notes: ${error}`);
+  }
+};
+
+const deleteTask = async (
+  taskId: number,
+  body?: {
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.delete(`/tasks/${taskId}`, {
+      headers: { Authorization: bearerToken },
+      data: { ...body, interactionType: InteractionType.DELETED_TASK },
+    });
+  } catch (error) {
+    throw new Error(`Failed to delete task: ${error}`);
+  }
+};
+
+const selfAssign = async (taskId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
+  if (userId == null) {
+    throw new Error("User ID not found in local storage");
+  }
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/assign-user`,
+      { userId: Number(userId) },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to self-assign task: ${error}`);
   }
 };
 
@@ -169,20 +382,6 @@ const createRecurringTask = async (payload: {
     throw new Error(`Failed to create recurring task: ${error}`);
   }
 };
-const deleteTask = async (taskId: number): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    await baseAPIClient.delete(`/tasks/${taskId}`, {
-      headers: { Authorization: bearerToken },
-    });
-  } catch (error) {
-    throw new Error(`Failed to delete task: ${error}`);
-  }
-};
-
 const deleteRecurringTask = async (
   taskId: number,
   date: string,
@@ -202,6 +401,22 @@ const deleteRecurringTask = async (
   }
 };
 
+const completeTask = async (taskId: number): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/end`,
+      { endTime: new Date().toISOString() },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to complete task: ${error}`);
+  }
+};
+
 const updateTask = async (
   taskId: number,
   payload: {
@@ -216,7 +431,6 @@ const updateTask = async (
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
-
   try {
     await baseAPIClient.patch(`/tasks/${taskId}`, payload, {
       headers: { Authorization: bearerToken },
@@ -228,15 +442,22 @@ const updateTask = async (
 
 export default {
   getTask,
+  getTasksByDate,
   getRecurrence,
   getAllTasks,
-  getPetTasksByDate,
   getUserTasks,
+  getPetTasksByDate,
   getPetTasks,
   assignUser,
+  scheduleTask,
+  startTask,
+  endTask,
+  updateNotes,
+  deleteTask,
+  selfAssign,
   createTask,
   createRecurringTask,
-  deleteTask,
   deleteRecurringTask,
+  completeTask,
   updateTask,
 };
