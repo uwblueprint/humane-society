@@ -348,7 +348,16 @@ const TaskDetailsModal = ({
 
   const handleStart = async () => {
     try {
-      await TaskAPIClient.startTask(taskId, new Date().toISOString());
+      await TaskAPIClient.startTask(taskId, {
+        startTime: new Date().toISOString(),
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskData?.petId ?? 0,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        actorName: `${authenticatedUser?.firstName ?? ""} ${
+          authenticatedUser?.lastName ?? ""
+        }`,
+      });
       const updated = await TaskAPIClient.getTask(taskId);
       setTaskData(updated);
       toast({
