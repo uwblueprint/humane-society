@@ -185,16 +185,20 @@ taskRouter.post(
       return;
     }
 
-    const { notes, userId, scheduledStartTime } = req.body;
+    const { notes, userId, scheduledStartTime, scheduledEndTime } = req.body;
 
     let parsedScheduledStartTime: Date | undefined;
+    let parsedScheduledEndTime: Date | undefined;
 
     if (
       (notes !== undefined && typeof notes !== "string") ||
       (userId !== undefined && typeof userId !== "number") ||
       (scheduledStartTime !== undefined &&
         (typeof scheduledStartTime !== "string" ||
-          Number.isNaN(new Date(scheduledStartTime).getTime())))
+          Number.isNaN(new Date(scheduledStartTime).getTime()))) ||
+      (scheduledEndTime !== undefined &&
+        (typeof scheduledEndTime !== "string" ||
+          Number.isNaN(new Date(scheduledEndTime).getTime())))
     ) {
       res.status(400).send("Invalid request body");
       return;
@@ -202,6 +206,10 @@ taskRouter.post(
 
     if (scheduledStartTime !== undefined) {
       parsedScheduledStartTime = new Date(scheduledStartTime);
+    }
+
+    if (scheduledEndTime !== undefined) {
+      parsedScheduledEndTime = new Date(scheduledEndTime);
     }
 
     try {
