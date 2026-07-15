@@ -134,9 +134,9 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
           const isFuture =
             new Date(date.getFullYear(), date.getMonth(), date.getDate()) >
             new Date(
-              new Date().getFullYear(),
-              new Date().getMonth(),
-              new Date().getDate(),
+              selectedDate.getFullYear(),
+              selectedDate.getMonth(),
+              selectedDate.getDate(),
             );
           return (
             <Flex
