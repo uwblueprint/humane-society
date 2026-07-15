@@ -18,7 +18,6 @@ import {
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
-import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
@@ -51,6 +50,7 @@ import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.s
 import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 
 const taskCategoryIcons: Record<TaskCategory, React.ElementType> = {
   [TaskCategory.WALK]: WalkIcon,
@@ -150,6 +150,7 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  onTaskCompleted: () => void;
   onTaskUpdated?: () => void;
 }
 
@@ -157,6 +158,7 @@ const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  onTaskCompleted,
   onTaskUpdated,
 }: TaskDetailsModalProps): React.ReactElement => {
   const history = useHistory();
@@ -202,6 +204,26 @@ const TaskDetailsModal = ({
     (t) => !isToday(t.scheduledStartTime) || !!t.endTime,
   );
 
+  const handleCompleteTask = async () => {
+    try {
+      await TaskAPIClient.completeTask(taskId);
+      toast({
+        title: "Task completed",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onTaskCompleted();
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to complete task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
   const fetchData = useCallback(
     async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -360,7 +382,12 @@ const TaskDetailsModal = ({
             </Button>
           )}
           {status === "In-Progress" && ( // Occupied status should not be possible for admins / animal behaviourists
-            <Button variant="dark-blue" size="medium" width="100%">
+            <Button
+              variant="dark-blue"
+              size="medium"
+              width="100%"
+              onClick={handleCompleteTask}
+            >
               Complete Task
             </Button>
           )}
@@ -415,7 +442,12 @@ const TaskDetailsModal = ({
               <Button variant="blue-outline" size="medium" width="100%">
                 Restart
               </Button>
-              <Button variant="dark-blue" size="medium" width="100%">
+              <Button
+                variant="dark-blue"
+                size="medium"
+                width="100%"
+                onClick={handleCompleteTask}
+              >
                 Complete Task
               </Button>
             </Flex>

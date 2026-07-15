@@ -1,12 +1,12 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
-import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
-import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
+import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
