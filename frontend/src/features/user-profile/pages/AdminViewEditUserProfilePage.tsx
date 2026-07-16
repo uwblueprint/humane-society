@@ -293,6 +293,12 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
               <Controller
                 name="phoneNumber"
                 control={control}
+                rules={{
+                  validate: (value) =>
+                    !value ||
+                    /^\d{3}-\d{3}-\d{4}$/.test(value) ||
+                    "Invalid number (must be in xxx-xxx-xxxx format)",
+                }}
                 render={({ field }) => (
                   <Input
                     label="Phone Number"
