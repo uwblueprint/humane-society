@@ -61,6 +61,7 @@ export interface ITaskService {
     cadence: Cadence,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
   ): Promise<RecurrenceTaskDTO>;
 
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;

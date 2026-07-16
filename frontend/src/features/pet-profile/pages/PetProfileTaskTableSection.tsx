@@ -15,7 +15,7 @@ interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }
 
 const StatusBadge = ({
@@ -208,7 +208,9 @@ const PetProfileTaskTableSection = ({
             marginBottom="0.5rem"
             marginTop="0.5rem"
             borderRadius="0.75rem"
-            onClick={() => onTaskClick(task.id)}
+            onClick={() =>
+              onTaskClick(task.id, task.scheduledStartTime?.toString())
+            }
             cursor="pointer"
           >
             <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">

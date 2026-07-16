@@ -152,6 +152,7 @@ interface TaskDetailsModalProps {
   onClose: () => void;
   onTaskCompleted: () => void;
   onTaskUpdated?: () => void;
+  instanceDate?: string;
 }
 
 const TaskDetailsModal = ({
@@ -160,6 +161,7 @@ const TaskDetailsModal = ({
   onClose,
   onTaskCompleted,
   onTaskUpdated,
+  instanceDate,
 }: TaskDetailsModalProps): React.ReactElement => {
   const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
@@ -398,7 +400,9 @@ const TaskDetailsModal = ({
             onClick={() => {
               onClose();
               history.push(
-                `/pet-profile/${taskData?.petId}/edit-task/${taskId}`,
+                `/pet-profile/${taskData?.petId}/edit-task/${taskId}${
+                  instanceDate ? `?date=${instanceDate}` : ""
+                }`,
               );
             }}
           >

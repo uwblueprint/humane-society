@@ -399,6 +399,36 @@ const completeTask = async (taskId: number): Promise<void> => {
   }
 };
 
+const editRecurringTask = async (
+  taskId: number,
+  date: string,
+  single: boolean,
+  payload: {
+    userId?: number;
+    taskTemplateId?: number;
+    notes?: string;
+    scheduledStartTime?: string;
+    scheduledEndTime?: string;
+    days?: string[];
+    cadence?: string;
+    endDate?: string;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    await baseAPIClient.post(`/tasks/recurrences/${taskId}/edit`, payload, {
+      headers: { Authorization: bearerToken },
+      params: { date, single },
+    });
+  } catch (error) {
+    throw new Error(`Failed to edit recurring task: ${error}`);
+  }
+};
+
 const updateTask = async (
   taskId: number,
   payload: {
@@ -440,6 +470,7 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  editRecurringTask,
   completeTask,
   updateTask,
 };
