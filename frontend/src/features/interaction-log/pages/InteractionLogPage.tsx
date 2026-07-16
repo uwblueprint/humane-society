@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Flex, Grid, Icon, Text } from "@chakra-ui/react";
 import {
   TableWrapper,
@@ -41,18 +41,19 @@ const InteractionLogPage = (): React.ReactElement => {
   const [selectedInteraction, setSelectedInteraction] =
     useState<InteractionDTO | null>(null);
 
-  useEffect(() => {
-    const fetchInteractions = async () => {
-      try {
-        const data = await InteractionAPIClient.getInteractions();
-        setInteractions(data);
-        setHasError(false);
-      } catch (error) {
-        setHasError(true);
-      }
-    };
-    fetchInteractions();
+  const fetchInteractions = useCallback(async () => {
+    try {
+      const data = await InteractionAPIClient.getInteractions();
+      setInteractions(data);
+      setHasError(false);
+    } catch (error) {
+      setHasError(true);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchInteractions();
+  }, [fetchInteractions]);
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
@@ -111,7 +112,11 @@ const InteractionLogPage = (): React.ReactElement => {
   let emptyState: React.ReactElement | null = null;
   if (hasError) {
     emptyState = (
-      <TableEmptyState message="Unable to load logs. Refresh page." />
+      <TableEmptyState
+        message="Unable to load logs."
+        linkLabel="Refresh page"
+        onLinkClick={fetchInteractions}
+      />
     );
   } else if (isRawEmpty) {
     emptyState = <TableEmptyState message="No interactions to display." />;
