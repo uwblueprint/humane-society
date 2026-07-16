@@ -129,7 +129,8 @@ const InteractionLogPage = (): React.ReactElement => {
           {isEmpty ? (
             <TableEmptyState
               message="No interactions currently match."
-              onClearFilters={handleClearFilters}
+              linkLabel="Clear all"
+              onLinkClick={handleClearFilters}
             />
           ) : (
             <Flex direction="column" width="100%">
