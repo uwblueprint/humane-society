@@ -4,12 +4,17 @@ import InteractionType from "../../models/interactionType.model";
 import User from "../../models/user.model";
 import { InteractionTypeEnum, Role } from "../../types";
 
-// Interactions about another user's personal information. Staff are not
-// permitted to see these (permissions sheet); Admin and Animal Behaviourist are.
+// Interactions about another user. Staff are not permitted to see these
+// (permissions sheet); Admin and Animal Behaviourist are.
+// These are the "Personal Details" and "User Details" groupings in
+// InteractionTypeEnum. The groupings are only comments, not data, so the types
+// are listed explicitly here.
 const USER_INFO_INTERACTION_TYPES: string[] = [
   InteractionTypeEnum.CHANGED_USER_NAME,
   InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
   InteractionTypeEnum.CHANGED_USER_ROLE,
+  InteractionTypeEnum.INVITED_USER,
+  InteractionTypeEnum.DELETED_USER,
 ];
 
 const InteractionService = {
