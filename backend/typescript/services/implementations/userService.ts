@@ -19,27 +19,44 @@ import Interaction from "../../models/interaction.model";
 
 const Logger = logger(__filename);
 
-// Distinct, frontend-matchable message thrown when a user cannot be deleted
-// because deleting them would violate the RESTRICT foreign keys on
-// tasks.user_id (assigned tasks) and/or interactions.actor_id (interaction
-// logs). Kept separate from the "Inactive/Invited" status guard message.
-export const DELETE_BLOCKED_BY_REFERENCES_ERROR =
-  "Cannot delete user with assigned tasks and/or interaction logs.";
+// Distinct, frontend-matchable messages thrown when a user cannot be deleted
+// because deleting them would violate a foreign key referencing them. The two
+// cases are kept separate because only one of them is actionable: tasks can be
+// unassigned, interaction logs cannot be removed through the app at all.
+export const DELETE_BLOCKED_BY_TASKS_ERROR =
+  "Cannot delete user with assigned tasks.";
+export const DELETE_BLOCKED_BY_LOGS_ERROR =
+  "Cannot delete user with interaction logs.";
 
-// Pre-check that mirrors the RESTRICT foreign keys referencing a user, so we
-// can surface a clear error instead of a raw Postgres FK-constraint error.
-// Note: interactions.target_user_id is ON DELETE SET NULL, so it does not
-// block deletion and is intentionally excluded here.
-const assertUserHasNoBlockingReferences = async (
+// Counts the rows behind the foreign keys that block deleting a user:
+// tasks.user_id and interactions.actor_id are both ON DELETE NO ACTION.
+// interactions.target_user_id is ON DELETE SET NULL, so it does not block
+// deletion and is intentionally excluded.
+export const getUserDeletionBlockers = async (
   userId: number,
-): Promise<void> => {
+): Promise<{ assignedTaskCount: number; interactionCount: number }> => {
   const [assignedTaskCount, interactionCount] = await Promise.all([
     Task.count({ where: { user_id: userId } }),
     Interaction.count({ where: { actor_id: userId } }),
   ]);
+  return { assignedTaskCount, interactionCount };
+};
 
-  if (assignedTaskCount > 0 || interactionCount > 0) {
-    throw new ConflictError(DELETE_BLOCKED_BY_REFERENCES_ERROR);
+// Pre-check so a blocked delete surfaces a clear error rather than a raw
+// Postgres FK-constraint error. Logs are reported ahead of tasks: when a user
+// has both, unassigning their tasks still would not make them deletable.
+const assertUserHasNoBlockingReferences = async (
+  userId: number,
+): Promise<void> => {
+  const { assignedTaskCount, interactionCount } = await getUserDeletionBlockers(
+    userId,
+  );
+
+  if (interactionCount > 0) {
+    throw new ConflictError(DELETE_BLOCKED_BY_LOGS_ERROR);
+  }
+  if (assignedTaskCount > 0) {
+    throw new ConflictError(DELETE_BLOCKED_BY_TASKS_ERROR);
   }
 };
 

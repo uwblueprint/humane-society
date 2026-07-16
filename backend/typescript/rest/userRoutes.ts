@@ -10,7 +10,11 @@ import {
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
 import EmailService from "../services/implementations/emailService";
-import UserService from "../services/implementations/userService";
+import UserService, {
+  DELETE_BLOCKED_BY_LOGS_ERROR,
+  DELETE_BLOCKED_BY_TASKS_ERROR,
+  getUserDeletionBlockers,
+} from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
@@ -295,6 +299,19 @@ userRouter.delete("/", async (req, res) => {
     } else {
       try {
         const user: UserDTO = await userService.getUserById(userId);
+        // Report a blocking reference ahead of the status guard. Telling an
+        // admin to deactivate a user first is a dead end when the user cannot
+        // be deleted at any status.
+        const { assignedTaskCount, interactionCount } =
+          await getUserDeletionBlockers(Number(userId));
+        if (interactionCount > 0) {
+          res.status(400).json({ error: DELETE_BLOCKED_BY_LOGS_ERROR });
+          return;
+        }
+        if (assignedTaskCount > 0) {
+          res.status(400).json({ error: DELETE_BLOCKED_BY_TASKS_ERROR });
+          return;
+        }
         if (user.status === "Active") {
           res.status(400).json({
             error:
