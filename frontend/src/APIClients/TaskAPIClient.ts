@@ -199,39 +199,6 @@ const scheduleTask = async (
   }
 };
 
-const startTask = async (
-  taskId: number,
-  body: {
-    startTime: string;
-    actorId: number;
-    targetId: number;
-    taskTemplateName: string;
-    petName: string;
-    actorName: string;
-    isRestart?: boolean;
-  },
-): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  const { isRestart, ...rest } = body;
-  try {
-    await baseAPIClient.patch(
-      `/tasks/${taskId}/start`,
-      {
-        ...rest,
-        interactionType: isRestart
-          ? InteractionType.RESTARTED_TASK
-          : InteractionType.STARTED_TASK,
-      },
-      { headers: { Authorization: bearerToken } },
-    );
-  } catch (error) {
-    throw new Error(`Failed to start task: ${error}`);
-  }
-};
-
 const endTask = async (
   taskId: number,
   body: {
@@ -325,6 +292,39 @@ const selfAssign = async (taskId: number): Promise<void> => {
     );
   } catch (error) {
     throw new Error(`Failed to self-assign task: ${error}`);
+  }
+};
+
+const startTask = async (
+  taskId: number,
+  body: {
+    startTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    actorName: string;
+    isRestart?: boolean;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const { isRestart, ...rest } = body;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/start`,
+      {
+        ...rest,
+        interactionType: isRestart
+          ? InteractionType.RESTARTED_TASK
+          : InteractionType.STARTED_TASK,
+      },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to start task: ${error}`);
   }
 };
 
