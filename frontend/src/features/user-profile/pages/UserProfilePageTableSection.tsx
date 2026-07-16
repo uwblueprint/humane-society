@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
 import { PET_PROFILE_PAGE } from "../../../constants/Routes";
 
@@ -67,9 +68,16 @@ const UserProfilePageTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Text textStyle="body" m={0}>
-            {task.petName ?? "—"}
-          </Text>
+          <Flex align="center" gap="0.75rem">
+            <ProfilePhoto
+              image={task.petPhoto ?? undefined}
+              size="small"
+              type="pet"
+            />
+            <Text textStyle="body" m={0}>
+              {task.petName ?? "—"}
+            </Text>
+          </Flex>
           {getStatusBadge(task)}
         </Grid>
       ))}
