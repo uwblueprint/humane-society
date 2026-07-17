@@ -1,4 +1,4 @@
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -518,6 +518,7 @@ class TaskService implements ITaskService {
         start_time: task.startTime,
         end_time: task.endTime,
         notes: task.notes,
+        parent_task_id: task.parentTaskId,
       });
     } catch (error: unknown) {
       Logger.error(`Failed to create task. Reason = ${getErrorMessage(error)}`);
@@ -533,6 +534,7 @@ class TaskService implements ITaskService {
       startTime: newTask.start_time,
       endTime: newTask.end_time,
       notes: newTask.notes,
+      parentTaskId: newTask.parent_task_id,
     };
   }
 
@@ -934,39 +936,25 @@ class TaskService implements ITaskService {
     }
   }
 
-  async deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
+  async deleteSeriesOverrides(
+    seedTaskId: number,
+    fromDate?: Date,
   ): Promise<void> {
     try {
-      const normalizedDate = resetDateToUTCMidnight(date);
-      const idConditions: unknown[] = [
-        {
-          [Op.notIn]: Sequelize.literal(
-            "(SELECT task_id FROM recurrence_tasks)",
-          ),
-        },
-      ];
+      const where: Record<string, unknown> = {
+        parent_task_id: seedTaskId,
+      };
 
-      if (excludeTaskId) {
-        idConditions.push({ [Op.ne]: excludeTaskId });
+      if (fromDate) {
+        where.scheduled_start_time = {
+          [Op.gte]: resetDateToUTCMidnight(fromDate),
+        };
       }
 
-      await PgTask.destroy({
-        where: {
-          task_template_id: taskTemplateId,
-          pet_id: petId,
-          scheduled_start_time: {
-            [Op.gte]: normalizedDate,
-          },
-          id: { [Op.and]: idConditions },
-        },
-      });
+      await PgTask.destroy({ where });
     } catch (error: unknown) {
       Logger.error(
-        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
+        `Failed to delete series overrides. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }

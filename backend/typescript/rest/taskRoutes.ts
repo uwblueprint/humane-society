@@ -241,6 +241,7 @@ taskRouter.post(
           startTime: task.startTime,
           endTime: task.endTime,
           notes: notes ?? task.notes,
+          parentTaskId: Number(taskId),
         });
         res.status(200).json({
           singleTask,
@@ -452,12 +453,7 @@ taskRouter.delete(
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
-        await taskService.deleteFutureTasks(
-          task.taskTemplateId,
-          task.petId,
-          date,
-          task.id,
-        );
+        await taskService.deleteSeriesOverrides(task.id, date);
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,

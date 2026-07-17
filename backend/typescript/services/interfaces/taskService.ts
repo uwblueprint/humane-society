@@ -9,6 +9,9 @@ export interface TaskRequestDTO {
   startTime?: Date;
   endTime?: Date;
   notes?: string;
+  // Set only when creating an override row for a single edited occurrence of
+  // a recurring series; points at that series' seed task id.
+  parentTaskId?: number;
 }
 
 export interface TaskResponseDTO {
@@ -21,6 +24,7 @@ export interface TaskResponseDTO {
   startTime?: Date;
   endTime?: Date;
   notes?: string;
+  parentTaskId?: number;
 }
 
 export interface TaskUserPatchDTO {
@@ -209,19 +213,14 @@ export interface ITaskService {
   ): Promise<TaskResponseDTOForDate[]>;
 
   /**
-   * deletes future PgTask records where task_template_id matches, pet_id matches,
-   * scheduled_start_time >= the given date, and id != excludeTaskId
-   * @param taskTemplateId task template id
-   * @param petId pet id
-   * @param date date to delete from
-   * @param excludeTaskId optional task id to exclude from deletion
+   * deletes override rows belonging to a recurring series (rows whose
+   * parent_task_id is seedTaskId), optionally scoped to those scheduled on
+   * or after fromDate. Used to truncate a series without touching unrelated
+   * one-time tasks or other series' rows.
+   * @param seedTaskId id of the series' seed task
+   * @param fromDate optional date to delete from; omit to delete all overrides
    * @returns void
    * @throws Error if deletion fails
    */
-  deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
-  ): Promise<void>;
+  deleteSeriesOverrides(seedTaskId: number, fromDate?: Date): Promise<void>;
 }

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import PgTask from "../../../models/task.model";
 import PgRecurrenceTask from "../../../models/recurrence_task.model";
 import { BadRequestError, NotFoundError } from "../../../utilities/errorUtils";
@@ -33,6 +34,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
   const mockPgTask = PgTask as unknown as {
     findByPk: jest.Mock;
     destroy: jest.Mock;
+    create: jest.Mock;
   };
 
   const mockPgRecurrenceTask = PgRecurrenceTask as unknown as {
@@ -532,6 +534,100 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       await expect(service.deleteRecurrence("999")).rejects.toThrow(
         NotFoundError,
       );
+    });
+  });
+
+  describe("createTask", () => {
+    it("persists parentTaskId as parent_task_id when creating a single-occurrence override", async () => {
+      mockPgTask.create.mockResolvedValue({
+        id: 456,
+        user_id: 4,
+        pet_id: 7,
+        task_template_id: 2,
+        scheduled_start_time: new Date("2026-08-20T00:00:00Z"),
+        notes: undefined,
+        parent_task_id: 123,
+      });
+
+      const result = await service.createTask({
+        userId: 4,
+        petId: 7,
+        taskTemplateId: 2,
+        scheduledStartTime: new Date("2026-08-20T00:00:00Z"),
+        parentTaskId: 123,
+      });
+
+      expect(mockPgTask.create).toHaveBeenCalledWith(
+        expect.objectContaining({ parent_task_id: 123 }),
+      );
+      expect(result.parentTaskId).toBe(123);
+    });
+
+    it("leaves parent_task_id unset for a one-time task or a new series seed", async () => {
+      mockPgTask.create.mockResolvedValue({
+        id: 789,
+        user_id: 4,
+        pet_id: 7,
+        task_template_id: 2,
+        scheduled_start_time: new Date("2026-08-20T00:00:00Z"),
+        notes: undefined,
+        parent_task_id: undefined,
+      });
+
+      await service.createTask({
+        userId: 4,
+        petId: 7,
+        taskTemplateId: 2,
+        scheduledStartTime: new Date("2026-08-20T00:00:00Z"),
+      });
+
+      expect(mockPgTask.create).toHaveBeenCalledWith(
+        expect.objectContaining({ parent_task_id: undefined }),
+      );
+    });
+  });
+
+  describe("deleteSeriesOverrides", () => {
+    it("scopes deletion by parent_task_id and a normalized from-date", async () => {
+      mockPgTask.destroy.mockResolvedValue(2);
+
+      await service.deleteSeriesOverrides(
+        123,
+        new Date("2026-08-01T15:30:00Z"),
+      );
+
+      expect(mockPgTask.destroy).toHaveBeenCalledWith({
+        where: {
+          parent_task_id: 123,
+          scheduled_start_time: {
+            [Op.gte]: resetDateToUTCMidnight(new Date("2026-08-01T15:30:00Z")),
+          },
+        },
+      });
+    });
+
+    it("deletes all overrides for a seed when no from-date is given", async () => {
+      mockPgTask.destroy.mockResolvedValue(5);
+
+      await service.deleteSeriesOverrides(123);
+
+      expect(mockPgTask.destroy).toHaveBeenCalledWith({
+        where: { parent_task_id: 123 },
+      });
+    });
+
+    it("never filters by task_template_id, pet_id, or an exclude id, so unrelated tasks and other series can't match", async () => {
+      mockPgTask.destroy.mockResolvedValue(1);
+
+      await service.deleteSeriesOverrides(
+        123,
+        new Date("2026-08-01T00:00:00Z"),
+      );
+
+      const [{ where }] = mockPgTask.destroy.mock.calls[0];
+      expect(where).not.toHaveProperty("task_template_id");
+      expect(where).not.toHaveProperty("pet_id");
+      expect(where).not.toHaveProperty("id");
     });
   });
 

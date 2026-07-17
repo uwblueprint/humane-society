@@ -41,6 +41,13 @@ export default class Task extends Model {
   @BelongsTo(() => TaskTemplate)
   task_template!: TaskTemplate;
 
+  // Set only on override rows created by editing a single occurrence of a
+  // recurring series; points back at that series' seed task. Null for
+  // one-time tasks, series seeds, and "edit this and following" new series.
+  @ForeignKey(() => Task)
+  @Column({})
+  parent_task_id?: number;
+
   @HasOne(() => RecurrenceTask)
   recurrence?: RecurrenceTask;
 
