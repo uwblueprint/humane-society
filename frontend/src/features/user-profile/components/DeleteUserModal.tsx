@@ -5,9 +5,10 @@ import UserAPIClient from "../../../APIClients/UserAPIClient";
 import AuthContext from "../../../contexts/AuthContext";
 
 interface DeleteUserModalProps {
-  isOpen: boolean; // Whether the modal should be visible
-  handleSecondaryButtonClick: () => void; // Functionality for secondary button
-  userId: string; // userID to be deleted
+  isOpen: boolean;
+  handleSecondaryButtonClick: () => void;
+  userId: string;
+  userName: string;
   onDeleteSuccess?: () => void;
 }
 
@@ -15,6 +16,7 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
   isOpen,
   handleSecondaryButtonClick,
   userId,
+  userName,
   onDeleteSuccess,
 }) => {
   const toast = useToast();
@@ -33,7 +35,11 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
     }
 
     try {
-      await UserAPIClient.deleteUser(userId);
+      await UserAPIClient.deleteUser(userId, {
+        actorId: authenticatedUser!.id,
+        targetId: parseInt(userId, 10),
+        targetName: userName,
+      });
       toast({
         title: "Success",
         description: "Successfully deleted user!",

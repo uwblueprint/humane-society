@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import {
+  isAuthorizedByRole,
+  isAuthorizedToAssignTask,
+} from "../middlewares/auth";
 import {
   taskRequestDtoValidator,
   taskUpdateDtoValidator,
@@ -145,6 +148,7 @@ taskRouter.post(
         petId: body.petId,
         taskTemplateId: body.taskTemplateId,
         scheduledStartTime: body.scheduledStartTime,
+        scheduledEndTime: body.scheduledEndTime,
         startTime: body.startTime,
         endTime: body.endTime,
         notes: body.notes,
@@ -297,6 +301,7 @@ taskRouter.patch(
         petId: body.petId,
         taskTemplateId: body.taskTemplateId,
         scheduledStartTime: body.scheduledStartTime,
+        scheduledEndTime: body.scheduledEndTime,
         startTime: body.startTime,
         endTime: body.endTime,
         notes: body.notes,
@@ -308,10 +313,12 @@ taskRouter.patch(
   },
 );
 
-/* Updates/Sets User assigned to an Task */
+/* Updates/Sets User assigned to an Task.
+ * Admins/Animal Behaviourists may assign anyone; other roles (e.g. Volunteers)
+ * may only self-assign (assignee in body must be their own user id). */
 taskRouter.patch(
   "/:id/assign-user",
-  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  isAuthorizedToAssignTask("userId"),
   taskUserPatchValidator,
   async (req, res) => {
     const { id } = req.params;
@@ -407,7 +414,7 @@ taskRouter.delete(
     const date =
       typeof req.query.date === "string" &&
       !Number.isNaN(new Date(req.query.date).getTime())
-        ? new Date(req.query.date)
+        ? resetDateToUTCMidnight(new Date(req.query.date))
         : undefined;
     const single =
       req.query.single === "true" || req.query.single === "false"
@@ -445,6 +452,12 @@ taskRouter.delete(
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
+        await taskService.deleteFutureTasks(
+          task.taskTemplateId,
+          task.petId,
+          date,
+          task.id,
+        );
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,

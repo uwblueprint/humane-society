@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Flex,
   Text,
@@ -38,6 +38,9 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
   const toast = useToast();
+  const originalValues = useRef<{ firstName: string; lastName: string } | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -100,6 +103,10 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           password: "",
           profilePhoto: userData.profilePhoto || "",
         });
+        originalValues.current = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        };
       } catch (error) {
         toast({
           title: "Error",
@@ -125,19 +132,57 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   }
 
   const onSubmit = async (data: FormData) => {
-    // TODO: deprecate console use in frontend
-    /* eslint-disable-next-line no-console */
-    console.log({
-      userId: data.userId,
+    const userId = Number(authenticatedUser?.id?.toString());
+    const orig = originalValues.current;
+    const formattedData = {
       firstName: data.firstName,
       lastName: data.lastName,
       phoneNumber: data.phoneNumber,
-      email: data.email,
-      profilePhoto: localProfilePhoto,
-    });
+    };
 
     try {
-      const userId = Number(authenticatedUser?.id?.toString());
+      // Name change goes through the granular route so it writes an interaction
+      // log; the general update below still persists phone (and name) without
+      // double-logging since the PUT route doesn't log.
+      if (
+        orig &&
+        (data.firstName !== orig.firstName || data.lastName !== orig.lastName)
+      ) {
+        await UserAPIClient.updateName(userId, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          actorId: userId,
+          targetId: userId,
+          oldUserName: `${orig.firstName} ${orig.lastName}`,
+          newUserName: `${data.firstName} ${data.lastName}`,
+        });
+      }
+      const updatedUser = await UserAPIClient.update(userId, formattedData);
+      reset({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNumber: updatedUser.phoneNumber || "",
+      });
+      toast({
+        title: "Success",
+        description: "User profile updated",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: "Fail",
+        description: "Failed to update user profile",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      // Profile save failed — don't attempt the photo upload or redirect.
+      return;
+    }
+
+    try {
       setIsUploading(true);
 
       if (profilePhotoFile) {
@@ -146,22 +191,21 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           userId,
           user?.profilePhoto,
         );
+        toast({
+          title: "Upload successful",
+          description: "Your profile photo has been updated.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } else if (localProfilePhoto === undefined) {
         await UserAPIClient.setDefaultProfilePhoto(userId);
       }
 
-      toast({
-        title: "Upload successful",
-        description: "Your profile photo has been updated.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-
       history.push(`/profile/${userId}`);
     } catch (error) {
       toast({
-        title: "Upload failed",
+        title: "Update failed",
         description:
           error instanceof Error ? error.message : "An error occurred",
         status: "error",
