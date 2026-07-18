@@ -263,10 +263,18 @@ class PetService implements IPetService {
         },
         { where: { id }, returning: true, transaction },
       );
-      if (!petUpdateResult[0]) {
-        throw new NotFoundError(`Pet id ${id} not found`);
+      if (petUpdateResult[0]) {
+        [, [resultingPet]] = petUpdateResult;
+      } else {
+        // No pets-table columns changed (e.g. a care-info-only update). Confirm
+        // the pet exists and use its current row instead of treating a no-op
+        // update as "not found".
+        const existingPet = await PgPet.findByPk(id, { transaction });
+        if (!existingPet) {
+          throw new NotFoundError(`Pet id ${id} not found`);
+        }
+        resultingPet = existingPet;
       }
-      [, [resultingPet]] = petUpdateResult;
 
       if (pet.careInfo) {
         petCareInfoUpdateResult = await PgPetCareInfo.update(

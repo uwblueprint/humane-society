@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
@@ -10,6 +10,7 @@ import SingleSelect from "../../../components/common/SingleSelect";
 import MultiSelect from "../../../components/common/MultiSelect";
 import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
+import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
 import { AnimalTag } from "../../../types/TaskTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
@@ -34,6 +35,9 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isDeleteSelected, setIsDeleteSelected] = useState(false);
+  const { authenticatedUser } = useContext(AuthContext);
+  const originalValues = useRef<FormData | null>(null);
+  const [userName, setUserName] = useState("");
   const {
     isOpen: isQuitEditingModalOpen,
     onOpen: openQuitEditingModal,
@@ -74,7 +78,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         const userData = await UserAPIClient.get(parseInt(userId, 10));
 
         // Prepopulate form with user data
-        reset({
+        const formValues = {
           firstName: userData.firstName,
           lastName: userData.lastName,
           phoneNumber: userData.phoneNumber || "",
@@ -82,7 +86,10 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           role: userData.role,
           colourLevel: colourLevelMap[userData.colorLevel],
           animalTag: userData.animalTags,
-        });
+        };
+        reset(formValues);
+        originalValues.current = formValues;
+        setUserName(`${userData.firstName} ${userData.lastName}`);
       } catch (error) {
         const is403 =
           axios.isAxiosError(error) && error.response?.status === 403;
@@ -105,22 +112,55 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
 
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);
-    const formattedData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phoneNumber: data.phoneNumber,
-      email: data.email,
-      role: data.role,
-      colorLevel: colourLevelReverseMap[data.colourLevel],
-      animalTags: Array.isArray(data.animalTag)
-        ? data.animalTag
-        : [data.animalTag],
-    };
+    const orig = originalValues.current;
+    const actorId = authenticatedUser!.id;
+    const targetId = parseInt(userId, 10);
 
-    // eslint-disable-next-line no-console
     try {
-      await UserAPIClient.update(parseInt(userId, 10), formattedData);
-      const updatedUser = await UserAPIClient.get(parseInt(userId, 10));
+      const patches: Promise<unknown>[] = [];
+
+      if (orig && (data.firstName !== orig.firstName || data.lastName !== orig.lastName)) {
+        patches.push(UserAPIClient.updateName(targetId, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          actorId,
+          targetId,
+          oldUserName: `${orig.firstName} ${orig.lastName}`,
+          newUserName: `${data.firstName} ${data.lastName}`,
+        }));
+      }
+
+      if (orig && data.colourLevel !== orig.colourLevel) {
+        patches.push(UserAPIClient.updateColorLevel(targetId, {
+          colorLevel: colourLevelReverseMap[data.colourLevel],
+          actorId,
+          targetId,
+          targetName: `${orig.firstName} ${orig.lastName}`,
+          oldColorLevel: orig.colourLevel,
+          newColorLevel: data.colourLevel,
+        }));
+      }
+
+      if (orig && data.role !== orig.role) {
+        patches.push(UserAPIClient.updateRole(targetId, {
+          role: data.role,
+          actorId,
+          targetId,
+          targetName: `${orig.firstName} ${orig.lastName}`,
+          oldRole: orig.role,
+          newRole: data.role,
+        }));
+      }
+
+      // phoneNumber and animalTags have no PATCH routes — use PUT
+      patches.push(UserAPIClient.update(targetId, {
+        phoneNumber: data.phoneNumber,
+        animalTags: Array.isArray(data.animalTag) ? data.animalTag : [data.animalTag],
+      }));
+
+      await Promise.all(patches);
+
+      const updatedUser = await UserAPIClient.get(targetId);
       reset({
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
@@ -370,6 +410,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
       <DeleteUserModal
         isOpen={isDeleteSelected}
         userId={userId}
+        userName={userName}
         handleSecondaryButtonClick={handleCancelDeleteUser}
         onDeleteSuccess={() => history.push(USER_MANAGEMENT_PAGE)}
       />

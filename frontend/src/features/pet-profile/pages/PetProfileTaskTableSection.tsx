@@ -1,17 +1,12 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
-import { ScheduledTaskDTO, TaskCategory } from "../../../types/TaskTypes";
-import { ReactComponent as GamesIcon } from "../../../assets/icons/games.svg";
-import { ReactComponent as HusbandryIcon } from "../../../assets/icons/husbandry.svg";
-import { ReactComponent as MiscIcon } from "../../../assets/icons/misc.svg";
-import { ReactComponent as PenTimeIcon } from "../../../assets/icons/pen_time.svg";
-import { ReactComponent as TrainingIcon } from "../../../assets/icons/training.svg";
-import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
-import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
-import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
+import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
+import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
@@ -20,7 +15,7 @@ interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }
 
 const StatusBadge = ({
@@ -30,9 +25,11 @@ const StatusBadge = ({
 }: {
   task: ScheduledTaskDTO;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }) => {
   const status = getTaskDetailedStatus(task, authenticatedUser);
+  const handleClick = () =>
+    onTaskClick(task.id, task.scheduledStartTime?.toString());
 
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
@@ -55,13 +52,25 @@ const StatusBadge = ({
   if (isAdminOrBehaviourist) {
     if (status === null)
       return (
-        <Button as="button" variant="dark-blue" size="medium" type="button">
+        <Button
+          as="button"
+          variant="dark-blue"
+          size="medium"
+          type="button"
+          onClick={handleClick}
+        >
           Assign
         </Button>
       );
     if (status === "In-Progress")
       return (
-        <Button as="button" variant="green" size="medium" type="button">
+        <Button
+          as="button"
+          variant="green"
+          size="medium"
+          type="button"
+          onClick={handleClick}
+        >
           In Progress
         </Button>
       );
@@ -77,7 +86,7 @@ const StatusBadge = ({
         variant="gray"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Assign to Me
       </Button>
@@ -90,7 +99,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Start
       </Button>
@@ -112,7 +121,7 @@ const StatusBadge = ({
         variant="green"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         In Progress
       </Button>
@@ -125,15 +134,6 @@ const StatusBadge = ({
       </Button>
     );
   return <></>;
-};
-
-const taskTypeIcons: Record<TaskCategory, React.ElementType> = {
-  [TaskCategory.WALK]: WalkIcon,
-  [TaskCategory.GAMES]: GamesIcon,
-  [TaskCategory.PEN_TIME]: PenTimeIcon,
-  [TaskCategory.HUSBANDRY]: HusbandryIcon,
-  [TaskCategory.TRAINING]: TrainingIcon,
-  [TaskCategory.MISC]: MiscIcon,
 };
 
 const PetProfileTaskTableSection = ({
@@ -204,12 +204,14 @@ const PetProfileTaskTableSection = ({
             marginBottom="0.5rem"
             marginTop="0.5rem"
             borderRadius="0.75rem"
-            onClick={() => onTaskClick(task.id)}
+            onClick={() =>
+              onTaskClick(task.id, task.scheduledStartTime?.toString())
+            }
             cursor="pointer"
           >
             <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
               <Icon
-                as={taskTypeIcons[task.category]}
+                as={taskCategoryIcons[task.category]}
                 boxSize="1.5rem"
                 flexShrink={0}
               />

@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -14,6 +14,7 @@ import {
 } from "../interfaces/taskService";
 import TaskTemplate from "../../models/taskTemplate.model";
 import User from "../../models/user.model";
+import Pet from "../../models/pet.model";
 import {
   BadRequestError,
   getErrorMessage,
@@ -282,12 +283,16 @@ class TaskService implements ITaskService {
         startDates = buildStartDates(actualStart, recurrenceTask.days);
       }
 
-      let validExclusion = false;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const startDate of startDates) {
-        if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
-          validExclusion = true;
-          break;
+      let validExclusion = exclusion.getTime() === actualStart.getTime();
+      if (!validExclusion) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const startDate of startDates) {
+          if (
+            isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)
+          ) {
+            validExclusion = true;
+            break;
+          }
         }
       }
 
@@ -339,7 +344,7 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < actualStart)
+      if (date < resetDateToUTCMidnight(actualStart))
         throw new Error("Date is before recurrence start date.");
       if (recurrence.end_date && date > new Date(recurrence.end_date))
         throw new Error("Date is after recurrence end date.");
@@ -361,12 +366,18 @@ class TaskService implements ITaskService {
       // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
+          const instanceDate = new Date(date);
+          instanceDate.setUTCHours(actualStart.getUTCHours());
+          instanceDate.setUTCMinutes(actualStart.getUTCMinutes());
+          instanceDate.setUTCSeconds(actualStart.getUTCSeconds());
+          instanceDate.setUTCMilliseconds(actualStart.getUTCMilliseconds());
+
           return {
             id: task.id,
             userId: task.user_id,
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
-            scheduledStartTime: task.scheduled_start_time,
+            scheduledStartTime: instanceDate,
             scheduledEndTime: task.scheduled_end_time,
             startTime: task.start_time,
             endTime: task.end_time,
@@ -786,14 +797,19 @@ class TaskService implements ITaskService {
       }
 
       const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
-        where: whereClause,
+        where: {
+          ...whereClause,
+          "$recurrence.task_id$": { [Op.is]: null },
+        },
         include: [
+          { model: PgRecurrenceTask, required: false },
           { model: TaskTemplate, attributes: ["task_name", "category"] },
           {
             model: User,
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
+          { model: Pet, attributes: ["name"], required: false },
         ],
       });
 
@@ -811,6 +827,7 @@ class TaskService implements ITaskService {
           isRecurring: false,
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
+          petName: task.pet?.name,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -872,6 +889,7 @@ class TaskService implements ITaskService {
                   ],
                   required: false,
                 },
+                { model: Pet, attributes: ["name"], required: false },
               ],
             })
           : [];
@@ -887,6 +905,7 @@ class TaskService implements ITaskService {
             ...instance,
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
+            petName: enriched?.pet?.name,
             assignedUser: enriched?.user
               ? {
                   id: enriched.user.id,
@@ -910,6 +929,44 @@ class TaskService implements ITaskService {
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
+      );
+      throw error;
+    }
+  }
+
+  async deleteFutureTasks(
+    taskTemplateId: number,
+    petId: number,
+    date: Date,
+    excludeTaskId?: number,
+  ): Promise<void> {
+    try {
+      const normalizedDate = resetDateToUTCMidnight(date);
+      const idConditions: unknown[] = [
+        {
+          [Op.notIn]: Sequelize.literal(
+            "(SELECT task_id FROM recurrence_tasks)",
+          ),
+        },
+      ];
+
+      if (excludeTaskId) {
+        idConditions.push({ [Op.ne]: excludeTaskId });
+      }
+
+      await PgTask.destroy({
+        where: {
+          task_template_id: taskTemplateId,
+          pet_id: petId,
+          scheduled_start_time: {
+            [Op.gte]: normalizedDate,
+          },
+          id: { [Op.and]: idConditions },
+        },
+      });
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }
