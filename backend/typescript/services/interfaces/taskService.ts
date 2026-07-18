@@ -9,8 +9,6 @@ export interface TaskRequestDTO {
   startTime?: Date;
   endTime?: Date;
   notes?: string;
-  // Set only when creating an override row for a single edited occurrence of
-  // a recurring series; points at that series' seed task id.
   parentTaskId?: number;
 }
 
@@ -212,15 +210,5 @@ export interface ITaskService {
     filters?: { userId?: number; petId?: number },
   ): Promise<TaskResponseDTOForDate[]>;
 
-  /**
-   * deletes override rows belonging to a recurring series (rows whose
-   * parent_task_id is seedTaskId), optionally scoped to those scheduled on
-   * or after fromDate. Used to truncate a series without touching unrelated
-   * one-time tasks or other series' rows.
-   * @param seedTaskId id of the series' seed task
-   * @param fromDate optional date to delete from; omit to delete all overrides
-   * @returns void
-   * @throws Error if deletion fails
-   */
   deleteSeriesOverrides(seedTaskId: number, fromDate?: Date): Promise<void>;
 }
