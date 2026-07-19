@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { taskTemplateRequestDtoValidator } from "../middlewares/validators/taskTemplateValidators";
 import TaskTemplateService from "../services/implementations/taskTemplateService";
+import { isAuthorizedByRole } from "../middlewares/auth";
 import {
   TaskTemplateResponseDTO,
   ITaskTemplateService,
@@ -12,6 +13,7 @@ import {
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
 import logInteraction from "../middlewares/logInteraction";
+import { Role } from "../types";
 
 const taskTemplateRouter: Router = Router();
 
@@ -20,6 +22,7 @@ const taskTemplateService: ITaskTemplateService = new TaskTemplateService();
 /* Create TaskTemplate */
 taskTemplateRouter.post(
   "/",
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR])),
   taskTemplateRequestDtoValidator,
   async (req, res) => {
     try {
@@ -81,6 +84,7 @@ taskTemplateRouter.get("/:id", async (req, res) => {
 /* Update TaskTemplate by id */
 taskTemplateRouter.put(
   "/:id",
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR])),
   taskTemplateRequestDtoValidator,
   async (req, res) => {
     const { id } = req.params;
@@ -103,50 +107,62 @@ taskTemplateRouter.put(
 );
 
 /* Delete TaskTemplate by id */
-taskTemplateRouter.delete("/:id", async (req, res) => {
-  const { id } = req.params;
+taskTemplateRouter.delete(
+  "/:id",
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { id } = req.params;
 
-  try {
-    const deletedId = await taskTemplateService.deleteTaskTemplate(id);
-    res.status(200).json({ id: deletedId });
-  } catch (e: unknown) {
-    if (e instanceof NotFoundError) {
-      res.status(404).send(getErrorMessage(e));
-    } else {
-      res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+    try {
+      const deletedId = await taskTemplateService.deleteTaskTemplate(id);
+      res.status(200).json({ id: deletedId });
+    } catch (e: unknown) {
+      if (e instanceof NotFoundError) {
+        res.status(404).send(getErrorMessage(e));
+      } else {
+        res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+      }
     }
-  }
-});
+  },
+);
 
 /* Change task template name by id */
-taskTemplateRouter.patch("/:id/name", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const updated = await taskTemplateService.updateTaskTemplate(id, {
-      taskName: req.body.name,
-    });
+taskTemplateRouter.patch(
+  "/:id/name",
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const updated = await taskTemplateService.updateTaskTemplate(id, {
+        taskName: req.body.name,
+      });
 
-    await logInteraction(req);
-    res.status(200).json(updated);
-  } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
-  }
-});
+      await logInteraction(req);
+      res.status(200).json(updated);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
 
 /* Change task template instruction by id */
-taskTemplateRouter.patch("/:id/instructions", async (req, res) => {
-  const { id } = req.params;
+taskTemplateRouter.patch(
+  "/:id/instructions",
+  isAuthorizedByRole(new Set([Role.ADMINISTRATOR])),
+  async (req, res) => {
+    const { id } = req.params;
 
-  try {
-    const updated = await taskTemplateService.updateTaskTemplate(id, {
-      instructions: req.body.instructions,
-    });
+    try {
+      const updated = await taskTemplateService.updateTaskTemplate(id, {
+        instructions: req.body.instructions,
+      });
 
-    await logInteraction(req);
-    res.status(200).json(updated);
-  } catch (e: unknown) {
-    res.status(500).send(getErrorMessage(e));
-  }
-});
+      await logInteraction(req);
+      res.status(200).json(updated);
+    } catch (e: unknown) {
+      res.status(500).send(getErrorMessage(e));
+    }
+  },
+);
 
 export default taskTemplateRouter;
