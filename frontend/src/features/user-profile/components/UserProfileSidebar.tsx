@@ -9,7 +9,7 @@ import {
   VStack,
   Link as ChakraLink,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useContext } from "react";
 import { MailIcon, PencilIcon, PhoneIcon } from "../../../assets/icons";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 
@@ -24,7 +24,11 @@ import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import AnimalTagList from "../../../components/common/AnimalTagList";
 import Logout from "../../../components/auth/Logout";
 import InviteUser from "./InviteUser";
-import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import AuthContext from "../../../contexts/AuthContext";
+import {
+  canEditProfile,
+  canResendVerificationEmail,
+} from "../../../utils/permissions";
 
 export interface UserProfileSidebarProps {
   id: number;
@@ -52,12 +56,19 @@ function UserProfileSidebar({
   animalTags,
 }: UserProfileSidebarProps): React.ReactElement {
   const isInvited = status === "Invited";
-  const currentUserRole = getCurrentUserRole();
+  const { authenticatedUser } = useContext(AuthContext);
+  const currentUserRole = (authenticatedUser?.role as UserRoles) ?? null;
   const isCurrentUserAdmin = currentUserRole === UserRoles.ADMIN;
+  const isOwnProfile = authenticatedUser?.id === id;
+  const canEdit = canEditProfile(currentUserRole, isOwnProfile);
 
-  const editUserProfilePath = isCurrentUserAdmin
-    ? `/admin/edit-user-profile/${id}`
-    : `/edit-user-profile/${id}`;
+  // Own profile uses the self-edit page, except admins (their own role/colour/
+  // tags only exist on AdminViewEditUserProfilePage). Editing someone else
+  // always uses that page too.
+  const editUserProfilePath =
+    !isOwnProfile || isCurrentUserAdmin
+      ? `/admin/edit-user-profile/${id}`
+      : `/edit-user-profile/${id}`;
 
   const roleIcons: Record<UserRoles, React.ElementType> = {
     [UserRoles.ADMIN]: AdminTag,
@@ -92,9 +103,20 @@ function UserProfileSidebar({
         >
           {firstName} {lastName}
         </Text>
-        <ChakraLink as={Link} to={editUserProfilePath} flexShrink="0">
-          <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
-        </ChakraLink>
+        {canEdit ? (
+          <ChakraLink as={Link} to={editUserProfilePath} flexShrink="0">
+            <Image src={PencilIcon} alt="edit" boxSize="1.2rem" />
+          </ChakraLink>
+        ) : (
+          <Image
+            src={PencilIcon}
+            alt="edit"
+            boxSize="1.2rem"
+            flexShrink="0"
+            opacity={0.3}
+            cursor="not-allowed"
+          />
+        )}
       </HStack>
 
       <VStack alignItems="start" gap="0.8rem" width="100%">
@@ -169,7 +191,13 @@ function UserProfileSidebar({
 
       {/* TODO: Make logout only available when userId matches currently signed in user */}
       <Flex marginTop="auto" width="100%" justifyContent="center">
-        {isInvited ? <InviteUser email={email} /> : <Logout />}
+        {isInvited ? (
+          canResendVerificationEmail(currentUserRole) && (
+            <InviteUser email={email} />
+          )
+        ) : (
+          <Logout />
+        )}
       </Flex>
     </VStack>
   );
