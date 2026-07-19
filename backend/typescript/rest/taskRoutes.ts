@@ -244,8 +244,6 @@ taskRouter.post(
         throw new NotFoundError("Given task has no start date");
       }
 
-      // The seed's own date is always a valid occurrence (it exists as a
-      // task row) even when its weekday isn't in the recurrence days
       const isSeedDate =
         resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
         resetDateToUTCMidnight(date).getTime();
@@ -264,13 +262,21 @@ taskRouter.post(
         );
       }
 
+      if (
+        recurrence.endDate &&
+        resetDateToUTCMidnight(date).getTime() >
+          resetDateToUTCMidnight(recurrence.endDate).getTime()
+      ) {
+        throw new BadRequestError(
+          "Given date is after the recurrence's end date",
+        );
+      }
+
       const newScheduledStartTime =
         parsedScheduledStartTime !== undefined
           ? parsedScheduledStartTime
           : date;
 
-      // When no end time is given, re-anchor the seed task's end time-of-day
-      // onto the new start date so the end never lands on the seed's old date
       let newScheduledEndTime = parsedScheduledEndTime;
       if (newScheduledEndTime === undefined && task.scheduledEndTime) {
         const seedEnd = new Date(task.scheduledEndTime);
@@ -280,6 +286,15 @@ taskRouter.post(
           seedEnd.getUTCMinutes(),
           seedEnd.getUTCSeconds(),
           seedEnd.getUTCMilliseconds(),
+        );
+      }
+
+      if (
+        newScheduledEndTime !== undefined &&
+        newScheduledEndTime <= newScheduledStartTime
+      ) {
+        throw new BadRequestError(
+          "scheduledEndTime must be after scheduledStartTime",
         );
       }
 
@@ -299,9 +314,7 @@ taskRouter.post(
           singleTask,
         });
       } else if (isSeedDate) {
-        // Editing from the seed occurrence: capping the old recurrence at
-        // date - 1 would land before its start, so update task and
-        // recurrence in place instead of splitting the series
+        // Editing from the seed occurrence
         const updatedTask = await taskService.updateTask(taskId, {
           userId: userId ?? task.userId,
           petId: task.petId,
@@ -341,12 +354,11 @@ taskRouter.post(
           endTime: task.endTime,
           notes: notes ?? task.notes,
         });
-        // Carry exclusions past the split date into the new series so
-        // previously removed occurrences don't reappear
+
         const carriedExclusions = (recurrence.exclusions ?? []).filter(
           (ex) =>
             resetDateToUTCMidnight(new Date(ex)).getTime() >
-            resetDateToUTCMidnight(date).getTime(),
+            resetDateToUTCMidnight(newScheduledStartTime).getTime(),
         );
         const newRecurrence = await taskService.createRecurrence(
           newTask.id.toString(),
