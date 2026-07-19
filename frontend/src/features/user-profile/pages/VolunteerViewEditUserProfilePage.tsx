@@ -1,27 +1,17 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {
-  Flex,
-  Text,
-  FormLabel,
-  Spinner,
-  Image,
-  useToast,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Flex, Text, Spinner, useToast, useDisclosure } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom";
 import Input from "../../../components/common/Input";
-import PasswordInput from "../../../components/common/PasswordInput";
 import Button from "../../../components/common/Button";
 import NavBar from "../../../components/common/navbar/NavBar";
-import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import AuthContext from "../../../contexts/AuthContext";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
-import PencilIcon from "../../../assets/icons/pencil.svg";
 import { PROFILE_PAGE } from "../../../constants/Routes";
 import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
-import ProfilePhotoModal from "../components/ProfilePhotoModal";
+import ProfilePhotoEditor from "../components/ProfilePhotoEditor";
+import ChangePasswordRow from "../components/ChangePasswordRow";
 import { User } from "../../../types/UserTypes";
 
 interface FormData {
@@ -30,7 +20,6 @@ interface FormData {
   lastName: string;
   phoneNumber: string;
   email: string;
-  password: string;
   profilePhoto: string;
 }
 
@@ -53,7 +42,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     onOpen: openQuitEditingModal,
     onClose: closeQuitEditingModal,
   } = useDisclosure();
-  const [isProfilePhotoModalOpen, setIsProfilePhotoModalOpen] = useState(false);
 
   const {
     control,
@@ -68,7 +56,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
       lastName: authenticatedUser?.lastName || "",
       phoneNumber: authenticatedUser?.phoneNumber || "",
       email: authenticatedUser?.email || "",
-      password: "",
       profilePhoto: authenticatedUser?.profilePhoto || "",
     },
   });
@@ -100,7 +87,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           lastName: userData.lastName,
           phoneNumber: userData.phoneNumber || "",
           email: userData.email,
-          password: "",
           profilePhoto: userData.profilePhoto || "",
         });
         originalValues.current = {
@@ -217,10 +203,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     }
   };
 
-  const handleChangePassword = () => {
-    history.push("/forgot-password");
-  };
-
   const handleProfilePhotoChange = (file: File | null) => {
     if (!file) {
       setLocalProfilePhoto(undefined);
@@ -283,49 +265,10 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
             Edit Profile
           </Text>
 
-          <Flex
-            direction="column"
-            align="center"
-            mb="2.5rem"
-            gap="0.5rem"
-            position="relative"
-          >
-            <FormLabel m={0} textStyle="body" color="gray.700">
-              Profile Picture:
-            </FormLabel>
-            <Flex position="relative" align="center" justifyContent="center">
-              <ProfilePhoto
-                size="large"
-                type="user"
-                image={localProfilePhoto}
-              />
-              <Flex
-                as="label"
-                htmlFor="profile-photo-upload"
-                position="absolute"
-                right="0"
-                top="0"
-                width="2.5rem"
-                height="2.5rem"
-                borderRadius="50%"
-                backgroundColor="gray.200"
-                alignItems="center"
-                justifyContent="center"
-                cursor="pointer"
-                border="none"
-                zIndex={2}
-                onClick={() => {
-                  setIsProfilePhotoModalOpen(true);
-                }}
-              >
-                <Image
-                  src={PencilIcon}
-                  alt="edit"
-                  style={{ stroke: "black" }}
-                />
-              </Flex>
-            </Flex>
-          </Flex>
+          <ProfilePhotoEditor
+            photoUrl={localProfilePhoto}
+            onChange={handleProfilePhotoChange}
+          />
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap="1.5rem">
@@ -391,34 +334,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
                 )}
               />
 
-              <Flex width="100%" gap="1.5rem" alignItems="end">
-                <Flex flex={1}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({ field }) => (
-                      <PasswordInput
-                        label="Password"
-                        value={field.value}
-                        onChange={field.onChange}
-                        disabled
-                        showToggle={false}
-                      />
-                    )}
-                  />
-                </Flex>
-                <Flex flex={1} align="center">
-                  <Button
-                    variant="dark-blue"
-                    size="large"
-                    width="100%"
-                    type="button"
-                    onClick={handleChangePassword}
-                  >
-                    Change Password
-                  </Button>
-                </Flex>
-              </Flex>
+              <ChangePasswordRow />
 
               <Flex justify="flex-end" mt="2rem">
                 <Button variant="green" size="medium" type="submit">
@@ -433,13 +349,6 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
         isOpen={isQuitEditingModalOpen}
         handleSecondaryButtonClick={closeQuitEditingModal}
         navigateTo={`${PROFILE_PAGE}/${authenticatedUser?.id}`}
-      />
-      <ProfilePhotoModal
-        isOpen={isProfilePhotoModalOpen}
-        profilePhoto={localProfilePhoto}
-        onClose={() => setIsProfilePhotoModalOpen(false)}
-        onConfirm={handleProfilePhotoChange}
-        type="user"
       />
     </>
   );
