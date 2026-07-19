@@ -269,7 +269,11 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     }
 
     // update other user's fields as admin
-    if (isAdministrator && !hasGivenUserId && req.body.profilePhoto) {
+    if (
+      isAdministrator &&
+      !hasGivenUserId &&
+      req.body.profilePhoto !== undefined
+    ) {
       res.status(403).json({ error: "Not authorized to update profile photo" });
       return;
     }
