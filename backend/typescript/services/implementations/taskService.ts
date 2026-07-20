@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -285,12 +285,15 @@ class TaskService implements ITaskService {
       }
 
       let validExclusion = exclusion.getTime() === actualStart.getTime();
-
-      // eslint-disable-next-line no-restricted-syntax
-      for (const startDate of startDates) {
-        if (isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)) {
-          validExclusion = true;
-          break;
+      if (!validExclusion) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const startDate of startDates) {
+          if (
+            isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)
+          ) {
+            validExclusion = true;
+            break;
+          }
         }
       }
 
@@ -342,7 +345,7 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < actualStart)
+      if (date < resetDateToUTCMidnight(actualStart))
         throw new Error("Date is before recurrence start date.");
       if (recurrence.end_date && date > new Date(recurrence.end_date))
         throw new Error("Date is after recurrence end date.");
@@ -806,8 +809,12 @@ class TaskService implements ITaskService {
       }
 
       const oneTimeTasks: Array<PgTask> = await PgTask.findAll({
-        where: whereClause,
+        where: {
+          ...whereClause,
+          "$recurrence.task_id$": { [Op.is]: null },
+        },
         include: [
+          { model: PgRecurrenceTask, required: false },
           { model: TaskTemplate, attributes: ["task_name", "category"] },
           {
             model: User,
@@ -945,6 +952,44 @@ class TaskService implements ITaskService {
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
+      );
+      throw error;
+    }
+  }
+
+  async deleteFutureTasks(
+    taskTemplateId: number,
+    petId: number,
+    date: Date,
+    excludeTaskId?: number,
+  ): Promise<void> {
+    try {
+      const normalizedDate = resetDateToUTCMidnight(date);
+      const idConditions: unknown[] = [
+        {
+          [Op.notIn]: Sequelize.literal(
+            "(SELECT task_id FROM recurrence_tasks)",
+          ),
+        },
+      ];
+
+      if (excludeTaskId) {
+        idConditions.push({ [Op.ne]: excludeTaskId });
+      }
+
+      await PgTask.destroy({
+        where: {
+          task_template_id: taskTemplateId,
+          pet_id: petId,
+          scheduled_start_time: {
+            [Op.gte]: normalizedDate,
+          },
+          id: { [Op.and]: idConditions },
+        },
+      });
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }

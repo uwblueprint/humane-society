@@ -268,6 +268,7 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          instanceDate={selectedInstanceDate}
           onTaskCompleted={async () => {
             await fetchTasks();
             setSelectedTaskId(null);
@@ -275,7 +276,6 @@ const PetProfilePage = (): React.ReactElement => {
             setShowSurvey(true);
           }}
           onTaskUpdated={fetchTasks}
-          instanceDate={selectedInstanceDate}
         />
       )}
       {showSurvey && (

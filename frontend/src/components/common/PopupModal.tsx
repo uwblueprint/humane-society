@@ -9,7 +9,7 @@ interface PopupModalProps {
   open: boolean; // Controls whether the modal is visible
   title: string; // Title displayed at the top of the modal
   message?: string; // Optional: main message or body text of the modal
-  children?: React.ReactNode; // Optional: custom content rendered between the message and buttons
+  children?: React.ReactNode; // Optional: custom content rendered in place of the message
   // Primary button props
   primaryButtonText?: string; // Text for the primary action button
   onPrimaryClick?: () => void; // Function to call when the primary button is clicked
@@ -74,8 +74,8 @@ const PopupModal: React.FC<PopupModalProps> = ({
         >
           {title}
         </Text>
-        {/* Message Body */}
-        {message && (
+        {/* Message Body (or custom children in its place) */}
+        {children || (
           <Text
             textStyle={{ base: "bodyMobile", md: "body" }}
             color="gray.600"
@@ -88,8 +88,6 @@ const PopupModal: React.FC<PopupModalProps> = ({
             {message}
           </Text>
         )}
-
-        {children}
 
         {/* Buttons */}
         {(hasPrimaryButton || hasSecondaryButton) && (

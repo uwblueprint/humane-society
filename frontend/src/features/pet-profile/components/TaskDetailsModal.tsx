@@ -21,6 +21,7 @@ import PetAPIClient from "../../../APIClients/PetAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
+
 import AuthContext from "../../../contexts/AuthContext";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import { Pet } from "../../../types/PetTypes";
@@ -150,22 +151,22 @@ interface TaskDetailsModalProps {
   taskId: number;
   isOpen: boolean;
   onClose: () => void;
+  instanceDate?: string;
   onTaskCompleted: () => void;
   onTaskUpdated?: () => void;
-  instanceDate?: string;
 }
 
 const TaskDetailsModal = ({
   taskId,
   isOpen,
   onClose,
+  instanceDate,
   onTaskCompleted,
   onTaskUpdated,
-  instanceDate,
 }: TaskDetailsModalProps): React.ReactElement => {
-  const history = useHistory();
   const { authenticatedUser } = useContext(AuthContext);
   const toast = useToast();
+  const history = useHistory();
 
   const [loading, setLoading] = useState(true);
   const [taskData, setTaskData] = useState<PetTask | null>(null);
@@ -348,6 +349,37 @@ const TaskDetailsModal = ({
     return "Recurring";
   };
 
+  const handleStart = async () => {
+    try {
+      await TaskAPIClient.startTask(taskId, {
+        startTime: new Date().toISOString(),
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskData?.petId ?? 0,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        actorName: `${authenticatedUser?.firstName ?? ""} ${
+          authenticatedUser?.lastName ?? ""
+        }`,
+      });
+      await fetchData(false);
+      onTaskUpdated?.();
+      toast({
+        title: "Task started",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to start task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const renderActions = () => {
     if (isAdminOrBehaviourist) {
       return (
@@ -437,6 +469,7 @@ const TaskDetailsModal = ({
               size="medium"
               width="100%"
               disabled={isPetOccupied || hasInProgressTask}
+              onClick={handleStart}
             >
               Start
             </Button>

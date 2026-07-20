@@ -199,39 +199,6 @@ const scheduleTask = async (
   }
 };
 
-const startTask = async (
-  taskId: number,
-  body: {
-    startTime: string;
-    actorId: number;
-    targetId: number;
-    taskTemplateName: string;
-    petName: string;
-    actorName: string;
-    isRestart?: boolean;
-  },
-): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  const { isRestart, ...rest } = body;
-  try {
-    await baseAPIClient.patch(
-      `/tasks/${taskId}/start`,
-      {
-        ...rest,
-        interactionType: isRestart
-          ? InteractionType.RESTARTED_TASK
-          : InteractionType.STARTED_TASK,
-      },
-      { headers: { Authorization: bearerToken } },
-    );
-  } catch (error) {
-    throw new Error(`Failed to start task: ${error}`);
-  }
-};
-
 const endTask = async (
   taskId: number,
   body: {
@@ -328,6 +295,39 @@ const selfAssign = async (taskId: number): Promise<void> => {
   }
 };
 
+const startTask = async (
+  taskId: number,
+  body: {
+    startTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    actorName: string;
+    isRestart?: boolean;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const { isRestart, ...rest } = body;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/start`,
+      {
+        ...rest,
+        interactionType: isRestart
+          ? InteractionType.RESTARTED_TASK
+          : InteractionType.STARTED_TASK,
+      },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to start task: ${error}`);
+  }
+};
+
 const createTask = async (payload: {
   userId: number | null;
   petId: number;
@@ -380,6 +380,24 @@ const createRecurringTask = async (payload: {
     });
   } catch (error) {
     throw new Error(`Failed to create recurring task: ${error}`);
+  }
+};
+const deleteRecurringTask = async (
+  taskId: number,
+  date: string,
+  single: boolean,
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    await baseAPIClient.delete(`/tasks/recurrences/${taskId}`, {
+      headers: { Authorization: bearerToken },
+      params: { date, single },
+    });
+  } catch (error) {
+    throw new Error(`Failed to delete recurring task: ${error}`);
   }
 };
 
@@ -449,7 +467,7 @@ const updateTask = async (
       headers: { Authorization: bearerToken },
     });
   } catch (error) {
-    throw new Error(`Failed to create task: ${error}`);
+    throw new Error(`Failed to update task: ${error}`);
   }
 };
 
@@ -471,6 +489,7 @@ export default {
   createTask,
   createRecurringTask,
   editRecurringTask,
+  deleteRecurringTask,
   completeTask,
   updateTask,
 };

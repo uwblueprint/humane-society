@@ -25,39 +25,51 @@ const StatusBadge = ({
 }: {
   task: ScheduledTaskDTO;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }) => {
+  const status = getTaskDetailedStatus(task, authenticatedUser);
+  const handleClick = () =>
+    onTaskClick(task.id, task.scheduledStartTime?.toString());
+
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
+  if (status === "Completed")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Completed
+      </Button>
+    );
+
+  if (status === "Incomplete")
+    return (
+      <Button as="button" variant="red" size="medium" type="button">
+        Incomplete
+      </Button>
+    );
+
   if (isAdminOrBehaviourist) {
-    if (task.endTime)
-      return (
-        <Button as="button" variant="gray-shaded" size="medium" type="button">
-          Completed
-        </Button>
-      );
-    if (!task.assignedUser)
+    if (status === null)
       return (
         <Button
           as="button"
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() => onTaskClick(task.id)}
+          onClick={handleClick}
         >
           Assign
         </Button>
       );
-    if (task.assignedUser && !task.endTime)
+    if (status === "In-Progress")
       return (
         <Button
           as="button"
           variant="green"
           size="medium"
           type="button"
-          onClick={() => onTaskClick(task.id)}
+          onClick={handleClick}
         >
           In Progress
         </Button>
@@ -65,7 +77,6 @@ const StatusBadge = ({
     return <></>;
   }
 
-  const status = getTaskDetailedStatus(task, authenticatedUser);
   const isMyTask = task.userId === authenticatedUser?.id;
 
   if (status === null)
@@ -75,7 +86,7 @@ const StatusBadge = ({
         variant="gray"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Assign to Me
       </Button>
@@ -88,7 +99,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Start
       </Button>
@@ -110,7 +121,7 @@ const StatusBadge = ({
         variant="green"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         In Progress
       </Button>
@@ -122,21 +133,6 @@ const StatusBadge = ({
         Occupied
       </Button>
     );
-
-  if (status === "Completed")
-    return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
-      </Button>
-    );
-
-  if (status === "Incomplete")
-    return (
-      <Button as="button" variant="red" size="medium" type="button">
-        Incomplete
-      </Button>
-    );
-
   return <></>;
 };
 
