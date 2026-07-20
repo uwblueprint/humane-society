@@ -172,14 +172,13 @@ class TaskService implements ITaskService {
             return first.getTime() <= newEndDate.getTime();
           });
 
-          newDays = prunedDays;
-
-          // this shouldn't be happening
           if (prunedDays.length === 0) {
-            throw new BadRequestError(
-              "End date is before or on the first occurrence of all selected days.",
-            );
+            const baseExclusions =
+              newExclusions ?? recurrenceTask.exclusions ?? [];
+            newExclusions = [...baseExclusions, actualStart];
           }
+
+          newDays = prunedDays;
         }
       }
 
