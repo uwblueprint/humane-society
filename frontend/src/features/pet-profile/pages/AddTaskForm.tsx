@@ -144,10 +144,13 @@ const AddTaskForm = ({
             const end = new Date(recurrence.endDate);
             setValue(
               "endMonth",
-              end.toLocaleString("default", { month: "long" }),
+              end.toLocaleString("default", {
+                month: "long",
+                timeZone: "UTC",
+              }),
             );
-            setValue("endDay", String(end.getDate()));
-            setValue("endYear", String(end.getFullYear()));
+            setValue("endDay", String(end.getUTCDate()));
+            setValue("endYear", String(end.getUTCFullYear()));
           }
         }
       } catch (error) {
@@ -350,9 +353,11 @@ const AddTaskForm = ({
           let endDate: string | undefined;
           if (endMonth && endDay && endYear) {
             endDate = new Date(
-              Number(endYear),
-              MONTH_NAME_TO_NUMBER[endMonth] - 1,
-              Number(endDay),
+              Date.UTC(
+                Number(endYear),
+                MONTH_NAME_TO_NUMBER[endMonth] - 1,
+                Number(endDay),
+              ),
             ).toISOString();
           }
           await TaskAPIClient.editRecurringTask(
@@ -393,9 +398,11 @@ const AddTaskForm = ({
         let endDate: string | null = null;
         if (endMonth && endDay && endYear) {
           endDate = new Date(
-            Number(endYear),
-            MONTH_NAME_TO_NUMBER[endMonth] - 1,
-            Number(endDay),
+            Date.UTC(
+              Number(endYear),
+              MONTH_NAME_TO_NUMBER[endMonth] - 1,
+              Number(endDay),
+            ),
           ).toISOString();
         }
         await TaskAPIClient.createRecurringTask({
