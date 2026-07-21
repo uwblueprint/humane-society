@@ -40,7 +40,6 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Status",
       value: "status",
-      // TODO: how to handle dynamically
       options: ["Needs Care", "Assigned to You"],
     },
     {

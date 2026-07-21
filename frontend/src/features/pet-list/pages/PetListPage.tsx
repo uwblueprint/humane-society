@@ -8,7 +8,6 @@ import AUTHENTICATED_USER_KEY, {
   STAFF_BEHAVIOURISTS_ADMIN,
 } from "../../../constants/AuthConstants";
 import {
-  PetInfo,
   PetListItemDTO,
   PetListRecord,
   PetListSectionKey,
@@ -72,49 +71,8 @@ const PetListPage = (): React.ReactElement => {
     getPets();
   }, []);
 
-  // Convert PetListSections from backend to PetListRecord format for role-based view
-  const convertToPetListRecord = (sections: PetListSections): PetListRecord => {
-    const result: PetListRecord = {};
-
-    // Helper to convert PetListItemDTO to PetInfo
-    const convertToPetInfo = (pet: PetListItemDTO): PetInfo => {
-      return {
-        id: pet.id,
-        name: pet.name,
-        color: pet.color,
-        photo: pet.photo || "/images/cat.png", // TODO: will replace placeholder image in the future
-        taskCategories: pet.taskCategories,
-        status: pet.status,
-        lastCaredFor: pet.lastCaredFor,
-        allTasksAssigned: pet.allTasksAssigned,
-        animalTag: pet.animalTag,
-      };
-    };
-
-    // Map backend section names to frontend section keys
-    Object.entries(sections).forEach(([sectionName, pets]) => {
-      const petInfos = pets.map(convertToPetInfo);
-
-      // Map section names to PetListSectionKey
-      if (sectionName === "Assigned to You") {
-        result["Assigned to You"] = petInfos;
-      } else if (sectionName === "Has Unassigned Tasks") {
-        result["Has Unassigned Tasks"] = petInfos;
-      } else if (sectionName === "All Tasks Assigned") {
-        result["All Tasks Assigned"] = petInfos;
-      } else if (sectionName === "No Tasks") {
-        result["No Tasks"] = petInfos;
-      } else if (sectionName === "Other Pets") {
-        result["Other Pets"] = petInfos;
-      }
-    });
-
-    return result;
-  };
-
   const filteredPets = useMemo(() => {
-    // Convert backend PetListSections to PetListRecord
-    const petListRecord = convertToPetListRecord(petsSections);
+    const petListRecord = petsSections as PetListRecord;
 
     const result: PetListRecord = {};
 
@@ -124,14 +82,27 @@ const PetListPage = (): React.ReactElement => {
         .filter((pet) =>
           Object.keys(filters).every((key) => {
             if (filters[key].length === 0) return true;
-            if (Array.isArray(pet[key as keyof PetInfo])) {
+
+            if (key === "status") {
+              const { ["Assigned to You"]: assignedToYouSelected, ...rest } =
+                Object.fromEntries(
+                  filters[key].map((value) => [value, true]),
+                );
+              const statusValues = Object.keys(rest);
+              return (
+                (assignedToYouSelected && pet.isAssignedToMe) ||
+                statusValues.includes(pet.status)
+              );
+            }
+
+            if (Array.isArray(pet[key as keyof PetListItemDTO])) {
               return filters[key].some((filter) =>
                 (
-                  pet[key as keyof PetInfo] as (string | TaskCategory)[]
+                  pet[key as keyof PetListItemDTO] as (string | TaskCategory)[]
                 ).includes(filter),
               );
             }
-            return filters[key].includes(pet[key as keyof PetInfo] as string);
+            return filters[key].includes(pet[key as keyof PetListItemDTO] as string);
           }),
         )
         .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()));
