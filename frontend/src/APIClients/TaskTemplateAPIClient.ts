@@ -7,6 +7,7 @@ import {
 } from "../types/TaskTypes";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import baseAPIClient from "./BaseAPIClient";
+import { InteractionType } from "../types/InteractionTypes";
 
 function transformTaskTemplateResponse(dto: TaskTemplateResponseDTO): Task {
   return {
@@ -87,8 +88,69 @@ const editTaskTemplate = async (
   }
 };
 
+const updateName = async (
+  taskTemplateId: number | string,
+  body: {
+    name: string;
+    actorId: number;
+    targetId: number;
+    oldTaskTemplateName: string;
+    newTaskTemplateName: string;
+  },
+): Promise<Task> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/task-templates/${taskTemplateId}/name`,
+      { ...body, interactionType: InteractionType.CHANGED_TASK_TEMPLATE_NAME },
+      { headers: { Authorization: bearerToken } },
+    );
+    return transformTaskTemplateResponse(data);
+  } catch (error) {
+    throw new Error(`Failed to update task template name: ${error}`);
+  }
+};
+
+const updateInstructions = async (
+  taskTemplateId: number | string,
+  body: {
+    instructions: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    oldInstructions: string;
+    newInstructions: string;
+  },
+): Promise<Task> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/task-templates/${taskTemplateId}/instructions`,
+      {
+        ...body,
+        interactionType: InteractionType.CHANGED_TASK_TEMPLATE_INSTRUCTIONS,
+      },
+      { headers: { Authorization: bearerToken } },
+    );
+    return transformTaskTemplateResponse(data);
+  } catch (error) {
+    throw new Error(`Failed to update task template instructions: ${error}`);
+  }
+};
+
 const deleteTaskTemplate = async (
   taskTemplateId: number | string,
+  body?: {
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+  },
 ): Promise<{ taskTemplateId: number }> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -99,6 +161,10 @@ const deleteTaskTemplate = async (
       `/task-templates/${taskTemplateId}`,
       {
         headers: { Authorization: bearerToken },
+        data: {
+          ...body,
+          interactionType: InteractionType.DELETED_TASK_TEMPLATE,
+        },
       },
     );
     return data;
@@ -112,5 +178,7 @@ export default {
   getAllTaskTemplates,
   createTaskTemplate,
   editTaskTemplate,
+  updateName,
+  updateInstructions,
   deleteTaskTemplate,
 };

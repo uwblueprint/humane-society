@@ -22,7 +22,7 @@ export interface Pet {
   age?: number;
   birthday?: string;
   weight?: number;
-  sex?: SexEnum;
+  sex?: SexEnum | null;
   photo?: string;
   careInfo?: {
     id: number;
@@ -84,7 +84,7 @@ export interface PetRequestDTO {
   neutered?: boolean | null;
   birthday?: string | null;
   weight?: number | null;
-  sex?: SexEnum;
+  sex?: SexEnum | null;
   photo?: string | null;
   careInfo?: {
     safetyInfo?: string | null;
