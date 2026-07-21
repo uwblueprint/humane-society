@@ -8,7 +8,6 @@ import AUTHENTICATED_USER_KEY, {
   STAFF_BEHAVIOURISTS_ADMIN,
 } from "../../../constants/AuthConstants";
 import {
-  PetInfo,
   PetListItemDTO,
   PetListRecord,
   PetListSectionKey,
@@ -141,8 +140,7 @@ const PetListPage = (): React.ReactElement => {
   };
 
   const filteredPets = useMemo(() => {
-    // Convert backend PetListSections to PetListRecord
-    const petListRecord = convertToPetListRecord(petsSections);
+    const petListRecord = petsSections as PetListRecord;
 
     const result: PetListRecord = {};
 
@@ -152,14 +150,27 @@ const PetListPage = (): React.ReactElement => {
         .filter((pet) =>
           Object.keys(filters).every((key) => {
             if (filters[key].length === 0) return true;
-            if (Array.isArray(pet[key as keyof PetInfo])) {
+
+            if (key === "status") {
+              const { ["Assigned to You"]: assignedToYouSelected, ...rest } =
+                Object.fromEntries(
+                  filters[key].map((value) => [value, true]),
+                );
+              const statusValues = Object.keys(rest);
+              return (
+                (assignedToYouSelected && pet.isAssignedToMe) ||
+                statusValues.includes(pet.status)
+              );
+            }
+
+            if (Array.isArray(pet[key as keyof PetListItemDTO])) {
               return filters[key].some((filter) =>
                 (
-                  pet[key as keyof PetInfo] as (string | TaskCategory)[]
+                  pet[key as keyof PetListItemDTO] as (string | TaskCategory)[]
                 ).includes(filter),
               );
             }
-            return filters[key].includes(pet[key as keyof PetInfo] as string);
+            return filters[key].includes(pet[key as keyof PetListItemDTO] as string);
           }),
         )
         .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()));
