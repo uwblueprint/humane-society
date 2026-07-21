@@ -186,7 +186,7 @@ export const taskUserPatchValidator = async (
 ) => {
   const { body } = req;
 
-  if (!validatePrimitive(body.userId, "integer")) {
+  if (body.userId !== null && !validatePrimitive(body.userId, "integer")) {
     return res.status(400).send(getApiValidationError("userId", "integer"));
   }
 
