@@ -180,8 +180,7 @@ const logInteraction = async (req: Request) => {
         if (
           !taskTemplateName ||
           !petName ||
-          !oldInstructions ||
-          !newInstructions
+          (!oldInstructions && !newInstructions)
         ) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
@@ -330,15 +329,20 @@ const logInteraction = async (req: Request) => {
         break;
 
       case InteractionTypeEnum.CHANGED_PET_NEUTER_STATUS:
-        if (!petName || !newText || !oldText) {
+        if (!petName || !newText || oldText === undefined) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
-        shortDescription = `Changed ${petName}'s neuter status to ${newText}`;
-        longDescription = `Changed ${petName}'s neuter status from ${oldText} to ${newText}.`;
+        if (oldText) {
+          shortDescription = `Changed ${petName}'s neuter status to ${newText}`;
+          longDescription = `Changed ${petName}'s neuter status from ${oldText} to ${newText}.`;
+        } else {
+          shortDescription = `Set ${petName}'s neuter status to ${newText}`;
+          longDescription = `Set ${petName}'s neuter status to ${newText}.`;
+        }
         break;
 
       case InteractionTypeEnum.CHANGED_PET_SAFETY_INFO:
-        if (!petName || !oldText || !newText) {
+        if (!petName || (!oldText && !newText)) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
         if (oldText && !newText) {
@@ -354,7 +358,7 @@ const logInteraction = async (req: Request) => {
         break;
 
       case InteractionTypeEnum.CHANGED_PET_MEDICAL_INFO:
-        if (!petName || !oldText || !newText) {
+        if (!petName || (!oldText && !newText)) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
         if (oldText && !newText) {
@@ -370,7 +374,7 @@ const logInteraction = async (req: Request) => {
         break;
 
       case InteractionTypeEnum.CHANGED_PET_MANAGEMENT_INFO:
-        if (!petName || !oldText || !newText) {
+        if (!petName || (!oldText && !newText)) {
           throw new Error(`Missing required fields for ${interactionType}`);
         }
         if (oldText && !newText) {
@@ -407,13 +411,13 @@ const logInteraction = async (req: Request) => {
         }
         if (oldInstructions && !newInstructions) {
           shortDescription = `Removed '${oldInstructions}' from ${taskTemplateName}'s instructions`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '${oldInstructions}' to ''.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '${oldInstructions}' to ''.`;
         } else if (!oldInstructions && newInstructions) {
           shortDescription = `Added '${newInstructions}' to ${taskTemplateName}'s instructions`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '' to '${newInstructions}'.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '' to '${newInstructions}'.`;
         } else {
           shortDescription = `Changed task template instructions of ${taskTemplateName} to ${newInstructions}`;
-          longDescription = `Changed the task template instructions of ${taskTemplateName} from '${oldInstructions}' to '${newInstructions}'.`;
+          longDescription = `Changed the ${taskTemplateName} task template instructions from '${oldInstructions}' to '${newInstructions}'.`;
         }
         break;
 
@@ -429,16 +433,31 @@ const logInteraction = async (req: Request) => {
     );
 
     // decide which of 4 target columns should be filled and set others to null.
-    const targetUserId = USER_INTERACTIONS.has(interactionType)
-      ? targetId
-      : null;
-    const targetPetId = PET_INTERACTIONS.has(interactionType) ? targetId : null;
-    const targetTaskId = TASK_INTERACTIONS.has(interactionType)
-      ? targetId
-      : null;
-    const targetTaskTemplateId = TASK_TEMPLATE_INTERACTIONS.has(interactionType)
-      ? targetId
-      : null;
+    // for delete interactions the target row no longer exists, so leave the FK
+    // null (the entity is named in the description) to avoid a FK violation on
+    // insert.
+    const isDeleteInteraction =
+      interactionType === InteractionTypeEnum.DELETED_USER ||
+      interactionType === InteractionTypeEnum.DELETED_PET ||
+      interactionType === InteractionTypeEnum.DELETED_TASK ||
+      interactionType === InteractionTypeEnum.DELETED_TASK_TEMPLATE ||
+      interactionType === InteractionTypeEnum.DELETED_RECURRING_TASK;
+    const targetUserId =
+      USER_INTERACTIONS.has(interactionType) && !isDeleteInteraction
+        ? targetId
+        : null;
+    const targetPetId =
+      PET_INTERACTIONS.has(interactionType) && !isDeleteInteraction
+        ? targetId
+        : null;
+    const targetTaskId =
+      TASK_INTERACTIONS.has(interactionType) && !isDeleteInteraction
+        ? targetId
+        : null;
+    const targetTaskTemplateId =
+      TASK_TEMPLATE_INTERACTIONS.has(interactionType) && !isDeleteInteraction
+        ? targetId
+        : null;
 
     // log interaction in DB
     await InteractionService.log({

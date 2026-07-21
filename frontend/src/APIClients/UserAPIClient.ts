@@ -3,6 +3,7 @@ import { User, CreateUserDTO } from "../types/UserTypes";
 import AUTHENTICATED_USER_KEY from "../constants/AuthConstants";
 import baseAPIClient from "./BaseAPIClient";
 import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
+import { InteractionType } from "../types/InteractionTypes";
 
 async function get(): Promise<User[]>;
 async function get(userId: number): Promise<User>;
@@ -62,7 +63,95 @@ const update = async (
   }
 };
 
-const invite = async (email: string): Promise<void> => {
+const updateName = async (
+  userId: number,
+  body: {
+    firstName: string;
+    lastName: string;
+    actorId: number;
+    targetId: number;
+    oldUserName: string;
+    newUserName: string;
+  },
+): Promise<User> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/users/${userId}/name`,
+      { ...body, interactionType: InteractionType.CHANGED_USER_NAME },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update user name: ${error}`);
+  }
+};
+
+const updateColorLevel = async (
+  userId: number,
+  body: {
+    colorLevel: number;
+    actorId: number;
+    targetId: number;
+    targetName: string;
+    oldColorLevel: string;
+    newColorLevel: string;
+  },
+): Promise<User> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/users/${userId}/color-level`,
+      { ...body, interactionType: InteractionType.CHANGED_USER_COLOR_LEVEL },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update user color level: ${error}`);
+  }
+};
+
+const updateRole = async (
+  userId: number,
+  body: {
+    role: string;
+    actorId: number;
+    targetId: number;
+    targetName: string;
+    oldRole: string;
+    newRole: string;
+  },
+): Promise<User> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const { data } = await baseAPIClient.patch(
+      `/users/${userId}/role`,
+      { ...body, interactionType: InteractionType.CHANGED_USER_ROLE },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to update user role: ${error}`);
+  }
+};
+
+const invite = async (
+  email: string,
+  body?: {
+    actorId: number;
+    targetId: number;
+    targetName: string;
+  },
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -70,7 +159,7 @@ const invite = async (email: string): Promise<void> => {
   try {
     await baseAPIClient.post(
       "/auth/invite-user",
-      { email },
+      { email, ...body, interactionType: InteractionType.INVITED_USER },
       {
         headers: { Authorization: bearerToken },
       },
@@ -80,7 +169,14 @@ const invite = async (email: string): Promise<void> => {
   }
 };
 
-const deleteUser = async (userId: string): Promise<void> => {
+const deleteUser = async (
+  userId: string,
+  body?: {
+    actorId: number;
+    targetId: number;
+    targetName: string;
+  },
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -90,6 +186,7 @@ const deleteUser = async (userId: string): Promise<void> => {
   try {
     await baseAPIClient.delete(url, {
       headers: { Authorization: bearerToken },
+      data: { ...body, interactionType: InteractionType.DELETED_USER },
     });
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.error) {
@@ -169,6 +266,9 @@ export default {
   create,
   invite,
   update,
+  updateName,
+  updateColorLevel,
+  updateRole,
   deleteUser,
   uploadProfilePhoto,
   getProfilePhotoUrl,
