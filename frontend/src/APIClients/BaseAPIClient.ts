@@ -34,23 +34,28 @@ baseAPIClient.interceptors.request.use(async (config: AxiosRequestConfig) => {
       (typeof decodedToken === "string" ||
         decodedToken.exp <= Math.round(new Date().getTime() / 1000))
     ) {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/auth/refresh`,
-        {},
-        { withCredentials: true },
-      );
+      try {
+        const { data } = await axios.post(
+          `${process.env.REACT_APP_BACKEND_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
-      const accessToken = data.accessToken || data.access_token;
-      setLocalStorageObjProperty(
-        AUTHENTICATED_USER_KEY,
-        "accessToken",
-        accessToken,
-      );
+        const accessToken = data.accessToken || data.access_token;
+        setLocalStorageObjProperty(
+          AUTHENTICATED_USER_KEY,
+          "accessToken",
+          accessToken,
+        );
 
-      if (!newConfig.headers) {
-        newConfig.headers = {};
+        if (!newConfig.headers) {
+          newConfig.headers = {};
+        }
+        newConfig.headers.Authorization = `Bearer ${accessToken}`;
+      } catch (error) {
+        localStorage.removeItem(AUTHENTICATED_USER_KEY);
+        return Promise.reject(error);
       }
-      newConfig.headers.Authorization = accessToken;
     }
   }
 

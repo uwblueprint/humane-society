@@ -26,10 +26,13 @@ const userService: IUserService = new UserService();
 const emailService: IEmailService = new EmailService(nodemailerConfig);
 const authService: IAuthService = new AuthService(userService, emailService);
 
+const REFRESH_TOKEN_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
 const cookieOptions: CookieOptions = {
   httpOnly: true,
   sameSite: process.env.PREVIEW_DEPLOY ? "none" : "strict",
   secure: process.env.NODE_ENV === "production",
+  maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE_MS,
 };
 
 /* Returns access token and user info in response body and sets refreshToken as an httpOnly cookie */
