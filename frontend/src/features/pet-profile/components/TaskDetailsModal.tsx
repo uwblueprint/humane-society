@@ -232,6 +232,7 @@ const TaskDetailsModal = ({
       if (showLoading) setLoading(true);
       try {
         const tTask = await TaskAPIClient.getTask(taskId);
+        if (instanceDate) tTask.scheduledStartTime = instanceDate;
         setTaskData(tTask);
 
         const [tTemplate, tPet, tRecurrence] = await Promise.all([
@@ -275,7 +276,7 @@ const TaskDetailsModal = ({
         if (showLoading) setLoading(false);
       }
     },
-    [taskId, toast, authenticatedUser],
+    [taskId, toast, authenticatedUser, instanceDate],
   );
 
   useEffect(() => {
