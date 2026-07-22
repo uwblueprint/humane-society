@@ -14,7 +14,7 @@ export interface PetRequestDTO {
   neutered?: boolean;
   birthday?: string;
   weight?: number;
-  sex?: Sex;
+  sex?: Sex | null;
   photo?: string | null;
   careInfo?: {
     safetyInfo?: string;
@@ -33,7 +33,7 @@ export interface PetResponseDTO {
   neutered?: boolean;
   age?: number;
   weight?: number;
-  sex?: Sex;
+  sex?: Sex | null;
   photo?: string;
   careInfo?: {
     id: number;
