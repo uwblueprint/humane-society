@@ -23,8 +23,11 @@ import AUTHENTICATED_USER_KEY, {
 } from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
-  const isAdmin = getCurrentUserRole() === "Administrator";
-  const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(getCurrentUserRole() ?? "");
+  const role = getCurrentUserRole();
+  const isAdmin = role === "Administrator";
+  const isStaffOrBehaviourist =
+    role === "Staff" || role === "Animal Behaviourist";
+  const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(role ?? "");
   const history = useHistory();
 
   const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
@@ -62,20 +65,20 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       <Spacer />
       <Flex gap="1.25rem">
         {isAdmin && (
-          <>
-            <NavLink
-              text="Users"
-              icon={UserManagementIcon}
-              ariaLabel="Users"
-              route={USER_MANAGEMENT_PAGE}
-            />
-            <NavLink
-              text="Tasks"
-              icon={TaskIcon}
-              ariaLabel="Tasks"
-              route={TASK_MANAGEMENT_PAGE}
-            />
-          </>
+          <NavLink
+            text="Users"
+            icon={UserManagementIcon}
+            ariaLabel="Users"
+            route={USER_MANAGEMENT_PAGE}
+          />
+        )}
+        {(isAdmin || isStaffOrBehaviourist) && (
+          <NavLink
+            text="Tasks"
+            icon={TaskIcon}
+            ariaLabel="Tasks"
+            route={TASK_MANAGEMENT_PAGE}
+          />
         )}
         {canViewLogs && (
           <NavLink

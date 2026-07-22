@@ -9,6 +9,8 @@ import Button from "../../../components/common/Button";
 import { ADD_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import Pagination from "../../../components/common/Pagination";
+import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import UserRoles from "../../../constants/UserConstants";
 
 const TaskManagementPage = (): React.ReactElement => {
   const history = useHistory();
@@ -19,6 +21,7 @@ const TaskManagementPage = (): React.ReactElement => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [page, setPage] = useState<number>(1);
   const numTasksPerPage = 10;
+  const isAdmin = getCurrentUserRole() === UserRoles.ADMIN;
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
@@ -96,7 +99,7 @@ const TaskManagementPage = (): React.ReactElement => {
         search,
         onSearchChange: handleSearchChange,
         searchPlaceholder: "Search for a task...",
-        actionButton: (
+        actionButton: isAdmin ? (
           <Button
             variant="dark-blue"
             size="medium"
@@ -104,7 +107,7 @@ const TaskManagementPage = (): React.ReactElement => {
           >
             Add Task Template
           </Button>
-        ),
+        ) : undefined,
       }}
       bottomContent={
         <Pagination
