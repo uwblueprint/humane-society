@@ -2,29 +2,32 @@ import { Op } from "sequelize";
 import Interaction from "../../models/interaction.model";
 import InteractionType from "../../models/interactionType.model";
 import User from "../../models/user.model";
-import { InteractionTypeEnum, Role } from "../../types";
-
-// Interactions about another user. Staff are not permitted to see these
-// (permissions sheet); Admin and Animal Behaviourist are.
-// These are the "Personal Details" and "User Details" groupings in
-// InteractionTypeEnum. The groupings are only comments, not data, so the types
-// are listed explicitly here.
-const USER_INFO_INTERACTION_TYPES: string[] = [
-  InteractionTypeEnum.CHANGED_USER_NAME,
-  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
-  InteractionTypeEnum.CHANGED_USER_ROLE,
-  InteractionTypeEnum.INVITED_USER,
-  InteractionTypeEnum.DELETED_USER,
-];
+import { Role, USER_INFO_INTERACTION_TYPES } from "../../types";
 
 const InteractionService = {
-  async getInteractions(requesterRole?: Role) {
+  async getInteractions(requesterRole?: Role, requesterId?: number) {
     try {
-      // Staff must not receive interactions about other users' information.
-      // Filtering here (server-side) ensures the data never leaves the backend.
-      const excludeUserInfoTypes = requesterRole === Role.STAFF;
+      // Staff may see user-info interactions ONLY when they are the actor (their
+      // own actions). They must not see user-info changes made by other people.
+      // Admin and Animal Behaviourist see all (permissions sheet). Filtering
+      // here (server-side) ensures the data never leaves the backend.
+      let where;
+      if (requesterRole === Role.STAFF) {
+        const userInfoTypes = await InteractionType.findAll({
+          where: { action_type: { [Op.in]: USER_INFO_INTERACTION_TYPES } },
+          attributes: ["id"],
+        });
+        const userInfoTypeIds = userInfoTypes.map((t) => t.id);
+        where = {
+          [Op.or]: [
+            { interaction_type_id: { [Op.notIn]: userInfoTypeIds } },
+            { actor_id: requesterId ?? null },
+          ],
+        };
+      }
 
       const interactions = await Interaction.findAll({
+        where,
         include: [
           {
             model: User,
@@ -40,14 +43,6 @@ const InteractionService = {
           {
             model: InteractionType,
             attributes: ["action_type"],
-            ...(excludeUserInfoTypes
-              ? {
-                  required: true,
-                  where: {
-                    action_type: { [Op.notIn]: USER_INFO_INTERACTION_TYPES },
-                  },
-                }
-              : {}),
           },
         ],
         order: [["created_at", "DESC"]],

@@ -86,6 +86,14 @@ interface IAuthService {
   getUserRoleByToken(accessToken: string): Promise<Role>;
 
   /**
+   * Get the id of the user the provided access token was issued to
+   * @param accessToken user's access token
+   * @returns the user's id
+   * @throws Error if token is invalid or the user cannot be resolved
+   */
+  getUserIdByToken(accessToken: string): Promise<string>;
+
+  /**
    * Determine if the provided access token is valid and issued to the requested user
    * @param accessToken user's access token
    * @param requestedUserId userId of requested user

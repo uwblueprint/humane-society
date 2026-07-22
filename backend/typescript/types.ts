@@ -164,3 +164,15 @@ export enum InteractionTypeEnum {
   CHANGED_TASK_TEMPLATE_NAME = "Changed Task Template Name",
   CHANGED_TASK_TEMPLATE_INSTRUCTIONS = "Changed Task Template Instructions",
 }
+
+// Interactions about another user's information ("Personal Details" + "User
+// Details" groupings above). Staff may only see these when they are the actor;
+// Admin and Animal Behaviourist see all (permissions sheet). Kept here so the
+// list lives in exactly one place.
+export const USER_INFO_INTERACTION_TYPES: InteractionTypeEnum[] = [
+  InteractionTypeEnum.CHANGED_USER_NAME,
+  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
+  InteractionTypeEnum.CHANGED_USER_ROLE,
+  InteractionTypeEnum.INVITED_USER,
+  InteractionTypeEnum.DELETED_USER,
+];
