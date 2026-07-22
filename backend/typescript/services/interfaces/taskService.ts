@@ -138,6 +138,7 @@ export interface ITaskService {
   assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -162,6 +163,7 @@ export interface ITaskService {
   startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -174,6 +176,7 @@ export interface ITaskService {
   endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**

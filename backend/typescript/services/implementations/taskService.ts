@@ -1,5 +1,6 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import { DateTime } from "luxon";
+import { sequelize } from "../../models";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
 import {
@@ -237,12 +238,17 @@ class TaskService implements ITaskService {
   async excludeDate(
     recurrenceId: string,
     date: Date,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
 
       if (!recurrenceTask || !task)
         throw new NotFoundError("Recurrence task/task was not found");
@@ -307,7 +313,7 @@ class TaskService implements ITaskService {
         {
           exclusions: updatedExclusions,
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       return {
@@ -506,19 +512,25 @@ class TaskService implements ITaskService {
     }
   }
 
-  async createTask(task: TaskRequestDTO): Promise<TaskResponseDTO> {
+  async createTask(
+    task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO> {
     let newTask: PgTask | null;
     try {
-      newTask = await PgTask.create({
-        user_id: task.userId,
-        pet_id: task.petId,
-        task_template_id: task.taskTemplateId,
-        scheduled_start_time: task.scheduledStartTime,
-        scheduled_end_time: task.scheduledEndTime,
-        start_time: task.startTime,
-        end_time: task.endTime,
-        notes: task.notes,
-      });
+      newTask = await PgTask.create(
+        {
+          user_id: task.userId,
+          pet_id: task.petId,
+          task_template_id: task.taskTemplateId,
+          scheduled_start_time: task.scheduledStartTime,
+          scheduled_end_time: task.scheduledEndTime,
+          start_time: task.startTime,
+          end_time: task.endTime,
+          notes: task.notes,
+        },
+        { transaction },
+      );
     } catch (error: unknown) {
       Logger.error(`Failed to create task. Reason = ${getErrorMessage(error)}`);
       throw error;
@@ -581,19 +593,21 @@ class TaskService implements ITaskService {
   async assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const resolvedId = await this.resolveOccurrenceTaskId(id, date);
       updateResult = await PgTask.update(
         {
           user_id: user.userId,
         },
-        { where: { id }, returning: true },
+        { where: { id: resolvedId }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${resolvedId} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {
@@ -648,22 +662,90 @@ class TaskService implements ITaskService {
     };
   }
 
+  private async resolveOccurrenceTaskId(
+    taskId: string,
+    date?: Date,
+  ): Promise<string> {
+    const task = await PgTask.findByPk(taskId, { raw: true });
+    if (!task) throw new NotFoundError(`Task id ${taskId} not found`);
+
+    const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, {
+      raw: true,
+    });
+    if (!recurrenceTask) return taskId;
+
+    if (!date) {
+      throw new BadRequestError(
+        "Occurrence date is required for actions on a recurring task",
+      );
+    }
+
+    const occurrenceDay = resetDateToUTCMidnight(date);
+    const nextDay = new Date(occurrenceDay.getTime() + 24 * 60 * 60 * 1000);
+
+    const existing = await PgTask.findOne({
+      raw: true,
+      where: {
+        pet_id: task.pet_id,
+        task_template_id: task.task_template_id,
+        scheduled_start_time: { [Op.gte]: occurrenceDay, [Op.lt]: nextDay },
+        "$recurrence.task_id$": { [Op.is]: null },
+      },
+      include: [{ model: PgRecurrenceTask, required: false }],
+    });
+    if (existing) return existing.id.toString();
+
+    const transaction = await sequelize.transaction();
+    try {
+      await this.excludeDate(taskId, date, transaction);
+
+      const durationMs =
+        task.scheduled_start_time && task.scheduled_end_time
+          ? task.scheduled_end_time.getTime() -
+            task.scheduled_start_time.getTime()
+          : undefined;
+
+      const newTask = await this.createTask(
+        {
+          userId: task.user_id,
+          petId: task.pet_id,
+          taskTemplateId: task.task_template_id,
+          scheduledStartTime: date,
+          scheduledEndTime:
+            durationMs !== undefined
+              ? new Date(date.getTime() + durationMs)
+              : undefined,
+          notes: task.notes,
+        },
+        transaction,
+      );
+
+      await transaction.commit();
+      return newTask.id.toString();
+    } catch (error: unknown) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
   async startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const resolvedId = await this.resolveOccurrenceTaskId(id, date);
       updateResult = await PgTask.update(
         {
           start_time: startTime.time,
         },
-        { where: { id }, returning: true },
+        { where: { id: resolvedId }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${resolvedId} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {
@@ -686,19 +768,21 @@ class TaskService implements ITaskService {
   async endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    date?: Date,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const resolvedId = await this.resolveOccurrenceTaskId(id, date);
       updateResult = await PgTask.update(
         {
           end_time: endTime.time,
         },
-        { where: { id }, returning: true },
+        { where: { id: resolvedId }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${resolvedId} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {

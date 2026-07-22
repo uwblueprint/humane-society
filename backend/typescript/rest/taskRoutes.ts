@@ -322,11 +322,20 @@ taskRouter.patch(
   taskUserPatchValidator,
   async (req, res) => {
     const { id } = req.params;
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
     try {
       const { body } = req;
-      const Task = await taskService.assignUser(id, {
-        userId: body.userId,
-      });
+      const Task = await taskService.assignUser(
+        id,
+        {
+          userId: body.userId,
+        },
+        date,
+      );
       await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
@@ -361,11 +370,20 @@ taskRouter.patch(
   taskStartTimePatchValidator,
   async (req, res) => {
     const { id } = req.params;
+    const date =
+      typeof req.query.date === "string" &&
+      !Number.isNaN(new Date(req.query.date).getTime())
+        ? new Date(req.query.date)
+        : undefined;
     try {
       const { body } = req;
-      const Task = await taskService.startTask(id, {
-        time: body.startTime,
-      });
+      const Task = await taskService.startTask(
+        id,
+        {
+          time: body.startTime,
+        },
+        date,
+      );
       await logInteraction(req);
       res.status(200).json(Task);
     } catch (e: unknown) {
@@ -377,11 +395,20 @@ taskRouter.patch(
 /* Adds an end time to an Task */
 taskRouter.patch("/:id/end", taskEndTimePatchValidator, async (req, res) => {
   const { id } = req.params;
+  const date =
+    typeof req.query.date === "string" &&
+    !Number.isNaN(new Date(req.query.date).getTime())
+      ? new Date(req.query.date)
+      : undefined;
   try {
     const { body } = req;
-    const Task = await taskService.endTask(id, {
-      time: body.endTime,
-    });
+    const Task = await taskService.endTask(
+      id,
+      {
+        time: body.endTime,
+      },
+      date,
+    );
     await logInteraction(req);
     res.status(200).json(Task);
   } catch (e: unknown) {

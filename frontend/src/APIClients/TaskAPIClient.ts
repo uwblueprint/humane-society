@@ -149,6 +149,7 @@ const assignUser = async (
     newUserName?: string;
     actorName?: string;
   },
+  date?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -166,6 +167,7 @@ const assignUser = async (
     }
     await baseAPIClient.patch(`/tasks/${taskId}/assign-user`, payload, {
       headers: { Authorization: bearerToken },
+      params: { date },
     });
   } catch (error) {
     throw new Error(`Failed to assign user: ${error}`);
@@ -275,7 +277,7 @@ const deleteTask = async (
   }
 };
 
-const selfAssign = async (taskId: number): Promise<void> => {
+const selfAssign = async (taskId: number, date?: string): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -288,7 +290,7 @@ const selfAssign = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/assign-user`,
       { userId: Number(userId) },
-      { headers: { Authorization: bearerToken } },
+      { headers: { Authorization: bearerToken }, params: { date } },
     );
   } catch (error) {
     throw new Error(`Failed to self-assign task: ${error}`);
@@ -306,6 +308,7 @@ const startTask = async (
     actorName: string;
     isRestart?: boolean;
   },
+  date?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -321,7 +324,7 @@ const startTask = async (
           ? InteractionType.RESTARTED_TASK
           : InteractionType.STARTED_TASK,
       },
-      { headers: { Authorization: bearerToken } },
+      { headers: { Authorization: bearerToken }, params: { date } },
     );
   } catch (error) {
     throw new Error(`Failed to start task: ${error}`);
@@ -401,7 +404,7 @@ const deleteRecurringTask = async (
   }
 };
 
-const completeTask = async (taskId: number): Promise<void> => {
+const completeTask = async (taskId: number, date?: string): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -410,7 +413,7 @@ const completeTask = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/end`,
       { endTime: new Date().toISOString() },
-      { headers: { Authorization: bearerToken } },
+      { headers: { Authorization: bearerToken }, params: { date } },
     );
   } catch (error) {
     throw new Error(`Failed to complete task: ${error}`);

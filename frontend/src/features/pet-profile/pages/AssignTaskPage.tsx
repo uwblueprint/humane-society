@@ -14,6 +14,8 @@ const AssignTaskPage = (): React.ReactElement => {
   const params = useParams<{ id: string; taskId: string }>();
   const petId = Number(params.id);
   const taskId = Number(params.taskId);
+  const queryParams = new URLSearchParams(location.search);
+  const instanceDate = queryParams.get("date") ?? undefined;
   const toast = useToast();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -79,7 +81,12 @@ const AssignTaskPage = (): React.ReactElement => {
   const handleSaveClick = async () => {
     if (!selectedUser) return;
     try {
-      await TaskAPIClient.assignUser(taskId, selectedUser.id);
+      await TaskAPIClient.assignUser(
+        taskId,
+        selectedUser.id,
+        undefined,
+        instanceDate,
+      );
       toast({
         title: "Success",
         description: "Task assigned successfully.",

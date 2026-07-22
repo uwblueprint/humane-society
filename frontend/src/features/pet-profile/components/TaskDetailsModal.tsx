@@ -209,7 +209,7 @@ const TaskDetailsModal = ({
 
   const handleCompleteTask = async () => {
     try {
-      await TaskAPIClient.completeTask(taskId);
+      await TaskAPIClient.completeTask(taskId, instanceDate);
       toast({
         title: "Task completed",
         status: "success",
@@ -287,7 +287,7 @@ const TaskDetailsModal = ({
   const handleSelfAssignConfirm = async () => {
     setIsAssigning(true);
     try {
-      await TaskAPIClient.selfAssign(taskId);
+      await TaskAPIClient.selfAssign(taskId, instanceDate);
       toast({
         title: "Success",
         description: "Task assigned successfully.",
@@ -352,16 +352,20 @@ const TaskDetailsModal = ({
 
   const handleStart = async () => {
     try {
-      await TaskAPIClient.startTask(taskId, {
-        startTime: new Date().toISOString(),
-        actorId: authenticatedUser?.id ?? 0,
-        targetId: taskData?.petId ?? 0,
-        taskTemplateName: templateData?.name ?? "",
-        petName: petData?.name ?? "",
-        actorName: `${authenticatedUser?.firstName ?? ""} ${
-          authenticatedUser?.lastName ?? ""
-        }`,
-      });
+      await TaskAPIClient.startTask(
+        taskId,
+        {
+          startTime: new Date().toISOString(),
+          actorId: authenticatedUser?.id ?? 0,
+          targetId: taskData?.petId ?? 0,
+          taskTemplateName: templateData?.name ?? "",
+          petName: petData?.name ?? "",
+          actorName: `${authenticatedUser?.firstName ?? ""} ${
+            authenticatedUser?.lastName ?? ""
+          }`,
+        },
+        instanceDate,
+      );
       await fetchData(false);
       onTaskUpdated?.();
       toast({
@@ -393,7 +397,9 @@ const TaskDetailsModal = ({
               onClick={() => {
                 onClose();
                 history.push(
-                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}${
+                    instanceDate ? `?date=${instanceDate}` : ""
+                  }`,
                 );
               }}
             >
@@ -408,7 +414,9 @@ const TaskDetailsModal = ({
               onClick={() => {
                 onClose();
                 history.push(
-                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}${
+                    instanceDate ? `?date=${instanceDate}` : ""
+                  }`,
                   { preselectedUser: assigneeData },
                 );
               }}
