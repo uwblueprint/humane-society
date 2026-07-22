@@ -84,10 +84,8 @@ const PetListPage = (): React.ReactElement => {
             if (filters[key].length === 0) return true;
 
             if (key === "status") {
-              const { ["Assigned to You"]: assignedToYouSelected, ...rest } =
-                Object.fromEntries(
-                  filters[key].map((value) => [value, true]),
-                );
+              const { "Assigned to You": assignedToYouSelected, ...rest } =
+                Object.fromEntries(filters[key].map((value) => [value, true]));
               const statusValues = Object.keys(rest);
               return (
                 (assignedToYouSelected && pet.isAssignedToMe) ||
@@ -102,7 +100,9 @@ const PetListPage = (): React.ReactElement => {
                 ).includes(filter),
               );
             }
-            return filters[key].includes(pet[key as keyof PetListItemDTO] as string);
+            return filters[key].includes(
+              pet[key as keyof PetListItemDTO] as string,
+            );
           }),
         )
         .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()));
