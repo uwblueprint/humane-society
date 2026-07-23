@@ -7,6 +7,7 @@ import UserAPIClient from "../../../APIClients/UserAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserSelection from "../components/UserSelection";
+import AssignTaskScopeModal from "../components/AssignTaskScopeModal";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
@@ -26,6 +27,8 @@ const AssignTaskPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [isScopeModalOpen, setIsScopeModalOpen] = useState<boolean>(false);
 
   const usersPerPage = 10;
 
@@ -44,6 +47,12 @@ const AssignTaskPage = (): React.ReactElement => {
   useEffect(() => {
     getUsers();
   }, []);
+
+  useEffect(() => {
+    TaskAPIClient.getRecurrence(taskId).then((recurrence) => {
+      setIsRecurring(recurrence !== null);
+    });
+  }, [taskId]);
 
   // filters users based on search
   const filteredUsers = useMemo(() => {
@@ -78,7 +87,7 @@ const AssignTaskPage = (): React.ReactElement => {
     history.push(`/pet-profile/${petId}`);
   };
 
-  const handleSaveClick = async () => {
+  const performAssign = async (single: boolean) => {
     if (!selectedUser) return;
     try {
       await TaskAPIClient.assignUser(
@@ -86,6 +95,7 @@ const AssignTaskPage = (): React.ReactElement => {
         selectedUser.id,
         undefined,
         instanceDate,
+        single,
       );
       toast({
         title: "Success",
@@ -104,6 +114,20 @@ const AssignTaskPage = (): React.ReactElement => {
         isClosable: true,
       });
     }
+  };
+
+  const handleSaveClick = () => {
+    if (!selectedUser) return;
+    if (isRecurring) {
+      setIsScopeModalOpen(true);
+      return;
+    }
+    performAssign(true);
+  };
+
+  const handleScopeConfirm = (single: boolean) => {
+    setIsScopeModalOpen(false);
+    performAssign(single);
   };
 
   return (
@@ -155,6 +179,12 @@ const AssignTaskPage = (): React.ReactElement => {
           Save
         </Button>
       </Flex>
+
+      <AssignTaskScopeModal
+        open={isScopeModalOpen}
+        onCancel={() => setIsScopeModalOpen(false)}
+        onConfirm={handleScopeConfirm}
+      />
     </Flex>
   );
 };

@@ -150,6 +150,7 @@ const assignUser = async (
     actorName?: string;
   },
   date?: string,
+  single?: boolean,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -167,7 +168,7 @@ const assignUser = async (
     }
     await baseAPIClient.patch(`/tasks/${taskId}/assign-user`, payload, {
       headers: { Authorization: bearerToken },
-      params: { date },
+      params: { date, single },
     });
   } catch (error) {
     throw new Error(`Failed to assign user: ${error}`);

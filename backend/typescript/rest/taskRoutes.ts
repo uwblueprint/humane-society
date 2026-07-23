@@ -327,6 +327,10 @@ taskRouter.patch(
       !Number.isNaN(new Date(req.query.date).getTime())
         ? new Date(req.query.date)
         : undefined;
+    const single =
+      req.query.single === "true" || req.query.single === "false"
+        ? req.query.single === "true"
+        : undefined;
     try {
       const { body } = req;
       const Task = await taskService.assignUser(
@@ -335,6 +339,7 @@ taskRouter.patch(
           userId: body.userId,
         },
         date,
+        single,
       );
       await logInteraction(req);
       res.status(200).json(Task);

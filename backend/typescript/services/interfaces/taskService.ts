@@ -139,6 +139,7 @@ export interface ITaskService {
     id: string,
     user: TaskUserPatchDTO,
     date?: Date,
+    single?: boolean,
   ): Promise<TaskResponseDTO | null>;
 
   /**

@@ -39,9 +39,11 @@ class TaskService implements ITaskService {
     cadence: string,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(taskId, { raw: true });
+      const task = await PgTask.findByPk(taskId, { raw: true, transaction });
       if (!task) {
         throw new NotFoundError(`Task id ${taskId} not found`);
       }
@@ -58,13 +60,16 @@ class TaskService implements ITaskService {
           "Recurrence task must have a start date if end date is provided.",
         );
 
-      const recurrenceTask = await PgRecurrenceTask.create({
-        task_id: taskId,
-        ...(days && { days }),
-        cadence,
-        exclusions: [],
-        ...(endDate && { end_date: endDate }),
-      });
+      const recurrenceTask = await PgRecurrenceTask.create(
+        {
+          task_id: taskId,
+          ...(days && { days }),
+          cadence,
+          exclusions: exclusions ?? [],
+          ...(endDate && { end_date: endDate }),
+        },
+        { transaction },
+      );
 
       return {
         id: recurrenceTask.task_id,
@@ -110,11 +115,16 @@ class TaskService implements ITaskService {
   async updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
       if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
       if (!recurrenceTask)
@@ -192,7 +202,7 @@ class TaskService implements ITaskService {
           ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
           ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       if (updatedRecurrenceTask[0] === 0) {
@@ -590,14 +600,114 @@ class TaskService implements ITaskService {
     };
   }
 
+  private async assignUserToSeries(
+    taskId: string,
+    date: Date,
+    userId: number,
+  ): Promise<TaskResponseDTO> {
+    const task = await PgTask.findByPk(taskId, { raw: true });
+    const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, {
+      raw: true,
+    });
+    if (!task) throw new NotFoundError(`Task id ${taskId} not found`);
+    if (!recurrenceTask)
+      throw new NotFoundError(`Recurrence for task id ${taskId} not found`);
+
+    if (
+      task.scheduled_start_time &&
+      resetDateToUTCMidnight(date).getTime() <=
+        resetDateToUTCMidnight(task.scheduled_start_time).getTime()
+    ) {
+      const updateResult = await PgTask.update(
+        { user_id: userId },
+        { where: { id: taskId }, returning: true },
+      );
+      if (!updateResult[0]) {
+        throw new NotFoundError(`Task id ${taskId} not found`);
+      }
+      const [, [resultingTask]] = updateResult;
+      return {
+        id: resultingTask.id,
+        userId: resultingTask.user_id,
+        petId: resultingTask.pet_id,
+        taskTemplateId: resultingTask.task_template_id,
+        scheduledStartTime: resultingTask.scheduled_start_time,
+        scheduledEndTime: resultingTask.scheduled_end_time,
+        startTime: resultingTask.start_time,
+        endTime: resultingTask.end_time,
+        notes: resultingTask.notes,
+      };
+    }
+
+    const occurrenceDay = resetDateToUTCMidnight(date);
+    const newEndDate = new Date(occurrenceDay.getTime() - 24 * 60 * 60 * 1000);
+    const futureExclusions =
+      recurrenceTask.exclusions?.filter(
+        (exclusion) =>
+          resetDateToUTCMidnight(new Date(exclusion)).getTime() >
+          occurrenceDay.getTime(),
+      ) ?? [];
+
+    const transaction = await sequelize.transaction();
+    try {
+      await this.updateRecurrence(taskId, { endDate: newEndDate }, transaction);
+
+      const durationMs =
+        task.scheduled_start_time && task.scheduled_end_time
+          ? task.scheduled_end_time.getTime() -
+            task.scheduled_start_time.getTime()
+          : undefined;
+
+      const newTask = await this.createTask(
+        {
+          userId,
+          petId: task.pet_id,
+          taskTemplateId: task.task_template_id,
+          scheduledStartTime: date,
+          scheduledEndTime:
+            durationMs !== undefined
+              ? new Date(date.getTime() + durationMs)
+              : undefined,
+          notes: task.notes,
+        },
+        transaction,
+      );
+
+      await this.createRecurrence(
+        newTask.id.toString(),
+        recurrenceTask.cadence,
+        recurrenceTask.days,
+        recurrenceTask.end_date ?? undefined,
+        futureExclusions,
+        transaction,
+      );
+
+      await transaction.commit();
+      return newTask;
+    } catch (error: unknown) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
   async assignUser(
     id: string,
     user: TaskUserPatchDTO,
     date?: Date,
+    single = true,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      if (!single) {
+        if (!date) {
+          throw new BadRequestError(
+            "Occurrence date is required to reassign a recurring task's series",
+          );
+        }
+        return await this.assignUserToSeries(id, date, user.userId);
+      }
+
       const resolvedId = await this.resolveOccurrenceTaskId(id, date);
       updateResult = await PgTask.update(
         {
