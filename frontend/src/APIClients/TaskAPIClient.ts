@@ -305,6 +305,7 @@ const startTask = async (
     petName: string;
     actorName: string;
     isRestart?: boolean;
+    date?: string;
   },
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(

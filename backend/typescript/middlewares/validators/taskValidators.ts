@@ -220,6 +220,10 @@ export const taskStartTimePatchValidator = async (
     return res.status(400).send(getApiValidationError("startTime", "Date"));
   }
 
+  if (body.date !== undefined && !validateDate(body.date)) {
+    return res.status(400).send(getApiValidationError("date", "Date"));
+  }
+
   return next();
 };
 

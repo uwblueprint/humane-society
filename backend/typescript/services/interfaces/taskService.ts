@@ -65,6 +65,26 @@ export interface ITaskService {
 
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;
 
+  /**
+   * retrieve the recurrence for a task, or null if the task is not recurring
+   * @param taskId Task id
+   * @returns the recurrence, or null if none exists
+   * @throws Error if retrieval fails for a reason other than not existing
+   */
+  getRecurrenceIfExists(taskId: string): Promise<RecurrenceTaskDTO | null>;
+
+  /**
+   * resolves the concrete Task row id to operate on for a given occurrence date.
+   * If the task isn't recurring (or no date is given), returns taskId unchanged.
+   * If the occurrence has already been materialized into its own row, returns that row's id.
+   * Otherwise excludes the date from the recurrence and creates a new standalone row for it.
+   * @param taskId Task id (may be a recurring base task)
+   * @param date the occurrence's scheduled date, if known
+   * @returns the id of the Task row to operate on
+   * @throws Error if resolution fails
+   */
+  resolveOccurrenceTaskId(taskId: string, date?: Date): Promise<string>;
+
   updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,

@@ -363,7 +363,9 @@ taskRouter.patch(
     const { id } = req.params;
     try {
       const { body } = req;
-      const Task = await taskService.startTask(id, {
+      const date = body.date ? new Date(body.date) : undefined;
+      const targetId = await taskService.resolveOccurrenceTaskId(id, date);
+      const Task = await taskService.startTask(targetId, {
         time: body.startTime,
       });
       await logInteraction(req);

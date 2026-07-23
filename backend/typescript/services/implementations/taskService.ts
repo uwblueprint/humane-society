@@ -106,6 +106,76 @@ class TaskService implements ITaskService {
   }
 
   /* eslint-disable class-methods-use-this */
+  async getRecurrenceIfExists(
+    taskId: string,
+  ): Promise<RecurrenceTaskDTO | null> {
+    const recurrenceTask = await PgRecurrenceTask.findByPk(taskId, {
+      raw: true,
+    });
+    if (!recurrenceTask) {
+      return null;
+    }
+
+    return {
+      id: recurrenceTask.task_id,
+      days: recurrenceTask.days,
+      cadence: recurrenceTask.cadence,
+      endDate: recurrenceTask.end_date ?? undefined,
+      exclusions: recurrenceTask.exclusions,
+    };
+  }
+
+  async resolveOccurrenceTaskId(taskId: string, date?: Date): Promise<string> {
+    try {
+      if (!date) {
+        return taskId;
+      }
+
+      const recurrence = await this.getRecurrenceIfExists(taskId);
+      if (!recurrence) {
+        return taskId;
+      }
+
+      const task = await PgTask.findByPk(taskId, { raw: true });
+      if (!task) {
+        throw new NotFoundError(`Task id ${taskId} not found`);
+      }
+
+      const occurrenceDate = resetDateToUTCMidnight(date);
+
+      const existing = await PgTask.findOne({
+        where: {
+          pet_id: task.pet_id,
+          task_template_id: task.task_template_id,
+          scheduled_start_time: date,
+          id: { [Op.ne]: taskId },
+        },
+        raw: true,
+      });
+      if (existing) {
+        return existing.id.toString();
+      }
+
+      await this.excludeDate(taskId, occurrenceDate);
+      const materializedTask = await this.createTask({
+        userId: task.user_id ?? undefined,
+        petId: task.pet_id,
+        taskTemplateId: task.task_template_id,
+        scheduledStartTime: date,
+        notes: task.notes ?? undefined,
+      });
+      return materializedTask.id.toString();
+    } catch (error: unknown) {
+      Logger.error(
+        `Failed to resolve occurrence task id. Reason = ${getErrorMessage(
+          error,
+        )}`,
+      );
+      throw error;
+    }
+  }
+
+  /* eslint-disable class-methods-use-this */
   async updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,

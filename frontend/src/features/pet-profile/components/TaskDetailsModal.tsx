@@ -360,6 +360,7 @@ const TaskDetailsModal = ({
         actorName: `${authenticatedUser?.firstName ?? ""} ${
           authenticatedUser?.lastName ?? ""
         }`,
+        date: instanceDate ?? taskData?.scheduledStartTime,
       });
       await fetchData(false);
       onTaskUpdated?.();
@@ -373,6 +374,39 @@ const TaskDetailsModal = ({
       toast({
         title: "Error",
         description: "Failed to start task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleRestart = async () => {
+    try {
+      await TaskAPIClient.startTask(taskId, {
+        startTime: new Date().toISOString(),
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskData?.petId ?? 0,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        actorName: `${authenticatedUser?.firstName ?? ""} ${
+          authenticatedUser?.lastName ?? ""
+        }`,
+        isRestart: true,
+        date: instanceDate ?? taskData?.scheduledStartTime,
+      });
+      await fetchData(false);
+      onTaskUpdated?.();
+      toast({
+        title: "Task restarted",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to restart task",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -463,7 +497,7 @@ const TaskDetailsModal = ({
               Assign to Me
             </Button>
           )}
-          {status === "Assigned" && isToday(taskData?.scheduledStartTime) && (
+          {status === "Assigned" && (
             <Button
               variant="dark-blue"
               size="medium"
@@ -476,7 +510,12 @@ const TaskDetailsModal = ({
           )}
           {status === "In-Progress" && (
             <Flex gap="1rem">
-              <Button variant="blue-outline" size="medium" width="100%">
+              <Button
+                variant="blue-outline"
+                size="medium"
+                width="100%"
+                onClick={handleRestart}
+              >
                 Restart
               </Button>
               <Button
