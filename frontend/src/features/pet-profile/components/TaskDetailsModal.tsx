@@ -241,12 +241,33 @@ const TaskDetailsModal = ({
         ]);
 
         setTemplateData(tTemplate);
-        setPetData(tPet);
         setRecurrenceData(tRecurrence);
+
+        if (tPet.photo) {
+          try {
+            const petPhotoUrl = await PetAPIClient.getProfilePhotoUrl(tPet.id);
+            setPetData({ ...tPet, photo: petPhotoUrl });
+          } catch {
+            setPetData({ ...tPet, photo: undefined });
+          }
+        } else {
+          setPetData(tPet);
+        }
 
         if (tTask.userId) {
           const tAssignee = await UserAPIClient.get(tTask.userId);
-          setAssigneeData(tAssignee);
+          if (tAssignee.profilePhoto) {
+            try {
+              const assigneePhotoUrl = await UserAPIClient.getProfilePhotoUrl(
+                tAssignee.id,
+              );
+              setAssigneeData({ ...tAssignee, profilePhoto: assigneePhotoUrl });
+            } catch {
+              setAssigneeData({ ...tAssignee, profilePhoto: undefined });
+            }
+          } else {
+            setAssigneeData(tAssignee);
+          }
         } else {
           setAssigneeData(null);
         }

@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { Pet } from "../../../types/PetTypes";
 import { colorLevelMap, ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserRoles from "../../../constants/UserConstants";
@@ -91,7 +92,34 @@ const PetProfilePage = (): React.ReactElement => {
         petId,
         dateString,
       );
-      const sortedTasks = [...fetchedTasks].sort(
+      const tasksWithPhotoUrls = await Promise.all(
+        fetchedTasks.map(async (task) => {
+          if (task.assignedUser?.profilePhoto) {
+            try {
+              const photoUrl = await UserAPIClient.getProfilePhotoUrl(
+                task.assignedUser.id,
+              );
+              return {
+                ...task,
+                assignedUser: {
+                  ...task.assignedUser,
+                  profilePhoto: photoUrl,
+                },
+              };
+            } catch {
+              return {
+                ...task,
+                assignedUser: {
+                  ...task.assignedUser,
+                  profilePhoto: undefined,
+                },
+              };
+            }
+          }
+          return task;
+        }),
+      );
+      const sortedTasks = [...tasksWithPhotoUrls].sort(
         (a, b) => sortTask(a) - sortTask(b),
       );
       setTasks(sortedTasks);

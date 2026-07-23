@@ -335,10 +335,7 @@ const EditPetProfilePage = (): React.ReactElement => {
         birthday,
         sex,
         neutered,
-        photo:
-          localProfilePhoto && !localProfilePhoto.startsWith("data:")
-            ? localProfilePhoto
-            : currentPet.photo || null,
+        photo: currentPet.photo || null,
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);
