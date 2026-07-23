@@ -10,11 +10,15 @@ import VolunteerPetListTableContent from "./VolunteerPetListTableContent";
 export interface PetListTableProps {
   petsRecord: PetListRecord;
   clearFilters: () => void;
+  hasError: boolean;
+  hasNoPets: boolean;
 }
 
 const PetListTable = ({
   petsRecord,
   clearFilters,
+  hasError,
+  hasNoPets,
 }: PetListTableProps): React.ReactElement => {
   const isStaffBehaviouristAdmin = STAFF_BEHAVIOURISTS_ADMIN.has(
     getCurrentUserRole() ?? "",
@@ -23,6 +27,23 @@ const PetListTable = ({
     () => Object.values(petsRecord).every((pets) => pets.length === 0),
     [petsRecord],
   );
+  const message = (() => {
+    if (hasError) return "Unable to load pets";
+    if (hasNoPets) return "There are currently no pets";
+    return "No pets currently match";
+  })();
+
+  const label = (() => {
+    if (hasError) return "Refresh";
+    if (hasNoPets) return undefined;
+    return "Clear all";
+  })();
+
+  const onLinkClick = (() => {
+    if (hasError) return () => window.location.reload();
+    if (hasNoPets) return undefined;
+    return clearFilters;
+  })();
 
   return (
     <Table w="100%" textAlign="left">
@@ -56,8 +77,9 @@ const PetListTable = ({
           <Tr>
             <Td colSpan={3}>
               <TableEmptyState
-                message="No pets currently match."
-                onClearFilters={clearFilters}
+                message={message}
+                linkLabel={label}
+                onLinkClick={onLinkClick}
               />
             </Td>
           </Tr>

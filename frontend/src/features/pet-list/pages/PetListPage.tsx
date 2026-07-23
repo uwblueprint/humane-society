@@ -21,7 +21,6 @@ import PetListTable from "../components/PetListTable";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
@@ -140,6 +139,10 @@ const PetListPage = (): React.ReactElement => {
     return result;
   }, [petsSections, filters, search]);
 
+  const hasNoPets = Object.values(petsSections).every(
+    (pets) => pets.length === 0,
+  );
+
   return (
     <TableWrapper
       filterBarProps={{
@@ -164,6 +167,8 @@ const PetListPage = (): React.ReactElement => {
       <PetListTable
         petsRecord={filteredPets}
         clearFilters={handleClearFilters}
+        hasError={errorMessage != null}
+        hasNoPets={hasNoPets}
       />
     </TableWrapper>
   );
