@@ -1,15 +1,11 @@
 /* eslint-disable no-console */
 import { Request } from "express";
 import InteractionService from "../services/implementations/interactionService"; // import service that write logs to DB
-import { InteractionTypeEnum } from "../types"; // enum lists all possible interaction types
+import { InteractionTypeEnum, USER_INFO_INTERACTION_TYPES } from "../types"; // enum lists all possible interaction types
 
-const USER_INTERACTIONS = new Set<InteractionTypeEnum>([
-  InteractionTypeEnum.CHANGED_USER_NAME,
-  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
-  InteractionTypeEnum.CHANGED_USER_ROLE,
-  InteractionTypeEnum.INVITED_USER,
-  InteractionTypeEnum.DELETED_USER,
-]);
+const USER_INTERACTIONS = new Set<InteractionTypeEnum>(
+  USER_INFO_INTERACTION_TYPES,
+);
 
 const PET_INTERACTIONS = new Set<InteractionTypeEnum>([
   InteractionTypeEnum.DELETED_PET,
