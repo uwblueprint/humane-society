@@ -7,6 +7,7 @@ import UserAPIClient from "../../../APIClients/UserAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserSelection from "../components/UserSelection";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
@@ -24,24 +25,40 @@ const AssignTaskPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [petColorLevel, setPetColorLevel] = useState<number | null>(null);
+  const hasColorLevelMismatch =
+    selectedUser !== null &&
+    petColorLevel !== null &&
+    selectedUser.colorLevel < petColorLevel;
 
   const usersPerPage = 10;
 
-  // fetch users
-  const getUsers = async () => {
-    try {
-      const fetchedUsers = await UserAPIClient.get();
-      if (fetchedUsers != null) setUsers(fetchedUsers);
-    } catch (error) {
-      setErrorMessage(`${error}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    // fetch users
+    const getUsers = async () => {
+      try {
+        const fetchedUsers = await UserAPIClient.get();
+        if (fetchedUsers != null) setUsers(fetchedUsers);
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // fetch pet's color level
+    const getPetColorLevel = async () => {
+      try {
+        const pet = await PetAPIClient.getPet(petId);
+        if (pet != null) setPetColorLevel(pet.colorLevel);
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      }
+    };
+
     getUsers();
-  }, []);
+    getPetColorLevel();
+  }, [petId]);
 
   // filters users based on search
   const filteredUsers = useMemo(() => {
@@ -133,7 +150,7 @@ const AssignTaskPage = (): React.ReactElement => {
         onRowClick={handleRowClick}
         onPageChange={setPage}
         onClearSelection={handleClearSelection}
-        hasColorLevelMismatch={false}
+        hasColorLevelMismatch={hasColorLevelMismatch}
       />
 
       {/* save button */}
@@ -145,7 +162,7 @@ const AssignTaskPage = (): React.ReactElement => {
           onClick={handleSaveClick}
           disabled={!selectedUser}
         >
-          Save
+          {hasColorLevelMismatch ? "Override" : "Save"}
         </Button>
       </Flex>
     </Flex>
