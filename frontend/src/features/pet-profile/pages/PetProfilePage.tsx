@@ -1,6 +1,6 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -100,27 +100,28 @@ const PetProfilePage = (): React.ReactElement => {
     setLoading(false);
   }, [petId, selectedDate, history, location.key]);
 
-  useEffect(() => {
-    const fetchPet = async () => {
-      if (!petId) {
-        history.push("/not-found");
-        return;
+  const fetchPet = useCallback(async () => {
+    if (!petId) {
+      history.push("/not-found");
+      return;
+    }
+    try {
+      const data = await PetAPIClient.getPet(petId);
+      setPetData(data);
+      if (data.photo) {
+        const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+        setProfilePhoto(photo);
       }
-      try {
-        const data = await PetAPIClient.getPet(petId);
-        setPetData(data);
-        if (data.photo) {
-          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
-          setProfilePhoto(photo);
-        }
-      } catch (error) {
-        history.push("/not-found");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPet();
+    } catch (error) {
+      history.push("/not-found");
+    } finally {
+      setLoading(false);
+    }
   }, [petId, history]);
+
+  useEffect(() => {
+    fetchPet();
+  }, [fetchPet, location.key]);
 
   if (loading || !petData) {
     return (

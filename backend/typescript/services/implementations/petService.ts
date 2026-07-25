@@ -345,16 +345,16 @@ class PetService implements IPetService {
     beginningOfTodayISO: string,
   ): PetListItemDTO[] {
     pets.sort((a, b) => {
-      // Never Cared For - highest priority
+      // Occupied pets are lowest priority (already being cared for)
+      if (a.status === PetStatus.OCCUPIED) return 1;
+      if (b.status === PetStatus.OCCUPIED) return -1;
+
+      // Never cared for pets are highest priority
       if (a.lastCaredFor === null) return -1;
       if (b.lastCaredFor === null) return 1;
 
-      // Occupied - lowest priority
-      if (a.lastCaredFor === LastCaredFor.OCCUPIED) return 1;
-      if (b.lastCaredFor === LastCaredFor.OCCUPIED) return -1;
-
-      // Both are non-null, non-occupied strings
-      // Compare directly (older - higher priority)
+      // Both are non-null strings
+      // Compare directly; older dates are higher priority
       if (a.lastCaredFor && b.lastCaredFor) {
         return a.lastCaredFor.localeCompare(b.lastCaredFor);
       }
@@ -366,7 +366,6 @@ class PetService implements IPetService {
     return pets.map((pet) => {
       if (
         pet.lastCaredFor &&
-        pet.lastCaredFor !== LastCaredFor.OCCUPIED &&
         pet.lastCaredFor !== LastCaredFor.ONE_OR_MORE_DAYS_AGO &&
         pet.lastCaredFor < beginningOfTodayISO
       ) {
@@ -434,10 +433,10 @@ class PetService implements IPetService {
           // Has an incomplete task today assigned to me
           pushOnce("Assigned to You", pet, added);
         } else if (pet.allTasksAssigned === false) {
-          // Has an incomplete, unassigned task today - self-assignable
+          // Has an incomplete, unassigned task today, so it's self-assignable
           pushOnce("Other Pets", pet, added);
         }
-        // Otherwise, every incomplete task today is assigned to someone else - excluded
+        // Otherwise every incomplete task today is assigned to someone else, so it's excluded
       });
 
     // Sort each section by care urgency
@@ -644,7 +643,7 @@ class PetService implements IPetService {
         }
 
         // Update lastCaredFor
-        // Only completed tasks count as "cared for" - incomplete tasks
+        // Only completed tasks count as "cared for"; incomplete tasks
         // (whether started or not) leave lastCaredFor unchanged
         if (petTask.end_time) {
           const endTime = DateTime.fromJSDate(petTask.end_time).setZone(

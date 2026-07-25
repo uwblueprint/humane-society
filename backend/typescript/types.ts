@@ -53,7 +53,6 @@ export enum PetStatus {
 }
 
 export enum LastCaredFor {
-  OCCUPIED = "Occupied",
   ONE_OR_MORE_DAYS_AGO = "One or more days ago",
 }
 
