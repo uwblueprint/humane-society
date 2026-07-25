@@ -271,12 +271,14 @@ const PetProfilePage = (): React.ReactElement => {
           onClose={() => setIsModalOpen(false)}
           instanceDate={selectedInstanceDate}
           onTaskCompleted={async () => {
-            await fetchTasks();
+            await Promise.all([fetchTasks(), fetchPet()]);
             setSelectedTaskId(null);
             setIsModalOpen(false);
             setShowSurvey(true);
           }}
-          onTaskUpdated={fetchTasks}
+          onTaskUpdated={async () => {
+            await Promise.all([fetchTasks(), fetchPet()]);
+          }}
         />
       )}
       {showSurvey && (
