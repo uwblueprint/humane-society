@@ -8,6 +8,7 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserRoles from "../../../constants/UserConstants";
 import UserSelection from "../components/UserSelection";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 import AssignTaskScopeModal from "../components/AssignTaskScopeModal";
 import { isPastDay } from "../../../utils/taskStatusUtils";
 
@@ -29,16 +30,22 @@ const AssignTaskPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [petColorLevel, setPetColorLevel] = useState<number | null>(null);
+  const hasColorLevelMismatch =
+    selectedUser !== null &&
+    petColorLevel !== null &&
+    selectedUser.colorLevel < petColorLevel;
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [showScopeModal, setShowScopeModal] = useState<boolean>(false);
 
   const usersPerPage = 10;
 
-  // fetch users
-  const getUsers = async () => {
-    try {
-      const fetchedUsers = await UserAPIClient.get();
-      if (fetchedUsers != null) {
+  useEffect(() => {
+    // fetch users
+    const getUsers = async () => {
+      try {
+        const fetchedUsers = await UserAPIClient.get();
+        if (fetchedUsers != null) {
         const nonAdminUsers = fetchedUsers.filter(
           (user) => user.role !== UserRoles.ADMIN,
         );
@@ -68,16 +75,26 @@ const AssignTaskPage = (): React.ReactElement => {
           })),
         );
       }
-    } catch (error) {
-      setErrorMessage(`${error}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
+    // fetch pet's color level
+    const getPetColorLevel = async () => {
+      try {
+        const pet = await PetAPIClient.getPet(petId);
+        if (pet != null) setPetColorLevel(pet.colorLevel);
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      }
+    };
+
     getUsers();
-  }, []);
+    getPetColorLevel();
+  }, [petId]);
 
   useEffect(() => {
     const checkRecurring = async () => {
@@ -197,7 +214,7 @@ const AssignTaskPage = (): React.ReactElement => {
         onRowClick={handleRowClick}
         onPageChange={setPage}
         onClearSelection={handleClearSelection}
-        hasColorLevelMismatch={false}
+        hasColorLevelMismatch={hasColorLevelMismatch}
       />
 
       {/* save button */}
@@ -208,7 +225,7 @@ const AssignTaskPage = (): React.ReactElement => {
           variant="green"
           onClick={handleSaveClick}
         >
-          Save
+          {hasColorLevelMismatch ? "Override" : "Save"}
         </Button>
       </Flex>
 
