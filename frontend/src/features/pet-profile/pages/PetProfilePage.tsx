@@ -26,6 +26,7 @@ import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
+import SurveyModal from "../components/surveyModal";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -68,37 +69,42 @@ const PetProfilePage = (): React.ReactElement => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedInstanceDate, setSelectedInstanceDate] = useState<
+    string | undefined
+  >(undefined);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!petId || Number.isNaN(petId)) {
-        history.push("/not-found");
-        return;
-      }
+  const fetchTasks = useCallback(async () => {
+    if (!petId || Number.isNaN(petId)) {
+      history.push("/not-found");
+      return;
+    }
 
-      try {
-        const dateString = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
-          petId,
-          dateString,
-        );
-        const sortedTasks = [...fetchedTasks].sort(
-          (a, b) => sortTask(a) - sortTask(b),
-        );
-        setTasks(sortedTasks);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    };
+    try {
+      const dateString = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+      const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+        petId,
+        dateString,
+      );
+      const sortedTasks = [...fetchedTasks].sort(
+        (a, b) => sortTask(a) - sortTask(b),
+      );
+      setTasks(sortedTasks);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [petId, selectedDate, history]);
+
+  useEffect(() => {
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [fetchTasks, location.key]);
 
   const fetchPet = useCallback(async () => {
     if (!petId) {
@@ -154,8 +160,9 @@ const PetProfilePage = (): React.ReactElement => {
         tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}
-        onTaskClick={(taskId) => {
+        onTaskClick={(taskId, instanceDate) => {
           setSelectedTaskId(taskId);
+          setSelectedInstanceDate(instanceDate);
           setIsModalOpen(true);
         }}
       />
@@ -262,6 +269,21 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          instanceDate={selectedInstanceDate}
+          onTaskCompleted={async () => {
+            await fetchTasks();
+            setSelectedTaskId(null);
+            setIsModalOpen(false);
+            setShowSurvey(true);
+          }}
+          onTaskUpdated={fetchTasks}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={petData.animalTag}
         />
       )}
     </>

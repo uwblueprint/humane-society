@@ -1,12 +1,12 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
-import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
-import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
+import { ReactComponent as OutlinedUserProfileIcon } from "../../../assets/icons/outline-user-profile.svg";
+import { ReactComponent as RoundQuestionMarkIcon } from "../../../assets/icons/round-question-mark.svg";
 import { AuthenticatedUser } from "../../../types/AuthTypes";
 import UserRoles from "../../../constants/UserConstants";
 import { getTaskDetailedStatus, isToday } from "../../../utils/taskStatusUtils";
@@ -15,7 +15,7 @@ interface PetProfileTaskTableSectionProps {
   tasks: ScheduledTaskDTO[];
   gridTemplateColumns: string;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }
 
 const StatusBadge = ({
@@ -25,39 +25,51 @@ const StatusBadge = ({
 }: {
   task: ScheduledTaskDTO;
   authenticatedUser: AuthenticatedUser;
-  onTaskClick: (taskId: number) => void;
+  onTaskClick: (taskId: number, instanceDate?: string) => void;
 }) => {
+  const status = getTaskDetailedStatus(task, authenticatedUser);
+  const handleClick = () =>
+    onTaskClick(task.id, task.scheduledStartTime?.toString());
+
   const isAdminOrBehaviourist =
     authenticatedUser?.role === UserRoles.ADMIN ||
     authenticatedUser?.role === UserRoles.BEHAVIOURIST;
 
+  if (status === "Completed")
+    return (
+      <Button as="button" variant="gray-shaded" size="medium" type="button">
+        Completed
+      </Button>
+    );
+
+  if (status === "Incomplete")
+    return (
+      <Button as="button" variant="red" size="medium" type="button">
+        Incomplete
+      </Button>
+    );
+
   if (isAdminOrBehaviourist) {
-    if (task.endTime)
-      return (
-        <Button as="button" variant="gray-shaded" size="medium" type="button">
-          Completed
-        </Button>
-      );
-    if (!task.assignedUser)
+    if (status === null)
       return (
         <Button
           as="button"
           variant="dark-blue"
           size="medium"
           type="button"
-          onClick={() => onTaskClick(task.id)}
+          onClick={handleClick}
         >
           Assign
         </Button>
       );
-    if (task.assignedUser && !task.endTime)
+    if (status === "In-Progress")
       return (
         <Button
           as="button"
           variant="green"
           size="medium"
           type="button"
-          onClick={() => onTaskClick(task.id)}
+          onClick={handleClick}
         >
           In Progress
         </Button>
@@ -65,7 +77,6 @@ const StatusBadge = ({
     return <></>;
   }
 
-  const status = getTaskDetailedStatus(task, authenticatedUser);
   const isMyTask = task.userId === authenticatedUser?.id;
 
   if (status === null)
@@ -75,7 +86,7 @@ const StatusBadge = ({
         variant="gray"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Assign to Me
       </Button>
@@ -88,7 +99,7 @@ const StatusBadge = ({
         variant="dark-blue"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         Start
       </Button>
@@ -110,7 +121,7 @@ const StatusBadge = ({
         variant="green"
         size="medium"
         type="button"
-        onClick={() => onTaskClick(task.id)}
+        onClick={handleClick}
       >
         In Progress
       </Button>
@@ -122,21 +133,6 @@ const StatusBadge = ({
         Occupied
       </Button>
     );
-
-  if (status === "Completed")
-    return (
-      <Button as="button" variant="gray-shaded" size="medium" type="button">
-        Completed
-      </Button>
-    );
-
-  if (status === "Incomplete")
-    return (
-      <Button as="button" variant="red" size="medium" type="button">
-        Incomplete
-      </Button>
-    );
-
   return <></>;
 };
 
@@ -208,7 +204,9 @@ const PetProfileTaskTableSection = ({
             marginBottom="0.5rem"
             marginTop="0.5rem"
             borderRadius="0.75rem"
-            onClick={() => onTaskClick(task.id)}
+            onClick={() =>
+              onTaskClick(task.id, task.scheduledStartTime?.toString())
+            }
             cursor="pointer"
           >
             <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">

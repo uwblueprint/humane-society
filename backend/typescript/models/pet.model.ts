@@ -38,7 +38,7 @@ export default class Pet extends Model {
   neutered?: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })
-  sex?: Sex;
+  sex?: Sex | null;
 
   @Column({})
   photo?: string;

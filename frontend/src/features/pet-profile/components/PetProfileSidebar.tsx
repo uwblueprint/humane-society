@@ -39,7 +39,7 @@ export interface PetProfileSidebarProps {
   birthday?: string;
   weight?: number;
   neutered?: boolean;
-  sex?: SexEnum;
+  sex?: SexEnum | null;
   photo?: string;
   careInfo?: {
     safetyInfo?: string;
@@ -72,8 +72,8 @@ const getSpayStatusLabel = (spayedNeutered?: boolean) => {
   return spayedNeutered ? "Spayed" : "Not spayed";
 };
 
-const getSexLabel = (sex?: SexEnum) => {
-  if (sex === undefined) return "Unknown sex";
+const getSexLabel = (sex?: SexEnum | null) => {
+  if (sex === undefined || sex === null) return "--";
   return sex === SexEnum.MALE ? "Male" : "Female";
 };
 
@@ -244,7 +244,7 @@ function PetProfileSidebar({
               height="100%"
             >
               <Image
-                src={sex === SexEnum.MALE ? MaleIcon : FemaleIcon}
+                src={sex === SexEnum.FEMALE ? FemaleIcon : MaleIcon}
                 alt="sex"
                 boxSize="1.2rem"
               />

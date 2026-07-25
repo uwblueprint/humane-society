@@ -37,6 +37,7 @@ class TaskTemplateService implements ITaskTemplateService {
     try {
       const taskTemplates: Array<PgTaskTemplate> = await PgTaskTemplate.findAll(
         {
+          where: { deleted_at: null },
           raw: true,
         },
       );
@@ -114,10 +115,11 @@ class TaskTemplateService implements ITaskTemplateService {
 
   async deleteTaskTemplate(id: string): Promise<string> {
     try {
-      const deleteResult: number | null = await PgTaskTemplate.destroy({
-        where: { id },
-      });
-      if (!deleteResult) {
+      const [updated] = await PgTaskTemplate.update(
+        { deleted_at: new Date() },
+        { where: { id, deleted_at: null } },
+      );
+      if (!updated) {
         throw new NotFoundError(`TaskTemplate id ${id} not found`);
       }
       return id;
