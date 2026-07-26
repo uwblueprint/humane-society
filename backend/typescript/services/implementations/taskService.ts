@@ -1,5 +1,6 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import { DateTime } from "luxon";
+import { sequelize } from "../../models";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
 import {
@@ -21,12 +22,14 @@ import {
   NotFoundError,
 } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { Days } from "../../types";
+import { Days, InteractionTypeEnum } from "../../types";
 import {
   buildStartDates,
   isDateInRecurrence,
   resetDateToUTCMidnight,
 } from "../../utilities/dateUtils";
+import { getSystemUserId } from "../../utilities/systemUser";
+import InteractionService from "./interactionService";
 
 const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
@@ -237,12 +240,17 @@ class TaskService implements ITaskService {
   async excludeDate(
     recurrenceId: string,
     date: Date,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
 
       if (!recurrenceTask || !task)
         throw new NotFoundError("Recurrence task/task was not found");
@@ -307,7 +315,7 @@ class TaskService implements ITaskService {
         {
           exclusions: updatedExclusions,
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       return {
@@ -396,6 +404,84 @@ class TaskService implements ITaskService {
     }
   }
 
+  private async materializeOccurrence(
+    anchorId: string,
+    date: Date,
+  ): Promise<PgTask> {
+    const anchor = await PgTask.findByPk(anchorId, { raw: true });
+    if (!anchor) throw new NotFoundError(`Task id ${anchorId} not found`);
+
+    const occurrenceDay = resetDateToUTCMidnight(date);
+    const nextDay = new Date(occurrenceDay.getTime() + 24 * 60 * 60 * 1000);
+
+    const existing = await PgTask.findOne({
+      raw: true,
+      where: {
+        pet_id: anchor.pet_id,
+        task_template_id: anchor.task_template_id,
+        scheduled_start_time: { [Op.gte]: occurrenceDay, [Op.lt]: nextDay },
+        "$recurrence.task_id$": { [Op.is]: null },
+      },
+      include: [{ model: PgRecurrenceTask, required: false }],
+    });
+    if (existing) return existing;
+
+    const durationMs =
+      anchor.scheduled_start_time && anchor.scheduled_end_time
+        ? anchor.scheduled_end_time.getTime() -
+          anchor.scheduled_start_time.getTime()
+        : undefined;
+
+    // preserve the anchor's original time-of-day on the occurrence's date,
+    // same as generateRecurringInstanceForData does for the virtual instance
+    const instanceStartTime = new Date(occurrenceDay);
+    if (anchor.scheduled_start_time) {
+      instanceStartTime.setUTCHours(anchor.scheduled_start_time.getUTCHours());
+      instanceStartTime.setUTCMinutes(
+        anchor.scheduled_start_time.getUTCMinutes(),
+      );
+      instanceStartTime.setUTCSeconds(
+        anchor.scheduled_start_time.getUTCSeconds(),
+      );
+      instanceStartTime.setUTCMilliseconds(
+        anchor.scheduled_start_time.getUTCMilliseconds(),
+      );
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      await this.excludeDate(anchorId, date, transaction);
+
+      const newTask = await this.createTask(
+        {
+          userId: anchor.user_id,
+          petId: anchor.pet_id,
+          taskTemplateId: anchor.task_template_id,
+          scheduledStartTime: instanceStartTime,
+          scheduledEndTime:
+            durationMs !== undefined
+              ? new Date(instanceStartTime.getTime() + durationMs)
+              : undefined,
+          notes: anchor.notes,
+        },
+        transaction,
+      );
+
+      await transaction.commit();
+
+      const materializedTask = await PgTask.findByPk(newTask.id, {
+        raw: true,
+      });
+      if (!materializedTask) {
+        throw new NotFoundError(`Task id ${newTask.id} not found`);
+      }
+      return materializedTask;
+    } catch (error: unknown) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
   /* eslint-disable class-methods-use-this */
   async getTask(id: string): Promise<TaskResponseDTO> {
     let task: PgTask | null;
@@ -422,11 +508,195 @@ class TaskService implements ITaskService {
     };
   }
 
+  /**
+   * Lazily reconciles standalone (non-recurring, or already-materialized)
+   * task rows on read: unassigns tasks whose scheduled window has passed
+   * with nobody having started/completed them, and logs a task as
+   * incomplete once its scheduled start day has passed with no end time.
+   * Both are self-guarded conditional updates, so a row can only ever
+   * fire once each - safe to call on every read.
+   */
+  /* eslint-disable class-methods-use-this */
+  private isTaskIncomplete(
+    task: Pick<
+      PgTask,
+      "end_time" | "incomplete_logged_at" | "scheduled_start_time"
+    >,
+    today: DateTime,
+  ): boolean {
+    return (
+      !task.end_time &&
+      !task.incomplete_logged_at &&
+      !!task.scheduled_start_time &&
+      DateTime.fromJSDate(task.scheduled_start_time)
+        .setZone(TIME_ZONE)
+        .startOf("day") < today
+    );
+  }
+
+  /* eslint-disable class-methods-use-this */
+  private isTaskStaleAssignment(
+    task: Pick<
+      PgTask,
+      "start_time" | "end_time" | "user_id" | "scheduled_end_time"
+    >,
+    now: Date,
+  ): boolean {
+    return (
+      !task.start_time &&
+      !task.end_time &&
+      task.user_id != null &&
+      !!task.scheduled_end_time &&
+      task.scheduled_end_time.getTime() < now.getTime()
+    );
+  }
+
+  private async reconcileLazyTaskStates(tasks: PgTask[]): Promise<PgTask[]> {
+    const now = new Date();
+    const today = DateTime.now().setZone(TIME_ZONE).startOf("day");
+
+    const isIncomplete = (task: PgTask): boolean =>
+      this.isTaskIncomplete(task, today);
+
+    const isStaleAssignment = (task: PgTask): boolean =>
+      this.isTaskStaleAssignment(task, now);
+
+    const staleTasks = tasks.filter(
+      (task) => isIncomplete(task) || isStaleAssignment(task),
+    );
+
+    if (staleTasks.length === 0) return tasks;
+
+    const taskTemplateIds = [
+      ...new Set(staleTasks.map((task) => task.task_template_id)),
+    ];
+    const petIds = [...new Set(staleTasks.map((task) => task.pet_id))];
+    const userIds = [
+      ...new Set(
+        staleTasks
+          .map((task) => task.user_id)
+          .filter((id): id is number => id != null),
+      ),
+    ];
+
+    const [taskTemplates, pets, users] = await Promise.all([
+      TaskTemplate.findAll({
+        where: { id: { [Op.in]: taskTemplateIds } },
+        raw: true,
+      }),
+      Pet.findAll({ where: { id: { [Op.in]: petIds } }, raw: true }),
+      userIds.length > 0
+        ? User.findAll({ where: { id: { [Op.in]: userIds } }, raw: true })
+        : Promise.resolve([]),
+    ]);
+
+    const taskTemplateNameById = new Map(
+      taskTemplates.map((taskTemplate) => [
+        taskTemplate.id,
+        taskTemplate.task_name,
+      ]),
+    );
+    const petNameById = new Map(pets.map((pet) => [pet.id, pet.name]));
+    const userNameById = new Map(
+      users.map((user) => [user.id, `${user.first_name} ${user.last_name}`]),
+    );
+
+    const systemUserId = await getSystemUserId();
+    const updatedById = new Map<number, PgTask>();
+
+    await Promise.all(
+      staleTasks.map(async (task) => {
+        const taskTemplateName = taskTemplateNameById.get(
+          task.task_template_id,
+        );
+        const petName = petNameById.get(task.pet_id);
+        const oldUserName =
+          task.user_id != null ? userNameById.get(task.user_id) : undefined;
+
+        let current = task;
+
+        if (isIncomplete(current)) {
+          const [affected] = await PgTask.update(
+            { incomplete_logged_at: now },
+            {
+              where: {
+                id: current.id,
+                incomplete_logged_at: { [Op.is]: null },
+              },
+            },
+          );
+          if (affected > 0) {
+            current = { ...current, incomplete_logged_at: now } as PgTask;
+            const interactionTypeId =
+              await InteractionService.getInteractionTypeId(
+                InteractionTypeEnum.MARKED_TASK_INCOMPLETE,
+              );
+            await InteractionService.log({
+              actorId: systemUserId,
+              targetUserId: null,
+              targetPetId: null,
+              targetTaskId: current.id,
+              targetTaskTemplateId: null,
+              interactionTypeId,
+              metadata: [],
+              short_description: `${taskTemplateName} is an incomplete task with ${petName}`,
+              long_description: oldUserName
+                ? `${taskTemplateName} is an incomplete task. It was last assigned to ${oldUserName}.`
+                : `${taskTemplateName} is an incomplete task. Nobody was assigned this task.`,
+            });
+          }
+        }
+
+        if (isStaleAssignment(current)) {
+          const [affected] = await PgTask.update(
+            { user_id: null },
+            {
+              where: {
+                id: current.id,
+                user_id: { [Op.ne]: null },
+                start_time: { [Op.is]: null },
+                end_time: { [Op.is]: null },
+              },
+            },
+          );
+          if (affected > 0) {
+            current = { ...current, user_id: undefined } as PgTask;
+            const interactionTypeId =
+              await InteractionService.getInteractionTypeId(
+                InteractionTypeEnum.MARKED_TASK_INACTIVE,
+              );
+            await InteractionService.log({
+              actorId: systemUserId,
+              targetUserId: null,
+              targetPetId: null,
+              targetTaskId: current.id,
+              targetTaskTemplateId: null,
+              interactionTypeId,
+              metadata: [],
+              short_description: `${taskTemplateName} is an inactive task with ${petName}`,
+              long_description: `${taskTemplateName} is an inactive task. It was last assigned to ${
+                oldUserName ?? "N/A"
+              }`,
+            });
+          }
+        }
+
+        updatedById.set(task.id, current);
+      }),
+    );
+
+    return tasks.map((task) => updatedById.get(task.id) ?? task);
+  }
+
   async getTasks(): Promise<TaskResponseDTO[]> {
     try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
-        raw: true,
-      });
+      const tasks: Array<PgTask> = await this.reconcileLazyTaskStates(
+        await PgTask.findAll({
+          where: { "$recurrence.task_id$": { [Op.is]: null } },
+          include: [{ model: PgRecurrenceTask, required: false }],
+          raw: true,
+        }),
+      );
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
@@ -448,15 +718,18 @@ class TaskService implements ITaskService {
 
   async getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>> {
     try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
+      const fetchedTasks: Array<PgTask> = await PgTask.findAll({
         where: {
           pet_id,
+          "$recurrence.task_id$": { [Op.is]: null },
         },
+        include: [{ model: PgRecurrenceTask, required: false }],
         raw: true,
       });
-      if (!tasks[0]) {
+      if (!fetchedTasks[0]) {
         throw new NotFoundError(`No tasks for pet id ${pet_id}`);
       }
+      const tasks = await this.reconcileLazyTaskStates(fetchedTasks);
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
@@ -478,15 +751,22 @@ class TaskService implements ITaskService {
 
   async getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>> {
     try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
+      const fetchedTasks: Array<PgTask> = await PgTask.findAll({
         where: {
           user_id,
+          "$recurrence.task_id$": { [Op.is]: null },
         },
+        include: [{ model: PgRecurrenceTask, required: false }],
         raw: true,
       });
-      if (!tasks[0]) {
+      if (!fetchedTasks[0]) {
         throw new NotFoundError(`No tasks for user id ${user_id}`);
       }
+      const reconciledTasks = await this.reconcileLazyTaskStates(fetchedTasks);
+      // a task reconciled into unassigned no longer belongs to this user
+      const tasks = reconciledTasks.filter(
+        (task) => String(task.user_id) === user_id,
+      );
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
@@ -506,19 +786,25 @@ class TaskService implements ITaskService {
     }
   }
 
-  async createTask(task: TaskRequestDTO): Promise<TaskResponseDTO> {
+  async createTask(
+    task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO> {
     let newTask: PgTask | null;
     try {
-      newTask = await PgTask.create({
-        user_id: task.userId,
-        pet_id: task.petId,
-        task_template_id: task.taskTemplateId,
-        scheduled_start_time: task.scheduledStartTime,
-        scheduled_end_time: task.scheduledEndTime,
-        start_time: task.startTime,
-        end_time: task.endTime,
-        notes: task.notes,
-      });
+      newTask = await PgTask.create(
+        {
+          user_id: task.userId,
+          pet_id: task.petId,
+          task_template_id: task.taskTemplateId,
+          scheduled_start_time: task.scheduledStartTime,
+          scheduled_end_time: task.scheduledEndTime,
+          start_time: task.startTime,
+          end_time: task.endTime,
+          notes: task.notes,
+        },
+        { transaction },
+      );
     } catch (error: unknown) {
       Logger.error(`Failed to create task. Reason = ${getErrorMessage(error)}`);
       throw error;
@@ -543,6 +829,9 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const isFutureStart =
+        !!task.scheduledStartTime &&
+        new Date(task.scheduledStartTime).getTime() > Date.now();
       updateResult = await PgTask.update(
         {
           user_id: task.userId,
@@ -553,6 +842,7 @@ class TaskService implements ITaskService {
           start_time: task.startTime,
           end_time: task.endTime,
           notes: task.notes,
+          ...(isFutureStart ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true },
       );
@@ -620,9 +910,11 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const isFutureStart = new Date(schedule.time).getTime() > Date.now();
       updateResult = await PgTask.update(
         {
           scheduled_start_time: schedule.time,
+          ...(isFutureStart ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true },
       );
@@ -813,30 +1105,42 @@ class TaskService implements ITaskService {
         ],
       });
 
+      const reconciledOneTimeTasks = await this.reconcileLazyTaskStates(
+        oneTimeTasks,
+      );
+      const reconciledUserIdById = new Map(
+        reconciledOneTimeTasks.map((task) => [task.id, task.user_id]),
+      );
+
       const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
-        (task) => ({
-          id: task.id,
-          userId: task.user_id,
-          petId: task.pet_id,
-          taskTemplateId: task.task_template_id,
-          scheduledStartTime: task.scheduled_start_time,
-          scheduledEndTime: task.scheduled_end_time,
-          startTime: task.start_time,
-          endTime: task.end_time,
-          notes: task.notes,
-          isRecurring: false,
-          taskName: task.task_template?.task_name,
-          category: task.task_template?.category,
-          petName: task.pet?.name,
-          assignedUser: task.user
-            ? {
-                id: task.user.id,
-                firstName: task.user.first_name,
-                lastName: task.user.last_name,
-                profilePhoto: task.user.profile_photo,
-              }
-            : null,
-        }),
+        (task) => {
+          const isStillAssigned =
+            (reconciledUserIdById.get(task.id) ?? task.user_id) != null;
+          return {
+            id: task.id,
+            userId: isStillAssigned ? task.user_id : undefined,
+            petId: task.pet_id,
+            taskTemplateId: task.task_template_id,
+            scheduledStartTime: task.scheduled_start_time,
+            scheduledEndTime: task.scheduled_end_time,
+            startTime: task.start_time,
+            endTime: task.end_time,
+            notes: task.notes,
+            isRecurring: false,
+            taskName: task.task_template?.task_name,
+            category: task.task_template?.category,
+            petName: task.pet?.name,
+            assignedUser:
+              isStillAssigned && task.user
+                ? {
+                    id: task.user.id,
+                    firstName: task.user.first_name,
+                    lastName: task.user.last_name,
+                    profilePhoto: task.user.profile_photo,
+                  }
+                : null,
+          };
+        },
       );
 
       const recurringWhereClause: Record<string, unknown> = {};
@@ -853,16 +1157,68 @@ class TaskService implements ITaskService {
       });
 
       const selectedDateObj = resetDateToUTCMidnight(beginningOfDay);
+      const now = new Date();
+      const today = DateTime.now().setZone(TIME_ZONE).startOf("day");
 
       const results = await Promise.all(
         recurringTasks.map((task) =>
           this.generateRecurringInstanceForData(task.id, selectedDateObj)
-            .then(
-              (instance): TaskResponseDTOForDate => ({
-                ...instance,
+            .then(async (instance): Promise<TaskResponseDTOForDate> => {
+              const anchorDurationMs =
+                task.scheduled_start_time && task.scheduled_end_time
+                  ? task.scheduled_end_time.getTime() -
+                    task.scheduled_start_time.getTime()
+                  : undefined;
+              const occurrenceEndTime =
+                anchorDurationMs !== undefined && instance.scheduledStartTime
+                  ? new Date(
+                      instance.scheduledStartTime.getTime() + anchorDurationMs,
+                    )
+                  : instance.scheduledEndTime;
+
+              const isStale =
+                this.isTaskIncomplete(
+                  {
+                    end_time: instance.endTime,
+                    incomplete_logged_at: undefined,
+                    scheduled_start_time: instance.scheduledStartTime,
+                  },
+                  today,
+                ) ||
+                this.isTaskStaleAssignment(
+                  {
+                    start_time: instance.startTime,
+                    end_time: instance.endTime,
+                    user_id: instance.userId,
+                    scheduled_end_time: occurrenceEndTime,
+                  },
+                  now,
+                );
+
+              if (!isStale) {
+                return { ...instance, isRecurring: true };
+              }
+
+              const materialized = await this.materializeOccurrence(
+                task.id.toString(),
+                selectedDateObj,
+              );
+              const [reconciled] = await this.reconcileLazyTaskStates([
+                materialized,
+              ]);
+              return {
+                id: reconciled.id,
+                userId: reconciled.user_id,
+                petId: reconciled.pet_id,
+                taskTemplateId: reconciled.task_template_id,
+                scheduledStartTime: reconciled.scheduled_start_time,
+                scheduledEndTime: reconciled.scheduled_end_time,
+                startTime: reconciled.start_time,
+                endTime: reconciled.end_time,
+                notes: reconciled.notes,
                 isRecurring: true,
-              }),
-            )
+              };
+            })
             .catch(() => null),
         ),
       );

@@ -3,6 +3,7 @@ import IUserService from "../interfaces/userService";
 import {
   CreateUserDTO,
   Role,
+  SYSTEM_USER_AUTH_ID,
   UpdateUserDTO,
   UserDTO,
   UserStatus,
@@ -186,9 +187,12 @@ class UserService implements IUserService {
     let userDtos: Array<UserDTO> = [];
     try {
       const users: Array<PgUser> = await PgUser.findAll();
+      const humanUsers = users.filter(
+        (user) => user.auth_id !== SYSTEM_USER_AUTH_ID,
+      );
 
       userDtos = await Promise.all(
-        users.map(async (user) => {
+        humanUsers.map(async (user) => {
           let firebaseUser: firebaseAdmin.auth.UserRecord;
 
           try {
@@ -384,6 +388,10 @@ class UserService implements IUserService {
         throw new Error(`userid ${userId} not found.`);
       }
 
+      if (deletedUser.auth_id === SYSTEM_USER_AUTH_ID) {
+        throw new Error("Cannot delete the System user.");
+      }
+
       await assertUserHasNoBlockingReferences(deletedUser.id);
 
       const numDestroyed: number = await PgUser.destroy({
@@ -441,6 +449,10 @@ class UserService implements IUserService {
 
       if (!deletedUser) {
         throw new Error(`userid ${firebaseUser.uid} not found.`);
+      }
+
+      if (deletedUser.auth_id === SYSTEM_USER_AUTH_ID) {
+        throw new Error("Cannot delete the System user.");
       }
 
       await assertUserHasNoBlockingReferences(deletedUser.id);

@@ -5,6 +5,8 @@ export enum Role {
   VOLUNTEER = "Volunteer",
 }
 
+export const SYSTEM_USER_AUTH_ID = "SYSTEM";
+
 export type Token = {
   accessToken: string;
   refreshToken: string;
