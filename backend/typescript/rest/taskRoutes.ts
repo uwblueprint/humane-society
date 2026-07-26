@@ -1,7 +1,8 @@
-import { Router } from "express";
+import { Router, Request } from "express";
 import {
   isAuthorizedByRole,
   isAuthorizedToAssignTask,
+  getAccessToken,
 } from "../middlewares/auth";
 import {
   taskRequestDtoValidator,
@@ -14,10 +15,20 @@ import {
   taskGetByDateValidator,
 } from "../middlewares/validators/taskValidators";
 import TaskService from "../services/implementations/taskService";
+import PetService from "../services/implementations/petService";
+import TaskTemplateService from "../services/implementations/taskTemplateService";
+import AuthService from "../services/implementations/authService";
+import UserService from "../services/implementations/userService";
+import InteractionService from "../services/implementations/interactionService";
+import IAuthService from "../services/interfaces/authService";
+import IUserService from "../services/interfaces/userService";
 import {
   TaskResponseDTO,
+  RecurrenceTaskDTO,
   ITaskService,
 } from "../services/interfaces/taskService";
+import { IPetService } from "../services/interfaces/petService";
+import { ITaskTemplateService } from "../services/interfaces/taskTemplateService";
 import {
   BadRequestError,
   getErrorMessage,
@@ -28,7 +39,7 @@ import {
   validateEnum,
   validateEnumArray,
 } from "../middlewares/validators/util";
-import { Role, Days, Cadence } from "../types";
+import { Role, Days, Cadence, InteractionTypeEnum } from "../types";
 import logInteraction from "../middlewares/logInteraction";
 import {
   buildStartDates,
@@ -39,6 +50,228 @@ import {
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 const taskService: ITaskService = new TaskService();
+const petService: IPetService = new PetService();
+const taskTemplateService: ITaskTemplateService = new TaskTemplateService();
+const userService: IUserService = new UserService();
+const authService: IAuthService = new AuthService(userService);
+
+const DAY_LABELS: Record<string, string> = {
+  Mon: "Monday",
+  Tue: "Tuesday",
+  Wed: "Wednesday",
+  Thu: "Thursday",
+  Fri: "Friday",
+  Sat: "Saturday",
+  Sun: "Sunday",
+};
+
+const formatDaysForLog = (days?: Days[] | null): string =>
+  days && days.length > 0
+    ? days.map((d) => DAY_LABELS[d] ?? d).join(", ")
+    : "no days";
+
+const formatRecurrenceDateForLog = (date?: Date | string | null): string => {
+  if (!date) return "indefinite";
+  const d = new Date(date);
+  return `${String(d.getUTCMonth() + 1).padStart(2, "0")}/${String(
+    d.getUTCDate(),
+  ).padStart(2, "0")}/${d.getUTCFullYear()}`;
+};
+
+const sameDays = (a?: Days[] | null, b?: Days[] | null): boolean =>
+  [...(a ?? [])].sort().join(",") === [...(b ?? [])].sort().join(",");
+
+// Prevents two near-simultaneous requests for the same task from both
+// passing the "not logged yet" check before either finishes writing.
+const incompleteCheckInFlight = new Set<number>();
+
+const maybeLogIncompleteTask = async (
+  task: TaskResponseDTO,
+  req: Request,
+): Promise<void> => {
+  if (incompleteCheckInFlight.has(task.id)) return;
+  incompleteCheckInFlight.add(task.id);
+  try {
+    if (!task.scheduledStartTime || task.endTime) return;
+    if (
+      resetDateToUTCMidnight(task.scheduledStartTime).getTime() >=
+      resetDateToUTCMidnight(new Date()).getTime()
+    ) {
+      return;
+    }
+
+    const alreadyLogged = await InteractionService.hasTaskInteraction(
+      task.id,
+      InteractionTypeEnum.MARKED_TASK_INCOMPLETE,
+    );
+    if (alreadyLogged) return;
+
+    const accessToken = getAccessToken(req);
+    if (!accessToken) return;
+    const actorId = Number(await authService.getUserIdByToken(accessToken));
+
+    const [pet, template, assignee] = await Promise.all([
+      petService.getPet(String(task.petId)),
+      taskTemplateService.getTaskTemplate(String(task.taskTemplateId)),
+      task.userId ? userService.getUserById(String(task.userId)) : null,
+    ]);
+
+    req.body = {
+      actorId,
+      targetId: task.id,
+      interactionType: InteractionTypeEnum.MARKED_TASK_INCOMPLETE,
+      taskTemplateName: template.taskName,
+      petName: pet.name,
+      oldUserName: assignee
+        ? `${assignee.firstName} ${assignee.lastName}`
+        : undefined,
+    };
+    await logInteraction(req);
+  } catch (err: unknown) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to log incomplete task:", err);
+  } finally {
+    incompleteCheckInFlight.delete(task.id);
+  }
+};
+
+// Logs ASSIGNED_TASK / SELF_ASSIGNED_TASK when a task is created with an
+// assignee already picked, since createTask never hits /assign-user.
+const logTaskCreationAssignment = async (
+  req: Request,
+  taskId: number,
+  userId: number | null | undefined,
+): Promise<void> => {
+  if (!userId) return;
+  try {
+    const accessToken = getAccessToken(req);
+    if (!accessToken) return;
+    const actorId = Number(await authService.getUserIdByToken(accessToken));
+
+    const [pet, template, assignee] = await Promise.all([
+      petService.getPet(String(req.body.petId)),
+      taskTemplateService.getTaskTemplate(String(req.body.taskTemplateId)),
+      userService.getUserById(String(userId)),
+    ]);
+
+    req.body = {
+      actorId,
+      targetId: taskId,
+      interactionType:
+        actorId === userId
+          ? InteractionTypeEnum.SELF_ASSIGNED_TASK
+          : InteractionTypeEnum.ASSIGNED_TASK,
+      taskTemplateName: template.taskName,
+      petName: pet.name,
+      newUserName: `${assignee.firstName} ${assignee.lastName}`,
+    };
+    await logInteraction(req);
+  } catch (err: unknown) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to log task creation assignment:", err);
+  }
+};
+
+// Logs one interaction per changed field on a recurring task edit. Used for
+// both in-place edits and "this and following" splits — in the split case
+// we still log against the original task id, since that's what the user
+// perceives themselves as editing even though a new task record is created.
+const logRecurrenceEditChanges = async (
+  req: Request,
+  taskId: string,
+  task: TaskResponseDTO,
+  recurrence: RecurrenceTaskDTO,
+  taskTemplateId: number | undefined,
+  notes: string | undefined,
+  parsedScheduledStartTime: Date | undefined,
+  parsedRecurrenceEndDate: Date | undefined,
+  days: Days[] | undefined,
+  cadence: Cadence | undefined,
+): Promise<void> => {
+  try {
+    if (!task.scheduledStartTime) return;
+    const accessToken = getAccessToken(req);
+    if (!accessToken) return;
+    const actorId = Number(await authService.getUserIdByToken(accessToken));
+    const [pet, template] = await Promise.all([
+      petService.getPet(String(task.petId)),
+      taskTemplateService.getTaskTemplate(
+        String(taskTemplateId ?? task.taskTemplateId),
+      ),
+    ]);
+    const logFields = {
+      actorId,
+      targetId: Number(taskId),
+      taskTemplateName: template.taskName,
+      petName: pet.name,
+    };
+    const originalBody = req.body;
+
+    if (notes !== undefined && notes !== task.notes) {
+      req.body = {
+        ...logFields,
+        interactionType: InteractionTypeEnum.CHANGED_TASK_INSTRUCTIONS,
+        oldInstructions: task.notes,
+        newInstructions: notes,
+      };
+      await logInteraction(req);
+    }
+
+    if (
+      parsedScheduledStartTime !== undefined &&
+      parsedScheduledStartTime.getTime() !==
+        new Date(task.scheduledStartTime).getTime()
+    ) {
+      req.body = {
+        ...logFields,
+        interactionType: InteractionTypeEnum.CHANGED_TASK_START_DATE,
+        oldDate: formatRecurrenceDateForLog(task.scheduledStartTime),
+        newDate: formatRecurrenceDateForLog(parsedScheduledStartTime),
+      };
+      await logInteraction(req);
+    }
+
+    if (
+      parsedRecurrenceEndDate !== undefined &&
+      (!recurrence.endDate ||
+        new Date(recurrence.endDate).getTime() !==
+          parsedRecurrenceEndDate.getTime())
+    ) {
+      req.body = {
+        ...logFields,
+        interactionType: InteractionTypeEnum.CHANGED_TASK_END_DATE,
+        oldDate: formatRecurrenceDateForLog(recurrence.endDate),
+        newDate: formatRecurrenceDateForLog(parsedRecurrenceEndDate),
+      };
+      await logInteraction(req);
+    }
+
+    if (days !== undefined && !sameDays(days, recurrence.days)) {
+      req.body = {
+        ...logFields,
+        interactionType: InteractionTypeEnum.CHANGED_RECURRING_TASK_DAYS,
+        oldDays: formatDaysForLog(recurrence.days),
+        newDays: formatDaysForLog(days),
+      };
+      await logInteraction(req);
+    }
+
+    if (cadence !== undefined && cadence !== recurrence.cadence) {
+      req.body = {
+        ...logFields,
+        interactionType: InteractionTypeEnum.CHANGED_RECURRING_TASK_CADENCE,
+        oldCadence: recurrence.cadence,
+        newCadence: cadence,
+      };
+      await logInteraction(req);
+    }
+
+    req.body = originalBody;
+  } catch (err: unknown) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to log recurring task edit:", err);
+  }
+};
 
 /* Get all Tasks */
 taskRouter.get("/", async (req, res) => {
@@ -85,6 +318,7 @@ taskRouter.get("/:id", async (req, res) => {
   try {
     const task = await taskService.getTask(id);
     res.status(200).json(task);
+    await maybeLogIncompleteTask(task, req);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));
@@ -158,6 +392,7 @@ taskRouter.post(
         notes: body.notes,
       });
       res.status(201).json(newTask);
+      await logTaskCreationAssignment(req, newTask.id, body.userId);
     } catch (error: unknown) {
       if (error instanceof NotFoundError) {
         res.status(404).send(getErrorMessage(error));
@@ -332,6 +567,20 @@ taskRouter.post(
             ? { endDate: parsedRecurrenceEndDate }
             : {}),
         });
+
+        await logRecurrenceEditChanges(
+          req,
+          taskId,
+          task,
+          recurrence,
+          taskTemplateId,
+          notes,
+          parsedScheduledStartTime,
+          parsedRecurrenceEndDate,
+          days,
+          cadence,
+        );
+
         res.status(200).json({
           task: updatedTask,
           recurrenceTask: updatedRecurrence,
@@ -354,6 +603,21 @@ taskRouter.post(
           endTime: task.endTime,
           notes: notes ?? task.notes,
         });
+
+        // Log against the original task id, even though the split below
+        // moves the new values onto a freshly-created task/recurrence.
+        await logRecurrenceEditChanges(
+          req,
+          taskId,
+          task,
+          recurrence,
+          taskTemplateId,
+          notes,
+          parsedScheduledStartTime,
+          parsedRecurrenceEndDate,
+          days,
+          cadence,
+        );
 
         const carriedExclusions = (recurrence.exclusions ?? []).filter(
           (ex) =>
@@ -532,6 +796,7 @@ taskRouter.delete(
 
       if (single) {
         const updatedRecurrence = await taskService.excludeDate(taskId, date);
+        await logInteraction(req);
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,
@@ -542,6 +807,7 @@ taskRouter.delete(
       ) {
         await taskService.deleteRecurrence(taskId);
         const deletedTaskId = await taskService.deleteTask(taskId);
+        await logInteraction(req);
         res.status(200).json({
           deleted: true,
           taskId: deletedTaskId,
@@ -557,6 +823,7 @@ taskRouter.delete(
           date,
           task.id,
         );
+        await logInteraction(req);
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,
