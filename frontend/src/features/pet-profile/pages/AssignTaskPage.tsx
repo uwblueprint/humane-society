@@ -1,19 +1,22 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Flex, Text, useToast } from "@chakra-ui/react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
+import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserRoles from "../../../constants/UserConstants";
 import UserSelection from "../components/UserSelection";
-import PetAPIClient from "../../../APIClients/PetAPIClient";
 import AssignTaskScopeModal from "../components/AssignTaskScopeModal";
 import { isPastDay } from "../../../utils/taskStatusUtils";
+import AuthContext from "../../../contexts/AuthContext";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
+  const { authenticatedUser } = useContext(AuthContext);
   const location = useLocation<{ preselectedUser?: User }>();
   const params = useParams<{ id: string; taskId: string }>();
   const petId = Number(params.id);
@@ -37,6 +40,10 @@ const AssignTaskPage = (): React.ReactElement => {
     selectedUser.colorLevel < petColorLevel;
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [showScopeModal, setShowScopeModal] = useState<boolean>(false);
+  const [previousUserId, setPreviousUserId] = useState<number | null>(null);
+  const [previousUserName, setPreviousUserName] = useState<string | null>(null);
+  const [taskTemplateName, setTaskTemplateName] = useState<string>("");
+  const [petName, setPetName] = useState<string>("");
 
   const usersPerPage = 10;
 
@@ -96,12 +103,35 @@ const AssignTaskPage = (): React.ReactElement => {
     getPetColorLevel();
   }, [petId]);
 
+  // fetch task/pet/template details needed for interaction logging
+  const getTaskContext = async () => {
+    try {
+      const task = await TaskAPIClient.getTask(taskId);
+      const [template, pet] = await Promise.all([
+        TaskTemplateAPIClient.getTaskTemplate(task.taskTemplateId),
+        PetAPIClient.getPet(task.petId),
+      ]);
+      setTaskTemplateName(template.name);
+      setPetName(pet.name);
+      setPreviousUserId(task.userId ?? null);
+      if (task.userId) {
+        const previousUser = await UserAPIClient.get(task.userId);
+        setPreviousUserName(
+          `${previousUser.firstName} ${previousUser.lastName}`,
+        );
+      }
+    } catch (error) {
+      setErrorMessage(`${error}`);
+    }
+  };
+
   useEffect(() => {
     const checkRecurring = async () => {
       const recurrence = await TaskAPIClient.getRecurrence(taskId);
       setIsRecurring(recurrence !== null);
     };
     checkRecurring();
+    getTaskContext();
   }, [taskId]);
 
   // filters users based on search
@@ -138,11 +168,23 @@ const AssignTaskPage = (): React.ReactElement => {
   };
 
   const performAssign = async (single?: boolean) => {
+    if (!selectedUser) return;
     try {
       await TaskAPIClient.assignUser(
         taskId,
         selectedUser?.id ?? null,
-        undefined,
+        {
+          previousUserId,
+          actorId: authenticatedUser?.id ?? 0,
+          targetId: taskId,
+          taskTemplateName,
+          petName,
+          oldUserName: previousUserName ?? undefined,
+          newUserName: `${selectedUser.firstName} ${selectedUser.lastName}`,
+          actorName: `${authenticatedUser?.firstName ?? ""} ${
+            authenticatedUser?.lastName ?? ""
+          }`,
+        },
         occurrenceDate,
         single,
       );
