@@ -53,6 +53,16 @@ const InteractionLogPage = (): React.ReactElement => {
 
   useEffect(() => {
     fetchInteractions();
+
+    // Refetch when the tab/window regains focus so new interactions logged
+    // elsewhere (or in another tab) show up without a manual reload.
+    const handleFocus = () => fetchInteractions();
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
   }, [fetchInteractions]);
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
