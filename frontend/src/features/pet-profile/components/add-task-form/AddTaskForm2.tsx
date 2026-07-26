@@ -1,4 +1,5 @@
 import { Text, Checkbox, Flex, FormControl, FormLabel } from "@chakra-ui/react";
+import { WarningTwoIcon } from "@chakra-ui/icons";
 import React from "react";
 import {
   Control,
@@ -24,7 +25,26 @@ interface AddTaskForm2Props {
   watch: UseFormWatch<AddTaskFormData>;
   getValues: UseFormGetValues<AddTaskFormData>;
   trigger: UseFormTrigger<AddTaskFormData>;
+
+  recurrenceWarnings?: {
+    startDate: boolean;
+    days: boolean;
+    cadence: boolean;
+  };
 }
+
+const RecurrenceWarning = ({
+  message,
+}: {
+  message: string;
+}): React.ReactElement => (
+  <Flex gap="0.375rem" align="center">
+    <WarningTwoIcon color="red.600" boxSize="1rem" />
+    <Text color="red.600" fontSize="1rem" m={0}>
+      {message}
+    </Text>
+  </Flex>
+);
 
 const MONTHS = [
   "January",
@@ -90,6 +110,7 @@ const AddTaskForm2 = ({
   watch,
   getValues,
   trigger,
+  recurrenceWarnings,
 }: AddTaskForm2Props): React.ReactElement => {
   const { errors } = useFormState({ control });
   const isRepeating = watch("isRepeating");
@@ -306,6 +327,9 @@ const AddTaskForm2 = ({
               errors.startDay?.message ||
               errors.startYear?.message}
           </Text>
+        )}
+        {recurrenceWarnings?.startDate && (
+          <RecurrenceWarning message="If editing 'This and following tasks', will affect recurrence occurences between the old and new start date." />
         )}
       </Flex>
 
@@ -554,6 +578,9 @@ const AddTaskForm2 = ({
                       {error.message}
                     </Text>
                   )}
+                  {recurrenceWarnings?.days && (
+                    <RecurrenceWarning message="This will update the recurring days for all future tasks." />
+                  )}
                 </Flex>
               )}
             />
@@ -590,6 +617,9 @@ const AddTaskForm2 = ({
                       <Text color="red.400" fontSize="1rem" m={0}>
                         {error.message}
                       </Text>
+                    )}
+                    {recurrenceWarnings?.cadence && (
+                      <RecurrenceWarning message="This will update the recurring cadence for all future tasks." />
                     )}
                   </Flex>
                 )}

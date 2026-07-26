@@ -24,7 +24,11 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { Role } from "../types";
+import {
+  validateEnum,
+  validateEnumArray,
+} from "../middlewares/validators/util";
+import { Role, Days, Cadence } from "../types";
 import logInteraction from "../middlewares/logInteraction";
 import {
   buildStartDates,
@@ -185,16 +189,36 @@ taskRouter.post(
       return;
     }
 
-    const { notes, userId, scheduledStartTime } = req.body;
+    const {
+      notes,
+      userId,
+      taskTemplateId,
+      scheduledStartTime,
+      scheduledEndTime,
+      days,
+      cadence,
+      endDate,
+    } = req.body;
 
     let parsedScheduledStartTime: Date | undefined;
+    let parsedScheduledEndTime: Date | undefined;
+    let parsedRecurrenceEndDate: Date | undefined;
 
     if (
       (notes !== undefined && typeof notes !== "string") ||
       (userId !== undefined && typeof userId !== "number") ||
+      (taskTemplateId !== undefined && typeof taskTemplateId !== "number") ||
       (scheduledStartTime !== undefined &&
         (typeof scheduledStartTime !== "string" ||
-          Number.isNaN(new Date(scheduledStartTime).getTime())))
+          Number.isNaN(new Date(scheduledStartTime).getTime()))) ||
+      (scheduledEndTime !== undefined &&
+        (typeof scheduledEndTime !== "string" ||
+          Number.isNaN(new Date(scheduledEndTime).getTime()))) ||
+      (days !== undefined && !validateEnumArray(days, Days)) ||
+      (cadence !== undefined && !validateEnum(cadence, Cadence)) ||
+      (endDate !== undefined &&
+        (typeof endDate !== "string" ||
+          Number.isNaN(new Date(endDate).getTime())))
     ) {
       res.status(400).send("Invalid request body");
       return;
@@ -202,6 +226,14 @@ taskRouter.post(
 
     if (scheduledStartTime !== undefined) {
       parsedScheduledStartTime = new Date(scheduledStartTime);
+    }
+
+    if (scheduledEndTime !== undefined) {
+      parsedScheduledEndTime = new Date(scheduledEndTime);
+    }
+
+    if (endDate !== undefined) {
+      parsedRecurrenceEndDate = new Date(endDate);
     }
 
     try {
@@ -212,6 +244,10 @@ taskRouter.post(
         throw new NotFoundError("Given task has no start date");
       }
 
+      const isSeedDate =
+        resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
+        resetDateToUTCMidnight(date).getTime();
+
       const actualStart = resetDateToUTCMidnight(task.scheduledStartTime);
       const startDates =
         recurrence.days && recurrence.days.length > 0
@@ -220,9 +256,19 @@ taskRouter.post(
       const matchesPattern = startDates.some((startDate) =>
         isDateInRecurrence(startDate, date, recurrence.cadence),
       );
-      if (!matchesPattern) {
+      if (!isSeedDate && !matchesPattern) {
         throw new BadRequestError(
           "Given date doesn't follow the recurrence rule",
+        );
+      }
+
+      if (
+        recurrence.endDate &&
+        resetDateToUTCMidnight(date).getTime() >
+          resetDateToUTCMidnight(recurrence.endDate).getTime()
+      ) {
+        throw new BadRequestError(
+          "Given date is after the recurrence's end date",
         );
       }
 
@@ -231,19 +277,64 @@ taskRouter.post(
           ? parsedScheduledStartTime
           : date;
 
+      let newScheduledEndTime = parsedScheduledEndTime;
+      if (newScheduledEndTime === undefined && task.scheduledEndTime) {
+        const seedEnd = new Date(task.scheduledEndTime);
+        newScheduledEndTime = new Date(newScheduledStartTime);
+        newScheduledEndTime.setUTCHours(
+          seedEnd.getUTCHours(),
+          seedEnd.getUTCMinutes(),
+          seedEnd.getUTCSeconds(),
+          seedEnd.getUTCMilliseconds(),
+        );
+      }
+
+      if (
+        newScheduledEndTime !== undefined &&
+        newScheduledEndTime <= newScheduledStartTime
+      ) {
+        throw new BadRequestError(
+          "scheduledEndTime must be after scheduledStartTime",
+        );
+      }
+
       if (single) {
         await taskService.excludeDate(taskId, date);
         const singleTask = await taskService.createTask({
           userId: userId ?? task.userId,
           petId: task.petId,
-          taskTemplateId: task.taskTemplateId,
+          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
           scheduledStartTime: newScheduledStartTime,
+          scheduledEndTime: newScheduledEndTime,
           startTime: task.startTime,
           endTime: task.endTime,
           notes: notes ?? task.notes,
         });
         res.status(200).json({
           singleTask,
+        });
+      } else if (isSeedDate) {
+        // Editing from the seed occurrence
+        const updatedTask = await taskService.updateTask(taskId, {
+          userId: userId ?? task.userId,
+          petId: task.petId,
+          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+          scheduledStartTime: newScheduledStartTime,
+          scheduledEndTime: newScheduledEndTime,
+          startTime: task.startTime,
+          endTime: task.endTime,
+          notes: notes ?? task.notes,
+        });
+        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
+          ...(cadence !== undefined ? { cadence } : {}),
+          ...(days !== undefined ? { days } : {}),
+          ...(parsedRecurrenceEndDate !== undefined
+            ? { endDate: parsedRecurrenceEndDate }
+            : {}),
+        });
+        res.status(200).json({
+          task: updatedTask,
+          recurrenceTask: updatedRecurrence,
         });
       } else {
         const newEndDate = new Date(
@@ -256,17 +347,25 @@ taskRouter.post(
         const newTask = await taskService.createTask({
           userId: userId ?? task.userId,
           petId: task.petId,
-          taskTemplateId: task.taskTemplateId,
+          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
           scheduledStartTime: newScheduledStartTime,
+          scheduledEndTime: newScheduledEndTime,
           startTime: task.startTime,
           endTime: task.endTime,
           notes: notes ?? task.notes,
         });
+
+        const carriedExclusions = (recurrence.exclusions ?? []).filter(
+          (ex) =>
+            resetDateToUTCMidnight(new Date(ex)).getTime() >
+            resetDateToUTCMidnight(newScheduledStartTime).getTime(),
+        );
         const newRecurrence = await taskService.createRecurrence(
           newTask.id.toString(),
-          recurrence.cadence,
-          recurrence.days,
-          recurrence.endDate,
+          cadence ?? recurrence.cadence,
+          days ?? recurrence.days,
+          parsedRecurrenceEndDate ?? recurrence.endDate,
+          carriedExclusions,
         );
         res.status(200).json({
           task: newTask,

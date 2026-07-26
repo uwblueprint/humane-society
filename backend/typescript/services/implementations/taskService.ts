@@ -38,6 +38,7 @@ class TaskService implements ITaskService {
     cadence: string,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
   ): Promise<RecurrenceTaskDTO> {
     try {
       const task = await PgTask.findByPk(taskId, { raw: true });
@@ -61,7 +62,7 @@ class TaskService implements ITaskService {
         task_id: taskId,
         ...(days && { days }),
         cadence,
-        exclusions: [],
+        exclusions: exclusions ?? [],
         ...(endDate && { end_date: endDate }),
       });
 
@@ -171,14 +172,13 @@ class TaskService implements ITaskService {
             return first.getTime() <= newEndDate.getTime();
           });
 
-          newDays = prunedDays;
-
-          // this shouldn't be happening
           if (prunedDays.length === 0) {
-            throw new BadRequestError(
-              "End date is before or on the first occurrence of all selected days.",
-            );
+            const baseExclusions =
+              newExclusions ?? recurrenceTask.exclusions ?? [];
+            newExclusions = [...baseExclusions, actualStart];
           }
+
+          newDays = prunedDays;
         }
       }
 
@@ -366,19 +366,30 @@ class TaskService implements ITaskService {
       // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
-          const instanceDate = new Date(date);
-          instanceDate.setUTCHours(actualStart.getUTCHours());
-          instanceDate.setUTCMinutes(actualStart.getUTCMinutes());
-          instanceDate.setUTCSeconds(actualStart.getUTCSeconds());
-          instanceDate.setUTCMilliseconds(actualStart.getUTCMilliseconds());
-
+          const occurrenceDate = new Date(
+            Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              actualStart.getUTCHours(),
+              actualStart.getUTCMinutes(),
+              actualStart.getUTCSeconds(),
+            ),
+          );
+          const occurrenceEndDate = task.scheduled_end_time
+            ? new Date(
+                occurrenceDate.getTime() +
+                  (new Date(task.scheduled_end_time).getTime() -
+                    actualStart.getTime()),
+              )
+            : task.scheduled_end_time;
           return {
             id: task.id,
             userId: task.user_id,
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
-            scheduledStartTime: instanceDate,
-            scheduledEndTime: task.scheduled_end_time,
+            scheduledStartTime: occurrenceDate,
+            scheduledEndTime: occurrenceEndDate,
             startTime: task.start_time,
             endTime: task.end_time,
             notes: task.notes,
@@ -810,11 +821,23 @@ class TaskService implements ITaskService {
             required: false,
           },
           { model: Pet, attributes: ["name"], required: false },
+          { model: PgRecurrenceTask, required: false },
         ],
       });
 
-      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
-        (task) => ({
+      // A recurrence seed row must respect its recurrence's exclusions
+      // ("this task" edits/deletes exclude the date and create a replacement)
+      const visibleOneTimeTasks = oneTimeTasks.filter(
+        (task) =>
+          !task.recurrence?.exclusions?.some(
+            (ex: Date) =>
+              resetDateToUTCMidnight(new Date(ex)).getTime() ===
+              resetDateToUTCMidnight(beginningOfDay).getTime(),
+          ),
+      );
+
+      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] =
+        visibleOneTimeTasks.map((task) => ({
           id: task.id,
           userId: task.user_id,
           petId: task.pet_id,
@@ -836,8 +859,7 @@ class TaskService implements ITaskService {
                 profilePhoto: task.user.profile_photo,
               }
             : null,
-        }),
-      );
+        }));
 
       const recurringWhereClause: Record<string, unknown> = {};
       if (filters?.userId !== undefined) {
