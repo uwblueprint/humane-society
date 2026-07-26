@@ -1,6 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import Button from "../../../components/common/Button";
@@ -15,6 +15,15 @@ import EditTaskScopeModal from "../components/EditTaskScopeModal";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
 import { RecurrenceTask } from "../../../types/TaskTypes";
+import AuthContext from "../../../contexts/AuthContext";
+
+const formatDateForLog = (dateStr?: string): string => {
+  if (!dateStr) return "indefinite";
+  const d = new Date(dateStr);
+  return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(
+    d.getDate(),
+  ).padStart(2, "0")}/${d.getFullYear()}`;
+};
 
 interface AddTaskFormProps {
   petId: number;
@@ -31,6 +40,7 @@ const AddTaskForm = ({
 }: AddTaskFormProps): React.ReactElement => {
   const history = useHistory();
   const toast = useToast();
+  const { authenticatedUser } = useContext(AuthContext);
   const { taskId } = useParams<{ taskId: string }>();
   const location = useLocation();
   const occurrenceDate =
@@ -39,6 +49,10 @@ const AddTaskForm = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
   const [existingUserId, setExistingUserId] = useState<number | null>(null);
+  const originalTaskValues = useRef<{
+    notes: string;
+    scheduledStartTime?: string;
+  } | null>(null);
   const [showEditScopeModal, setShowEditScopeModal] = useState(false);
   const [initialRecurrence, setInitialRecurrence] = useState<{
     days: string[];
@@ -93,6 +107,10 @@ const AddTaskForm = ({
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
         setExistingUserId(task.userId ?? null);
         setRecurrenceData(recurrence);
+        originalTaskValues.current = {
+          notes: task.notes ?? "",
+          scheduledStartTime: task.scheduledStartTime,
+        };
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -241,7 +259,12 @@ const AddTaskForm = ({
     if (!taskId) return;
     setIsDeleting(true);
     try {
-      await TaskAPIClient.deleteTask(Number(taskId));
+      await TaskAPIClient.deleteTask(Number(taskId), {
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: Number(taskId),
+        taskTemplateName: getValues("selectedTemplate")?.name ?? "",
+        petName,
+      });
       toast({
         title: "Task deleted!",
         status: "success",
@@ -280,6 +303,12 @@ const AddTaskForm = ({
         Number(taskId),
         scheduledStartTime,
         deleteRecurringOption === "single",
+        {
+          actorId: authenticatedUser?.id ?? 0,
+          targetId: Number(taskId),
+          taskTemplateName: getValues("selectedTemplate")?.name ?? "",
+          petName,
+        },
       );
       toast({
         title: "Task deleted!",
@@ -384,6 +413,37 @@ const AddTaskForm = ({
             scheduledEndTime,
             notes: instructions,
           });
+
+          const orig = originalTaskValues.current;
+          const actorId = authenticatedUser?.id ?? 0;
+          const logPatches: Promise<unknown>[] = [];
+          if (orig && orig.scheduledStartTime !== scheduledStartTime) {
+            logPatches.push(
+              TaskAPIClient.scheduleTask(Number(taskId), {
+                scheduledStartTime,
+                actorId,
+                targetId: Number(taskId),
+                taskTemplateName: template.name,
+                petName,
+                oldDate: formatDateForLog(orig.scheduledStartTime),
+                newDate: formatDateForLog(scheduledStartTime),
+              }),
+            );
+          }
+          if (orig && orig.notes !== instructions) {
+            logPatches.push(
+              TaskAPIClient.updateNotes(Number(taskId), {
+                notes: instructions,
+                actorId,
+                targetId: Number(taskId),
+                taskTemplateName: template.name,
+                petName,
+                oldInstructions: orig.notes,
+                newInstructions: instructions,
+              }),
+            );
+          }
+          await Promise.all(logPatches);
         }
       } else if (!isRepeating) {
         await TaskAPIClient.createTask({
