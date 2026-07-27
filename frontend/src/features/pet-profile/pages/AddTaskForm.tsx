@@ -55,6 +55,9 @@ const AddTaskForm = ({
   const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
     null,
   );
+  const [originalStartDateKey, setOriginalStartDateKey] = useState<
+    string | null
+  >(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -112,6 +115,13 @@ const AddTaskForm = ({
           setValue("startYear", String(date.getFullYear()));
           setValue("startHour", String(date.getHours()).padStart(2, "0"));
           setValue("startMinute", String(date.getMinutes()).padStart(2, "0"));
+          setOriginalStartDateKey(
+            [
+              date.toLocaleString("default", { month: "long" }),
+              String(date.getDate()),
+              String(date.getFullYear()),
+            ].join("|"),
+          );
         }
 
         if (task.scheduledEndTime) {
@@ -497,6 +507,7 @@ const AddTaskForm = ({
               getValues={getValues}
               trigger={trigger}
               recurrenceWarnings={recurrenceWarnings}
+              originalStartDateKey={originalStartDateKey}
             />
           )}
 

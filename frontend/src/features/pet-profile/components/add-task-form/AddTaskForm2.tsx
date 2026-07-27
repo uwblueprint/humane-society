@@ -31,6 +31,7 @@ interface AddTaskForm2Props {
     days: boolean;
     cadence: boolean;
   };
+  originalStartDateKey?: string | null;
 }
 
 const RecurrenceWarning = ({
@@ -111,6 +112,7 @@ const AddTaskForm2 = ({
   getValues,
   trigger,
   recurrenceWarnings,
+  originalStartDateKey,
 }: AddTaskForm2Props): React.ReactElement => {
   const { errors } = useFormState({ control });
   const isRepeating = watch("isRepeating");
@@ -271,6 +273,8 @@ const AddTaskForm2 = ({
                       const { startMonth: month, startYear: year } =
                         getValues();
                       if (!month || !year) return false;
+                      const selectedKey = [month, day, year].join("|");
+                      if (selectedKey === originalStartDateKey) return true;
                       const selected = toDate(month, day, year);
                       return (
                         selected >= today ||
