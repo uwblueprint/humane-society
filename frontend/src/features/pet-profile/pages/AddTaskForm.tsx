@@ -507,6 +507,7 @@ const AddTaskForm = ({
               getValues={getValues}
               trigger={trigger}
               setValue={setValue}
+              isEditMode={isEditMode}
               recurrenceWarnings={recurrenceWarnings}
               originalStartDateKey={originalStartDateKey}
             />

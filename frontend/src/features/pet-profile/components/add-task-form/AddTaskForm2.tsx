@@ -27,6 +27,7 @@ interface AddTaskForm2Props {
   getValues: UseFormGetValues<AddTaskFormData>;
   trigger: UseFormTrigger<AddTaskFormData>;
   setValue: UseFormSetValue<AddTaskFormData>;
+  isEditMode?: boolean;
 
   recurrenceWarnings?: {
     startDate: boolean;
@@ -114,6 +115,7 @@ const AddTaskForm2 = ({
   getValues,
   trigger,
   setValue,
+  isEditMode,
   recurrenceWarnings,
   originalStartDateKey,
 }: AddTaskForm2Props): React.ReactElement => {
@@ -509,6 +511,7 @@ const AddTaskForm2 = ({
           <Checkbox
             isChecked={field.value}
             onChange={field.onChange}
+            isDisabled={isEditMode}
             size="lg"
             _checked={{
               "& .chakra-checkbox__control": {
