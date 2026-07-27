@@ -429,7 +429,7 @@ const editRecurringTask = async (
     scheduledEndTime?: string;
     days?: string[];
     cadence?: string;
-    endDate?: string;
+    endDate?: string | null;
   },
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(

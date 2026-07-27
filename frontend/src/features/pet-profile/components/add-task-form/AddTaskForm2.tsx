@@ -8,6 +8,7 @@ import {
   UseFormGetValues,
   useFormState,
   UseFormTrigger,
+  UseFormSetValue,
 } from "react-hook-form";
 import Input from "../../../../components/common/Input";
 import TaskCategoryBadge from "../../../../components/common/TaskCategoryBadge";
@@ -25,6 +26,7 @@ interface AddTaskForm2Props {
   watch: UseFormWatch<AddTaskFormData>;
   getValues: UseFormGetValues<AddTaskFormData>;
   trigger: UseFormTrigger<AddTaskFormData>;
+  setValue: UseFormSetValue<AddTaskFormData>;
 
   recurrenceWarnings?: {
     startDate: boolean;
@@ -111,6 +113,7 @@ const AddTaskForm2 = ({
   watch,
   getValues,
   trigger,
+  setValue,
   recurrenceWarnings,
   originalStartDateKey,
 }: AddTaskForm2Props): React.ReactElement => {
@@ -119,6 +122,7 @@ const AddTaskForm2 = ({
   const startMonth = watch("startMonth");
   const startYear = watch("startYear");
   const endMonth = watch("endMonth");
+  const watchedEndDay = watch("endDay");
   const endYear = watch("endYear");
 
   const startDays = Array.from(
@@ -633,14 +637,33 @@ const AddTaskForm2 = ({
 
           {/* End Date */}
           <Flex flexDirection="column" gap="0.375rem">
-            <FormLabel
-              color="gray.600"
-              marginBottom="0.38rem"
-              fontWeight="normal"
-              m={0}
-            >
-              End Date:
-            </FormLabel>
+            <Flex justify="space-between" align="center">
+              <FormLabel
+                color="gray.600"
+                marginBottom="0.38rem"
+                fontWeight="normal"
+                m={0}
+              >
+                End Date:
+              </FormLabel>
+              {(endMonth || watchedEndDay || endYear) && (
+                <Text
+                  as="button"
+                  type="button"
+                  color="blue.700"
+                  fontSize="1rem"
+                  m={0}
+                  onClick={() => {
+                    setValue("endMonth", "");
+                    setValue("endDay", "");
+                    setValue("endYear", "");
+                    trigger(["endMonth", "endDay", "endYear"]);
+                  }}
+                >
+                  Clear
+                </Text>
+              )}
+            </Flex>
             <Flex gap="0.75rem">
               {/* Month */}
               <Flex flex="2">

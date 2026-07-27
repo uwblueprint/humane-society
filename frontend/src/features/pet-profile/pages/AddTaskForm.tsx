@@ -360,16 +360,16 @@ const AddTaskForm = ({
     try {
       if (isEditMode) {
         if (recurrenceData && occurrenceDate) {
-          let endDate: string | undefined;
-          if (endMonth && endDay && endYear) {
-            endDate = new Date(
-              Date.UTC(
-                Number(endYear),
-                MONTH_NAME_TO_NUMBER[endMonth] - 1,
-                Number(endDay),
-              ),
-            ).toISOString();
-          }
+          const endDate =
+            endMonth && endDay && endYear
+              ? new Date(
+                  Date.UTC(
+                    Number(endYear),
+                    MONTH_NAME_TO_NUMBER[endMonth] - 1,
+                    Number(endDay),
+                  ),
+                ).toISOString()
+              : null;
           await TaskAPIClient.editRecurringTask(
             Number(taskId),
             occurrenceDate,
@@ -506,6 +506,7 @@ const AddTaskForm = ({
               watch={watch}
               getValues={getValues}
               trigger={trigger}
+              setValue={setValue}
               recurrenceWarnings={recurrenceWarnings}
               originalStartDateKey={originalStartDateKey}
             />

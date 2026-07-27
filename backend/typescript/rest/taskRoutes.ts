@@ -202,7 +202,7 @@ taskRouter.post(
 
     let parsedScheduledStartTime: Date | undefined;
     let parsedScheduledEndTime: Date | undefined;
-    let parsedRecurrenceEndDate: Date | undefined;
+    let parsedRecurrenceEndDate: Date | null | undefined;
 
     if (
       (notes !== undefined && typeof notes !== "string") ||
@@ -217,6 +217,7 @@ taskRouter.post(
       (days !== undefined && !validateEnumArray(days, Days)) ||
       (cadence !== undefined && !validateEnum(cadence, Cadence)) ||
       (endDate !== undefined &&
+        endDate !== null &&
         (typeof endDate !== "string" ||
           Number.isNaN(new Date(endDate).getTime())))
     ) {
@@ -233,7 +234,7 @@ taskRouter.post(
     }
 
     if (endDate !== undefined) {
-      parsedRecurrenceEndDate = new Date(endDate);
+      parsedRecurrenceEndDate = endDate === null ? null : new Date(endDate);
     }
 
     try {
@@ -360,11 +361,15 @@ taskRouter.post(
             resetDateToUTCMidnight(new Date(ex)).getTime() >
             resetDateToUTCMidnight(newScheduledStartTime).getTime(),
         );
+        const resolvedNewRecurrenceEndDate =
+          parsedRecurrenceEndDate !== undefined
+            ? parsedRecurrenceEndDate ?? undefined
+            : recurrence.endDate ?? undefined;
         const newRecurrence = await taskService.createRecurrence(
           newTask.id.toString(),
           cadence ?? recurrence.cadence,
           days ?? recurrence.days,
-          parsedRecurrenceEndDate ?? recurrence.endDate,
+          resolvedNewRecurrenceEndDate,
           carriedExclusions,
         );
         res.status(200).json({

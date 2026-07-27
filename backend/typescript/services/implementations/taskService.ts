@@ -133,6 +133,9 @@ class TaskService implements ITaskService {
           "Recurrence task must have a start date if end date is provided.",
         );
 
+      const isClearingEndDate =
+        "endDate" in updates && updates.endDate === null;
+
       // normalize it to utc midnight
       const newEndDate = updates.endDate
         ? resetDateToUTCMidnight(updates.endDate)
@@ -182,13 +185,20 @@ class TaskService implements ITaskService {
         }
       }
 
+      let endDateUpdate: { end_date: Date | null } | Record<string, never> = {};
+      if (newEndDate !== undefined) {
+        endDateUpdate = { end_date: newEndDate };
+      } else if (isClearingEndDate) {
+        endDateUpdate = { end_date: null };
+      }
+
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
           ...(newDays !== undefined ? { days: newDays } : {}),
           ...(updates.cadence !== undefined
             ? { cadence: updates.cadence }
             : {}),
-          ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
+          ...endDateUpdate,
           ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
         { where: { task_id: recurrenceId }, returning: true },

@@ -51,7 +51,7 @@ export interface RecurrenceTaskDTO {
   id: number;
   cadence: Cadence;
   days?: Days[];
-  endDate?: Date;
+  endDate?: Date | null;
   exclusions?: Date[];
 }
 
