@@ -9,7 +9,7 @@ const formatTimeFromISO = (isoString: string | null): string => {
   }
 
   // Check if it's a special status string
-  if (isoString === "Occupied" || isoString === "One or more days ago") {
+  if (isoString === "One or more days ago") {
     return isoString;
   }
 
