@@ -142,10 +142,16 @@ const PetProfilePage = (): React.ReactElement => {
     colorLevel: colorLevelMap[petData.colorLevel],
   };
 
+  const volunteerOrStaff =
+    authenticatedUser?.role === UserRoles.VOLUNTEER ||
+    authenticatedUser?.role === UserRoles.STAFF;
+
   // If the viewer isn't cleared for this pet's color level, they should only
   // see tasks they've been overridden onto (i.e. assigned despite the mismatch).
   const visibleTasks =
-    authenticatedUser && authenticatedUser.colorLevel < petData.colorLevel
+    authenticatedUser &&
+    authenticatedUser.colorLevel < petData.colorLevel &&
+    volunteerOrStaff
       ? tasks.filter((task) => task.userId === authenticatedUser.id)
       : tasks;
 
