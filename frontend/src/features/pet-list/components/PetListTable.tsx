@@ -12,6 +12,7 @@ export interface PetListTableProps {
   clearFilters: () => void;
   hasError: boolean;
   hasNoPets: boolean;
+  isLoading?: boolean;
 }
 
 const PetListTable = ({
@@ -19,6 +20,7 @@ const PetListTable = ({
   clearFilters,
   hasError,
   hasNoPets,
+  isLoading = false,
 }: PetListTableProps): React.ReactElement => {
   const isStaffBehaviouristAdmin = STAFF_BEHAVIOURISTS_ADMIN.has(
     getCurrentUserRole() ?? "",
@@ -28,20 +30,21 @@ const PetListTable = ({
     [petsRecord],
   );
   const message = (() => {
-    if (hasError) return "Unable to load pets";
-    if (hasNoPets) return "There are currently no pets";
-    return "No pets currently match";
+    if (hasError) return "No pets currently match.";
+    if (isLoading) return "Loading pets...";
+    if (hasNoPets) return "There are currently no pets.";
+    return "No pets currently match.";
   })();
 
   const label = (() => {
-    if (hasError) return "Refresh";
-    if (hasNoPets) return undefined;
+    if (hasError) return "Refresh page";
+    if (isLoading || hasNoPets) return undefined;
     return "Clear all";
   })();
 
   const onLinkClick = (() => {
     if (hasError) return () => window.location.reload();
-    if (hasNoPets) return undefined;
+    if (isLoading || hasNoPets) return undefined;
     return clearFilters;
   })();
 

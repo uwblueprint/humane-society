@@ -21,6 +21,7 @@ import PetListTable from "../components/PetListTable";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
@@ -64,6 +65,8 @@ const PetListPage = (): React.ReactElement => {
       }
     } catch (error) {
       setErrorMessage(`${error}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -169,6 +172,7 @@ const PetListPage = (): React.ReactElement => {
         clearFilters={handleClearFilters}
         hasError={errorMessage != null}
         hasNoPets={hasNoPets}
+        isLoading={isLoading}
       />
     </TableWrapper>
   );
