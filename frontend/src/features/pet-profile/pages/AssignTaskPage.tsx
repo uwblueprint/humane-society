@@ -17,12 +17,6 @@ const AssignTaskPage = (): React.ReactElement => {
   const taskId = Number(params.taskId);
   const toast = useToast();
 
-  const initialUserId = useMemo(
-    () => location.state?.preselectedUser?.id ?? null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(
     location.state?.preselectedUser ?? null,
@@ -85,10 +79,7 @@ const AssignTaskPage = (): React.ReactElement => {
     history.push(`/pet-profile/${petId}`);
   };
 
-  const hasAssignmentChanged = (selectedUser?.id ?? null) !== initialUserId;
-
   const handleSaveClick = async () => {
-    if (!hasAssignmentChanged) return;
     try {
       await TaskAPIClient.assignUser(taskId, selectedUser?.id ?? null);
       toast({
@@ -156,7 +147,6 @@ const AssignTaskPage = (): React.ReactElement => {
           type="button"
           variant="green"
           onClick={handleSaveClick}
-          disabled={!hasAssignmentChanged}
         >
           Save
         </Button>
