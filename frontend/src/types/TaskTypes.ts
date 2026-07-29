@@ -89,6 +89,7 @@ export interface PetTask {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime?: string;
+  scheduledEndTime?: string;
   startTime?: string;
   endTime?: string;
   notes?: string;
