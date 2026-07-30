@@ -723,9 +723,8 @@ class TaskService implements ITaskService {
           resetDateToUTCMidnight(occurrenceDate).getTime();
 
         if (
-          !isSeedDate &&
           resetDateToUTCMidnight(occurrenceDate).getTime() <
-            resetDateToUTCMidnight(new Date()).getTime()
+          resetDateToUTCMidnight(new Date()).getTime()
         ) {
           throw new BadRequestError(
             "Cannot apply 'this and following' to a past occurrence.",
@@ -1276,6 +1275,7 @@ class TaskService implements ITaskService {
     petId: number,
     date: Date,
     excludeTaskId?: number,
+    transaction?: Transaction,
   ): Promise<void> {
     try {
       const normalizedDate = resetDateToUTCMidnight(date);
@@ -1300,6 +1300,7 @@ class TaskService implements ITaskService {
           },
           id: { [Op.and]: idConditions },
         },
+        transaction,
       });
     } catch (error: unknown) {
       Logger.error(

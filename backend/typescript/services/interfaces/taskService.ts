@@ -268,5 +268,6 @@ export interface ITaskService {
     petId: number,
     date: Date,
     excludeTaskId?: number,
+    transaction?: Transaction,
   ): Promise<void>;
 }

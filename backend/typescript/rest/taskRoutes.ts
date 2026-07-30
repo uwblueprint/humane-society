@@ -744,18 +744,45 @@ taskRouter.delete(
         });
       } else {
         const newEndDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
-          endDate: newEndDate,
-        });
-        await taskService.deleteFutureTasks(
-          task.taskTemplateId,
-          task.petId,
-          date,
-          task.id,
-        );
+        const transaction: Transaction = await sequelize.transaction();
+        let updatedRecurrence;
+        let deletedCount = 0;
+        try {
+          updatedRecurrence = await taskService.updateRecurrence(
+            taskId,
+            { endDate: newEndDate },
+            transaction,
+          );
+          await taskService.deleteFutureTasks(
+            task.taskTemplateId,
+            task.petId,
+            date,
+            task.id,
+            transaction,
+          );
+          ({ deletedCount } = await taskService.reconcileShadows(
+            taskId,
+            resetDateToUTCMidnight(task.scheduledStartTime),
+            {
+              days: updatedRecurrence.days,
+              cadence: updatedRecurrence.cadence,
+              end_date: updatedRecurrence.endDate,
+              exclusions: updatedRecurrence.exclusions,
+            },
+            null,
+            null,
+            null,
+            transaction,
+          ));
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,
+          deletedShadowCount: deletedCount,
         });
       }
     } catch (e: unknown) {
