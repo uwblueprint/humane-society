@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Flex, Grid, Icon, Text, useToast } from "@chakra-ui/react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Flex, Grid, Icon, Text } from "@chakra-ui/react";
 import {
   TableWrapper,
   TableHeader,
@@ -34,30 +34,26 @@ const columns: TableColumn[] = [
 const gridTemplateColumns = "1fr 1fr 2fr 1fr 1fr";
 
 const InteractionLogPage = (): React.ReactElement => {
-  const toast = useToast();
   const [interactions, setInteractions] = useState<InteractionDTO[]>([]);
+  const [hasError, setHasError] = useState<boolean>(false);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const [selectedInteraction, setSelectedInteraction] =
     useState<InteractionDTO | null>(null);
 
+  const fetchInteractions = useCallback(async () => {
+    try {
+      const data = await InteractionAPIClient.getInteractions();
+      setInteractions(data);
+      setHasError(false);
+    } catch (error) {
+      setHasError(true);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchInteractions = async () => {
-      try {
-        const data = await InteractionAPIClient.getInteractions();
-        setInteractions(data);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch interactions",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    };
     fetchInteractions();
-  }, [toast]);
+  }, [fetchInteractions]);
 
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
@@ -90,7 +86,11 @@ const InteractionLogPage = (): React.ReactElement => {
     return result;
   }, [interactions, search]);
 
-  const isEmpty = filteredLogs.length === 0;
+  // Distinguish a genuinely empty list from a search that filtered everything
+  // out: when the raw list has items but the filtered result is empty, an
+  // active search (the only wired filter) must be excluding them.
+  const isRawEmpty = interactions.length === 0;
+  const isNoMatch = filteredLogs.length === 0;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -109,6 +109,27 @@ const InteractionLogPage = (): React.ReactElement => {
     });
   };
 
+  let emptyState: React.ReactElement | null = null;
+  if (hasError) {
+    emptyState = (
+      <TableEmptyState
+        message="Unable to load logs."
+        linkLabel="Refresh page"
+        onLinkClick={fetchInteractions}
+      />
+    );
+  } else if (isRawEmpty) {
+    emptyState = <TableEmptyState message="No interactions to display." />;
+  } else if (isNoMatch) {
+    emptyState = (
+      <TableEmptyState
+        message="No interactions currently match."
+        linkLabel="Clear all"
+        onLinkClick={handleClearFilters}
+      />
+    );
+  }
+
   return (
     <>
       <TableWrapper
@@ -126,13 +147,7 @@ const InteractionLogPage = (): React.ReactElement => {
             columns={columns}
             gridTemplateColumns={gridTemplateColumns}
           />
-          {isEmpty ? (
-            <TableEmptyState
-              message="No interactions currently match."
-              linkLabel="Clear all"
-              onLinkClick={handleClearFilters}
-            />
-          ) : (
+          {emptyState ?? (
             <Flex direction="column" width="100%">
               {filteredLogs.map((log) => (
                 <Grid

@@ -9,6 +9,8 @@ export const ALL_ROLES = new Set<string>([
   "Volunteer",
 ]);
 
+export const ADMIN_ONLY = new Set<string>(["Administrator"]);
+
 export const ADMIN_AND_BEHAVIOURISTS = new Set<string>([
   "Administrator",
   "Animal Behaviourist",

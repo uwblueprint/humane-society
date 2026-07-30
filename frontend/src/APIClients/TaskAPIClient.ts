@@ -199,39 +199,6 @@ const scheduleTask = async (
   }
 };
 
-const startTask = async (
-  taskId: number,
-  body: {
-    startTime: string;
-    actorId: number;
-    targetId: number;
-    taskTemplateName: string;
-    petName: string;
-    actorName: string;
-    isRestart?: boolean;
-  },
-): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  const { isRestart, ...rest } = body;
-  try {
-    await baseAPIClient.patch(
-      `/tasks/${taskId}/start`,
-      {
-        ...rest,
-        interactionType: isRestart
-          ? InteractionType.RESTARTED_TASK
-          : InteractionType.STARTED_TASK,
-      },
-      { headers: { Authorization: bearerToken } },
-    );
-  } catch (error) {
-    throw new Error(`Failed to start task: ${error}`);
-  }
-};
-
 const endTask = async (
   taskId: number,
   body: {
@@ -328,6 +295,39 @@ const selfAssign = async (taskId: number): Promise<void> => {
   }
 };
 
+const startTask = async (
+  taskId: number,
+  body: {
+    startTime: string;
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+    actorName: string;
+    isRestart?: boolean;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  const { isRestart, ...rest } = body;
+  try {
+    await baseAPIClient.patch(
+      `/tasks/${taskId}/start`,
+      {
+        ...rest,
+        interactionType: isRestart
+          ? InteractionType.RESTARTED_TASK
+          : InteractionType.STARTED_TASK,
+      },
+      { headers: { Authorization: bearerToken } },
+    );
+  } catch (error) {
+    throw new Error(`Failed to start task: ${error}`);
+  }
+};
+
 const createTask = async (payload: {
   userId: number | null;
   petId: number;
@@ -417,6 +417,36 @@ const completeTask = async (taskId: number): Promise<void> => {
   }
 };
 
+const editRecurringTask = async (
+  taskId: number,
+  date: string,
+  single: boolean,
+  payload: {
+    userId?: number;
+    taskTemplateId?: number;
+    notes?: string;
+    scheduledStartTime?: string;
+    scheduledEndTime?: string;
+    days?: string[];
+    cadence?: string;
+    endDate?: string | null;
+  },
+): Promise<void> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    await baseAPIClient.post(`/tasks/recurrences/${taskId}/edit`, payload, {
+      headers: { Authorization: bearerToken },
+      params: { date, single },
+    });
+  } catch (error) {
+    throw new Error(`Failed to edit recurring task: ${error}`);
+  }
+};
+
 const updateTask = async (
   taskId: number,
   payload: {
@@ -424,6 +454,7 @@ const updateTask = async (
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
+    scheduledEndTime: string;
     notes: string;
   },
 ): Promise<void> => {
@@ -457,6 +488,7 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  editRecurringTask,
   deleteRecurringTask,
   completeTask,
   updateTask,

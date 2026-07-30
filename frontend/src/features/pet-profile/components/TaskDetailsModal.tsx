@@ -349,6 +349,37 @@ const TaskDetailsModal = ({
     return "Recurring";
   };
 
+  const handleStart = async () => {
+    try {
+      await TaskAPIClient.startTask(taskId, {
+        startTime: new Date().toISOString(),
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskData?.petId ?? 0,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        actorName: `${authenticatedUser?.firstName ?? ""} ${
+          authenticatedUser?.lastName ?? ""
+        }`,
+      });
+      await fetchData(false);
+      onTaskUpdated?.();
+      toast({
+        title: "Task started",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to start task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const renderActions = () => {
     if (isAdminOrBehaviourist) {
       return (
@@ -438,6 +469,7 @@ const TaskDetailsModal = ({
               size="medium"
               width="100%"
               disabled={isPetOccupied || hasInProgressTask}
+              onClick={handleStart}
             >
               Start
             </Button>
