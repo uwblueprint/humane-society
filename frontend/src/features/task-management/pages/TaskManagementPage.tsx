@@ -29,18 +29,24 @@ const TaskManagementPage = (): React.ReactElement => {
   const handleClearFilters = () => {
     setFilters({});
     setSearch("");
+    setPage(1);
   };
 
   const handleAddTaskTemplate = () => {
     history.push(ADD_TASK_TEMPLATE_PAGE);
   };
 
+  // Reset to the first page whenever the result set changes, otherwise a stale
+  // page number can slice past the end of the filtered list and render the
+  // "no match" empty state even though there are matches.
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
+    setPage(1);
   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
+    setPage(1);
   };
 
   const hasActiveFilters = Object.values(filters).some(
