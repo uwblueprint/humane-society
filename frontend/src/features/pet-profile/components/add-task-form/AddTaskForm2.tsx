@@ -33,6 +33,7 @@ interface AddTaskForm2Props {
     startDate: boolean;
     days: boolean;
     cadence: boolean;
+    endDate: boolean;
   };
   originalStartDateKey?: string | null;
 }
@@ -339,7 +340,7 @@ const AddTaskForm2 = ({
           </Text>
         )}
         {recurrenceWarnings?.startDate && (
-          <RecurrenceWarning message="If editing 'This and following tasks', will affect recurrence occurences between the old and new start date." />
+          <RecurrenceWarning message="All future tasks will now repeat from this new start date." />
         )}
       </Flex>
 

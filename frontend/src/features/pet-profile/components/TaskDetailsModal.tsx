@@ -28,6 +28,7 @@ import { Pet } from "../../../types/PetTypes";
 import {
   PetTask,
   RecurrenceTask,
+  ScheduledTaskDTO,
   Task,
   TaskCategory,
   colorLevelMap,
@@ -176,8 +177,8 @@ const TaskDetailsModal = ({
   const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
     null,
   );
-  const [userTasks, setUserTasks] = useState<PetTask[]>([]);
-  const [petTasks, setPetTasks] = useState<PetTask[]>([]);
+  const [userTasks, setUserTasks] = useState<ScheduledTaskDTO[]>([]);
+  const [petTasks, setPetTasks] = useState<ScheduledTaskDTO[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
@@ -209,7 +210,7 @@ const TaskDetailsModal = ({
 
   const handleCompleteTask = async () => {
     try {
-      await TaskAPIClient.completeTask(taskId);
+      await TaskAPIClient.completeTask(taskId, instanceDate);
       toast({
         title: "Task completed",
         status: "success",
@@ -231,7 +232,7 @@ const TaskDetailsModal = ({
     async (showLoading = true) => {
       if (showLoading) setLoading(true);
       try {
-        const tTask = await TaskAPIClient.getTask(taskId);
+        const tTask = await TaskAPIClient.getTask(taskId, instanceDate);
         setTaskData(tTask);
 
         const [tTemplate, tPet, tRecurrence] = await Promise.all([
@@ -256,9 +257,15 @@ const TaskDetailsModal = ({
           (authenticatedUser.role === UserRoles.VOLUNTEER ||
             authenticatedUser.role === UserRoles.STAFF)
         ) {
+          const today = new Date();
+          const todayString = [
+            today.getFullYear(),
+            String(today.getMonth() + 1).padStart(2, "0"),
+            String(today.getDate()).padStart(2, "0"),
+          ].join("-");
           const [uTasks, pTasks] = await Promise.all([
-            TaskAPIClient.getUserTasks(authenticatedUser.id),
-            TaskAPIClient.getPetTasks(tTask.petId),
+            TaskAPIClient.getTasksByDate(todayString, authenticatedUser.id),
+            TaskAPIClient.getPetTasksByDate(tTask.petId, todayString),
           ]);
           setUserTasks(uTasks);
           setPetTasks(pTasks);
@@ -275,7 +282,7 @@ const TaskDetailsModal = ({
         if (showLoading) setLoading(false);
       }
     },
-    [taskId, toast, authenticatedUser],
+    [taskId, toast, authenticatedUser, instanceDate],
   );
 
   useEffect(() => {
@@ -286,7 +293,7 @@ const TaskDetailsModal = ({
   const handleSelfAssignConfirm = async () => {
     setIsAssigning(true);
     try {
-      await TaskAPIClient.selfAssign(taskId);
+      await TaskAPIClient.selfAssign(taskId, instanceDate);
       toast({
         title: "Success",
         description: "Task assigned successfully.",
@@ -351,16 +358,20 @@ const TaskDetailsModal = ({
 
   const handleStart = async () => {
     try {
-      await TaskAPIClient.startTask(taskId, {
-        startTime: new Date().toISOString(),
-        actorId: authenticatedUser?.id ?? 0,
-        targetId: taskData?.petId ?? 0,
-        taskTemplateName: templateData?.name ?? "",
-        petName: petData?.name ?? "",
-        actorName: `${authenticatedUser?.firstName ?? ""} ${
-          authenticatedUser?.lastName ?? ""
-        }`,
-      });
+      await TaskAPIClient.startTask(
+        taskId,
+        {
+          startTime: new Date().toISOString(),
+          actorId: authenticatedUser?.id ?? 0,
+          targetId: taskData?.petId ?? 0,
+          taskTemplateName: templateData?.name ?? "",
+          petName: petData?.name ?? "",
+          actorName: `${authenticatedUser?.firstName ?? ""} ${
+            authenticatedUser?.lastName ?? ""
+          }`,
+        },
+        instanceDate,
+      );
       await fetchData(false);
       onTaskUpdated?.();
       toast({
@@ -392,7 +403,9 @@ const TaskDetailsModal = ({
               onClick={() => {
                 onClose();
                 history.push(
-                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}${
+                    instanceDate ? `?date=${instanceDate}` : ""
+                  }`,
                 );
               }}
             >
@@ -407,7 +420,9 @@ const TaskDetailsModal = ({
               onClick={() => {
                 onClose();
                 history.push(
-                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}`,
+                  `/pet-profile/${taskData?.petId}/assign-task/${taskId}${
+                    instanceDate ? `?date=${instanceDate}` : ""
+                  }`,
                   { preselectedUser: assigneeData },
                 );
               }}

@@ -14,6 +14,7 @@ import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import EditTaskScopeModal from "../components/EditTaskScopeModal";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
+import { isPastDay } from "../../../utils/taskStatusUtils";
 import { RecurrenceTask } from "../../../types/TaskTypes";
 
 interface AddTaskFormProps {
@@ -44,6 +45,7 @@ const AddTaskForm = ({
     days: string[];
     cadence: string;
     startKey: string;
+    endKey: string;
   } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRecurringDeleteModal, setShowRecurringDeleteModal] =
@@ -139,17 +141,7 @@ const AddTaskForm = ({
           setValue("recurringDays", recurrence.days ?? []);
           setValue("recurringCadences", recurrence.cadence);
           const start = startSource ? new Date(startSource) : null;
-          setInitialRecurrence({
-            days: recurrence.days ?? [],
-            cadence: recurrence.cadence,
-            startKey: start
-              ? [
-                  start.toLocaleString("default", { month: "long" }),
-                  String(start.getDate()),
-                  String(start.getFullYear()),
-                ].join("|")
-              : "",
-          });
+          let endKey = "||";
           if (recurrence.endDate) {
             const end = new Date(recurrence.endDate);
             setValue(
@@ -161,7 +153,27 @@ const AddTaskForm = ({
             );
             setValue("endDay", String(end.getUTCDate()));
             setValue("endYear", String(end.getUTCFullYear()));
+            endKey = [
+              end.toLocaleString("default", {
+                month: "long",
+                timeZone: "UTC",
+              }),
+              String(end.getUTCDate()),
+              String(end.getUTCFullYear()),
+            ].join("|");
           }
+          setInitialRecurrence({
+            days: recurrence.days ?? [],
+            cadence: recurrence.cadence,
+            startKey: start
+              ? [
+                  start.toLocaleString("default", { month: "long" }),
+                  String(start.getDate()),
+                  String(start.getFullYear()),
+                ].join("|")
+              : "",
+            endKey,
+          });
         }
       } catch (error) {
         toast({
@@ -186,6 +198,11 @@ const AddTaskForm = ({
     watch("startDay"),
     watch("startYear"),
   ].join("|");
+  const watchedEndKey = [
+    watch("endMonth"),
+    watch("endDay"),
+    watch("endYear"),
+  ].join("|");
   const watchedDays = watch("recurringDays");
   const watchedCadence = watch("recurringCadences");
   const recurrenceWarnings =
@@ -196,6 +213,7 @@ const AddTaskForm = ({
             [...watchedDays].sort().join(",") !==
             [...initialRecurrence.days].sort().join(","),
           cadence: watchedCadence !== initialRecurrence.cadence,
+          endDate: watchedEndKey !== initialRecurrence.endKey,
         }
       : undefined;
 
@@ -618,6 +636,15 @@ const AddTaskForm = ({
           setShowEditScopeModal(false);
           handleSave(single);
         }}
+        disableSingle={
+          !!(
+            recurrenceWarnings?.days ||
+            recurrenceWarnings?.cadence ||
+            recurrenceWarnings?.endDate
+          )
+        }
+        disableSeries={!!occurrenceDate && isPastDay(occurrenceDate)}
+        startDateChanged={recurrenceWarnings?.startDate}
       />
       <PopupModal
         open={showDeleteConfirm}

@@ -82,6 +82,32 @@ export interface ITaskService {
     transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
+  consumeShadowForOccurrence(
+    taskId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null>;
+
+  reconcileShadows(
+    oldAnchorId: string,
+    oldAnchorStart: Date,
+    oldRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    },
+    newAnchorId: string | null,
+    newAnchorStart: Date | null,
+    newRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    } | null,
+    transaction: Transaction,
+  ): Promise<{ deletedCount: number }>;
+
   generateRecurringInstanceForData(
     taskId: string,
     date: Date,
@@ -93,7 +119,7 @@ export interface ITaskService {
    * @returns requested Task
    * @throws Error if retrieval fails
    */
-  getTask(id: string): Promise<TaskResponseDTO>;
+  getTask(id: string, date?: Date): Promise<TaskResponseDTO>;
 
   /**
    * retrieve all Tasks
@@ -153,6 +179,8 @@ export interface ITaskService {
   assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    occurrenceDate?: Date,
+    single?: boolean,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -177,6 +205,7 @@ export interface ITaskService {
   startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -189,6 +218,7 @@ export interface ITaskService {
   endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**

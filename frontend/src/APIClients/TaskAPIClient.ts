@@ -4,7 +4,10 @@ import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import { ScheduledTaskDTO, PetTask, RecurrenceTask } from "../types/TaskTypes";
 import { InteractionType } from "../types/InteractionTypes";
 
-const getTask = async (taskId: number): Promise<PetTask> => {
+const getTask = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<PetTask> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -12,6 +15,7 @@ const getTask = async (taskId: number): Promise<PetTask> => {
   try {
     const { data } = await baseAPIClient.get(`/tasks/${taskId}`, {
       headers: { Authorization: bearerToken },
+      params: { date: occurrenceDate },
     });
     return data;
   } catch (error) {
@@ -149,6 +153,8 @@ const assignUser = async (
     newUserName?: string;
     actorName?: string;
   },
+  occurrenceDate?: string,
+  single?: boolean,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -166,6 +172,7 @@ const assignUser = async (
     }
     await baseAPIClient.patch(`/tasks/${taskId}/assign-user`, payload, {
       headers: { Authorization: bearerToken },
+      params: { date: occurrenceDate, single },
     });
   } catch (error) {
     throw new Error(`Failed to assign user: ${error}`);
@@ -209,6 +216,7 @@ const endTask = async (
     petName: string;
     actorName: string;
   },
+  occurrenceDate?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -218,7 +226,10 @@ const endTask = async (
     await baseAPIClient.patch(
       `/tasks/${taskId}/end`,
       { ...body, interactionType: InteractionType.COMPLETED_TASK },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to end task: ${error}`);
@@ -275,7 +286,10 @@ const deleteTask = async (
   }
 };
 
-const selfAssign = async (taskId: number): Promise<void> => {
+const selfAssign = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -288,7 +302,11 @@ const selfAssign = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/assign-user`,
       { userId: Number(userId) },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        // self-assign is always single-day only, never "this and following"
+        params: { date: occurrenceDate, single: true },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to self-assign task: ${error}`);
@@ -306,6 +324,7 @@ const startTask = async (
     actorName: string;
     isRestart?: boolean;
   },
+  occurrenceDate?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -321,7 +340,10 @@ const startTask = async (
           ? InteractionType.RESTARTED_TASK
           : InteractionType.STARTED_TASK,
       },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to start task: ${error}`);
@@ -401,7 +423,10 @@ const deleteRecurringTask = async (
   }
 };
 
-const completeTask = async (taskId: number): Promise<void> => {
+const completeTask = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -410,7 +435,10 @@ const completeTask = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/end`,
       { endTime: new Date().toISOString() },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to complete task: ${error}`);
