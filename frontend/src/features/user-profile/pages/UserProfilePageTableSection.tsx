@@ -43,7 +43,7 @@ const UserProfilePageTableSection = ({
         <Grid
           key={task.id}
           gridTemplateColumns={gridTemplateColumns}
-          padding="1rem 2.5rem"
+          padding="1rem 1.5rem"
           alignItems="center"
           borderBottom="1px solid"
           borderColor="gray.200"
@@ -68,13 +68,13 @@ const UserProfilePageTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Flex align="center" gap="0.75rem">
+          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
             <ProfilePhoto
               image={task.petPhoto ?? undefined}
               size="small"
               type="pet"
             />
-            <Text textStyle="body" m={0}>
+            <Text textStyle="body" m={0} isTruncated>
               {task.petName ?? "—"}
             </Text>
           </Flex>
