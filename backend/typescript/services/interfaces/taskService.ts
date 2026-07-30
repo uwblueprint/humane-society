@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { TaskCategory, Days, Cadence } from "../../types";
 
 export interface TaskRequestDTO {
@@ -52,7 +53,7 @@ export interface RecurrenceTaskDTO {
   id: number;
   cadence: Cadence;
   days?: Days[];
-  endDate?: Date;
+  endDate?: Date | null;
   exclusions?: Date[];
 }
 
@@ -62,6 +63,8 @@ export interface ITaskService {
     cadence: Cadence,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;
@@ -69,11 +72,16 @@ export interface ITaskService {
   updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
   deleteRecurrence(recurrenceId: string): Promise<string>;
 
-  excludeDate(recurrenceId: string, date: Date): Promise<RecurrenceTaskDTO>;
+  excludeDate(
+    recurrenceId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<RecurrenceTaskDTO>;
 
   generateRecurringInstanceForData(
     taskId: string,
@@ -118,7 +126,10 @@ export interface ITaskService {
    * @returns the created Task
    * @throws Error if creation fails
    */
-  createTask(Task: TaskRequestDTO): Promise<TaskResponseDTO>;
+  createTask(
+    Task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO>;
 
   /**
    * update the Task with the given id with fields in the DTO, return updated Task
@@ -127,7 +138,11 @@ export interface ITaskService {
    * @returns the updated Task
    * @throws Error if update fails
    */
-  updateTask(id: string, Task: TaskRequestDTO): Promise<TaskResponseDTO | null>;
+  updateTask(
+    id: string,
+    Task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO | null>;
 
   /**
    * assign a user to an task, or update the user assigned to an task, return updated Task

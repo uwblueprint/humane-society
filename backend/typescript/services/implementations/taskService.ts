@@ -1,4 +1,4 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Sequelize, Transaction } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -38,9 +38,11 @@ class TaskService implements ITaskService {
     cadence: string,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(taskId, { raw: true });
+      const task = await PgTask.findByPk(taskId, { raw: true, transaction });
       if (!task) {
         throw new NotFoundError(`Task id ${taskId} not found`);
       }
@@ -51,19 +53,22 @@ class TaskService implements ITaskService {
         resetDateToUTCMidnight(endDate).getTime() <
           resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
-        throw new Error("End date cannot be before task start date.");
+        throw new BadRequestError("End date cannot be before task start date.");
       if (endDate && !task.scheduled_start_time)
-        throw new Error(
+        throw new BadRequestError(
           "Recurrence task must have a start date if end date is provided.",
         );
 
-      const recurrenceTask = await PgRecurrenceTask.create({
-        task_id: taskId,
-        ...(days && { days }),
-        cadence,
-        exclusions: [],
-        ...(endDate && { end_date: endDate }),
-      });
+      const recurrenceTask = await PgRecurrenceTask.create(
+        {
+          task_id: taskId,
+          ...(days && { days }),
+          cadence,
+          exclusions: exclusions ?? [],
+          ...(endDate && { end_date: endDate }),
+        },
+        { transaction },
+      );
 
       return {
         id: recurrenceTask.task_id,
@@ -109,11 +114,16 @@ class TaskService implements ITaskService {
   async updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
       if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
       if (!recurrenceTask)
@@ -126,11 +136,14 @@ class TaskService implements ITaskService {
         resetDateToUTCMidnight(updates.endDate).getTime() <
           resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
-        throw new Error("End date cannot be before task start date.");
+        throw new BadRequestError("End date cannot be before task start date.");
       if (updates.endDate && !task.scheduled_start_time)
-        throw new Error(
+        throw new BadRequestError(
           "Recurrence task must have a start date if end date is provided.",
         );
+
+      const isClearingEndDate =
+        "endDate" in updates && updates.endDate === null;
 
       // normalize it to utc midnight
       const newEndDate = updates.endDate
@@ -171,15 +184,21 @@ class TaskService implements ITaskService {
             return first.getTime() <= newEndDate.getTime();
           });
 
-          newDays = prunedDays;
-
-          // this shouldn't be happening
           if (prunedDays.length === 0) {
-            throw new BadRequestError(
-              "End date is before or on the first occurrence of all selected days.",
-            );
+            const baseExclusions =
+              newExclusions ?? recurrenceTask.exclusions ?? [];
+            newExclusions = [...baseExclusions, actualStart];
           }
+
+          newDays = prunedDays;
         }
+      }
+
+      let endDateUpdate: { end_date: Date | null } | Record<string, never> = {};
+      if (newEndDate !== undefined) {
+        endDateUpdate = { end_date: newEndDate };
+      } else if (isClearingEndDate) {
+        endDateUpdate = { end_date: null };
       }
 
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
@@ -188,10 +207,10 @@ class TaskService implements ITaskService {
           ...(updates.cadence !== undefined
             ? { cadence: updates.cadence }
             : {}),
-          ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
+          ...endDateUpdate,
           ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       if (updatedRecurrenceTask[0] === 0) {
@@ -237,12 +256,17 @@ class TaskService implements ITaskService {
   async excludeDate(
     recurrenceId: string,
     date: Date,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
 
       if (!recurrenceTask || !task)
         throw new NotFoundError("Recurrence task/task was not found");
@@ -307,7 +331,7 @@ class TaskService implements ITaskService {
         {
           exclusions: updatedExclusions,
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       return {
@@ -366,19 +390,30 @@ class TaskService implements ITaskService {
       // eslint-disable-next-line no-restricted-syntax
       for (const startDate of startDates) {
         if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
-          const instanceDate = new Date(date);
-          instanceDate.setUTCHours(actualStart.getUTCHours());
-          instanceDate.setUTCMinutes(actualStart.getUTCMinutes());
-          instanceDate.setUTCSeconds(actualStart.getUTCSeconds());
-          instanceDate.setUTCMilliseconds(actualStart.getUTCMilliseconds());
-
+          const occurrenceDate = new Date(
+            Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              actualStart.getUTCHours(),
+              actualStart.getUTCMinutes(),
+              actualStart.getUTCSeconds(),
+            ),
+          );
+          const occurrenceEndDate = task.scheduled_end_time
+            ? new Date(
+                occurrenceDate.getTime() +
+                  (new Date(task.scheduled_end_time).getTime() -
+                    actualStart.getTime()),
+              )
+            : task.scheduled_end_time;
           return {
             id: task.id,
             userId: task.user_id,
             petId: task.pet_id,
             taskTemplateId: task.task_template_id,
-            scheduledStartTime: instanceDate,
-            scheduledEndTime: task.scheduled_end_time,
+            scheduledStartTime: occurrenceDate,
+            scheduledEndTime: occurrenceEndDate,
             startTime: task.start_time,
             endTime: task.end_time,
             notes: task.notes,
@@ -506,19 +541,25 @@ class TaskService implements ITaskService {
     }
   }
 
-  async createTask(task: TaskRequestDTO): Promise<TaskResponseDTO> {
+  async createTask(
+    task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO> {
     let newTask: PgTask | null;
     try {
-      newTask = await PgTask.create({
-        user_id: task.userId,
-        pet_id: task.petId,
-        task_template_id: task.taskTemplateId,
-        scheduled_start_time: task.scheduledStartTime,
-        scheduled_end_time: task.scheduledEndTime,
-        start_time: task.startTime,
-        end_time: task.endTime,
-        notes: task.notes,
-      });
+      newTask = await PgTask.create(
+        {
+          user_id: task.userId,
+          pet_id: task.petId,
+          task_template_id: task.taskTemplateId,
+          scheduled_start_time: task.scheduledStartTime,
+          scheduled_end_time: task.scheduledEndTime,
+          start_time: task.startTime,
+          end_time: task.endTime,
+          notes: task.notes,
+        },
+        { transaction },
+      );
     } catch (error: unknown) {
       Logger.error(`Failed to create task. Reason = ${getErrorMessage(error)}`);
       throw error;
@@ -539,6 +580,7 @@ class TaskService implements ITaskService {
   async updateTask(
     id: string,
     task: TaskRequestDTO,
+    transaction?: Transaction,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
@@ -554,7 +596,7 @@ class TaskService implements ITaskService {
           end_time: task.endTime,
           notes: task.notes,
         },
-        { where: { id }, returning: true },
+        { where: { id }, returning: true, transaction },
       );
 
       if (!updateResult[0]) {
@@ -813,8 +855,19 @@ class TaskService implements ITaskService {
         ],
       });
 
-      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] = oneTimeTasks.map(
-        (task) => ({
+      // A recurrence seed row must respect its recurrence's exclusions
+      // ("this task" edits/deletes exclude the date and create a replacement)
+      const visibleOneTimeTasks = oneTimeTasks.filter(
+        (task) =>
+          !task.recurrence?.exclusions?.some(
+            (ex: Date) =>
+              resetDateToUTCMidnight(new Date(ex)).getTime() ===
+              resetDateToUTCMidnight(beginningOfDay).getTime(),
+          ),
+      );
+
+      const oneTimeTasksWithFlag: TaskResponseDTOForDate[] =
+        visibleOneTimeTasks.map((task) => ({
           id: task.id,
           userId: task.user_id,
           petId: task.pet_id,
@@ -837,8 +890,7 @@ class TaskService implements ITaskService {
                 profilePhoto: task.user.profile_photo,
               }
             : null,
-        }),
-      );
+        }));
 
       const recurringWhereClause: Record<string, unknown> = {};
       if (filters?.userId !== undefined) {

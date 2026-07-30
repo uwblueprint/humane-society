@@ -22,7 +22,7 @@ export interface Pet {
   age?: number;
   birthday?: string;
   weight?: number;
-  sex?: SexEnum;
+  sex?: SexEnum | null;
   photo?: string;
   careInfo?: {
     id: number;
@@ -42,8 +42,8 @@ export type CareInfo = {
 export type PetListSectionKey =
   | "Assigned to You"
   | "Other Pets"
-  | "Has Unassigned Tasks"
-  | "All Tasks Assigned"
+  | "Unassigned Tasks"
+  | "Assigned Tasks"
   | "No Tasks";
 
 // For frontend pet list display
@@ -79,12 +79,11 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
-  status: PetStatus;
   breed?: string | null;
   neutered?: boolean | null;
   birthday?: string | null;
   weight?: number | null;
-  sex?: SexEnum;
+  sex?: SexEnum | null;
   photo?: string | null;
   careInfo?: {
     safetyInfo?: string | null;
