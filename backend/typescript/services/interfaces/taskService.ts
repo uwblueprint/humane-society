@@ -41,6 +41,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
   taskName?: string;
   category?: TaskCategory;
   petName?: string;
+  petPhoto?: string;
   assignedUser?: {
     id: number;
     firstName: string;

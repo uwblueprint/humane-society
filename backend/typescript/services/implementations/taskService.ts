@@ -851,8 +851,7 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
-          { model: Pet, attributes: ["name"], required: false },
-          { model: PgRecurrenceTask, required: false },
+          { model: Pet, attributes: ["name", "photo"], required: false },
         ],
       });
 
@@ -882,6 +881,7 @@ class TaskService implements ITaskService {
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
           petName: task.pet?.name,
+          petPhoto: task.pet?.photo,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -942,7 +942,7 @@ class TaskService implements ITaskService {
                   ],
                   required: false,
                 },
-                { model: Pet, attributes: ["name"], required: false },
+                { model: Pet, attributes: ["name", "photo"], required: false },
               ],
             })
           : [];
@@ -959,6 +959,7 @@ class TaskService implements ITaskService {
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
             petName: enriched?.pet?.name,
+            petPhoto: enriched?.pet?.photo,
             assignedUser: enriched?.user
               ? {
                   id: enriched.user.id,
