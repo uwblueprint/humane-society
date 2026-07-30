@@ -14,7 +14,11 @@ import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import EditTaskScopeModal from "../components/EditTaskScopeModal";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
-import { isPastDay } from "../../../utils/taskStatusUtils";
+import {
+  isPastDay,
+  isSameDay,
+  startOfLocalDay,
+} from "../../../utils/taskStatusUtils";
 import { RecurrenceTask } from "../../../types/TaskTypes";
 
 interface AddTaskFormProps {
@@ -60,6 +64,9 @@ const AddTaskForm = ({
   const [originalStartDateKey, setOriginalStartDateKey] = useState<
     string | null
   >(null);
+  const [anchorScheduledStartTime, setAnchorScheduledStartTime] = useState<
+    string | null
+  >(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -98,6 +105,7 @@ const AddTaskForm = ({
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
         setExistingUserId(task.userId ?? null);
         setRecurrenceData(recurrence);
+        setAnchorScheduledStartTime(task.scheduledStartTime ?? null);
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -205,6 +213,29 @@ const AddTaskForm = ({
   ].join("|");
   const watchedDays = watch("recurringDays");
   const watchedCadence = watch("recurringCadences");
+
+  const isSeedDateEdit =
+    !!occurrenceDate &&
+    !!anchorScheduledStartTime &&
+    isSameDay(occurrenceDate, anchorScheduledStartTime);
+
+  const watchedStartMonth = watch("startMonth");
+  const watchedStartDay = watch("startDay");
+  const watchedStartYear = watch("startYear");
+  const watchedStartDate =
+    watchedStartMonth && watchedStartDay && watchedStartYear
+      ? new Date(
+          Number(watchedStartYear),
+          MONTH_NAME_TO_NUMBER[watchedStartMonth] - 1,
+          Number(watchedStartDay),
+        )
+      : null;
+  const startDateBeforeOccurrence =
+    !isSeedDateEdit &&
+    !!occurrenceDate &&
+    !!watchedStartDate &&
+    watchedStartDate < startOfLocalDay(occurrenceDate);
+
   const recurrenceWarnings =
     isEditMode && initialRecurrence
       ? {
@@ -645,6 +676,7 @@ const AddTaskForm = ({
           )
         }
         disableSeries={!!occurrenceDate && isPastDay(occurrenceDate)}
+        startDateBeforeOccurrence={startDateBeforeOccurrence}
         startDateChanged={recurrenceWarnings?.startDate}
       />
       <PopupModal

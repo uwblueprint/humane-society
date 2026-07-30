@@ -8,6 +8,14 @@ export type TaskLike = {
   scheduledStartTime?: Date | string;
 };
 
+export const startOfLocalDay = (date: Date | string): Date => {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+
+export const isSameDay = (a: Date | string, b: Date | string): boolean =>
+  startOfLocalDay(a).getTime() === startOfLocalDay(b).getTime();
+
 export const isPastDay = (date?: Date | string): boolean => {
   if (!date) return false;
   const d = new Date(date);

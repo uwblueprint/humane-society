@@ -561,16 +561,6 @@ taskRouter.patch(
         : undefined;
     try {
       const { body } = req;
-      if (
-        single === false &&
-        occurrenceDate &&
-        resetDateToUTCMidnight(occurrenceDate).getTime() <
-          resetDateToUTCMidnight(new Date()).getTime()
-      ) {
-        throw new BadRequestError(
-          "Cannot apply 'this and following' to a past occurrence.",
-        );
-      }
       const Task = await taskService.assignUser(
         id,
         { userId: body.userId },

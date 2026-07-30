@@ -711,14 +711,45 @@ class TaskService implements ITaskService {
             "Occurrence date is required to reassign this and following",
           );
         }
-        const newAnchor = await this.forkRecurrenceWithNewAssignee(
-          id,
-          occurrenceDate,
-          user.userId,
-          transaction,
-        );
+
+        const task = await PgTask.findByPk(id, { transaction });
+        if (!task) throw new NotFoundError(`Task id ${id} not found`);
+        if (!task.scheduled_start_time) {
+          throw new NotFoundError("Given task has no start date");
+        }
+
+        const isSeedDate =
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime() ===
+          resetDateToUTCMidnight(occurrenceDate).getTime();
+
+        if (
+          !isSeedDate &&
+          resetDateToUTCMidnight(occurrenceDate).getTime() <
+            resetDateToUTCMidnight(new Date()).getTime()
+        ) {
+          throw new BadRequestError(
+            "Cannot apply 'this and following' to a past occurrence.",
+          );
+        }
+
+        let resultTask: PgTask;
+        if (isSeedDate) {
+          const updateResult = await PgTask.update(
+            { user_id: user.userId },
+            { where: { id }, returning: true, transaction },
+          );
+          [, [resultTask]] = updateResult;
+        } else {
+          resultTask = await this.forkRecurrenceWithNewAssignee(
+            id,
+            occurrenceDate,
+            user.userId,
+            transaction,
+          );
+        }
+
         await transaction.commit();
-        return await this.buildTaskResponseDTO(newAnchor);
+        return await this.buildTaskResponseDTO(resultTask);
       } catch (error) {
         await transaction.rollback();
         Logger.error(
@@ -811,10 +842,6 @@ class TaskService implements ITaskService {
     });
     if (existingShadow) return existingShadow;
 
-    // Seed the new shadow with the anchor's current assignee so an action
-    // that doesn't touch assignment (start/end) doesn't silently read back
-    // as unassigned. An assign/unassign action overwrites this immediately
-    // after creation with the value it's actually setting.
     const anchor = await PgTask.findByPk(taskId);
     if (!anchor) throw new NotFoundError(`Task id ${taskId} not found`);
 

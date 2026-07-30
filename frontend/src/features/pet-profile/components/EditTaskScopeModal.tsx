@@ -9,6 +9,7 @@ interface EditTaskScopeModalProps {
   onConfirm: (single: boolean) => void; // true = "This task" only
   disableSingle?: boolean;
   disableSeries?: boolean;
+  startDateBeforeOccurrence?: boolean;
   startDateChanged?: boolean;
 }
 
@@ -18,23 +19,21 @@ const EditTaskScopeModal = ({
   onConfirm,
   disableSingle = false,
   disableSeries = false,
+  startDateBeforeOccurrence = false,
   startDateChanged = false,
 }: EditTaskScopeModalProps): React.ReactElement => {
   const [scope, setScope] = useState("single");
+  const seriesDisabled = disableSeries || startDateBeforeOccurrence;
 
   useEffect(() => {
     if (open) setScope(disableSingle ? "series" : "single");
   }, [open, disableSingle]);
 
   useEffect(() => {
-    // If both are disabled at once (e.g. editing a past occurrence with
-    // pattern fields also changed), there's no valid option to correct to
-    // — leave scope where it is rather than ping-ponging between the two
-    // forever.
-    if (disableSingle && disableSeries) return;
+    if (disableSingle && seriesDisabled) return;
     if (disableSingle && scope === "single") setScope("series");
-    if (disableSeries && scope === "series") setScope("single");
-  }, [disableSingle, disableSeries, scope]);
+    if (seriesDisabled && scope === "series") setScope("single");
+  }, [disableSingle, seriesDisabled, scope]);
 
   return (
     <PopupModal
@@ -42,6 +41,7 @@ const EditTaskScopeModal = ({
       title="Edit Task"
       primaryButtonText="Confirm"
       onPrimaryClick={() => onConfirm(scope === "single")}
+      isPrimaryDisabled={disableSingle && seriesDisabled}
       secondaryButtonText="Cancel"
       onSecondaryClick={onCancel}
     >
@@ -64,10 +64,14 @@ const EditTaskScopeModal = ({
             )}
           </Flex>
           <Flex direction="column" gap="0.375rem">
-            <Radio value="series" colorScheme="blue" isDisabled={disableSeries}>
+            <Radio
+              value="series"
+              colorScheme="blue"
+              isDisabled={seriesDisabled}
+            >
               <Text
                 textStyle="body"
-                color={disableSeries ? "gray.400" : "gray.700"}
+                color={seriesDisabled ? "gray.400" : "gray.700"}
                 m={0}
               >
                 This and following tasks
@@ -76,6 +80,11 @@ const EditTaskScopeModal = ({
             {disableSeries && (
               <Text color="gray.500" fontSize="0.875rem" m={0} ml="1.75rem">
                 Past occurrences can only be edited individually.
+              </Text>
+            )}
+            {startDateBeforeOccurrence && (
+              <Text color="gray.500" fontSize="0.875rem" m={0} ml="1.75rem">
+                The start date cannot be moved earlier than this occurrence.
               </Text>
             )}
             {startDateChanged && scope === "series" && (
