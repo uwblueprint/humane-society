@@ -94,18 +94,19 @@ const AssignTaskPage = (): React.ReactElement => {
   };
 
   const performAssign = async (single?: boolean) => {
-    if (!selectedUser) return;
     try {
       await TaskAPIClient.assignUser(
         taskId,
-        selectedUser.id,
+        selectedUser?.id ?? null,
         undefined,
         occurrenceDate,
         single,
       );
       toast({
         title: "Success",
-        description: "Task assigned successfully.",
+        description: selectedUser
+          ? "Task assigned successfully."
+          : "Task unassigned successfully.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -123,7 +124,6 @@ const AssignTaskPage = (): React.ReactElement => {
   };
 
   const handleSaveClick = async () => {
-    if (!selectedUser) return;
     if (isRecurring) {
       setShowScopeModal(true);
       return;
@@ -180,7 +180,6 @@ const AssignTaskPage = (): React.ReactElement => {
           type="button"
           variant="green"
           onClick={handleSaveClick}
-          disabled={!selectedUser}
         >
           Save
         </Button>
