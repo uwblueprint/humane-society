@@ -26,7 +26,6 @@ export const INTERACTION_TYPE_GROUPS: InteractionTypeGroup[] = [
       "Changed Task Start Date",
       "Changed Task End Date",
       "Deleted Recurring Task",
-      "Changed Recurring Task Name",
       "Changed Recurring Task Days",
       "Changed Recurring Task Cadence",
     ],

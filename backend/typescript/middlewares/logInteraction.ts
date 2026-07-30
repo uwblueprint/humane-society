@@ -42,7 +42,6 @@ const TASK_INTERACTIONS = new Set<InteractionTypeEnum>([
   InteractionTypeEnum.CHANGED_TASK_START_DATE,
   InteractionTypeEnum.CHANGED_TASK_END_DATE,
   InteractionTypeEnum.DELETED_RECURRING_TASK,
-  InteractionTypeEnum.CHANGED_RECURRING_TASK_NAME,
   InteractionTypeEnum.CHANGED_RECURRING_TASK_DAYS,
   InteractionTypeEnum.CHANGED_RECURRING_TASK_CADENCE,
 ]);
@@ -225,14 +224,6 @@ const logInteraction = async (req: Request) => {
         }
         shortDescription = `Deleted recurring task ${taskTemplateName} with ${petName}`;
         longDescription = `Deleted recurring task ${taskTemplateName.toLowerCase()} with ${petName}.`;
-        break;
-
-      case InteractionTypeEnum.CHANGED_RECURRING_TASK_NAME:
-        if (!oldText || !newText || !petName) {
-          throw new Error(`Missing required fields for ${interactionType}`);
-        }
-        shortDescription = `Changed recurring task name of ${oldText} with ${petName} to ${newText}`;
-        longDescription = `Changed recurring task name from ${oldText} to ${newText} with ${petName}.`;
         break;
 
       case InteractionTypeEnum.CHANGED_RECURRING_TASK_DAYS:
