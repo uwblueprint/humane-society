@@ -20,6 +20,7 @@ const TaskManagementPage = (): React.ReactElement => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [page, setPage] = useState<number>(1);
+  const [hasError, setHasError] = useState<boolean>(false);
   const numTasksPerPage = 10;
   const isAdmin = getCurrentUserRole() === UserRoles.ADMIN;
 
@@ -31,26 +32,32 @@ const TaskManagementPage = (): React.ReactElement => {
   const handleClearFilters = () => {
     setFilters({});
     setSearch("");
+    setPage(1);
   };
 
   const handleAddTaskTemplate = () => {
     history.push(ADD_TASK_TEMPLATE_PAGE);
   };
 
+  // Reset to the first page whenever the result set changes, otherwise a stale
+  // page number can slice past the end of the filtered list and render the
+  // "no match" empty state even though there are matches.
   const handleFilterChange = (selectedFilters: Record<string, string[]>) => {
     setFilters(selectedFilters);
+    setPage(1);
   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
+    setPage(1);
   };
 
-  const filteredTasks = useMemo(() => {
-    const hasActiveFilters = Object.values(filters).some(
-      (vals) => vals && vals.length > 0,
-    );
-    const hasSearch = search.trim() !== "";
+  const hasActiveFilters = Object.values(filters).some(
+    (vals) => vals && vals.length > 0,
+  );
+  const hasSearch = search.trim() !== "";
 
+  const filteredTasks = useMemo(() => {
     // If no filters and no search, just return everything
     if (!hasActiveFilters && !hasSearch) return tasks;
 
@@ -67,7 +74,7 @@ const TaskManagementPage = (): React.ReactElement => {
           task.name.toLowerCase().includes(search.toLowerCase()) ||
           task.instructions?.toLowerCase().includes(search.toLowerCase()),
       );
-  }, [filters, search, tasks]);
+  }, [hasActiveFilters, hasSearch, filters, search, tasks]);
 
   const filteredTasksLength = filteredTasks.length;
 
@@ -77,9 +84,11 @@ const TaskManagementPage = (): React.ReactElement => {
 
       if (fetchedTasks != null) {
         setTasks(fetchedTasks);
+        setHasError(false);
       }
     } catch (error) {
       setTasks([]);
+      setHasError(true);
       // TODO: deprecate console use in frontend
       /* eslint-disable-next-line no-console */
       console.error("Could not fetch tasks");
@@ -125,6 +134,9 @@ const TaskManagementPage = (): React.ReactElement => {
         )}
         clearFilters={handleClearFilters}
         onTaskClick={handleTaskClick}
+        hasError={hasError}
+        hasActiveFilters={hasActiveFilters}
+        hasSearch={hasSearch}
       />
       {selectedTask && (
         <TaskDetailsModal
