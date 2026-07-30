@@ -232,6 +232,9 @@ const TaskDetailsModal = ({
       if (showLoading) setLoading(true);
       try {
         const tTask = await TaskAPIClient.getTask(taskId);
+        if (instanceDate) {
+          tTask.scheduledStartTime = instanceDate;
+        }
         setTaskData(tTask);
 
         const [tTemplate, tPet, tRecurrence] = await Promise.all([
@@ -275,7 +278,7 @@ const TaskDetailsModal = ({
         if (showLoading) setLoading(false);
       }
     },
-    [taskId, toast, authenticatedUser],
+    [taskId, instanceDate, toast, authenticatedUser],
   );
 
   useEffect(() => {
@@ -354,7 +357,7 @@ const TaskDetailsModal = ({
       await TaskAPIClient.startTask(taskId, {
         startTime: new Date().toISOString(),
         actorId: authenticatedUser?.id ?? 0,
-        targetId: taskData?.petId ?? 0,
+        targetId: taskData?.id ?? 0,
         taskTemplateName: templateData?.name ?? "",
         petName: petData?.name ?? "",
         actorName: `${authenticatedUser?.firstName ?? ""} ${
@@ -386,7 +389,7 @@ const TaskDetailsModal = ({
       await TaskAPIClient.startTask(taskId, {
         startTime: new Date().toISOString(),
         actorId: authenticatedUser?.id ?? 0,
-        targetId: taskData?.petId ?? 0,
+        targetId: taskData?.id ?? 0,
         taskTemplateName: templateData?.name ?? "",
         petName: petData?.name ?? "",
         actorName: `${authenticatedUser?.firstName ?? ""} ${
@@ -497,7 +500,7 @@ const TaskDetailsModal = ({
               Assign to Me
             </Button>
           )}
-          {status === "Assigned" && (
+          {status === "Assigned" && isToday(taskData?.scheduledStartTime) && (
             <Button
               variant="dark-blue"
               size="medium"
