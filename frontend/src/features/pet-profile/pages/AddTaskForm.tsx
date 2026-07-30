@@ -230,7 +230,8 @@ const AddTaskForm = ({
       ...(isRepeating
         ? (["recurringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
         : []),
-      ...(isRepeating && getValues("endMonth")
+      ...(isRepeating &&
+      (getValues("endMonth") || getValues("endDay") || getValues("endYear"))
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
         : []),
     ];

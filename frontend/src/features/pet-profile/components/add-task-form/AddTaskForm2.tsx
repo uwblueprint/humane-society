@@ -695,11 +695,32 @@ const AddTaskForm2 = ({
                   name="endDay"
                   rules={{
                     validate: {
+                      isComplete: (endDay) => {
+                        // read from getValues, not the watched closure vars:
+                        // trigger("endDay") fires synchronously from the
+                        // month/year onSelect, before this rule re-renders
+                        const { endMonth: month, endYear: year } = getValues();
+                        const anySet = !!month || !!endDay || !!year;
+                        const allSet = !!month && !!endDay && !!year;
+                        return (
+                          !anySet ||
+                          allSet ||
+                          "Enter a full end date, or press Clear to remove it."
+                        );
+                      },
                       isValid: (endDay) => {
-                        const { startDay } = getValues();
-                        if (!endDay || !endMonth || !endYear) return true;
-                        const end = toDate(endMonth, endDay, endYear);
-                        const start = toDate(startMonth, startDay, startYear);
+                        // same reason as isComplete: read live form state, not
+                        // the watched closure vars, which lag one render behind
+                        const {
+                          startMonth: sMonth,
+                          startDay: sDay,
+                          startYear: sYear,
+                          endMonth: month,
+                          endYear: year,
+                        } = getValues();
+                        if (!endDay || !month || !year) return true;
+                        const end = toDate(month, endDay, year);
+                        const start = toDate(sMonth, sDay, sYear);
                         return (
                           end > start || "End date cannot precede start date."
                         );

@@ -10,7 +10,6 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
-  status: PetStatus;
   breed?: string;
   neutered?: boolean;
   birthday?: string;
@@ -80,7 +79,6 @@ export interface PetQuery {
 export interface PetTask {
   pet_id: number;
   name: string;
-  status: PetStatus;
   photo?: string;
   color_level: number;
   animal_tag?: AnimalTag;
@@ -104,14 +102,6 @@ export interface IPetService {
    * @throws Error if retrieval fails
    */
   getPet(id: string): Promise<PetRawDTO>;
-
-  /**
-   * retrieve all Pets
-   * @param
-   * @returns returns array of Pets
-   * @throws Error if retrieval fails
-   */
-  getPets(): Promise<PetResponseDTO[]>;
 
   /**
    * create a Pet with the fields given in the DTO, return created Pet
