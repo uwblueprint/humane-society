@@ -118,10 +118,10 @@ const PetListPage = (): React.ReactElement => {
       // Map section names to PetListSectionKey
       if (sectionName === "Assigned to You") {
         result["Assigned to You"] = petInfos;
-      } else if (sectionName === "Has Unassigned Tasks") {
-        result["Has Unassigned Tasks"] = petInfos;
-      } else if (sectionName === "All Tasks Assigned") {
-        result["All Tasks Assigned"] = petInfos;
+      } else if (sectionName === "Unassigned Tasks") {
+        result["Unassigned Tasks"] = petInfos;
+      } else if (sectionName === "Assigned Tasks") {
+        result["Assigned Tasks"] = petInfos;
       } else if (sectionName === "No Tasks") {
         result["No Tasks"] = petInfos;
       } else if (sectionName === "Other Pets") {

@@ -18,13 +18,16 @@ import {
   UserManagementIcon,
 } from "../../../assets/icons";
 import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
-import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
+import AUTHENTICATED_USER_KEY, {
+  STAFF_BEHAVIOURISTS_ADMIN,
+} from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   const role = getCurrentUserRole();
   const isAdmin = role === "Administrator";
   const isStaffOrBehaviourist =
     role === "Staff" || role === "Animal Behaviourist";
+  const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(role ?? "");
   const history = useHistory();
 
   const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
@@ -77,7 +80,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
             route={TASK_MANAGEMENT_PAGE}
           />
         )}
-        {isAdmin && (
+        {canViewLogs && (
           <NavLink
             text="Logs"
             icon={LogIcon}
