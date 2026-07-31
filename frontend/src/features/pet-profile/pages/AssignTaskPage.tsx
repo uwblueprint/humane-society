@@ -33,7 +33,23 @@ const AssignTaskPage = (): React.ReactElement => {
     try {
       const fetchedUsers = await UserAPIClient.get();
       if (fetchedUsers != null) {
-        setUsers(fetchedUsers.filter((user) => user.role !== UserRoles.ADMIN));
+        const nonAdminUsers = fetchedUsers.filter(
+          (user) => user.role !== UserRoles.ADMIN,
+        );
+        const usersWithPhotoUrls = await Promise.all(
+          nonAdminUsers.map(async (user) => {
+            if (user.profilePhoto) {
+              try {
+                const url = await UserAPIClient.getProfilePhotoUrl(user.id);
+                return { ...user, profilePhoto: url };
+              } catch {
+                return { ...user, profilePhoto: undefined };
+              }
+            }
+            return user;
+          }),
+        );
+        setUsers(usersWithPhotoUrls);
       }
     } catch (error) {
       setErrorMessage(`${error}`);
