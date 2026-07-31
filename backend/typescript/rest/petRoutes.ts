@@ -6,17 +6,12 @@ import {
   /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
-import {
-  PetResponseDTO,
-  IPetService,
-  PetRequestDTO,
-} from "../services/interfaces/petService";
+import { IPetService, PetRequestDTO } from "../services/interfaces/petService";
 import {
   getErrorMessage,
   INTERNAL_SERVER_ERROR_MESSAGE,
   NotFoundError,
 } from "../utilities/errorUtils";
-import { sendResponseByMimeType } from "../utilities/responseUtil";
 import logInteraction from "../middlewares/logInteraction";
 import {
   ACCEPTED_TYPES,
@@ -43,7 +38,6 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
-      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       weight: body.weight,
@@ -74,6 +68,7 @@ petRouter.delete("/:id", async (req, res) => {
 
   try {
     const deletedId = await petService.deletePet(id);
+    await logInteraction(req);
     res.status(200).json({ id: deletedId });
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
@@ -108,7 +103,6 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
-      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       neutered: body.neutered,
@@ -226,21 +220,6 @@ petRouter.post("/:id/profile-photo/default", async (req, res) => {
   }
 });
 
-/* Get all Pets */
-petRouter.get("/", async (req, res) => {
-  const contentType = req.headers["content-type"];
-  try {
-    const pets = await petService.getPets();
-    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
-  } catch (e: unknown) {
-    await sendResponseByMimeType(res, 500, contentType, [
-      {
-        error: INTERNAL_SERVER_ERROR_MESSAGE,
-      },
-    ]);
-  }
-});
-
 /* Get PetList by userId */
 petRouter.get("/list/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -290,6 +269,21 @@ petRouter.get("/:id", async (req, res) => {
     } else {
       res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
     }
+  }
+});
+
+/* Change pet name by id */
+petRouter.patch("/:id/name", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await petService.updatePet(id, {
+      name: req.body.name,
+    } as Partial<PetRequestDTO>);
+    await logInteraction(req);
+    res.status(200).json(updated);
+  } catch (e: unknown) {
+    res.status(500).send(getErrorMessage(e));
   }
 });
 

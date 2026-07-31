@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Flex, Text } from "@chakra-ui/react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
@@ -9,6 +9,7 @@ import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import Button from "../../../components/common/Button";
 import UserRoles from "../../../constants/UserConstants";
 import { ColorLevel, AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
+import AuthContext from "../../../contexts/AuthContext";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import * as Routes from "../../../constants/Routes";
 import NavBar from "../../../components/common/navbar/NavBar";
@@ -26,6 +27,7 @@ export interface InviteUserFormData {
 
 const InviteUserPage = (): React.ReactElement => {
   const history = useHistory();
+  const { authenticatedUser } = useContext(AuthContext);
   const [formData, setFormData] = useState<InviteUserFormData>({
     firstName: "",
     lastName: "",
@@ -84,7 +86,8 @@ const InviteUserPage = (): React.ReactElement => {
         !phoneRegex.test(formData.phoneNumber) &&
         !phoneRegex2.test(formData.phoneNumber)
       ) {
-        newErrors.phoneNumber = "Phone number must be in xxx-xxx-xxxx format";
+        newErrors.phoneNumber =
+          "Phone number must be in xxx-xxx-xxxx or xxxxxxxxxx format";
       }
     }
 
@@ -156,7 +159,11 @@ const InviteUserPage = (): React.ReactElement => {
       });
 
       // Step 3: Send the invite email
-      await UserAPIClient.invite(formData.email);
+      await UserAPIClient.invite(formData.email, {
+        actorId: authenticatedUser!.id,
+        targetId: newUser.id,
+        targetName: `${formData.firstName} ${formData.lastName}`,
+      });
 
       // Navigate back to user management page
       setIsSuccessModalOpen(true);

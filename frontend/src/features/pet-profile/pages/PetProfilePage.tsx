@@ -1,6 +1,6 @@
 /* eslint  react/jsx-props-no-spreading: 0 */ // --> OFF
 import { Flex, Spinner, Text } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Route,
   Switch,
@@ -26,6 +26,7 @@ import TaskDetailsModal from "../components/TaskDetailsModal";
 import CalendarDateSelector from "../../user-profile/components/CalendarDateSelector";
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
+import SurveyModal from "../components/surveyModal";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -68,59 +69,65 @@ const PetProfilePage = (): React.ReactElement => {
   );
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedInstanceDate, setSelectedInstanceDate] = useState<
+    string | undefined
+  >(undefined);
+  const [showSurvey, setShowSurvey] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!petId || Number.isNaN(petId)) {
-        history.push("/not-found");
-        return;
-      }
+  const fetchTasks = useCallback(async () => {
+    if (!petId || Number.isNaN(petId)) {
+      history.push("/not-found");
+      return;
+    }
 
-      try {
-        const dateString = [
-          selectedDate.getFullYear(),
-          String(selectedDate.getMonth() + 1).padStart(2, "0"),
-          String(selectedDate.getDate()).padStart(2, "0"),
-        ].join("-");
-        const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
-          petId,
-          dateString,
-        );
-        const sortedTasks = [...fetchedTasks].sort(
-          (a, b) => sortTask(a) - sortTask(b),
-        );
-        setTasks(sortedTasks);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    };
+    try {
+      const dateString = [
+        selectedDate.getFullYear(),
+        String(selectedDate.getMonth() + 1).padStart(2, "0"),
+        String(selectedDate.getDate()).padStart(2, "0"),
+      ].join("-");
+      const fetchedTasks = await TaskAPIClient.getPetTasksByDate(
+        petId,
+        dateString,
+      );
+      const sortedTasks = [...fetchedTasks].sort(
+        (a, b) => sortTask(a) - sortTask(b),
+      );
+      setTasks(sortedTasks);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [petId, selectedDate, history]);
+
+  useEffect(() => {
     fetchTasks();
     setLoading(false);
-  }, [petId, selectedDate, history, location.key]);
+  }, [fetchTasks, location.key]);
+
+  const fetchPet = useCallback(async () => {
+    if (!petId) {
+      history.push("/not-found");
+      return;
+    }
+    try {
+      const data = await PetAPIClient.getPet(petId);
+      setPetData(data);
+      if (data.photo) {
+        const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+        setProfilePhoto(photo);
+      }
+    } catch (error) {
+      history.push("/not-found");
+    } finally {
+      setLoading(false);
+    }
+  }, [petId, history]);
 
   useEffect(() => {
-    const fetchPet = async () => {
-      if (!petId) {
-        history.push("/not-found");
-        return;
-      }
-      try {
-        const data = await PetAPIClient.getPet(petId);
-        setPetData(data);
-        if (data.photo) {
-          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
-          setProfilePhoto(photo);
-        }
-      } catch (error) {
-        history.push("/not-found");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPet();
-  }, [petId, history]);
+  }, [fetchPet, location.key]);
 
   if (loading || !petData) {
     return (
@@ -142,19 +149,29 @@ const PetProfilePage = (): React.ReactElement => {
     colorLevel: colorLevelMap[petData.colorLevel],
   };
 
+  // If the viewer isn't cleared for this pet's color level, they should only
+  // see tasks they've been overridden onto (i.e. assigned despite the mismatch).
+  const visibleTasks =
+    authenticatedUser &&
+    authenticatedUser.colorLevel < petData.colorLevel &&
+    authenticatedUser?.role === UserRoles.VOLUNTEER
+      ? tasks.filter((task) => task.userId === authenticatedUser.id)
+      : tasks;
+
   let content;
   if (loading) {
     content = <Spinner />;
-  } else if (tasks.length === 0) {
+  } else if (visibleTasks.length === 0) {
     content = <Text>No tasks currently.</Text>;
   } else {
     content = (
       <PetProfileTaskTableSection
-        tasks={tasks}
+        tasks={visibleTasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}
-        onTaskClick={(taskId) => {
+        onTaskClick={(taskId, instanceDate) => {
           setSelectedTaskId(taskId);
+          setSelectedInstanceDate(instanceDate);
           setIsModalOpen(true);
         }}
       />
@@ -261,6 +278,23 @@ const PetProfilePage = (): React.ReactElement => {
           taskId={selectedTaskId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          instanceDate={selectedInstanceDate}
+          onTaskCompleted={async () => {
+            await Promise.all([fetchTasks(), fetchPet()]);
+            setSelectedTaskId(null);
+            setIsModalOpen(false);
+            setShowSurvey(true);
+          }}
+          onTaskUpdated={async () => {
+            await Promise.all([fetchTasks(), fetchPet()]);
+          }}
+        />
+      )}
+      {showSurvey && (
+        <SurveyModal
+          isOpen
+          onClose={() => setShowSurvey(false)}
+          animalTag={petData.animalTag}
         />
       )}
     </>

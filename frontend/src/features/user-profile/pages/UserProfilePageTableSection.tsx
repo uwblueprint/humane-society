@@ -1,9 +1,12 @@
 import React from "react";
 import { Flex, Text, Icon, Grid } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 import Button from "../../../components/common/Button";
+import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import { taskCategoryIcons } from "../../../components/common/TaskCategoryBadge";
+import { PET_PROFILE_PAGE } from "../../../constants/Routes";
 
 interface UserProfilePageTableSectionProps {
   tasks: ScheduledTaskDTO[];
@@ -33,13 +36,14 @@ const UserProfilePageTableSection = ({
   tasks,
   gridTemplateColumns,
 }: UserProfilePageTableSectionProps): React.ReactElement => {
+  const history = useHistory();
   return (
     <Flex direction="column">
       {tasks.map((task) => (
         <Grid
           key={task.id}
           gridTemplateColumns={gridTemplateColumns}
-          padding="1rem 2.5rem"
+          padding="1rem 1.5rem"
           alignItems="center"
           borderBottom="1px solid"
           borderColor="gray.200"
@@ -47,6 +51,8 @@ const UserProfilePageTableSection = ({
           marginBottom="0.5rem"
           marginTop="0.5rem"
           borderRadius="0.75rem"
+          cursor="pointer"
+          onClick={() => history.push(`${PET_PROFILE_PAGE}/${task.petId}`)}
         >
           <Flex align="center" gap="0.75rem">
             <Icon as={taskCategoryIcons[task.category]} boxSize="1.5rem" />
@@ -62,9 +68,16 @@ const UserProfilePageTableSection = ({
           <Text textStyle="body" m={0}>
             {task.endTime ? formatTimeFromISO(task.endTime.toString()) : "—"}
           </Text>
-          <Text textStyle="body" m={0}>
-            {task.petName ?? "—"}
-          </Text>
+          <Flex align="center" gap="0.75rem" overflow="hidden" pr="1rem">
+            <ProfilePhoto
+              image={task.petPhoto ?? undefined}
+              size="small"
+              type="pet"
+            />
+            <Text textStyle="body" m={0} isTruncated>
+              {task.petName ?? "—"}
+            </Text>
+          </Flex>
           {getStatusBadge(task)}
         </Grid>
       ))}

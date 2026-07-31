@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Flex,
   Text,
@@ -38,6 +38,9 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
   const { authenticatedUser } = useContext(AuthContext);
   const history = useHistory();
   const toast = useToast();
+  const originalValues = useRef<{ firstName: string; lastName: string } | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [localProfilePhoto, setLocalProfilePhoto] = useState<
     string | undefined
@@ -100,6 +103,10 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
           password: "",
           profilePhoto: userData.profilePhoto || "",
         });
+        originalValues.current = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        };
       } catch (error) {
         toast({
           title: "Error",
@@ -126,6 +133,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
 
   const onSubmit = async (data: FormData) => {
     const userId = Number(authenticatedUser?.id?.toString());
+    const orig = originalValues.current;
     const formattedData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -133,6 +141,22 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
     };
 
     try {
+      // Name change goes through the granular route so it writes an interaction
+      // log; the general update below still persists phone (and name) without
+      // double-logging since the PUT route doesn't log.
+      if (
+        orig &&
+        (data.firstName !== orig.firstName || data.lastName !== orig.lastName)
+      ) {
+        await UserAPIClient.updateName(userId, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          actorId: userId,
+          targetId: userId,
+          oldUserName: `${orig.firstName} ${orig.lastName}`,
+          newUserName: `${data.firstName} ${data.lastName}`,
+        });
+      }
       const updatedUser = await UserAPIClient.update(userId, formattedData);
       reset({
         firstName: updatedUser.firstName,
@@ -181,7 +205,7 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
       history.push(`/profile/${userId}`);
     } catch (error) {
       toast({
-        title: "Upload failed",
+        title: "Update failed",
         description:
           error instanceof Error ? error.message : "An error occurred",
         status: "error",
@@ -341,6 +365,13 @@ const VolunteerViewEditUserProfilePage = (): React.ReactElement => {
               <Controller
                 name="phoneNumber"
                 control={control}
+                rules={{
+                  validate: (value) =>
+                    !value ||
+                    /^\d{3}-\d{3}-\d{4}$/.test(value) ||
+                    /^\d{10}$/.test(value) ||
+                    "Invalid number (must be in xxx-xxx-xxxx or xxxxxxxxxx format)",
+                }}
                 render={({ field }) => (
                   <Input
                     label="Phone Number"

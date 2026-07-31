@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import { Transaction } from "sequelize";
+import { sequelize } from "../models";
+import {
+  isAuthorizedByRole,
+  isAuthorizedToAssignTask,
+} from "../middlewares/auth";
 import {
   taskRequestDtoValidator,
   taskUpdateDtoValidator,
@@ -21,7 +26,11 @@ import {
   NotFoundError,
 } from "../utilities/errorUtils";
 import { sendResponseByMimeType } from "../utilities/responseUtil";
-import { Role } from "../types";
+import {
+  validateEnum,
+  validateEnumArray,
+} from "../middlewares/validators/util";
+import { Role, Days, Cadence } from "../types";
 import logInteraction from "../middlewares/logInteraction";
 import {
   buildStartDates,
@@ -182,16 +191,37 @@ taskRouter.post(
       return;
     }
 
-    const { notes, userId, scheduledStartTime } = req.body;
+    const {
+      notes,
+      userId,
+      taskTemplateId,
+      scheduledStartTime,
+      scheduledEndTime,
+      days,
+      cadence,
+      endDate,
+    } = req.body;
 
     let parsedScheduledStartTime: Date | undefined;
+    let parsedScheduledEndTime: Date | undefined;
+    let parsedRecurrenceEndDate: Date | null | undefined;
 
     if (
       (notes !== undefined && typeof notes !== "string") ||
       (userId !== undefined && typeof userId !== "number") ||
+      (taskTemplateId !== undefined && typeof taskTemplateId !== "number") ||
       (scheduledStartTime !== undefined &&
         (typeof scheduledStartTime !== "string" ||
-          Number.isNaN(new Date(scheduledStartTime).getTime())))
+          Number.isNaN(new Date(scheduledStartTime).getTime()))) ||
+      (scheduledEndTime !== undefined &&
+        (typeof scheduledEndTime !== "string" ||
+          Number.isNaN(new Date(scheduledEndTime).getTime()))) ||
+      (days !== undefined && !validateEnumArray(days, Days)) ||
+      (cadence !== undefined && !validateEnum(cadence, Cadence)) ||
+      (endDate !== undefined &&
+        endDate !== null &&
+        (typeof endDate !== "string" ||
+          Number.isNaN(new Date(endDate).getTime())))
     ) {
       res.status(400).send("Invalid request body");
       return;
@@ -199,6 +229,14 @@ taskRouter.post(
 
     if (scheduledStartTime !== undefined) {
       parsedScheduledStartTime = new Date(scheduledStartTime);
+    }
+
+    if (scheduledEndTime !== undefined) {
+      parsedScheduledEndTime = new Date(scheduledEndTime);
+    }
+
+    if (endDate !== undefined) {
+      parsedRecurrenceEndDate = endDate === null ? null : new Date(endDate);
     }
 
     try {
@@ -209,6 +247,10 @@ taskRouter.post(
         throw new NotFoundError("Given task has no start date");
       }
 
+      const isSeedDate =
+        resetDateToUTCMidnight(task.scheduledStartTime).getTime() ===
+        resetDateToUTCMidnight(date).getTime();
+
       const actualStart = resetDateToUTCMidnight(task.scheduledStartTime);
       const startDates =
         recurrence.days && recurrence.days.length > 0
@@ -217,9 +259,19 @@ taskRouter.post(
       const matchesPattern = startDates.some((startDate) =>
         isDateInRecurrence(startDate, date, recurrence.cadence),
       );
-      if (!matchesPattern) {
+      if (!isSeedDate && !matchesPattern) {
         throw new BadRequestError(
           "Given date doesn't follow the recurrence rule",
+        );
+      }
+
+      if (
+        recurrence.endDate &&
+        resetDateToUTCMidnight(date).getTime() >
+          resetDateToUTCMidnight(recurrence.endDate).getTime()
+      ) {
+        throw new BadRequestError(
+          "Given date is after the recurrence's end date",
         );
       }
 
@@ -228,43 +280,143 @@ taskRouter.post(
           ? parsedScheduledStartTime
           : date;
 
+      let newScheduledEndTime = parsedScheduledEndTime;
+      if (newScheduledEndTime === undefined && task.scheduledEndTime) {
+        const seedEnd = new Date(task.scheduledEndTime);
+        newScheduledEndTime = new Date(newScheduledStartTime);
+        newScheduledEndTime.setUTCHours(
+          seedEnd.getUTCHours(),
+          seedEnd.getUTCMinutes(),
+          seedEnd.getUTCSeconds(),
+          seedEnd.getUTCMilliseconds(),
+        );
+      }
+
+      if (
+        newScheduledEndTime !== undefined &&
+        newScheduledEndTime <= newScheduledStartTime
+      ) {
+        throw new BadRequestError(
+          "scheduledEndTime must be after scheduledStartTime",
+        );
+      }
+
       if (single) {
-        await taskService.excludeDate(taskId, date);
-        const singleTask = await taskService.createTask({
-          userId: userId ?? task.userId,
-          petId: task.petId,
-          taskTemplateId: task.taskTemplateId,
-          scheduledStartTime: newScheduledStartTime,
-          startTime: task.startTime,
-          endTime: task.endTime,
-          notes: notes ?? task.notes,
-        });
+        const transaction: Transaction = await sequelize.transaction();
+        let singleTask;
+        try {
+          await taskService.excludeDate(taskId, date, transaction);
+          singleTask = await taskService.createTask(
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
         res.status(200).json({
           singleTask,
+        });
+      } else if (isSeedDate) {
+        // Editing from the seed occurrence
+        const transaction: Transaction = await sequelize.transaction();
+        let updatedTask;
+        let updatedRecurrence;
+        try {
+          updatedTask = await taskService.updateTask(
+            taskId,
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
+          updatedRecurrence = await taskService.updateRecurrence(
+            taskId,
+            {
+              ...(cadence !== undefined ? { cadence } : {}),
+              ...(days !== undefined ? { days } : {}),
+              ...(parsedRecurrenceEndDate !== undefined
+                ? { endDate: parsedRecurrenceEndDate }
+                : {}),
+            },
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
+        res.status(200).json({
+          task: updatedTask,
+          recurrenceTask: updatedRecurrence,
         });
       } else {
         const newEndDate = new Date(
           resetDateToUTCMidnight(date).getTime() - 24 * 60 * 60 * 1000,
         );
 
-        await taskService.updateRecurrence(taskId, {
-          endDate: newEndDate,
-        });
-        const newTask = await taskService.createTask({
-          userId: userId ?? task.userId,
-          petId: task.petId,
-          taskTemplateId: task.taskTemplateId,
-          scheduledStartTime: newScheduledStartTime,
-          startTime: task.startTime,
-          endTime: task.endTime,
-          notes: notes ?? task.notes,
-        });
-        const newRecurrence = await taskService.createRecurrence(
-          newTask.id.toString(),
-          recurrence.cadence,
-          recurrence.days,
-          recurrence.endDate,
-        );
+        const transaction: Transaction = await sequelize.transaction();
+        let newTask;
+        let newRecurrence;
+        try {
+          await taskService.updateRecurrence(
+            taskId,
+            { endDate: newEndDate },
+            transaction,
+          );
+          newTask = await taskService.createTask(
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
+
+          const carriedExclusions = (recurrence.exclusions ?? []).filter(
+            (ex) =>
+              resetDateToUTCMidnight(new Date(ex)).getTime() >
+              resetDateToUTCMidnight(newScheduledStartTime).getTime(),
+          );
+          const resolvedNewRecurrenceEndDate =
+            parsedRecurrenceEndDate !== undefined
+              ? parsedRecurrenceEndDate ?? undefined
+              : recurrence.endDate ?? undefined;
+          newRecurrence = await taskService.createRecurrence(
+            newTask.id.toString(),
+            cadence ?? recurrence.cadence,
+            days ?? recurrence.days,
+            resolvedNewRecurrenceEndDate,
+            carriedExclusions,
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
         res.status(200).json({
           task: newTask,
           recurrenceTask: newRecurrence,
@@ -310,10 +462,12 @@ taskRouter.patch(
   },
 );
 
-/* Updates/Sets User assigned to an Task */
+/* Updates/Sets User assigned to an Task.
+ * Admins/Animal Behaviourists may assign anyone; other roles (e.g. Volunteers)
+ * may only self-assign (assignee in body must be their own user id). */
 taskRouter.patch(
   "/:id/assign-user",
-  isAuthorizedByRole(new Set([Role.ANIMAL_BEHAVIOURIST, Role.ADMINISTRATOR])),
+  isAuthorizedToAssignTask("userId"),
   taskUserPatchValidator,
   async (req, res) => {
     const { id } = req.params;
@@ -409,7 +563,7 @@ taskRouter.delete(
     const date =
       typeof req.query.date === "string" &&
       !Number.isNaN(new Date(req.query.date).getTime())
-        ? new Date(req.query.date)
+        ? resetDateToUTCMidnight(new Date(req.query.date))
         : undefined;
     const single =
       req.query.single === "true" || req.query.single === "false"
@@ -447,6 +601,12 @@ taskRouter.delete(
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
+        await taskService.deleteFutureTasks(
+          task.taskTemplateId,
+          task.petId,
+          date,
+          task.id,
+        );
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,
