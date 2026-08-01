@@ -393,11 +393,31 @@ const getProfilePhotoUrl = async (petId: number): Promise<string> => {
   }
 };
 
+const getProfilePhotoUrls = async (
+  petIds: number[],
+): Promise<Record<number, string>> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+  try {
+    const res = await baseAPIClient.post(
+      "/pets/profile-photos",
+      { petIds },
+      { headers: { Authorization: bearerToken } },
+    );
+    return res.data.urls;
+  } catch (error) {
+    throw new Error(`Failed to get profile photo urls: ${error}`);
+  }
+};
+
 export default {
   getPetTasks,
   getPet,
   getPetList,
   getProfilePhotoUrl,
+  getProfilePhotoUrls,
   setDefaultProfilePhoto,
   uploadProfilePhoto,
   createPet,

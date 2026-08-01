@@ -45,20 +45,34 @@ const InteractionLogPage = (): React.ReactElement => {
   const fetchInteractions = useCallback(async () => {
     try {
       const data = await InteractionAPIClient.getInteractions();
-      const dataWithPhotoUrls = await Promise.all(
-        data.map(async (log) => {
-          if (log.actor.profilePhoto) {
-            try {
-              const url = await UserAPIClient.getProfilePhotoUrl(log.actor.id);
-              return { ...log, actor: { ...log.actor, profilePhoto: url } };
-            } catch {
-              return { ...log, actor: { ...log.actor, profilePhoto: null } };
-            }
-          }
-          return log;
-        }),
+
+      const actorIdsWithPhotos = Array.from(
+        new Set(
+          data
+            .filter((log) => log.actor.profilePhoto)
+            .map((log) => log.actor.id),
+        ),
       );
-      setInteractions(dataWithPhotoUrls);
+      let photoUrlsByActorId: Record<number, string> = {};
+      if (actorIdsWithPhotos.length > 0) {
+        try {
+          photoUrlsByActorId = await UserAPIClient.getProfilePhotoUrls(
+            actorIdsWithPhotos,
+          );
+        } catch {
+          // Leave unresolved; ProfilePhoto falls back to the default avatar.
+        }
+      }
+
+      setInteractions(
+        data.map((log) => ({
+          ...log,
+          actor: {
+            ...log.actor,
+            profilePhoto: photoUrlsByActorId[log.actor.id] ?? null,
+          },
+        })),
+      );
       setHasError(false);
     } catch (error) {
       setHasError(true);

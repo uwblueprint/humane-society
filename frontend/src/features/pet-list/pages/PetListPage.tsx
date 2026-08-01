@@ -61,26 +61,32 @@ const PetListPage = (): React.ReactElement => {
       const fetchedPetsSections = await PetAPIClient.getPetList(userId);
 
       if (fetchedPetsSections != null) {
-        const sectionsWithPhotoUrls: PetListSections = {};
-        await Promise.all(
-          Object.entries(fetchedPetsSections).map(
-            async ([sectionName, pets]) => {
-              sectionsWithPhotoUrls[sectionName] = await Promise.all(
-                pets.map(async (pet) => {
-                  if (pet.photo) {
-                    try {
-                      const url = await PetAPIClient.getProfilePhotoUrl(pet.id);
-                      return { ...pet, photo: url };
-                    } catch {
-                      return { ...pet, photo: undefined };
-                    }
-                  }
-                  return pet;
-                }),
-              );
-            },
+        const petIdsWithPhotos = Array.from(
+          new Set(
+            Object.values(fetchedPetsSections)
+              .flat()
+              .filter((pet) => pet.photo)
+              .map((pet) => pet.id),
           ),
         );
+        let photoUrlsByPetId: Record<number, string> = {};
+        if (petIdsWithPhotos.length > 0) {
+          try {
+            photoUrlsByPetId = await PetAPIClient.getProfilePhotoUrls(
+              petIdsWithPhotos,
+            );
+          } catch {
+            // Leave unresolved; ProfilePhoto falls back to the default avatar.
+          }
+        }
+
+        const sectionsWithPhotoUrls: PetListSections = {};
+        Object.entries(fetchedPetsSections).forEach(([sectionName, pets]) => {
+          sectionsWithPhotoUrls[sectionName] = pets.map((pet) => ({
+            ...pet,
+            photo: photoUrlsByPetId[pet.id] ?? undefined,
+          }));
+        });
         setPetsSections(sectionsWithPhotoUrls);
       }
     } catch (error) {

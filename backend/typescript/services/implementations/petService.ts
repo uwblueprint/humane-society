@@ -75,6 +75,21 @@ class PetService implements IPetService {
     return PetStatus.DOES_NOT_NEED_CARE;
   }
 
+  async getProfilePhotosByIds(
+    petIds: number[],
+  ): Promise<Record<number, string | null>> {
+    const pets = await PgPet.findAll({
+      where: { id: petIds },
+      attributes: ["id", "photo"],
+    });
+
+    const photosById: Record<number, string | null> = {};
+    pets.forEach((pet) => {
+      photosById[pet.id] = pet.photo ?? null;
+    });
+    return photosById;
+  }
+
   async getPet(id: string): Promise<PetRawDTO> {
     let pet: PgPet | null;
     try {

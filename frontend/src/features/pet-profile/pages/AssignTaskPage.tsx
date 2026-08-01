@@ -36,20 +36,31 @@ const AssignTaskPage = (): React.ReactElement => {
         const nonAdminUsers = fetchedUsers.filter(
           (user) => user.role !== UserRoles.ADMIN,
         );
-        const usersWithPhotoUrls = await Promise.all(
-          nonAdminUsers.map(async (user) => {
-            if (user.profilePhoto) {
-              try {
-                const url = await UserAPIClient.getProfilePhotoUrl(user.id);
-                return { ...user, profilePhoto: url };
-              } catch {
-                return { ...user, profilePhoto: undefined };
-              }
-            }
-            return user;
-          }),
+
+        const userIdsWithPhotos = Array.from(
+          new Set(
+            nonAdminUsers
+              .filter((user) => user.profilePhoto)
+              .map((user) => user.id),
+          ),
         );
-        setUsers(usersWithPhotoUrls);
+        let photoUrlsByUserId: Record<number, string> = {};
+        if (userIdsWithPhotos.length > 0) {
+          try {
+            photoUrlsByUserId = await UserAPIClient.getProfilePhotoUrls(
+              userIdsWithPhotos,
+            );
+          } catch {
+            // Leave unresolved; ProfilePhoto falls back to the default avatar.
+          }
+        }
+
+        setUsers(
+          nonAdminUsers.map((user) => ({
+            ...user,
+            profilePhoto: photoUrlsByUserId[user.id],
+          })),
+        );
       }
     } catch (error) {
       setErrorMessage(`${error}`);
