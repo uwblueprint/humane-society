@@ -115,7 +115,8 @@ describe("InteractionLogPage filters", () => {
 
     const navLabel = monthsFromNow >= 0 ? "Previous month" : "Next month";
     for (let i = 0; i < Math.abs(monthsFromNow); i += 1) {
-      userEvent.click(within(popoverBody).getByLabelText(navLabel));
+      // eslint-disable-next-line no-await-in-loop
+      await userEvent.click(within(popoverBody).getByLabelText(navLabel));
     }
 
     userEvent.click(within(popoverBody).getByText("13"));
