@@ -14,7 +14,7 @@ import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { Role, UserDTO } from "../types";
+import { Role, UpdateUserDTO, UserDTO } from "../types";
 
 import {
   getErrorMessage,
@@ -285,22 +285,35 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     }
   }
 
+  const updatableFields = [
+    "firstName",
+    "lastName",
+    "role",
+    "status",
+    "colorLevel",
+    "animalTags",
+    "canSeeAllLogs",
+    "canAssignUsersToTasks",
+    "phoneNumber",
+    "profilePhoto",
+  ] as const;
+
   try {
-    const user: UserDTO = await userService.getUserById(String(userId));
-    const updatedUser = await userService.updateUserById(userId, {
-      firstName: req.body.firstName ?? user.firstName,
-      lastName: req.body.lastName ?? user.lastName,
-      email: user.email,
-      role: req.body.role ?? user.role,
-      status: req.body.status ?? user.status,
-      colorLevel: req.body.colorLevel ?? user.colorLevel,
-      animalTags: req.body.animalTags ?? user.animalTags,
-      canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
-      canAssignUsersToTasks:
-        req.body.canAssignUsersToTasks ?? user.canAssignUsersToTasks,
-      phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
-      profilePhoto: req.body.profilePhoto ?? user.profilePhoto,
+    // Existence check only — a missing user must surface as a 400, not a 500.
+    await userService.getUserById(String(userId));
+
+    // Only forward the fields the caller actually sent. This used to read the
+    // user and re-send every column, which silently reverted any concurrent
+    // write from the granular PATCH routes (e.g. a colour level set by
+    // PATCH /:id/color-level was overwritten with the value read here).
+    const updates: Partial<UpdateUserDTO> = {};
+    updatableFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
     });
+
+    const updatedUser = await userService.updateUserById(userId, updates);
     res.status(200).json(updatedUser);
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
