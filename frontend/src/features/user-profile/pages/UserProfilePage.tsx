@@ -8,6 +8,7 @@ import UserProfileSidebar from "../components/UserProfileSidebar";
 import CalendarDateSelector from "../components/CalendarDateSelector";
 import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
+import { canViewProfile } from "../../../utils/permissions";
 import { TableColumn, TableHeader } from "../../../components/common/table";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserProfilePageTableSection from "./UserProfilePageTableSection";
@@ -57,10 +58,11 @@ const ProfilePage = (): React.ReactElement => {
         try {
           const data = await UserAPIClient.get(Number(userId));
 
-          const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
           const isOwnPage = authenticatedUser?.id === userId;
 
-          if (!isAdmin && !isOwnPage) {
+          if (
+            !canViewProfile(authenticatedUser?.role as UserRoles, isOwnPage)
+          ) {
             history.push("/not-found");
             return;
           }
