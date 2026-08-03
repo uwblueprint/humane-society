@@ -53,11 +53,8 @@ export enum PetStatus {
 }
 
 export enum LastCaredFor {
-  OCCUPIED = "Occupied",
   ONE_OR_MORE_DAYS_AGO = "One or more days ago",
 }
-
-export const petStatusEnum: PetStatus[] = [...Object.values(PetStatus)];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {

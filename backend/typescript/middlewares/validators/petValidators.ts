@@ -7,7 +7,7 @@ import {
   validateNumberConstraint,
   getConstraintError,
 } from "./util";
-import { petStatusEnum, sexEnum, AnimalTag } from "../../types";
+import { sexEnum, AnimalTag } from "../../types";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable-next-line import/prefer-default-export */
@@ -34,10 +34,6 @@ export const petRequestDtoValidators = async (
 
   if (!validateNumberConstraint(body.colorLevel, 1, 5)) {
     return res.status(400).send(getConstraintError("colorLevel", 1, 5));
-  }
-
-  if (!validateEnum(body.status, petStatusEnum)) {
-    return res.status(400).send(getApiValidationError("status", "PetStatus"));
   }
 
   if (body.breed && !validatePrimitive(body.breed, "string")) {
