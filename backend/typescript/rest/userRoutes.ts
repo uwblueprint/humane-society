@@ -172,12 +172,26 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       res.status(404).json({ error: "Access token not found" });
       return;
     }
-    const canCreateUser = await authService.isAuthorizedByRole(
+    const isAdministrator = await authService.isAuthorizedByRole(
       accessToken,
-      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
+      new Set([Role.ADMINISTRATOR]),
     );
+    const canCreateUser =
+      isAdministrator ||
+      (await authService.isAuthorizedByRole(
+        accessToken,
+        new Set([Role.ANIMAL_BEHAVIOURIST]),
+      ));
     if (!canCreateUser) {
       res.status(403).json({ error: "Not authorized to create user" });
+      return;
+    }
+    // Creating a user is not the same right as granting a role: only an admin
+    // may mint another admin. Mirrors canAssignRole in frontend permissions.ts.
+    if (req.body.role === Role.ADMINISTRATOR && !isAdministrator) {
+      res
+        .status(403)
+        .json({ error: "Not authorized to create an administrator" });
       return;
     }
 

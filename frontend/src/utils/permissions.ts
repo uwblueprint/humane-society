@@ -79,3 +79,14 @@ export const canResendVerificationEmail = (
 ): boolean => {
   return actorRole === UserRoles.ADMIN || actorRole === UserRoles.BEHAVIOURIST;
 };
+
+// Which roles the actor may grant when inviting a new user. Creating a user and
+// granting a role are separate rights: only an admin may mint another admin,
+// but anyone who can create users may assign any other role.
+// Mirrors the guard in backend/typescript/rest/userRoutes.ts (POST /).
+export const canAssignRole = (
+  actorRole: UserRoles | null | undefined,
+  targetRole: UserRoles,
+): boolean => {
+  return targetRole !== UserRoles.ADMIN || actorRole === UserRoles.ADMIN;
+};

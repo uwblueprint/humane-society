@@ -14,6 +14,7 @@ import UserAPIClient from "../../../APIClients/UserAPIClient";
 import * as Routes from "../../../constants/Routes";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PopupModal from "../../../components/common/PopupModal";
+import { canAssignRole } from "../../../utils/permissions";
 
 export interface InviteUserFormData {
   firstName: string;
@@ -187,7 +188,7 @@ const InviteUserPage = (): React.ReactElement => {
     UserRoles.BEHAVIOURIST,
     UserRoles.STAFF,
     UserRoles.VOLUNTEER,
-  ];
+  ].filter((role) => canAssignRole(authenticatedUser?.role as UserRoles, role));
 
   const colorLevels = [
     ColorLevel.GREEN,
