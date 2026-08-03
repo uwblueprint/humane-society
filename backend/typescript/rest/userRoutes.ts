@@ -299,19 +299,30 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
   ] as const;
 
   try {
-    // Existence check only — a missing user must surface as a 400, not a 500.
-    await userService.getUserById(String(userId));
+    // Also doubles as the existence check: a missing user must surface as a
+    // 400 (NotFoundError), not a 500.
+    const existingUser: UserDTO = await userService.getUserById(String(userId));
 
     // Only forward the fields the caller actually sent. This used to read the
     // user and re-send every column, which silently reverted any concurrent
     // write from the granular PATCH routes (e.g. a colour level set by
     // PATCH /:id/color-level was overwritten with the value read here).
+    // null is treated as "not sent" to match the previous `?? user.field`
+    // behaviour: several of these columns are NOT NULL, so forwarding an
+    // explicit null would turn a silent no-op into a constraint violation.
     const updates: Partial<UpdateUserDTO> = {};
     updatableFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
+      if (req.body[field] !== undefined && req.body[field] !== null) {
         updates[field] = req.body[field];
       }
     });
+
+    // Nothing to write: Sequelize would issue no statement, and
+    // updateUserById reads 0 affected rows as "user not found" and throws.
+    if (Object.keys(updates).length === 0) {
+      res.status(200).json(existingUser);
+      return;
+    }
 
     const updatedUser = await userService.updateUserById(userId, updates);
     res.status(200).json(updatedUser);
