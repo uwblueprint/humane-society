@@ -601,12 +601,6 @@ taskRouter.delete(
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
-        await taskService.deleteFutureTasks(
-          task.taskTemplateId,
-          task.petId,
-          date,
-          task.id,
-        );
         res.status(200).json({
           task,
           recurrenceTask: updatedRecurrence,
