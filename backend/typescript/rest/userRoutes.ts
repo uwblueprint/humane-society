@@ -278,11 +278,14 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       return;
     }
   } catch (error: unknown) {
+    // Must return: without it a failed authorization check would fall through
+    // to the update below, applying the change and double-sending a response.
     if (error instanceof NotFoundError) {
       res.status(400).json({ error: getErrorMessage(error) });
     } else {
       res.status(500).json({ error: getErrorMessage(error) });
     }
+    return;
   }
 
   const updatableFields = [
