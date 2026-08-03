@@ -87,7 +87,8 @@ const InviteUserPage = (): React.ReactElement => {
         !phoneRegex.test(formData.phoneNumber) &&
         !phoneRegex2.test(formData.phoneNumber)
       ) {
-        newErrors.phoneNumber = "Phone number must be in xxx-xxx-xxxx format";
+        newErrors.phoneNumber =
+          "Phone number must be in xxx-xxx-xxxx or xxxxxxxxxx format";
       }
     }
 

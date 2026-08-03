@@ -41,7 +41,8 @@ const UserManagementTable = ({
             <Td colSpan={3}>
               <TableEmptyState
                 message="No users currently match."
-                onClearFilters={clearFilters}
+                linkLabel="Clear all"
+                onLinkClick={clearFilters}
               />
             </Td>
           </Tr>

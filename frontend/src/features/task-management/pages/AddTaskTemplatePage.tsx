@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Flex,
   Text,
-  Box,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -108,7 +107,6 @@ const AddTaskTemplatePage = (): React.ReactElement => {
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
     if (!formData.taskName.trim()) {
       newErrors.taskName = "Field is required.";
     }
@@ -117,8 +115,11 @@ const AddTaskTemplatePage = (): React.ReactElement => {
       newErrors.taskCategory = "Please select an option from the dropdown.";
     }
 
-    if (!formData.instructions?.trim()) {
-      newErrors.taskInstructions = "Information must not exceed 10,000 words.";
+    if (formData.instructions?.trim()) {
+      const wordCount = formData.instructions.trim().split(/\s+/).length;
+      if (wordCount > 10000) {
+        newErrors.taskInstructions = "Information must not exceed 10,000 words.";
+      }
     }
 
     setErrors(newErrors);
@@ -200,7 +201,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
           </Text>
         </Flex>
 
-        <Text fontSize="24px" fontWeight="600" color="gray.800" mb="2rem">
+        <Text fontSize="24px" fontWeight="600" color="gray.800" m={0} mb="2rem">
           Add Task Template
         </Text>
 
@@ -215,7 +216,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
               required
             />
 
-            <Box>
+            <Flex direction="column">
               <SingleSelect
                 label="Task Category"
                 values={taskCategories}
@@ -227,11 +228,11 @@ const AddTaskTemplatePage = (): React.ReactElement => {
                 required
               />
               {errors.taskCategory && (
-                <Text fontSize="12px" color="red.500" mt="0.5rem">
+                <Text fontSize="12px" color="red.500" m={0} mt="0.5rem">
                   {errors.taskCategory}
                 </Text>
               )}
-            </Box>
+            </Flex>
 
             <TextArea
               label="Instructions"
@@ -240,7 +241,6 @@ const AddTaskTemplatePage = (): React.ReactElement => {
               placeholder="Write task instructions here"
               error={errors.taskInstructions}
               rows={8}
-              required
             />
 
             <Flex justifyContent="flex-end" mt="2rem">
@@ -282,7 +282,7 @@ const AddTaskTemplatePage = (): React.ReactElement => {
             Quit Editing?
           </ModalHeader>
           <ModalBody pb="1.5rem">
-            <Text fontSize="16px" color="gray.600">
+            <Text fontSize="16px" color="gray.600" m={0}>
               Changes you made so far will not be saved.
             </Text>
           </ModalBody>

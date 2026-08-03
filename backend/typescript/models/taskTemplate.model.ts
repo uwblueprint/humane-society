@@ -14,4 +14,7 @@ export default class TaskTemplate extends Model {
 
   @Column({ type: DataType.TEXT, allowNull: true })
   instruction?: string;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  deleted_at?: Date;
 }
