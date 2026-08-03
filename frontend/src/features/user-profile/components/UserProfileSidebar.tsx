@@ -189,15 +189,12 @@ function UserProfileSidebar({
         <AnimalTagList isInvited={false} animalTags={animalTags} />
       </VStack>
 
-      {/* TODO: Make logout only available when userId matches currently signed in user */}
       <Flex marginTop="auto" width="100%" justifyContent="center">
-        {isInvited ? (
-          canResendVerificationEmail(currentUserRole) && (
-            <InviteUser email={email} />
-          )
-        ) : (
-          <Logout />
-        )}
+        {isInvited
+          ? canResendVerificationEmail(currentUserRole) && (
+              <InviteUser email={email} />
+            )
+          : isOwnProfile && <Logout />}
       </Flex>
     </VStack>
   );
