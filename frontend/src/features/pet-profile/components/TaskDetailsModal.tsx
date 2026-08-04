@@ -209,7 +209,16 @@ const TaskDetailsModal = ({
 
   const handleCompleteTask = async () => {
     try {
-      await TaskAPIClient.completeTask(taskId);
+      await TaskAPIClient.endTask(taskId, {
+        endTime: new Date().toISOString(),
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskId,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        actorName: `${authenticatedUser?.firstName ?? ""} ${
+          authenticatedUser?.lastName ?? ""
+        }`,
+      });
       toast({
         title: "Task completed",
         status: "success",
@@ -286,7 +295,18 @@ const TaskDetailsModal = ({
   const handleSelfAssignConfirm = async () => {
     setIsAssigning(true);
     try {
-      await TaskAPIClient.selfAssign(taskId);
+      const actorName = `${authenticatedUser?.firstName ?? ""} ${
+        authenticatedUser?.lastName ?? ""
+      }`;
+      await TaskAPIClient.assignUser(taskId, authenticatedUser?.id ?? null, {
+        previousUserId: taskData?.userId ?? null,
+        actorId: authenticatedUser?.id ?? 0,
+        targetId: taskId,
+        taskTemplateName: templateData?.name ?? "",
+        petName: petData?.name ?? "",
+        newUserName: actorName,
+        actorName,
+      });
       toast({
         title: "Success",
         description: "Task assigned successfully.",
@@ -354,7 +374,7 @@ const TaskDetailsModal = ({
       await TaskAPIClient.startTask(taskId, {
         startTime: new Date().toISOString(),
         actorId: authenticatedUser?.id ?? 0,
-        targetId: taskData?.petId ?? 0,
+        targetId: taskId,
         taskTemplateName: templateData?.name ?? "",
         petName: petData?.name ?? "",
         actorName: `${authenticatedUser?.firstName ?? ""} ${

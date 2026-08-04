@@ -78,6 +78,23 @@ const InteractionService = {
     }
   },
 
+  async hasTaskInteraction(targetTaskId: number, interactionTypeEnum: string) {
+    try {
+      const type = await InteractionType.findOne({
+        where: { action_type: interactionTypeEnum },
+      });
+      if (!type) return false;
+      const existing = await Interaction.findOne({
+        where: { target_task_id: targetTaskId, interaction_type_id: type.id },
+      });
+      return existing !== null;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Error checking existing interaction:", err);
+      return false;
+    }
+  },
+
   async getInteractionTypeId(interactionTypeEnum: string) {
     try {
       const type = await InteractionType.findOne({

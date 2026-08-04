@@ -1,21 +1,72 @@
-import { Router } from "express";
-import { isAuthorizedByRole } from "../middlewares/auth";
+import { Router, Request } from "express";
+import { isAuthorizedByRole, getAccessToken } from "../middlewares/auth";
 import {
   createRecurringTaskValidator,
   addRecurrenceToTaskValidator,
 } from "../middlewares/validators/recurrenceValidators";
 import RecurrenceService from "../services/implementations/recurrenceService";
 import { IRecurrenceService } from "../services/interfaces/recurrenceService";
+import PetService from "../services/implementations/petService";
+import TaskTemplateService from "../services/implementations/taskTemplateService";
+import AuthService from "../services/implementations/authService";
+import UserService from "../services/implementations/userService";
+import IAuthService from "../services/interfaces/authService";
+import { IPetService } from "../services/interfaces/petService";
+import { ITaskTemplateService } from "../services/interfaces/taskTemplateService";
 import {
   getErrorMessage,
   NotFoundError,
   ConflictError,
 } from "../utilities/errorUtils";
-import { Role } from "../types";
+import { Role, InteractionTypeEnum } from "../types";
+import logInteraction from "../middlewares/logInteraction";
 
 const recurrenceRouter: Router = Router();
 recurrenceRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 const recurrenceService: IRecurrenceService = new RecurrenceService();
+const petService: IPetService = new PetService();
+const taskTemplateService: ITaskTemplateService = new TaskTemplateService();
+const userService = new UserService();
+const authService: IAuthService = new AuthService(userService);
+
+// Logs ASSIGNED_TASK / SELF_ASSIGNED_TASK when a recurring task is created
+// (or recurrence is added to a task) with an assignee already picked, since
+// these routes never go through the /assign-user route.
+const logTaskCreationAssignment = async (
+  req: Request,
+  taskId: number,
+  petId: number,
+  taskTemplateId: number,
+  userId: number | null | undefined,
+): Promise<void> => {
+  if (!userId) return;
+  try {
+    const accessToken = getAccessToken(req);
+    if (!accessToken) return;
+    const actorId = Number(await authService.getUserIdByToken(accessToken));
+
+    const [pet, template, assignee] = await Promise.all([
+      petService.getPet(String(petId)),
+      taskTemplateService.getTaskTemplate(String(taskTemplateId)),
+      userService.getUserById(String(userId)),
+    ]);
+
+    req.body = {
+      actorId,
+      targetId: taskId,
+      interactionType:
+        actorId === userId
+          ? InteractionTypeEnum.SELF_ASSIGNED_TASK
+          : InteractionTypeEnum.ASSIGNED_TASK,
+      taskTemplateName: template.taskName,
+      petName: pet.name,
+      newUserName: `${assignee.firstName} ${assignee.lastName}`,
+    };
+    await logInteraction(req);
+  } catch (err: unknown) {
+    console.error("Failed to log task creation assignment:", err);
+  }
+};
 
 /* Create a new recurring task */
 recurrenceRouter.post(
@@ -44,6 +95,13 @@ recurrenceRouter.post(
         },
       });
       res.status(201).json(newRecurringTask);
+      await logTaskCreationAssignment(
+        req,
+        newRecurringTask.id,
+        body.task.petId,
+        body.task.taskTemplateId,
+        body.task.userId,
+      );
     } catch (error: unknown) {
       res.status(500).send(getErrorMessage(error));
     }
