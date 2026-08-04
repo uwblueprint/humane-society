@@ -45,6 +45,16 @@ const EditTaskScopeModal = ({
       secondaryButtonText="Cancel"
       onSecondaryClick={onCancel}
     >
+      {disableSingle && seriesDisabled && (
+        <Flex gap="0.375rem" align="flex-start" width="100%">
+          <WarningTwoIcon color="red.600" boxSize="1rem" mt="0.125rem" />
+          <Text color="red.600" fontSize="0.875rem" m={0}>
+            {disableSeries
+              ? `Neither option works here. Cancel, then either undo recurrence changes to edit just this task, or exit and make recurrence edits on a non-past task instead.`
+              : `Neither option works here. Cancel, then either undo recurrence changes to edit just this task, or keep the start date on or after this task's original date.`}
+          </Text>
+        </Flex>
+      )}
       <RadioGroup value={scope} onChange={setScope} width="100%">
         <Flex direction="column" gap="1rem" align="flex-start">
           <Flex direction="column" gap="0.375rem">
@@ -87,7 +97,7 @@ const EditTaskScopeModal = ({
                 The start date cannot be moved earlier than this occurrence.
               </Text>
             )}
-            {startDateChanged && scope === "series" && (
+            {startDateChanged && scope === "series" && !seriesDisabled && (
               <Flex gap="0.375rem" align="center" ml="1.75rem">
                 <WarningTwoIcon color="red.600" boxSize="1rem" />
                 <Text color="red.600" fontSize="0.875rem" m={0}>
