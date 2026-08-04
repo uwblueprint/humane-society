@@ -11,6 +11,8 @@ export enum PetStatus {
   DOES_NOT_NEED_CARE = "Does Not Need Care",
 }
 
+export const ASSIGNED_TO_YOU_FILTER_VALUE = "Assigned to You" as const;
+
 export interface Pet {
   id: number;
   name: string;
@@ -46,9 +48,10 @@ export type PetListSectionKey =
   | "All Tasks Assigned"
   | "No Tasks";
 
-
 // For role-based view
-export type PetListRecord = Partial<Record<PetListSectionKey, PetListItemDTO[]>>;
+export type PetListRecord = Partial<
+  Record<PetListSectionKey, PetListItemDTO[]>
+>;
 
 export interface PetListItemDTO {
   id: number;

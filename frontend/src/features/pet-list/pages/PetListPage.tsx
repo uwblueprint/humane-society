@@ -8,6 +8,7 @@ import AUTHENTICATED_USER_KEY, {
   STAFF_BEHAVIOURISTS_ADMIN,
 } from "../../../constants/AuthConstants";
 import {
+  ASSIGNED_TO_YOU_FILTER_VALUE,
   PetListItemDTO,
   PetListRecord,
   PetListSectionKey,
@@ -84,8 +85,12 @@ const PetListPage = (): React.ReactElement => {
             if (filters[key].length === 0) return true;
 
             if (key === "status") {
-              const { "Assigned to You": assignedToYouSelected, ...rest } =
-                Object.fromEntries(filters[key].map((value) => [value, true]));
+              const {
+                [ASSIGNED_TO_YOU_FILTER_VALUE]: assignedToYouSelected,
+                ...rest
+              } = Object.fromEntries(
+                filters[key].map((value) => [value, true]),
+              );
               const statusValues = Object.keys(rest);
               return (
                 (assignedToYouSelected && pet.isAssignedToMe) ||
