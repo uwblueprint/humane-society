@@ -39,7 +39,9 @@ export const getTaskSortRank = (
 ): number => {
   const isCompleted = !!task.endTime;
   const isAssigned = !!task.userId;
-  const isStarted = !!task.startTime;
+  // Matches getTaskDetailedStatus: a task from a past day reads as "Incomplete"
+  // rather than in-progress/occupied, so it must not sort into those bands.
+  const isStarted = !!task.startTime && !isPastDay(task.scheduledStartTime);
   const isPastStartTime = task.scheduledStartTime
     ? new Date(task.scheduledStartTime) < new Date()
     : false;
