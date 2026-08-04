@@ -340,7 +340,7 @@ const AddTaskForm2 = ({
           </Text>
         )}
         {recurrenceWarnings?.startDate && (
-          <RecurrenceWarning message="All future tasks will now repeat from this new start date." />
+          <RecurrenceWarning message="If you apply this to following tasks, they will repeat from the new start date." />
         )}
       </Flex>
 
