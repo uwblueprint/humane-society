@@ -1,4 +1,7 @@
 import { ALL_ROLES, STATUS } from "../constants/AuthConstants";
+import INTERACTION_TYPES, {
+  INTERACTION_TYPE_GROUPS,
+} from "../constants/InteractionConstants";
 import { FilterSection } from "../types/FilterTypes";
 import { PetStatus } from "../types/PetTypes";
 import { AnimalTag, ColorLevel, TaskCategory } from "../types/TaskTypes";
@@ -80,14 +83,27 @@ const filterConfig: Record<string, FilterSection[]> = {
   ],
   interactionLog: [
     {
+      name: "Interaction",
+      value: "interactionType",
+      kind: "grouped-checkbox",
+      options: INTERACTION_TYPES,
+      groups: INTERACTION_TYPE_GROUPS,
+    },
+    {
       name: "Animal Tag",
       value: "animalTag",
       options: Object.values(AnimalTag),
     },
     {
-      name: "Task Category",
-      value: "taskCategory",
-      options: Object.values(TaskCategory),
+      name: "Role",
+      value: "role",
+      options: Array.from(ALL_ROLES),
+    },
+    {
+      name: "Date",
+      value: "date",
+      kind: "date",
+      options: [],
     },
   ],
 };
