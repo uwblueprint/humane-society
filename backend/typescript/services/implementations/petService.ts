@@ -425,6 +425,12 @@ class PetService implements IPetService {
 
     allPets
       .filter((pet) => {
+        // A pet assigned to me (e.g. an override assignment) always shows,
+        // regardless of colour/tag eligibility - otherwise the volunteer has
+        // assigned work they can never discover. isAssignedToMe is only set
+        // for an incomplete task today, so allTasksAssigned is already non-null.
+        if (pet.isAssignedToMe) return true;
+
         const canCare = this.canVolunteerCareToday(
           user,
           petAnimalTagMap[pet.id],
