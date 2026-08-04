@@ -30,7 +30,7 @@ const PetListTable = ({
     [petsRecord],
   );
   const message = (() => {
-    if (hasError) return "No pets currently match.";
+    if (hasError) return "Unable to load pets.";
     if (isLoading) return "Loading pets...";
     if (hasNoPets) return "There are currently no pets.";
     return "No pets currently match.";
