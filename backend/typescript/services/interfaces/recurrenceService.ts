@@ -32,7 +32,6 @@ export interface RecurringTaskResponseDTO {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime?: Date;
-  scheduledEndTime?: Date;
   startTime?: Date;
   endTime?: Date;
   notes?: string;

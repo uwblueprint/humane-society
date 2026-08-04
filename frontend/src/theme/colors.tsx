@@ -2,9 +2,6 @@ const colors = {
   white: {
     default: "#FFFFFF",
   },
-  overlay: {
-    default: "rgba(26, 32, 44, 0.6)",
-  },
   gray: {
     50: "#F7FAFC",
     100: "#EDF2F7",

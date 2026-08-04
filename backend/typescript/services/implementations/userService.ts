@@ -7,58 +7,11 @@ import {
   UserDTO,
   UserStatus,
 } from "../../types";
-import {
-  ConflictError,
-  getErrorMessage,
-  NotFoundError,
-} from "../../utilities/errorUtils";
+import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
 import PgUser from "../../models/user.model";
-import Task from "../../models/task.model";
-import Interaction from "../../models/interaction.model";
 
 const Logger = logger(__filename);
-
-// Distinct, frontend-matchable messages thrown when a user cannot be deleted
-// because deleting them would violate a foreign key referencing them. The two
-// cases are kept separate because only one of them is actionable: tasks can be
-// unassigned, interaction logs cannot be removed through the app at all.
-export const DELETE_BLOCKED_BY_TASKS_ERROR =
-  "Cannot delete user with assigned tasks.";
-export const DELETE_BLOCKED_BY_LOGS_ERROR =
-  "Cannot delete user with interaction logs.";
-
-// Counts the rows behind the foreign keys that block deleting a user:
-// tasks.user_id and interactions.actor_id are both ON DELETE NO ACTION.
-// interactions.target_user_id is ON DELETE SET NULL, so it does not block
-// deletion and is intentionally excluded.
-export const getUserDeletionBlockers = async (
-  userId: number,
-): Promise<{ assignedTaskCount: number; interactionCount: number }> => {
-  const [assignedTaskCount, interactionCount] = await Promise.all([
-    Task.count({ where: { user_id: userId } }),
-    Interaction.count({ where: { actor_id: userId } }),
-  ]);
-  return { assignedTaskCount, interactionCount };
-};
-
-// Pre-check so a blocked delete surfaces a clear error rather than a raw
-// Postgres FK-constraint error. Logs are reported ahead of tasks: when a user
-// has both, unassigning their tasks still would not make them deletable.
-const assertUserHasNoBlockingReferences = async (
-  userId: number,
-): Promise<void> => {
-  const { assignedTaskCount, interactionCount } = await getUserDeletionBlockers(
-    userId,
-  );
-
-  if (interactionCount > 0) {
-    throw new ConflictError(DELETE_BLOCKED_BY_LOGS_ERROR);
-  }
-  if (assignedTaskCount > 0) {
-    throw new ConflictError(DELETE_BLOCKED_BY_TASKS_ERROR);
-  }
-};
 
 class UserService implements IUserService {
   /* eslint-disable class-methods-use-this */
@@ -384,8 +337,6 @@ class UserService implements IUserService {
         throw new Error(`userid ${userId} not found.`);
       }
 
-      await assertUserHasNoBlockingReferences(deletedUser.id);
-
       const numDestroyed: number = await PgUser.destroy({
         where: { id: userId },
       });
@@ -442,8 +393,6 @@ class UserService implements IUserService {
       if (!deletedUser) {
         throw new Error(`userid ${firebaseUser.uid} not found.`);
       }
-
-      await assertUserHasNoBlockingReferences(deletedUser.id);
 
       const numDestroyed: number = await PgUser.destroy({
         where: { auth_id: firebaseUser.uid },

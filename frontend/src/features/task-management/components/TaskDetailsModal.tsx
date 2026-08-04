@@ -19,8 +19,6 @@ import Button from "../../../components/common/Button";
 import TaskCategoryBadge from "../../../components/common/TaskCategoryBadge";
 import { EDIT_TASK_TEMPLATE_PAGE } from "../../../constants/Routes";
 import { Task } from "../../../types/TaskTypes";
-import { getCurrentUserRole } from "../../../utils/CommonUtils";
-import UserRoles from "../../../constants/UserConstants";
 
 interface TaskDetailsModelsProps {
   taskTemplateId: number;
@@ -36,7 +34,6 @@ const TaskDetailsModal = ({
   const toast = useToast();
   const history = useHistory();
   const [taskTemplateData, setTaskTemplateData] = useState<Task | null>(null);
-  const isAdmin = getCurrentUserRole() === UserRoles.ADMIN;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -120,17 +117,15 @@ const TaskDetailsModal = ({
           </ModalBody>
 
           <ModalFooter paddingInline="2.5rem">
-            {isAdmin && (
-              <Button
-                variant="blue-outline"
-                width="100%"
-                onClick={() => {
-                  history.push(`${EDIT_TASK_TEMPLATE_PAGE}/${taskTemplateId}`);
-                }}
-              >
-                Edit Task
-              </Button>
-            )}
+            <Button
+              variant="blue-outline"
+              width="100%"
+              onClick={() => {
+                history.push(`${EDIT_TASK_TEMPLATE_PAGE}/${taskTemplateId}`);
+              }}
+            >
+              Edit Task
+            </Button>
           </ModalFooter>
         </Flex>
       </ModalContent>

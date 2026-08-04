@@ -33,15 +33,7 @@ interactionRouter.get("/", async (req, res) => {
       return;
     }
 
-    // Staff may only see user-info interactions they performed themselves, so we
-    // resolve the requester's role AND id and let the service filter accordingly.
-    const requesterRole = await authService.getUserRoleByToken(accessToken);
-    const requesterId = Number(await authService.getUserIdByToken(accessToken));
-
-    const interactions = await InteractionService.getInteractions(
-      requesterRole,
-      requesterId,
-    );
+    const interactions = await InteractionService.getInteractions();
     res.status(200).json(interactions);
   } catch (error: unknown) {
     res.status(500).json({

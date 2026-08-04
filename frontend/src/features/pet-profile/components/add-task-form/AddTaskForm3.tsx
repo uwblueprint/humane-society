@@ -3,7 +3,6 @@ import { Flex, useToast } from "@chakra-ui/react";
 import UserSelection from "../UserSelection";
 import UserAPIClient from "../../../../APIClients/UserAPIClient";
 import { User } from "../../../../types/UserTypes";
-import UserRoles from "../../../../constants/UserConstants";
 
 interface AddTaskForm3Props {
   petColorLevel: number;
@@ -30,9 +29,7 @@ const AddTaskForm3 = ({
       setLoading(true);
       try {
         const fetchedUsers = await UserAPIClient.get();
-        if (fetchedUsers != null) {
-          setUsers(fetchedUsers.filter((user) => user.role !== UserRoles.ADMIN));
-        }
+        if (fetchedUsers != null) setUsers(fetchedUsers);
       } catch (error) {
         setErrorMessage(`${error}`);
         toast({

@@ -8,43 +8,13 @@ interface TaskManagementTableProps {
   tasks: Task[];
   clearFilters: () => void;
   onTaskClick: (task: Task) => void;
-  hasError: boolean;
-  hasActiveFilters: boolean;
-  hasSearch: boolean;
 }
 
 const TaskManagementTable = ({
   tasks,
   clearFilters,
   onTaskClick,
-  hasError,
-  hasActiveFilters,
-  hasSearch,
 }: TaskManagementTableProps): React.ReactElement => {
-  const renderEmptyState = () => {
-    if (hasError) {
-      return (
-        <TableEmptyState
-          message="Unable to load templates."
-          linkLabel="Refresh page"
-          onLinkClick={() => window.location.reload()}
-        />
-      );
-    }
-
-    if (hasActiveFilters || hasSearch) {
-      return (
-        <TableEmptyState
-          message="No templates currently match."
-          linkLabel="Clear all"
-          onLinkClick={clearFilters}
-        />
-      );
-    }
-
-    return <TableEmptyState message="No templates to display." />;
-  };
-
   return (
     <Flex width="100%" overflowX="auto">
       <Table width="100%" minWidth="50rem" textAlign="left" layout="fixed">
@@ -71,8 +41,11 @@ const TaskManagementTable = ({
         {tasks.length === 0 ? (
           <Tbody>
             <Tr>
-              <Td colSpan={3} borderBottom="none">
-                {renderEmptyState()}
+              <Td colSpan={3}>
+                <TableEmptyState
+                  message="No tasks currently match."
+                  onClearFilters={clearFilters}
+                />
               </Td>
             </Tr>
           </Tbody>

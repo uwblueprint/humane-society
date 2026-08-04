@@ -3,31 +3,28 @@ import { Flex, Text } from "@chakra-ui/react";
 
 export interface TableEmptyStateProps {
   message: string;
-  linkLabel?: string;
-  onLinkClick?: () => void;
+  onClearFilters?: () => void;
 }
 
 const TableEmptyState = ({
   message,
-  linkLabel,
-  onLinkClick,
+  onClearFilters,
 }: TableEmptyStateProps): React.ReactElement => {
-
   return (
     <Flex direction="column" alignItems="center" gap="1rem" my="5rem">
       <Text m={0} textStyle="subheading">
         {message}
       </Text>
-      {linkLabel && onLinkClick && (
+      {onClearFilters && (
         <Text
           m={0}
           textStyle="h3"
           color="blue.500"
           cursor="pointer"
           textDecoration="underline"
-          onClick={onLinkClick}
+          onClick={onClearFilters}
         >
-          {linkLabel}
+          Clear all
         </Text>
       )}
     </Flex>

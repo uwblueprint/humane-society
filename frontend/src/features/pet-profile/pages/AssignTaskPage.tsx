@@ -6,7 +6,6 @@ import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
-import UserRoles from "../../../constants/UserConstants";
 import UserSelection from "../components/UserSelection";
 
 const AssignTaskPage = (): React.ReactElement => {
@@ -32,9 +31,7 @@ const AssignTaskPage = (): React.ReactElement => {
   const getUsers = async () => {
     try {
       const fetchedUsers = await UserAPIClient.get();
-      if (fetchedUsers != null) {
-        setUsers(fetchedUsers.filter((user) => user.role !== UserRoles.ADMIN));
-      }
+      if (fetchedUsers != null) setUsers(fetchedUsers);
     } catch (error) {
       setErrorMessage(`${error}`);
     } finally {

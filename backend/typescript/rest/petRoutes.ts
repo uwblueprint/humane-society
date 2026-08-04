@@ -6,12 +6,17 @@ import {
   /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
-import { IPetService, PetRequestDTO } from "../services/interfaces/petService";
+import {
+  PetResponseDTO,
+  IPetService,
+  PetRequestDTO,
+} from "../services/interfaces/petService";
 import {
   getErrorMessage,
   INTERNAL_SERVER_ERROR_MESSAGE,
   NotFoundError,
 } from "../utilities/errorUtils";
+import { sendResponseByMimeType } from "../utilities/responseUtil";
 import logInteraction from "../middlewares/logInteraction";
 import {
   ACCEPTED_TYPES,
@@ -38,6 +43,7 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
+      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       weight: body.weight,
@@ -103,6 +109,7 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
+      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       neutered: body.neutered,
@@ -217,6 +224,21 @@ petRouter.post("/:id/profile-photo/default", async (req, res) => {
     res.status(200).json();
   } catch (error: unknown) {
     res.status(500).send(getErrorMessage(error));
+  }
+});
+
+/* Get all Pets */
+petRouter.get("/", async (req, res) => {
+  const contentType = req.headers["content-type"];
+  try {
+    const pets = await petService.getPets();
+    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
+  } catch (e: unknown) {
+    await sendResponseByMimeType(res, 500, contentType, [
+      {
+        error: INTERNAL_SERVER_ERROR_MESSAGE,
+      },
+    ]);
   }
 });
 

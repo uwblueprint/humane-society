@@ -53,8 +53,11 @@ export enum PetStatus {
 }
 
 export enum LastCaredFor {
+  OCCUPIED = "Occupied",
   ONE_OR_MORE_DAYS_AGO = "One or more days ago",
 }
+
+export const petStatusEnum: PetStatus[] = [...Object.values(PetStatus)];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
@@ -134,6 +137,7 @@ export enum InteractionTypeEnum {
   CHANGED_TASK_START_DATE = "Changed Task Start Date",
   CHANGED_TASK_END_DATE = "Changed Task End Date",
   DELETED_RECURRING_TASK = "Deleted Recurring Task",
+  CHANGED_RECURRING_TASK_NAME = "Changed Recurring Task Name",
   CHANGED_RECURRING_TASK_DAYS = "Changed Recurring Task Days",
   CHANGED_RECURRING_TASK_CADENCE = "Changed Recurring Task Cadence",
 
@@ -160,15 +164,3 @@ export enum InteractionTypeEnum {
   CHANGED_TASK_TEMPLATE_NAME = "Changed Task Template Name",
   CHANGED_TASK_TEMPLATE_INSTRUCTIONS = "Changed Task Template Instructions",
 }
-
-// Interactions about another user's information ("Personal Details" + "User
-// Details" groupings above). Staff may only see these when they are the actor;
-// Admin and Animal Behaviourist see all (permissions sheet). Kept here so the
-// list lives in exactly one place.
-export const USER_INFO_INTERACTION_TYPES: InteractionTypeEnum[] = [
-  InteractionTypeEnum.CHANGED_USER_NAME,
-  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
-  InteractionTypeEnum.CHANGED_USER_ROLE,
-  InteractionTypeEnum.INVITED_USER,
-  InteractionTypeEnum.DELETED_USER,
-];

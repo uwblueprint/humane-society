@@ -1,34 +1,11 @@
-import { Op } from "sequelize";
 import Interaction from "../../models/interaction.model";
 import InteractionType from "../../models/interactionType.model";
 import User from "../../models/user.model";
-import Pet from "../../models/pet.model";
-import { Role, USER_INFO_INTERACTION_TYPES } from "../../types";
 
 const InteractionService = {
-  async getInteractions(requesterRole?: Role, requesterId?: number) {
+  async getInteractions() {
     try {
-      // Staff may see user-info interactions ONLY when they are the actor (their
-      // own actions). They must not see user-info changes made by other people.
-      // Admin and Animal Behaviourist see all (permissions sheet). Filtering
-      // here (server-side) ensures the data never leaves the backend.
-      let where;
-      if (requesterRole === Role.STAFF) {
-        const userInfoTypes = await InteractionType.findAll({
-          where: { action_type: { [Op.in]: USER_INFO_INTERACTION_TYPES } },
-          attributes: ["id"],
-        });
-        const userInfoTypeIds = userInfoTypes.map((t) => t.id);
-        where = {
-          [Op.or]: [
-            { interaction_type_id: { [Op.notIn]: userInfoTypeIds } },
-            { actor_id: requesterId ?? null },
-          ],
-        };
-      }
-
       const interactions = await Interaction.findAll({
-        where,
         include: [
           {
             model: User,
@@ -45,11 +22,6 @@ const InteractionService = {
             model: InteractionType,
             attributes: ["action_type"],
           },
-          {
-            model: Pet,
-            as: "target_pet",
-            attributes: ["id", "animal_tag"],
-          },
         ],
         order: [["created_at", "DESC"]],
       });
@@ -60,7 +32,6 @@ const InteractionService = {
         longDescription: interaction.long_description,
         createdAt: interaction.getDataValue("created_at"),
         interactionType: interaction.interaction_type?.action_type ?? "Unknown",
-        animalTag: interaction.target_pet?.animal_tag ?? null,
         actor: interaction.actor
           ? {
               id: interaction.actor.id,

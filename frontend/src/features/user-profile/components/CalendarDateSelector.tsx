@@ -131,13 +131,6 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
             date.getDate() === selectedDate.getDate() &&
             date.getMonth() === selectedDate.getMonth() &&
             date.getFullYear() === selectedDate.getFullYear();
-          const isFuture =
-            new Date(date.getFullYear(), date.getMonth(), date.getDate()) >
-            new Date(
-              selectedDate.getFullYear(),
-              selectedDate.getMonth(),
-              selectedDate.getDate(),
-            );
           return (
             <Flex
               flexDirection="column"
@@ -164,14 +157,7 @@ const CalendarDateSelector: React.FC<CalendarDateSelectorProps> = ({
               >
                 <Text
                   fontWeight={isActive ? "700" : "400"}
-                  color={
-                    // eslint-disable-next-line no-nested-ternary
-                    isActive
-                      ? colors.white.default
-                      : isFuture
-                      ? colors.gray[800]
-                      : colors.gray[500]
-                  }
+                  color={isActive ? colors.white.default : colors.gray[500]}
                   margin="0"
                 >
                   {date.getDate()}

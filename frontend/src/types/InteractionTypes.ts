@@ -4,7 +4,6 @@ export type InteractionDTO = {
   longDescription: string;
   createdAt: string;
   interactionType: string;
-  animalTag: string | null;
   actor: {
     id: number;
     firstName: string;

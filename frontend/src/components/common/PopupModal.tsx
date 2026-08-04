@@ -8,8 +8,8 @@ import { Flex, Text, Button } from "@chakra-ui/react";
 interface PopupModalProps {
   open: boolean; // Controls whether the modal is visible
   title: string; // Title displayed at the top of the modal
-  message?: string; // Optional: main message or body text of the modal
-  children?: React.ReactNode; // Optional: custom content rendered in place of the message
+  message?: string; // Main message or body text of the modal
+  children?: React.ReactNode;
   // Primary button props
   primaryButtonText?: string; // Text for the primary action button
   onPrimaryClick?: () => void; // Function to call when the primary button is clicked
@@ -74,7 +74,6 @@ const PopupModal: React.FC<PopupModalProps> = ({
         >
           {title}
         </Text>
-        {/* Message Body (or custom children in its place) */}
         {children || (
           <Text
             textStyle={{ base: "bodyMobile", md: "body" }}

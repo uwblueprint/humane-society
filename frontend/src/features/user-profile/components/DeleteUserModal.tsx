@@ -51,20 +51,14 @@ const DeleteUserModal: FC<DeleteUserModalProps> = ({
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "";
       let description = "Unable to delete user, please try again later.";
-      if (errorMessage.includes("interaction logs")) {
-        description =
-          "This user has interaction logs recorded against them and cannot be deleted.";
-      } else if (errorMessage.includes("assigned tasks")) {
-        description =
-          "All tasks must be unassigned from this user before deletion.";
-      } else if (
+      if (
         errorMessage.includes("user status must be 'Inactive' or 'Invited'")
       ) {
         description =
           "User must be deactivated before deletion. Please change the user's status to 'Inactive' or 'Invited' first.";
       } else if (errorMessage.includes("foreign key")) {
         description =
-          "This user still has tasks assigned and/or interaction logs, so they cannot be deleted.";
+          "All tasks must be unassigned from this user before deletion.";
       }
       toast({
         title: "Delete User",

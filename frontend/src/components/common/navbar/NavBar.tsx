@@ -11,7 +11,6 @@ import {
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
-import UserRoles from "../../../constants/UserConstants";
 import {
   LogIcon,
   ProfileIcon,
@@ -19,17 +18,10 @@ import {
   UserManagementIcon,
 } from "../../../assets/icons";
 import { getLocalStorageObjProperty } from "../../../utils/LocalStorageUtils";
-import AUTHENTICATED_USER_KEY, {
-  STAFF_BEHAVIOURISTS_ADMIN,
-} from "../../../constants/AuthConstants";
+import AUTHENTICATED_USER_KEY from "../../../constants/AuthConstants";
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
-  const role = getCurrentUserRole();
-  const isAdmin = role === UserRoles.ADMIN;
-  const isStaffOrBehaviourist =
-    role === UserRoles.STAFF || role === UserRoles.BEHAVIOURIST;
-  const canSeeUserManagement = role !== null && role !== UserRoles.VOLUNTEER;
-  const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(role ?? "");
+  const isAdmin = getCurrentUserRole() === "Administrator";
   const history = useHistory();
 
   const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
@@ -66,29 +58,27 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       </Text>
       <Spacer />
       <Flex gap="1.25rem">
-        {canSeeUserManagement && (
-          <NavLink
-            text="Users"
-            icon={UserManagementIcon}
-            ariaLabel="Users"
-            route={USER_MANAGEMENT_PAGE}
-          />
-        )}
-        {(isAdmin || isStaffOrBehaviourist) && (
-          <NavLink
-            text="Tasks"
-            icon={TaskIcon}
-            ariaLabel="Tasks"
-            route={TASK_MANAGEMENT_PAGE}
-          />
-        )}
-        {canViewLogs && (
-          <NavLink
-            text="Logs"
-            icon={LogIcon}
-            ariaLabel="InteractionLogs"
-            route={INTERACTION_LOG_PAGE}
-          />
+        {isAdmin && (
+          <>
+            <NavLink
+              text="Users"
+              icon={UserManagementIcon}
+              ariaLabel="Users"
+              route={USER_MANAGEMENT_PAGE}
+            />
+            <NavLink
+              text="Tasks"
+              icon={TaskIcon}
+              ariaLabel="Tasks"
+              route={TASK_MANAGEMENT_PAGE}
+            />
+            <NavLink
+              text="Logs"
+              icon={LogIcon}
+              ariaLabel="InteractionLogs"
+              route={INTERACTION_LOG_PAGE}
+            />
+          </>
         )}
         <NavLink
           text="Profile"

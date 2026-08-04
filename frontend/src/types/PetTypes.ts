@@ -42,8 +42,8 @@ export type CareInfo = {
 export type PetListSectionKey =
   | "Assigned to You"
   | "Other Pets"
-  | "Unassigned Tasks"
-  | "Assigned Tasks"
+  | "Has Unassigned Tasks"
+  | "All Tasks Assigned"
   | "No Tasks";
 
 // For frontend pet list display
@@ -79,6 +79,7 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
+  status: PetStatus;
   breed?: string | null;
   neutered?: boolean | null;
   birthday?: string | null;

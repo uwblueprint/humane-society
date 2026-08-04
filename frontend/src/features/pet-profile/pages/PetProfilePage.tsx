@@ -27,6 +27,7 @@ import CalendarDateSelector from "../../user-profile/components/CalendarDateSele
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
 import SurveyModal from "../components/surveyModal";
+import { getTaskSortRank } from "../../../utils/taskStatusUtils";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -46,18 +47,6 @@ const PetProfilePage = (): React.ReactElement => {
   ];
   const gridTemplateColumns = "2.5fr 2fr 2fr 3fr 2.5fr";
   const [tasks, setTasks] = useState<ScheduledTaskDTO[]>([]);
-  const sortTask = (task: ScheduledTaskDTO): number => {
-    const isCompleted = !!task.endTime;
-    const isAssigned = !!task.userId;
-    const isPastStartTime = task.scheduledStartTime
-      ? new Date(task.scheduledStartTime) < new Date()
-      : false;
-
-    if (isCompleted) return 3;
-    if (!isAssigned && isPastStartTime && !task.endTime) return 0;
-    if (isAssigned && !task.endTime) return 1;
-    return 2;
-  };
 
   const canAddTask =
     authenticatedUser?.role === UserRoles.ADMIN ||
@@ -91,43 +80,50 @@ const PetProfilePage = (): React.ReactElement => {
         petId,
         dateString,
       );
-      const sortedTasks = [...fetchedTasks].sort(
-        (a, b) => sortTask(a) - sortTask(b),
-      );
+      const getStartTimeValue = (task: ScheduledTaskDTO): number =>
+        task.scheduledStartTime
+          ? new Date(task.scheduledStartTime).getTime()
+          : Infinity;
+      const sortedTasks = [...fetchedTasks].sort((a, b) => {
+        const rankDiff =
+          getTaskSortRank(a, authenticatedUser) -
+          getTaskSortRank(b, authenticatedUser);
+        if (rankDiff !== 0) return rankDiff;
+        return getStartTimeValue(a) - getStartTimeValue(b);
+      });
       setTasks(sortedTasks);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-  }, [petId, selectedDate, history]);
+  }, [petId, selectedDate, history, authenticatedUser]);
 
   useEffect(() => {
     fetchTasks();
     setLoading(false);
   }, [fetchTasks, location.key]);
 
-  const fetchPet = useCallback(async () => {
-    if (!petId) {
-      history.push("/not-found");
-      return;
-    }
-    try {
-      const data = await PetAPIClient.getPet(petId);
-      setPetData(data);
-      if (data.photo) {
-        const photo = await PetAPIClient.getProfilePhotoUrl(petId);
-        setProfilePhoto(photo);
-      }
-    } catch (error) {
-      history.push("/not-found");
-    } finally {
-      setLoading(false);
-    }
-  }, [petId, history]);
-
   useEffect(() => {
+    const fetchPet = async () => {
+      if (!petId) {
+        history.push("/not-found");
+        return;
+      }
+      try {
+        const data = await PetAPIClient.getPet(petId);
+        setPetData(data);
+        if (data.photo) {
+          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+          setProfilePhoto(photo);
+        }
+      } catch (error) {
+        history.push("/not-found");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchPet();
-  }, [fetchPet, location.key]);
+  }, [petId, history]);
 
   if (loading || !petData) {
     return (
@@ -149,24 +145,15 @@ const PetProfilePage = (): React.ReactElement => {
     colorLevel: colorLevelMap[petData.colorLevel],
   };
 
-  // If the viewer isn't cleared for this pet's color level, they should only
-  // see tasks they've been overridden onto (i.e. assigned despite the mismatch).
-  const visibleTasks =
-    authenticatedUser &&
-    authenticatedUser.colorLevel < petData.colorLevel &&
-    authenticatedUser?.role === UserRoles.VOLUNTEER
-      ? tasks.filter((task) => task.userId === authenticatedUser.id)
-      : tasks;
-
   let content;
   if (loading) {
     content = <Spinner />;
-  } else if (visibleTasks.length === 0) {
+  } else if (tasks.length === 0) {
     content = <Text>No tasks currently.</Text>;
   } else {
     content = (
       <PetProfileTaskTableSection
-        tasks={visibleTasks}
+        tasks={tasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}
         onTaskClick={(taskId, instanceDate) => {
@@ -280,14 +267,12 @@ const PetProfilePage = (): React.ReactElement => {
           onClose={() => setIsModalOpen(false)}
           instanceDate={selectedInstanceDate}
           onTaskCompleted={async () => {
-            await Promise.all([fetchTasks(), fetchPet()]);
+            await fetchTasks();
             setSelectedTaskId(null);
             setIsModalOpen(false);
             setShowSurvey(true);
           }}
-          onTaskUpdated={async () => {
-            await Promise.all([fetchTasks(), fetchPet()]);
-          }}
+          onTaskUpdated={fetchTasks}
         />
       )}
       {showSurvey && (

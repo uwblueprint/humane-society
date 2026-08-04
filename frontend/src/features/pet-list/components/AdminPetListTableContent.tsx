@@ -24,12 +24,12 @@ const AdminPetListTableContent = ({
         />
       )}
       <PetListTableSection
-        pets={petsRecord["Unassigned Tasks"] ?? []}
-        sectionTitle="Unassigned Tasks"
+        pets={petsRecord["Has Unassigned Tasks"] ?? []}
+        sectionTitle="Has Unassigned Tasks"
       />
       <PetListTableSection
-        pets={petsRecord["Assigned Tasks"] ?? []}
-        sectionTitle="Assigned Tasks"
+        pets={petsRecord["All Tasks Assigned"] ?? []}
+        sectionTitle="All Tasks Assigned"
       />
       <PetListTableSection
         pets={petsRecord["No Tasks"] ?? []}

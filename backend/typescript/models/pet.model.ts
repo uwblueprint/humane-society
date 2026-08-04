@@ -1,7 +1,7 @@
 import { Column, Model, Table, DataType, HasOne } from "sequelize-typescript";
 import PetCareInfo from "./petCareInfo.model";
 
-import { Sex, AnimalTag } from "../types";
+import { Sex, PetStatus, AnimalTag, petStatusEnum } from "../types";
 
 @Table({
   tableName: "pets",
@@ -18,6 +18,11 @@ export default class Pet extends Model {
 
   @Column({})
   name!: string;
+
+  @Column({
+    type: DataType.ENUM(...petStatusEnum),
+  })
+  status!: PetStatus;
 
   @Column({})
   breed?: string;

@@ -57,8 +57,7 @@ const PetListTable = ({
             <Td colSpan={3}>
               <TableEmptyState
                 message="No pets currently match."
-                linkLabel="Clear all"
-                onLinkClick={clearFilters}
+                onClearFilters={clearFilters}
               />
             </Td>
           </Tr>

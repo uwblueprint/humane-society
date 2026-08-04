@@ -255,18 +255,6 @@ class AuthService implements IAuthService {
     }
   }
 
-  async getUserRoleByToken(accessToken: string): Promise<Role> {
-    const decodedIdToken: firebaseAdmin.auth.DecodedIdToken =
-      await firebaseAdmin.auth().verifyIdToken(accessToken, true);
-    return this.userService.getUserRoleByAuthId(decodedIdToken.uid);
-  }
-
-  async getUserIdByToken(accessToken: string): Promise<string> {
-    const decodedIdToken: firebaseAdmin.auth.DecodedIdToken =
-      await firebaseAdmin.auth().verifyIdToken(accessToken, true);
-    return this.userService.getUserIdByAuthId(decodedIdToken.uid);
-  }
-
   async isAuthorizedByUserId(
     accessToken: string,
     requestedUserId: string,

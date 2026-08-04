@@ -144,13 +144,13 @@ const App = (): React.ReactElement => {
                 exact
                 path={Routes.ADD_TASK_TEMPLATE_PAGE}
                 component={AddTaskTemplatePage}
-                allowedRoles={AuthConstants.ADMIN_ONLY}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact
                 path={`${Routes.EDIT_TASK_TEMPLATE_PAGE}/:taskTemplateId`}
                 component={EditTaskTemplatePage}
-                allowedRoles={AuthConstants.ADMIN_ONLY}
+                allowedRoles={AuthConstants.ADMIN_AND_BEHAVIOURISTS}
               />
               <PrivateRoute
                 exact

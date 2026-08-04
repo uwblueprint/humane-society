@@ -10,18 +10,13 @@ import {
 import nodemailerConfig from "../nodemailer.config";
 import AuthService from "../services/implementations/authService";
 import EmailService from "../services/implementations/emailService";
-import UserService, {
-  DELETE_BLOCKED_BY_LOGS_ERROR,
-  DELETE_BLOCKED_BY_TASKS_ERROR,
-  getUserDeletionBlockers,
-} from "../services/implementations/userService";
+import UserService from "../services/implementations/userService";
 import IAuthService from "../services/interfaces/authService";
 import IEmailService from "../services/interfaces/emailService";
 import IUserService from "../services/interfaces/userService";
-import { Role, UpdateUserDTO, UserDTO } from "../types";
+import { Role, UserDTO } from "../types";
 
 import {
-  ConflictError,
   getErrorMessage,
   NotFoundError,
   INTERNAL_SERVER_ERROR_MESSAGE,
@@ -92,39 +87,18 @@ userRouter.get("/", async (req, res) => {
       res
         .status(400)
         .json({ error: "userId query parameter must be a string." });
-      return;
-    }
-    if (Number.isNaN(Number(userId))) {
+    } else if (Number.isNaN(Number(userId))) {
       res.status(400).json({ error: "Invalid user ID" });
-      return;
-    }
-
-    const accessToken = getAccessToken(req);
-    if (!accessToken) {
-      res.status(404).json({ error: "Access token not found" });
-      return;
-    }
-    const canViewOthers = await authService.isAuthorizedByRole(
-      accessToken,
-      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
-    );
-    const isOwnRecord = await authService.isAuthorizedByUserId(
-      accessToken,
-      userId,
-    );
-    if (!canViewOthers && !isOwnRecord) {
-      res.status(403).json({ error: "Not authorized to view this user" });
-      return;
-    }
-
-    try {
-      const user = await userService.getUserById(userId);
-      res.status(200).json(user);
-    } catch (error: unknown) {
-      if (error instanceof NotFoundError) {
-        res.status(404).send(getErrorMessage(error));
-      } else {
-        res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+    } else {
+      try {
+        const user = await userService.getUserById(userId);
+        res.status(200).json(user);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(404).send(getErrorMessage(error));
+        } else {
+          res.status(500).send(INTERNAL_SERVER_ERROR_MESSAGE);
+        }
       }
     }
     return;
@@ -135,35 +109,16 @@ userRouter.get("/", async (req, res) => {
       res
         .status(400)
         .json({ error: "email query parameter must be a string." });
-      return;
-    }
-
-    const accessToken = getAccessToken(req);
-    if (!accessToken) {
-      res.status(404).json({ error: "Access token not found" });
-      return;
-    }
-    const canViewOthers = await authService.isAuthorizedByRole(
-      accessToken,
-      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
-    );
-    const isOwnRecord = await authService.isAuthorizedByEmail(
-      accessToken,
-      email,
-    );
-    if (!canViewOthers && !isOwnRecord) {
-      res.status(403).json({ error: "Not authorized to view this user" });
-      return;
-    }
-
-    try {
-      const user = await userService.getUserByEmail(email);
-      res.status(200).json(user);
-    } catch (error: unknown) {
-      if (error instanceof NotFoundError) {
-        res.status(404).send(getErrorMessage(error));
-      } else {
-        res.status(500).json({ error: getErrorMessage(error) });
+    } else {
+      try {
+        const user = await userService.getUserByEmail(email);
+        res.status(200).json(user);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundError) {
+          res.status(404).send(getErrorMessage(error));
+        } else {
+          res.status(500).json({ error: getErrorMessage(error) });
+        }
       }
     }
   }
@@ -177,26 +132,12 @@ userRouter.post("/", createUserDtoValidator, async (req, res) => {
       res.status(404).json({ error: "Access token not found" });
       return;
     }
-    const isAdministrator = await authService.isAuthorizedByRole(
+    const canCreateUser = await authService.isAuthorizedByRole(
       accessToken,
-      new Set([Role.ADMINISTRATOR]),
+      new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST]),
     );
-    const canCreateUser =
-      isAdministrator ||
-      (await authService.isAuthorizedByRole(
-        accessToken,
-        new Set([Role.ANIMAL_BEHAVIOURIST]),
-      ));
     if (!canCreateUser) {
       res.status(403).json({ error: "Not authorized to create user" });
-      return;
-    }
-    // Creating a user is not the same right as granting a role: only an admin
-    // may mint another admin. Mirrors canAssignRole in frontend permissions.ts.
-    if (req.body.role === Role.ADMINISTRATOR && !isAdministrator) {
-      res
-        .status(403)
-        .json({ error: "Not authorized to create an administrator" });
       return;
     }
 
@@ -245,12 +186,6 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
       req.params.userId,
     );
 
-    // default-deny: not admin, not editing own record, not a behaviourist → no edit right
-    if (!isAdministrator && !hasGivenUserId && !isBehaviourist) {
-      res.status(403).json({ error: "Not authorized to update this user" });
-      return;
-    }
-
     // update own user fields
     const userUpdatableSet = new Set([
       "firstName",
@@ -273,8 +208,7 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
 
     // update other user's fields as behaviourist
     const behaviouristUpdatableSet = new Set(["colorLevel", "animalTags"]);
-    if (isBehaviourist && !hasGivenUserId) {
-      // this block only runs when a behaviourist is editing another's profile
+    if (isBehaviourist) {
       const deniedFieldSet = Object.keys(req.body).filter((field) => {
         return !behaviouristUpdatableSet.has(field);
       });
@@ -288,65 +222,34 @@ userRouter.put("/:userId", updateUserDtoValidator, async (req, res) => {
     }
 
     // update other user's fields as admin
-    if (
-      isAdministrator &&
-      !hasGivenUserId &&
-      req.body.profilePhoto !== undefined
-    ) {
+    if (isAdministrator && !hasGivenUserId && req.body.profilePhoto) {
       res.status(403).json({ error: "Not authorized to update profile photo" });
       return;
     }
   } catch (error: unknown) {
-    // Must return: without it a failed authorization check would fall through
-    // to the update below, applying the change and double-sending a response.
     if (error instanceof NotFoundError) {
       res.status(400).json({ error: getErrorMessage(error) });
     } else {
       res.status(500).json({ error: getErrorMessage(error) });
     }
-    return;
   }
 
-  const updatableFields = [
-    "firstName",
-    "lastName",
-    "role",
-    "status",
-    "colorLevel",
-    "animalTags",
-    "canSeeAllLogs",
-    "canAssignUsersToTasks",
-    "phoneNumber",
-    "profilePhoto",
-  ] as const;
-
   try {
-    // Also doubles as the existence check: a missing user must surface as a
-    // 400 (NotFoundError), not a 500.
-    const existingUser: UserDTO = await userService.getUserById(String(userId));
-
-    // Only forward the fields the caller actually sent. This used to read the
-    // user and re-send every column, which silently reverted any concurrent
-    // write from the granular PATCH routes (e.g. a colour level set by
-    // PATCH /:id/color-level was overwritten with the value read here).
-    // null is treated as "not sent" to match the previous `?? user.field`
-    // behaviour: several of these columns are NOT NULL, so forwarding an
-    // explicit null would turn a silent no-op into a constraint violation.
-    const updates: Partial<UpdateUserDTO> = {};
-    updatableFields.forEach((field) => {
-      if (req.body[field] !== undefined && req.body[field] !== null) {
-        updates[field] = req.body[field];
-      }
+    const user: UserDTO = await userService.getUserById(String(userId));
+    const updatedUser = await userService.updateUserById(userId, {
+      firstName: req.body.firstName ?? user.firstName,
+      lastName: req.body.lastName ?? user.lastName,
+      email: user.email,
+      role: req.body.role ?? user.role,
+      status: req.body.status ?? user.status,
+      colorLevel: req.body.colorLevel ?? user.colorLevel,
+      animalTags: req.body.animalTags ?? user.animalTags,
+      canSeeAllLogs: req.body.canSeeAllLogs ?? user.canSeeAllLogs,
+      canAssignUsersToTasks:
+        req.body.canAssignUsersToTasks ?? user.canAssignUsersToTasks,
+      phoneNumber: req.body.phoneNumber ?? user.phoneNumber,
+      profilePhoto: req.body.profilePhoto ?? user.profilePhoto,
     });
-
-    // Nothing to write: Sequelize would issue no statement, and
-    // updateUserById reads 0 affected rows as "user not found" and throws.
-    if (Object.keys(updates).length === 0) {
-      res.status(200).json(existingUser);
-      return;
-    }
-
-    const updatedUser = await userService.updateUserById(userId, updates);
     res.status(200).json(updatedUser);
   } catch (error: unknown) {
     if (error instanceof NotFoundError) {
@@ -391,19 +294,6 @@ userRouter.delete("/", async (req, res) => {
     } else {
       try {
         const user: UserDTO = await userService.getUserById(userId);
-        // Report a blocking reference ahead of the status guard. Telling an
-        // admin to deactivate a user first is a dead end when the user cannot
-        // be deleted at any status.
-        const { assignedTaskCount, interactionCount } =
-          await getUserDeletionBlockers(Number(userId));
-        if (interactionCount > 0) {
-          res.status(400).json({ error: DELETE_BLOCKED_BY_LOGS_ERROR });
-          return;
-        }
-        if (assignedTaskCount > 0) {
-          res.status(400).json({ error: DELETE_BLOCKED_BY_TASKS_ERROR });
-          return;
-        }
         if (user.status === "Active") {
           res.status(400).json({
             error:
@@ -415,7 +305,7 @@ userRouter.delete("/", async (req, res) => {
         await logInteraction(req);
         res.status(204).send();
       } catch (error: unknown) {
-        if (error instanceof NotFoundError || error instanceof ConflictError) {
+        if (error instanceof NotFoundError) {
           res.status(400).json({ error: getErrorMessage(error) });
         } else {
           res.status(500).json({ error: getErrorMessage(error) });
@@ -443,11 +333,7 @@ userRouter.delete("/", async (req, res) => {
         await logInteraction(req);
         res.status(204).send();
       } catch (error: unknown) {
-        if (error instanceof NotFoundError || error instanceof ConflictError) {
-          res.status(400).json({ error: getErrorMessage(error) });
-        } else {
-          res.status(500).json({ error: getErrorMessage(error) });
-        }
+        res.status(500).json({ error: getErrorMessage(error) });
       }
     }
     return;
@@ -474,22 +360,6 @@ userRouter.post(
 
       if (!userId) {
         res.status(400).json({ error: "Missing userId" });
-        return;
-      }
-
-      const accessToken = getAccessToken(req);
-      if (!accessToken) {
-        res.status(404).json({ error: "Access token not found" });
-        return;
-      }
-      const hasGivenUserId = await authService.isAuthorizedByUserId(
-        accessToken,
-        String(userId),
-      );
-      if (!hasGivenUserId) {
-        res
-          .status(403)
-          .json({ error: "Not authorized to update this user's photo" });
         return;
       }
 
@@ -564,22 +434,6 @@ userRouter.post("/me/profile-photo/default", async (req, res) => {
     return;
   }
 
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-  const hasGivenUserId = await authService.isAuthorizedByUserId(
-    accessToken,
-    String(userId),
-  );
-  if (!hasGivenUserId) {
-    res
-      .status(403)
-      .json({ error: "Not authorized to update this user's photo" });
-    return;
-  }
-
   try {
     const user = await userService.getUserById(String(userId));
     if (user.profilePhoto) {
@@ -607,30 +461,11 @@ userRouter.post("/me/profile-photo/default", async (req, res) => {
 userRouter.get("/me/profile-photo", async (req, res) => {
   const { userId } = req.query;
 
-  if (!userId) {
-    res.status(400).json({ error: "Missing userId query parameter" });
-    return;
-  }
-
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-  const canViewOthers = await authService.isAuthorizedByRole(
-    accessToken,
-    new Set([Role.ADMINISTRATOR, Role.ANIMAL_BEHAVIOURIST, Role.STAFF]),
-  );
-  const isOwnRecord = await authService.isAuthorizedByUserId(
-    accessToken,
-    String(userId),
-  );
-  if (!canViewOthers && !isOwnRecord) {
-    res.status(403).json({ error: "Not authorized to view this user" });
-    return;
-  }
-
   try {
+    if (!userId) {
+      res.status(400).json({ error: "Missing userId query parameter" });
+      return;
+    }
     const user = await userService.getUserById(String(userId));
 
     if (user.profilePhoto) {
@@ -649,24 +484,6 @@ userRouter.patch("/:id/name", async (req, res) => {
   const idNum = Number(req.params.id);
   if (Number.isNaN(idNum)) {
     res.status(400).json({ error: "Invalid user ID" });
-    return;
-  }
-
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-  const isAdministrator = await authService.isAuthorizedByRole(
-    accessToken,
-    new Set([Role.ADMINISTRATOR]),
-  );
-  const hasGivenUserId = await authService.isAuthorizedByUserId(
-    accessToken,
-    req.params.id,
-  );
-  if (!isAdministrator && !hasGivenUserId) {
-    res.status(403).json({ error: "Not authorized to update this user" });
     return;
   }
 
@@ -691,28 +508,6 @@ userRouter.patch("/:id/color-level", async (req, res) => {
     return;
   }
 
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-  const isAdministrator = await authService.isAuthorizedByRole(
-    accessToken,
-    new Set([Role.ADMINISTRATOR]),
-  );
-  const isBehaviourist = await authService.isAuthorizedByRole(
-    accessToken,
-    new Set([Role.ANIMAL_BEHAVIOURIST]),
-  );
-  const hasGivenUserId = await authService.isAuthorizedByUserId(
-    accessToken,
-    req.params.id,
-  );
-  if (!isAdministrator && !(isBehaviourist && !hasGivenUserId)) {
-    res.status(403).json({ error: "Not authorized to update this user" });
-    return;
-  }
-
   try {
     const updated = await userService.updateUserById(idNum, {
       colorLevel: req.body.colorLevel,
@@ -730,20 +525,6 @@ userRouter.patch("/:id/role", async (req, res) => {
   const idNum = Number(req.params.id);
   if (Number.isNaN(idNum)) {
     res.status(400).json({ error: "Invalid user ID" });
-    return;
-  }
-
-  const accessToken = getAccessToken(req);
-  if (!accessToken) {
-    res.status(404).json({ error: "Access token not found" });
-    return;
-  }
-  const isAdministrator = await authService.isAuthorizedByRole(
-    accessToken,
-    new Set([Role.ADMINISTRATOR]),
-  );
-  if (!isAdministrator) {
-    res.status(403).json({ error: "Not authorized to update this user" });
     return;
   }
 

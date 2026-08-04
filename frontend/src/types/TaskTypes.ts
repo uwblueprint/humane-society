@@ -68,7 +68,6 @@ export interface ScheduledTaskDTO {
   taskTemplateId: number;
   taskName: string;
   petName?: string;
-  petPhoto?: string;
   assignedUser?: {
     id: number;
     firstName: string;
@@ -90,7 +89,6 @@ export interface PetTask {
   petId: number;
   taskTemplateId: number;
   scheduledStartTime?: string;
-  scheduledEndTime?: string;
   startTime?: string;
   endTime?: string;
   notes?: string;

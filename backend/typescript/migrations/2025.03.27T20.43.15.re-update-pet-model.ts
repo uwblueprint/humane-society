@@ -1,8 +1,6 @@
 import { DataType } from "sequelize-typescript";
 import { Migration } from "../umzug";
-import { AnimalTag } from "../types";
-
-const PET_STATUS_ENUM_VALUES = ["Occupied", "Needs Care", "Does Not Need Care"];
+import { AnimalTag, petStatusEnum } from "../types";
 
 const TABLE_NAME = "pets";
 const ANIMAL_TYPE_TABLE_NAME = "animal_types";
@@ -25,7 +23,7 @@ export const up: Migration = async ({ context: sequelize }) => {
     .getQueryInterface()
     .sequelize.query('DROP TYPE IF EXISTS "enum_pets_status";');
   await queryInterface.addColumn(TABLE_NAME, "status", {
-    type: DataType.ENUM(...PET_STATUS_ENUM_VALUES),
+    type: DataType.ENUM(...petStatusEnum),
     allowNull: false,
     defaultValue: "Needs Care",
   });
