@@ -16,16 +16,12 @@ import {
   taskGetByDateValidator,
 } from "../middlewares/validators/taskValidators";
 import TaskService from "../services/implementations/taskService";
-import {
-  TaskResponseDTO,
-  ITaskService,
-} from "../services/interfaces/taskService";
+import { ITaskService } from "../services/interfaces/taskService";
 import {
   BadRequestError,
   getErrorMessage,
   NotFoundError,
 } from "../utilities/errorUtils";
-import { sendResponseByMimeType } from "../utilities/responseUtil";
 import {
   validateEnum,
   validateEnumArray,
@@ -40,19 +36,6 @@ import {
 const taskRouter: Router = Router();
 taskRouter.use(isAuthorizedByRole(new Set(Object.values(Role))));
 const taskService: ITaskService = new TaskService();
-
-/* Get all Tasks */
-taskRouter.get("/", async (req, res) => {
-  const contentType = req.headers["content-type"];
-  try {
-    const tasks = await taskService.getTasks();
-    await sendResponseByMimeType<TaskResponseDTO>(res, 200, contentType, tasks);
-  } catch (e: unknown) {
-    await sendResponseByMimeType(res, 500, contentType, [
-      { error: getErrorMessage(e) },
-    ]);
-  }
-});
 
 /* Get Tasks for a specific date */
 taskRouter.get("/date", taskGetByDateValidator, async (req, res) => {
@@ -106,36 +89,6 @@ taskRouter.get("/:id/recurrence", async (req, res) => {
   try {
     const recurrence = await taskService.getRecurrence(id);
     res.status(200).json(recurrence);
-  } catch (e: unknown) {
-    if (e instanceof NotFoundError) {
-      res.status(404).send(getErrorMessage(e));
-    } else {
-      res.status(500).send(getErrorMessage(e));
-    }
-  }
-});
-
-/* Get Tasks for specific Pet by Pet id */
-taskRouter.get("/pet/:petId", async (req, res) => {
-  const { petId } = req.params;
-  try {
-    const tasksByPet = await taskService.getPetTasks(petId);
-    res.status(200).json(tasksByPet);
-  } catch (e: unknown) {
-    if (e instanceof NotFoundError) {
-      res.status(404).send(getErrorMessage(e));
-    } else {
-      res.status(500).send(getErrorMessage(e));
-    }
-  }
-});
-
-/* Get Tasks for specific User by User id */
-taskRouter.get("/user/:userId", async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const tasksByUser = await taskService.getUserTasks(userId);
-    res.status(200).json(tasksByUser);
   } catch (e: unknown) {
     if (e instanceof NotFoundError) {
       res.status(404).send(getErrorMessage(e));

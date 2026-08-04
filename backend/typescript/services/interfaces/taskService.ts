@@ -122,30 +122,6 @@ export interface ITaskService {
   getTask(id: string, date?: Date): Promise<TaskResponseDTO>;
 
   /**
-   * retrieve all Tasks
-   * @param
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getTasks(): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific pet
-   * @param pet_id pet id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific user
-   * @param user_id user id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>>;
-
-  /**
    * create a Task with the fields given in the DTO, return created Task
    * @param Task new Task to be created
    * @returns the created Task
