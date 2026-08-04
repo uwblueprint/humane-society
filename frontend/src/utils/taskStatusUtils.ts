@@ -29,41 +29,6 @@ export const isToday = (date?: Date | string): boolean => {
   );
 };
 
-// Admin/Behaviourist: unassigned+passed tasks first, then in-progress, then
-// everything else, then completed last.
-// Volunteer/Staff: in-progress/occupied tasks first, then tasks assigned to
-// me, then unassigned/inactive tasks, then everything else, then completed.
-export const getTaskSortRank = (
-  task: TaskLike,
-  authenticatedUser?: AuthenticatedUser,
-): number => {
-  const isCompleted = !!task.endTime;
-  const isAssigned = !!task.userId;
-  // Matches getTaskDetailedStatus: a task from a past day reads as "Incomplete"
-  // rather than in-progress/occupied, so it must not sort into those bands.
-  const isStarted = !!task.startTime && !isPastDay(task.scheduledStartTime);
-  const isPastStartTime = task.scheduledStartTime
-    ? new Date(task.scheduledStartTime) < new Date()
-    : false;
-
-  if (
-    authenticatedUser?.role === UserRoles.ADMIN ||
-    authenticatedUser?.role === UserRoles.BEHAVIOURIST
-  ) {
-    if (isCompleted) return 3;
-    if (!isAssigned && isPastStartTime) return 0;
-    if (isStarted) return 1;
-    return 2;
-  }
-
-  const isMine = isAssigned && task.userId === authenticatedUser?.id;
-  if (isCompleted) return 4;
-  if (isStarted) return 0;
-  if (isMine) return 1;
-  if (!isAssigned || isPastStartTime) return 2;
-  return 3;
-};
-
 export const getTaskDetailedStatus = (
   task: TaskLike | null,
   authenticatedUser?: AuthenticatedUser,

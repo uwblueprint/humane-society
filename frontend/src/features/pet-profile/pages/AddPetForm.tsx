@@ -23,7 +23,7 @@ import NavBar from "../../../components/common/navbar/NavBar";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import { PetRequestDTO, PetStatus, SexEnum } from "../../../types/PetTypes";
+import { PetRequestDTO, SexEnum } from "../../../types/PetTypes";
 import { AnimalTag } from "../../../types/TaskTypes";
 import { getDaysInMonth } from "../../../utils/CommonUtils";
 import QuitEditingModal from "./QuitEditingModal";
@@ -162,7 +162,6 @@ const transformFormData = (
     name: data.name,
     animalTag: data.animalTag as AnimalTag,
     colorLevel,
-    status: PetStatus.NEEDS_CARE,
     breed: data.breed || undefined,
     birthday,
     sex,
