@@ -49,6 +49,16 @@ interface IUserService {
   getUsers(): Promise<Array<UserDTO>>;
 
   /**
+   * Get the raw stored profile photo path for a batch of users
+   * @param userIds ids of the users to look up
+   * @returns a map of userId to their stored profile photo path (null if unset)
+   * @throws Error if retrieval fails
+   */
+  getProfilePhotosByIds(
+    userIds: number[],
+  ): Promise<Record<number, string | null>>;
+
+  /**
    * Create a user, email verification configurable
    * @param user the user to be created
    * @returns a UserDTO with the created user's information
