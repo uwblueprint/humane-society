@@ -408,16 +408,20 @@ const deleteRecurringTask = async (
   taskId: number,
   date: string,
   single: boolean,
-): Promise<void> => {
+): Promise<{ deletedShadowCount?: number }> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
   try {
-    await baseAPIClient.delete(`/tasks/recurrences/${taskId}`, {
-      headers: { Authorization: bearerToken },
-      params: { date, single },
-    });
+    const { data } = await baseAPIClient.delete(
+      `/tasks/recurrences/${taskId}`,
+      {
+        headers: { Authorization: bearerToken },
+        params: { date, single },
+      },
+    );
+    return data;
   } catch (error) {
     throw new Error(`Failed to delete recurring task: ${error}`);
   }
@@ -459,17 +463,22 @@ const editRecurringTask = async (
     cadence?: string;
     endDate?: string | null;
   },
-): Promise<void> => {
+): Promise<{ deletedShadowCount?: number }> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
 
   try {
-    await baseAPIClient.post(`/tasks/recurrences/${taskId}/edit`, payload, {
-      headers: { Authorization: bearerToken },
-      params: { date, single },
-    });
+    const { data } = await baseAPIClient.post(
+      `/tasks/recurrences/${taskId}/edit`,
+      payload,
+      {
+        headers: { Authorization: bearerToken },
+        params: { date, single },
+      },
+    );
+    return data;
   } catch (error) {
     throw new Error(`Failed to edit recurring task: ${error}`);
   }

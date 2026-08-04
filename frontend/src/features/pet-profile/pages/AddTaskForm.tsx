@@ -336,13 +336,20 @@ const AddTaskForm = ({
             Number(getValues("startDay")),
           ).toISOString()) ||
         new Date().toISOString();
-      await TaskAPIClient.deleteRecurringTask(
+      const result = await TaskAPIClient.deleteRecurringTask(
         Number(taskId),
         scheduledStartTime,
         deleteRecurringOption === "single",
       );
+      const deletedShadowCount = result.deletedShadowCount ?? 0;
       toast({
         title: "Task deleted!",
+        description:
+          deletedShadowCount > 0
+            ? `${deletedShadowCount} assigned task${
+                deletedShadowCount === 1 ? "" : "s"
+              } removed from the schedule.`
+            : undefined,
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -408,6 +415,7 @@ const AddTaskForm = ({
     const scheduledEndTime = scheduledEndDate.toISOString();
 
     try {
+      let deletedShadowCount = 0;
       if (isEditMode) {
         if (recurrenceData && occurrenceDate) {
           const endDate =
@@ -420,7 +428,7 @@ const AddTaskForm = ({
                   ),
                 ).toISOString()
               : null;
-          await TaskAPIClient.editRecurringTask(
+          const result = await TaskAPIClient.editRecurringTask(
             Number(taskId),
             occurrenceDate,
             single ?? true,
@@ -435,6 +443,7 @@ const AddTaskForm = ({
               endDate,
             },
           );
+          deletedShadowCount = result.deletedShadowCount ?? 0;
         } else {
           await TaskAPIClient.updateTask(Number(taskId), {
             userId,
@@ -485,6 +494,12 @@ const AddTaskForm = ({
 
       toast({
         title: isEditMode ? "Task updated!" : "Task added!",
+        description:
+          deletedShadowCount > 0
+            ? `${deletedShadowCount} assigned task${
+                deletedShadowCount === 1 ? "" : "s"
+              } removed from the schedule.`
+            : undefined,
         status: "success",
         duration: 3000,
         isClosable: true,
