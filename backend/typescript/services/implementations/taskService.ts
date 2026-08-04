@@ -1,4 +1,4 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -39,9 +39,10 @@ class TaskService implements ITaskService {
     days?: Days[],
     endDate?: Date,
     exclusions?: Date[],
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(taskId, { raw: true });
+      const task = await PgTask.findByPk(taskId, { raw: true, transaction });
       if (!task) {
         throw new NotFoundError(`Task id ${taskId} not found`);
       }
@@ -52,19 +53,22 @@ class TaskService implements ITaskService {
         resetDateToUTCMidnight(endDate).getTime() <
           resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
-        throw new Error("End date cannot be before task start date.");
+        throw new BadRequestError("End date cannot be before task start date.");
       if (endDate && !task.scheduled_start_time)
-        throw new Error(
+        throw new BadRequestError(
           "Recurrence task must have a start date if end date is provided.",
         );
 
-      const recurrenceTask = await PgRecurrenceTask.create({
-        task_id: taskId,
-        ...(days && { days }),
-        cadence,
-        exclusions: exclusions ?? [],
-        ...(endDate && { end_date: endDate }),
-      });
+      const recurrenceTask = await PgRecurrenceTask.create(
+        {
+          task_id: taskId,
+          ...(days && { days }),
+          cadence,
+          exclusions: exclusions ?? [],
+          ...(endDate && { end_date: endDate }),
+        },
+        { transaction },
+      );
 
       return {
         id: recurrenceTask.task_id,
@@ -110,11 +114,16 @@ class TaskService implements ITaskService {
   async updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
       if (!task) throw new NotFoundError(`Task id ${recurrenceId} not found`);
       if (!recurrenceTask)
@@ -127,11 +136,14 @@ class TaskService implements ITaskService {
         resetDateToUTCMidnight(updates.endDate).getTime() <
           resetDateToUTCMidnight(task.scheduled_start_time).getTime()
       )
-        throw new Error("End date cannot be before task start date.");
+        throw new BadRequestError("End date cannot be before task start date.");
       if (updates.endDate && !task.scheduled_start_time)
-        throw new Error(
+        throw new BadRequestError(
           "Recurrence task must have a start date if end date is provided.",
         );
+
+      const isClearingEndDate =
+        "endDate" in updates && updates.endDate === null;
 
       // normalize it to utc midnight
       const newEndDate = updates.endDate
@@ -182,16 +194,23 @@ class TaskService implements ITaskService {
         }
       }
 
+      let endDateUpdate: { end_date: Date | null } | Record<string, never> = {};
+      if (newEndDate !== undefined) {
+        endDateUpdate = { end_date: newEndDate };
+      } else if (isClearingEndDate) {
+        endDateUpdate = { end_date: null };
+      }
+
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
           ...(newDays !== undefined ? { days: newDays } : {}),
           ...(updates.cadence !== undefined
             ? { cadence: updates.cadence }
             : {}),
-          ...(newEndDate !== undefined ? { end_date: newEndDate } : {}),
+          ...endDateUpdate,
           ...(newExclusions !== undefined ? { exclusions: newExclusions } : {}),
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       if (updatedRecurrenceTask[0] === 0) {
@@ -237,12 +256,17 @@ class TaskService implements ITaskService {
   async excludeDate(
     recurrenceId: string,
     date: Date,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO> {
     try {
       const recurrenceTask = await PgRecurrenceTask.findByPk(recurrenceId, {
         raw: true,
+        transaction,
       });
-      const task = await PgTask.findByPk(recurrenceId, { raw: true });
+      const task = await PgTask.findByPk(recurrenceId, {
+        raw: true,
+        transaction,
+      });
 
       if (!recurrenceTask || !task)
         throw new NotFoundError("Recurrence task/task was not found");
@@ -307,7 +331,7 @@ class TaskService implements ITaskService {
         {
           exclusions: updatedExclusions,
         },
-        { where: { task_id: recurrenceId }, returning: true },
+        { where: { task_id: recurrenceId }, returning: true, transaction },
       );
 
       return {
@@ -517,19 +541,25 @@ class TaskService implements ITaskService {
     }
   }
 
-  async createTask(task: TaskRequestDTO): Promise<TaskResponseDTO> {
+  async createTask(
+    task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO> {
     let newTask: PgTask | null;
     try {
-      newTask = await PgTask.create({
-        user_id: task.userId,
-        pet_id: task.petId,
-        task_template_id: task.taskTemplateId,
-        scheduled_start_time: task.scheduledStartTime,
-        scheduled_end_time: task.scheduledEndTime,
-        start_time: task.startTime,
-        end_time: task.endTime,
-        notes: task.notes,
-      });
+      newTask = await PgTask.create(
+        {
+          user_id: task.userId,
+          pet_id: task.petId,
+          task_template_id: task.taskTemplateId,
+          scheduled_start_time: task.scheduledStartTime,
+          scheduled_end_time: task.scheduledEndTime,
+          start_time: task.startTime,
+          end_time: task.endTime,
+          notes: task.notes,
+        },
+        { transaction },
+      );
     } catch (error: unknown) {
       Logger.error(`Failed to create task. Reason = ${getErrorMessage(error)}`);
       throw error;
@@ -550,6 +580,7 @@ class TaskService implements ITaskService {
   async updateTask(
     id: string,
     task: TaskRequestDTO,
+    transaction?: Transaction,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
@@ -565,7 +596,7 @@ class TaskService implements ITaskService {
           end_time: task.endTime,
           notes: task.notes,
         },
-        { where: { id }, returning: true },
+        { where: { id }, returning: true, transaction },
       );
 
       if (!updateResult[0]) {
@@ -820,8 +851,7 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
-          { model: Pet, attributes: ["name"], required: false },
-          { model: PgRecurrenceTask, required: false },
+          { model: Pet, attributes: ["name", "photo"], required: false },
         ],
       });
 
@@ -851,6 +881,7 @@ class TaskService implements ITaskService {
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
           petName: task.pet?.name,
+          petPhoto: task.pet?.photo,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -911,7 +942,7 @@ class TaskService implements ITaskService {
                   ],
                   required: false,
                 },
-                { model: Pet, attributes: ["name"], required: false },
+                { model: Pet, attributes: ["name", "photo"], required: false },
               ],
             })
           : [];
@@ -928,6 +959,7 @@ class TaskService implements ITaskService {
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
             petName: enriched?.pet?.name,
+            petPhoto: enriched?.pet?.photo,
             assignedUser: enriched?.user
               ? {
                   id: enriched.user.id,
@@ -951,44 +983,6 @@ class TaskService implements ITaskService {
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
-  ): Promise<void> {
-    try {
-      const normalizedDate = resetDateToUTCMidnight(date);
-      const idConditions: unknown[] = [
-        {
-          [Op.notIn]: Sequelize.literal(
-            "(SELECT task_id FROM recurrence_tasks)",
-          ),
-        },
-      ];
-
-      if (excludeTaskId) {
-        idConditions.push({ [Op.ne]: excludeTaskId });
-      }
-
-      await PgTask.destroy({
-        where: {
-          task_template_id: taskTemplateId,
-          pet_id: petId,
-          scheduled_start_time: {
-            [Op.gte]: normalizedDate,
-          },
-          id: { [Op.and]: idConditions },
-        },
-      });
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }

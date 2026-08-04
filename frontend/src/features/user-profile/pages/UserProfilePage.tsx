@@ -8,10 +8,12 @@ import UserProfileSidebar from "../components/UserProfileSidebar";
 import CalendarDateSelector from "../components/CalendarDateSelector";
 import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
+import { canViewProfile } from "../../../utils/permissions";
 import { TableColumn, TableHeader } from "../../../components/common/table";
 import { ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserProfilePageTableSection from "./UserProfilePageTableSection";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 
 const ProfilePage = (): React.ReactElement => {
   const params = useParams<{ id: string }>();
@@ -56,10 +58,11 @@ const ProfilePage = (): React.ReactElement => {
         try {
           const data = await UserAPIClient.get(Number(userId));
 
-          const isAdmin = authenticatedUser?.role === UserRoles.ADMIN;
           const isOwnPage = authenticatedUser?.id === userId;
 
-          if (!isAdmin && !isOwnPage) {
+          if (
+            !canViewProfile(authenticatedUser?.role as UserRoles, isOwnPage)
+          ) {
             history.push("/not-found");
             return;
           }
@@ -118,7 +121,18 @@ const ProfilePage = (): React.ReactElement => {
         const sortedTasks = [...fetchedTasks].sort(
           (a, b) => sortTask(a) - sortTask(b),
         );
-        setTasks(sortedTasks);
+        const tasksWithPhotos = await Promise.all(
+          sortedTasks.map(async (task) => {
+            if (task.petPhoto && task.petId) {
+              const photoUrl = await PetAPIClient.getProfilePhotoUrl(
+                task.petId,
+              );
+              return { ...task, petPhoto: photoUrl ?? undefined };
+            }
+            return task;
+          }),
+        );
+        setTasks(tasksWithPhotos);
       } catch (err) {
         console.error(err);
       }

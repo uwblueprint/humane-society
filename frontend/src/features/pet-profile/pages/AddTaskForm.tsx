@@ -69,6 +69,9 @@ const AddTaskForm = ({
   const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
     null,
   );
+  const [originalStartDateKey, setOriginalStartDateKey] = useState<
+    string | null
+  >(null);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -130,6 +133,13 @@ const AddTaskForm = ({
           setValue("startYear", String(date.getFullYear()));
           setValue("startHour", String(date.getHours()).padStart(2, "0"));
           setValue("startMinute", String(date.getMinutes()).padStart(2, "0"));
+          setOriginalStartDateKey(
+            [
+              date.toLocaleString("default", { month: "long" }),
+              String(date.getDate()),
+              String(date.getFullYear()),
+            ].join("|"),
+          );
         }
 
         if (task.scheduledEndTime) {
@@ -220,7 +230,8 @@ const AddTaskForm = ({
       ...(isRepeating
         ? (["recurringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
         : []),
-      ...(isRepeating && getValues("endMonth")
+      ...(isRepeating &&
+      (getValues("endMonth") || getValues("endDay") || getValues("endYear"))
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
         : []),
     ];
@@ -379,16 +390,16 @@ const AddTaskForm = ({
     try {
       if (isEditMode) {
         if (recurrenceData && occurrenceDate) {
-          let endDate: string | undefined;
-          if (endMonth && endDay && endYear) {
-            endDate = new Date(
-              Date.UTC(
-                Number(endYear),
-                MONTH_NAME_TO_NUMBER[endMonth] - 1,
-                Number(endDay),
-              ),
-            ).toISOString();
-          }
+          const endDate =
+            endMonth && endDay && endYear
+              ? new Date(
+                  Date.UTC(
+                    Number(endYear),
+                    MONTH_NAME_TO_NUMBER[endMonth] - 1,
+                    Number(endDay),
+                  ),
+                ).toISOString()
+              : null;
           await TaskAPIClient.editRecurringTask(
             Number(taskId),
             occurrenceDate,
@@ -556,7 +567,10 @@ const AddTaskForm = ({
               watch={watch}
               getValues={getValues}
               trigger={trigger}
+              setValue={setValue}
+              isEditMode={isEditMode}
               recurrenceWarnings={recurrenceWarnings}
+              originalStartDateKey={originalStartDateKey}
             />
           )}
 

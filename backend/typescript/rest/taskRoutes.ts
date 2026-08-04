@@ -1,4 +1,6 @@
 import { Router, Request } from "express";
+import { Transaction } from "sequelize";
+import { sequelize } from "../models";
 import {
   isAuthorizedByRole,
   isAuthorizedToAssignTask,
@@ -184,7 +186,7 @@ const logRecurrenceEditChanges = async (
   taskTemplateId: number | undefined,
   notes: string | undefined,
   parsedScheduledStartTime: Date | undefined,
-  parsedRecurrenceEndDate: Date | undefined,
+  parsedRecurrenceEndDate: Date | null | undefined,
   days: Days[] | undefined,
   cadence: Cadence | undefined,
 ): Promise<void> => {
@@ -231,11 +233,16 @@ const logRecurrenceEditChanges = async (
       await logInteraction(req);
     }
 
+    const oldEndDateTime = recurrence.endDate
+      ? new Date(recurrence.endDate).getTime()
+      : null;
+    const newEndDateTime = parsedRecurrenceEndDate
+      ? parsedRecurrenceEndDate.getTime()
+      : null;
+
     if (
       parsedRecurrenceEndDate !== undefined &&
-      (!recurrence.endDate ||
-        new Date(recurrence.endDate).getTime() !==
-          parsedRecurrenceEndDate.getTime())
+      oldEndDateTime !== newEndDateTime
     ) {
       req.body = {
         ...logFields,
@@ -437,7 +444,7 @@ taskRouter.post(
 
     let parsedScheduledStartTime: Date | undefined;
     let parsedScheduledEndTime: Date | undefined;
-    let parsedRecurrenceEndDate: Date | undefined;
+    let parsedRecurrenceEndDate: Date | null | undefined;
 
     if (
       (notes !== undefined && typeof notes !== "string") ||
@@ -452,6 +459,7 @@ taskRouter.post(
       (days !== undefined && !validateEnumArray(days, Days)) ||
       (cadence !== undefined && !validateEnum(cadence, Cadence)) ||
       (endDate !== undefined &&
+        endDate !== null &&
         (typeof endDate !== "string" ||
           Number.isNaN(new Date(endDate).getTime())))
     ) {
@@ -468,7 +476,7 @@ taskRouter.post(
     }
 
     if (endDate !== undefined) {
-      parsedRecurrenceEndDate = new Date(endDate);
+      parsedRecurrenceEndDate = endDate === null ? null : new Date(endDate);
     }
 
     try {
@@ -534,39 +542,67 @@ taskRouter.post(
       }
 
       if (single) {
-        await taskService.excludeDate(taskId, date);
-        const singleTask = await taskService.createTask({
-          userId: userId ?? task.userId,
-          petId: task.petId,
-          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
-          scheduledStartTime: newScheduledStartTime,
-          scheduledEndTime: newScheduledEndTime,
-          startTime: task.startTime,
-          endTime: task.endTime,
-          notes: notes ?? task.notes,
-        });
+        const transaction: Transaction = await sequelize.transaction();
+        let singleTask;
+        try {
+          await taskService.excludeDate(taskId, date, transaction);
+          singleTask = await taskService.createTask(
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
         res.status(200).json({
           singleTask,
         });
       } else if (isSeedDate) {
         // Editing from the seed occurrence
-        const updatedTask = await taskService.updateTask(taskId, {
-          userId: userId ?? task.userId,
-          petId: task.petId,
-          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
-          scheduledStartTime: newScheduledStartTime,
-          scheduledEndTime: newScheduledEndTime,
-          startTime: task.startTime,
-          endTime: task.endTime,
-          notes: notes ?? task.notes,
-        });
-        const updatedRecurrence = await taskService.updateRecurrence(taskId, {
-          ...(cadence !== undefined ? { cadence } : {}),
-          ...(days !== undefined ? { days } : {}),
-          ...(parsedRecurrenceEndDate !== undefined
-            ? { endDate: parsedRecurrenceEndDate }
-            : {}),
-        });
+        const transaction: Transaction = await sequelize.transaction();
+        let updatedTask;
+        let updatedRecurrence;
+        try {
+          updatedTask = await taskService.updateTask(
+            taskId,
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
+          updatedRecurrence = await taskService.updateRecurrence(
+            taskId,
+            {
+              ...(cadence !== undefined ? { cadence } : {}),
+              ...(days !== undefined ? { days } : {}),
+              ...(parsedRecurrenceEndDate !== undefined
+                ? { endDate: parsedRecurrenceEndDate }
+                : {}),
+            },
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
 
         await logRecurrenceEditChanges(
           req,
@@ -590,22 +626,52 @@ taskRouter.post(
           resetDateToUTCMidnight(date).getTime() - 24 * 60 * 60 * 1000,
         );
 
-        await taskService.updateRecurrence(taskId, {
-          endDate: newEndDate,
-        });
-        const newTask = await taskService.createTask({
-          userId: userId ?? task.userId,
-          petId: task.petId,
-          taskTemplateId: taskTemplateId ?? task.taskTemplateId,
-          scheduledStartTime: newScheduledStartTime,
-          scheduledEndTime: newScheduledEndTime,
-          startTime: task.startTime,
-          endTime: task.endTime,
-          notes: notes ?? task.notes,
-        });
+        const transaction: Transaction = await sequelize.transaction();
+        let newTask;
+        let newRecurrence;
+        try {
+          await taskService.updateRecurrence(
+            taskId,
+            { endDate: newEndDate },
+            transaction,
+          );
+          newTask = await taskService.createTask(
+            {
+              userId: userId ?? task.userId,
+              petId: task.petId,
+              taskTemplateId: taskTemplateId ?? task.taskTemplateId,
+              scheduledStartTime: newScheduledStartTime,
+              scheduledEndTime: newScheduledEndTime,
+              startTime: task.startTime,
+              endTime: task.endTime,
+              notes: notes ?? task.notes,
+            },
+            transaction,
+          );
 
-        // Log against the original task id, even though the split below
-        // moves the new values onto a freshly-created task/recurrence.
+          const carriedExclusions = (recurrence.exclusions ?? []).filter(
+            (ex) =>
+              resetDateToUTCMidnight(new Date(ex)).getTime() >
+              resetDateToUTCMidnight(newScheduledStartTime).getTime(),
+          );
+          const resolvedNewRecurrenceEndDate =
+            parsedRecurrenceEndDate !== undefined
+              ? parsedRecurrenceEndDate ?? undefined
+              : recurrence.endDate ?? undefined;
+          newRecurrence = await taskService.createRecurrence(
+            newTask.id.toString(),
+            cadence ?? recurrence.cadence,
+            days ?? recurrence.days,
+            resolvedNewRecurrenceEndDate,
+            carriedExclusions,
+            transaction,
+          );
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
+
         await logRecurrenceEditChanges(
           req,
           taskId,
@@ -619,18 +685,6 @@ taskRouter.post(
           cadence,
         );
 
-        const carriedExclusions = (recurrence.exclusions ?? []).filter(
-          (ex) =>
-            resetDateToUTCMidnight(new Date(ex)).getTime() >
-            resetDateToUTCMidnight(newScheduledStartTime).getTime(),
-        );
-        const newRecurrence = await taskService.createRecurrence(
-          newTask.id.toString(),
-          cadence ?? recurrence.cadence,
-          days ?? recurrence.days,
-          parsedRecurrenceEndDate ?? recurrence.endDate,
-          carriedExclusions,
-        );
         res.status(200).json({
           task: newTask,
           recurrenceTask: newRecurrence,
@@ -817,12 +871,6 @@ taskRouter.delete(
         const updatedRecurrence = await taskService.updateRecurrence(taskId, {
           endDate: newEndDate,
         });
-        await taskService.deleteFutureTasks(
-          task.taskTemplateId,
-          task.petId,
-          date,
-          task.id,
-        );
         await logInteraction(req);
         res.status(200).json({
           task,
