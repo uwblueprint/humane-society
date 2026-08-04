@@ -27,6 +27,10 @@ const Pagination: FC<PaginationProps> = ({
   const MAX_NUM_OF_PAGES = ceil(numberOfItems / itemsPerPage);
   const theme = useTheme();
 
+  if (MAX_NUM_OF_PAGES < 1) {
+    return null;
+  }
+
   const handlePrevClick = () => {
     if (value > 1) {
       onChange(value - 1);

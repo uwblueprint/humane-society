@@ -71,6 +71,32 @@ const InteractionLogPage = (): React.ReactElement => {
   const filteredLogs = useMemo(() => {
     let result = interactions;
 
+    const hasActiveFilters = Object.values(filters).some(
+      (vals) => vals && vals.length > 0,
+    );
+    if (hasActiveFilters) {
+      result = result.filter((log) =>
+        Object.keys(filters).every((key) => {
+          const vals = filters[key];
+          if (!vals || vals.length === 0) return true;
+          if (key === "interactionType")
+            return vals.includes(log.interactionType);
+          if (key === "animalTag")
+            return log.animalTag ? vals.includes(log.animalTag) : false;
+          if (key === "role") return vals.includes(log.actor.role);
+          if (key === "date") {
+            const d = new Date(log.createdAt);
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+              2,
+              "0",
+            )}-${String(d.getDate()).padStart(2, "0")}`;
+            return vals.includes(iso);
+          }
+          return true;
+        }),
+      );
+    }
+
     if (search) {
       const lowerSearch = search.toLowerCase();
       result = result.filter(
@@ -84,7 +110,7 @@ const InteractionLogPage = (): React.ReactElement => {
     }
 
     return result;
-  }, [interactions, search]);
+  }, [interactions, filters, search]);
 
   // Distinguish a genuinely empty list from a search that filtered everything
   // out: when the raw list has items but the filtered result is empty, an

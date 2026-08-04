@@ -1,15 +1,11 @@
 /* eslint-disable no-console */
 import { Request } from "express";
 import InteractionService from "../services/implementations/interactionService"; // import service that write logs to DB
-import { InteractionTypeEnum } from "../types"; // enum lists all possible interaction types
+import { InteractionTypeEnum, USER_INFO_INTERACTION_TYPES } from "../types"; // enum lists all possible interaction types
 
-const USER_INTERACTIONS = new Set<InteractionTypeEnum>([
-  InteractionTypeEnum.CHANGED_USER_NAME,
-  InteractionTypeEnum.CHANGED_USER_COLOR_LEVEL,
-  InteractionTypeEnum.CHANGED_USER_ROLE,
-  InteractionTypeEnum.INVITED_USER,
-  InteractionTypeEnum.DELETED_USER,
-]);
+const USER_INTERACTIONS = new Set<InteractionTypeEnum>(
+  USER_INFO_INTERACTION_TYPES,
+);
 
 const PET_INTERACTIONS = new Set<InteractionTypeEnum>([
   InteractionTypeEnum.DELETED_PET,
@@ -42,7 +38,6 @@ const TASK_INTERACTIONS = new Set<InteractionTypeEnum>([
   InteractionTypeEnum.CHANGED_TASK_START_DATE,
   InteractionTypeEnum.CHANGED_TASK_END_DATE,
   InteractionTypeEnum.DELETED_RECURRING_TASK,
-  InteractionTypeEnum.CHANGED_RECURRING_TASK_NAME,
   InteractionTypeEnum.CHANGED_RECURRING_TASK_DAYS,
   InteractionTypeEnum.CHANGED_RECURRING_TASK_CADENCE,
 ]);
@@ -224,14 +219,6 @@ const logInteraction = async (req: Request) => {
         }
         shortDescription = `Deleted recurring task ${taskTemplateName} with ${petName}`;
         longDescription = `Deleted recurring task ${taskTemplateName.toLowerCase()} with ${petName}.`;
-        break;
-
-      case InteractionTypeEnum.CHANGED_RECURRING_TASK_NAME:
-        if (!oldText || !newText || !petName) {
-          throw new Error(`Missing required fields for ${interactionType}`);
-        }
-        shortDescription = `Changed recurring task name of ${oldText} with ${petName} to ${newText}`;
-        longDescription = `Changed recurring task name from ${oldText} to ${newText} with ${petName}.`;
         break;
 
       case InteractionTypeEnum.CHANGED_RECURRING_TASK_DAYS:

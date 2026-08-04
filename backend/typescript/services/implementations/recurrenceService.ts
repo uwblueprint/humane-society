@@ -29,6 +29,7 @@ class RecurrenceService implements IRecurrenceService {
         pet_id: data.task.petId,
         task_template_id: data.task.taskTemplateId,
         scheduled_start_time: data.task.scheduledStartTime,
+        scheduled_end_time: data.task.scheduledEndTime,
         start_time: data.task.startTime,
         end_time: data.task.endTime,
         notes: data.task.notes,
@@ -54,6 +55,7 @@ class RecurrenceService implements IRecurrenceService {
       petId: newTask.pet_id,
       taskTemplateId: newTask.task_template_id,
       scheduledStartTime: newTask.scheduled_start_time,
+      scheduledEndTime: newTask.scheduled_end_time,
       startTime: newTask.start_time,
       endTime: newTask.end_time,
       notes: newTask.notes,
@@ -94,6 +96,8 @@ class RecurrenceService implements IRecurrenceService {
           task_template_id: data.task.taskTemplateId ?? task.task_template_id,
           scheduled_start_time:
             data.task.scheduledStartTime ?? task.scheduled_start_time,
+          scheduled_end_time:
+            data.task.scheduledEndTime ?? task.scheduled_end_time,
           start_time: data.task.startTime ?? task.start_time,
           end_time: data.task.endTime ?? task.end_time,
           notes: data.task.notes ?? task.notes,
@@ -120,6 +124,7 @@ class RecurrenceService implements IRecurrenceService {
       petId: task.pet_id,
       taskTemplateId: task.task_template_id,
       scheduledStartTime: task.scheduled_start_time,
+      scheduledEndTime: task.scheduled_end_time,
       startTime: task.start_time,
       endTime: task.end_time,
       notes: task.notes,
