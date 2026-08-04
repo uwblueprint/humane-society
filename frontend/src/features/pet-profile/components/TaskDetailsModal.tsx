@@ -398,7 +398,7 @@ const TaskDetailsModal = ({
         {
           startTime: new Date().toISOString(),
           actorId: authenticatedUser?.id ?? 0,
-          targetId: taskData?.petId ?? 0,
+          targetId: taskId,
           taskTemplateName: templateData?.name ?? "",
           petName: petData?.name ?? "",
           actorName: `${authenticatedUser?.firstName ?? ""} ${
