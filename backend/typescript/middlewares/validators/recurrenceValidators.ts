@@ -52,6 +52,16 @@ export const createRecurringTaskValidator = async (
   }
 
   if (
+    body.task.scheduledEndTime !== undefined &&
+    body.task.scheduledEndTime !== null &&
+    !validateDate(body.task.scheduledEndTime)
+  ) {
+    return res
+      .status(400)
+      .send(getApiValidationError("task.scheduledEndTime", "Date"));
+  }
+
+  if (
     body.task.startTime !== undefined &&
     body.task.startTime !== null &&
     !validateDate(body.task.startTime)
@@ -186,6 +196,16 @@ export const addRecurrenceToTaskValidator = async (
       return res
         .status(400)
         .send(getApiValidationError("task.scheduledStartTime", "Date"));
+    }
+
+    if (
+      body.task.scheduledEndTime !== undefined &&
+      body.task.scheduledEndTime !== null &&
+      !validateDate(body.task.scheduledEndTime)
+    ) {
+      return res
+        .status(400)
+        .send(getApiValidationError("task.scheduledEndTime", "Date"));
     }
 
     if (
