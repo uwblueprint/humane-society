@@ -107,12 +107,13 @@ const AssignTaskPage = (): React.ReactElement => {
   };
 
   const handleSaveClick = async () => {
-    if (!selectedUser) return;
     try {
-      await TaskAPIClient.assignUser(taskId, selectedUser.id);
+      await TaskAPIClient.assignUser(taskId, selectedUser?.id ?? null);
       toast({
         title: "Success",
-        description: "Task assigned successfully.",
+        description: selectedUser
+          ? "Task assigned successfully."
+          : "Task unassigned successfully.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -173,7 +174,6 @@ const AssignTaskPage = (): React.ReactElement => {
           type="button"
           variant="green"
           onClick={handleSaveClick}
-          disabled={!selectedUser}
         >
           Save
         </Button>
