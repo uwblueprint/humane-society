@@ -75,20 +75,6 @@ export interface PetQuery {
   sex?: string;
 }
 
-// result of a join between pet and task table
-export interface PetTask {
-  pet_id: number;
-  name: string;
-  photo?: string;
-  color_level: number;
-  animal_tag?: AnimalTag;
-  user_id?: number;
-  task_template_id?: number;
-  scheduled_start_time: Date;
-  start_time?: Date;
-  end_time?: Date;
-}
-
 export interface IPetService {
   /**
    * Gets the pet's age from their birthday

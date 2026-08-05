@@ -83,6 +83,32 @@ export interface ITaskService {
     transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
+  consumeShadowForOccurrence(
+    taskId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null>;
+
+  reconcileShadows(
+    oldAnchorId: string,
+    oldAnchorStart: Date,
+    oldRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    },
+    newAnchorId: string | null,
+    newAnchorStart: Date | null,
+    newRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    } | null,
+    transaction: Transaction,
+  ): Promise<{ deletedCount: number }>;
+
   generateRecurringInstanceForData(
     taskId: string,
     date: Date,
@@ -94,31 +120,7 @@ export interface ITaskService {
    * @returns requested Task
    * @throws Error if retrieval fails
    */
-  getTask(id: string): Promise<TaskResponseDTO>;
-
-  /**
-   * retrieve all Tasks
-   * @param
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getTasks(): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific pet
-   * @param pet_id pet id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific user
-   * @param user_id user id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>>;
+  getTask(id: string, date?: Date): Promise<TaskResponseDTO>;
 
   /**
    * create a Task with the fields given in the DTO, return created Task
@@ -154,6 +156,8 @@ export interface ITaskService {
   assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    occurrenceDate?: Date,
+    single?: boolean,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -178,6 +182,7 @@ export interface ITaskService {
   startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -190,6 +195,7 @@ export interface ITaskService {
   endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**

@@ -82,3 +82,44 @@ export function buildStartDates(actualStart: Date, days: Days[]): Date[] {
   dates.sort((a, b) => a.getTime() - b.getTime());
   return dates;
 }
+
+export function matchesRecurrenceRule(
+  actualStart: Date,
+  targetDate: Date,
+  recurrence: {
+    days?: Days[] | null;
+    cadence: Cadence;
+    end_date?: Date | null;
+    exclusions?: Date[] | null;
+  },
+): boolean {
+  const start = resetDateToUTCMidnight(actualStart);
+  const target = resetDateToUTCMidnight(targetDate);
+
+  if (target < start) return false;
+
+  if (
+    recurrence.end_date &&
+    target > resetDateToUTCMidnight(new Date(recurrence.end_date))
+  ) {
+    return false;
+  }
+
+  if (
+    recurrence.exclusions?.some(
+      (ex) =>
+        resetDateToUTCMidnight(new Date(ex)).getTime() === target.getTime(),
+    )
+  ) {
+    return false;
+  }
+
+  const startDates =
+    recurrence.days && recurrence.days.length > 0
+      ? buildStartDates(start, recurrence.days)
+      : [start];
+
+  return startDates.some((sd) =>
+    isDateInRecurrence(sd, target, recurrence.cadence),
+  );
+}
