@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Flex, Radio, RadioGroup, Text } from "@chakra-ui/react";
 import { WarningTwoIcon } from "@chakra-ui/icons";
 import PopupModal from "../../../components/common/PopupModal";
-import { startOfLocalDay } from "../../../utils/taskStatusUtils";
 
 interface EditTaskScopeModalProps {
   open: boolean;
@@ -14,8 +13,6 @@ interface EditTaskScopeModalProps {
   startDateChanged?: boolean;
   // The occurrence the user opened, used to name dates in the warnings
   occurrenceDate?: string;
-  // The start date currently entered in the form
-  newStartDate?: Date | null;
   // Days, cadence or recurrence end date differ from what was prefilled
   recurrenceChanged?: boolean;
   // The opened occurrence is today and has already been started or completed
@@ -54,7 +51,6 @@ const EditTaskScopeModal = ({
   startDateBeforeOccurrence = false,
   startDateChanged = false,
   occurrenceDate,
-  newStartDate,
   recurrenceChanged = false,
   todayHasProgress = false,
 }: EditTaskScopeModalProps): React.ReactElement => {
@@ -74,21 +70,6 @@ const EditTaskScopeModal = ({
   const occurrenceLabel = occurrenceDate
     ? formatShortDate(new Date(occurrenceDate))
     : null;
-
-  // The stretch of days the old schedule has given up but the new one has not
-  // picked up yet, i.e. the start date was pushed later than this occurrence.
-  let gapLabel: string | null = null;
-  if (occurrenceDate && newStartDate) {
-    const gapStart = startOfLocalDay(occurrenceDate);
-    const gapEnd = startOfLocalDay(newStartDate);
-    gapEnd.setDate(gapEnd.getDate() - 1);
-    if (gapEnd >= gapStart) {
-      gapLabel =
-        gapEnd.getTime() === gapStart.getTime()
-          ? formatShortDate(gapStart)
-          : `${formatShortDate(gapStart)}–${formatShortDate(gapEnd)}`;
-    }
-  }
 
   const seriesSelectable = scope === "series" && !seriesDisabled;
 
@@ -154,24 +135,6 @@ const EditTaskScopeModal = ({
                   occurrenceLabel ?? "this task's date"
                 }. To start the schedule earlier, cancel and edit from the series' first task instead.`}
               </Text>
-            )}
-            {seriesSelectable && recurrenceChanged && (
-              <WarningLine
-                indent
-                message="Days that get removed due to this change will no longer be scheduled. Tasks individually assigned to users on those days will be deleted."
-              />
-            )}
-            {seriesSelectable && startDateChanged && (
-              <WarningLine
-                indent
-                message={
-                  gapLabel && newStartDate
-                    ? `Future tasks will repeat from ${formatShortDate(
-                        newStartDate,
-                      )}. ${gapLabel} will no longer be scheduled, and tasks individually assigned to users on those days will be deleted.`
-                    : `All future tasks will now repeat from this new start date.`
-                }
-              />
             )}
             {seriesSelectable &&
               todayHasProgress &&

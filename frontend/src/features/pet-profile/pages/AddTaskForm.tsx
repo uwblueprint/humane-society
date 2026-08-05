@@ -749,7 +749,6 @@ const AddTaskForm = ({
         startDateBeforeOccurrence={startDateBeforeOccurrence}
         startDateChanged={recurrenceWarnings?.startDate}
         occurrenceDate={occurrenceDate}
-        newStartDate={watchedStartDate}
         recurrenceChanged={
           !!(
             recurrenceWarnings?.days ||
