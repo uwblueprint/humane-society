@@ -1,4 +1,4 @@
-import { Op, Sequelize, Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
@@ -1039,8 +1039,7 @@ class TaskService implements ITaskService {
             attributes: ["id", "first_name", "last_name", "profile_photo"],
             required: false,
           },
-          { model: Pet, attributes: ["name"], required: false },
-          { model: PgRecurrenceTask, required: false },
+          { model: Pet, attributes: ["name", "photo"], required: false },
         ],
       });
 
@@ -1069,6 +1068,7 @@ class TaskService implements ITaskService {
           taskName: task.task_template?.task_name,
           category: task.task_template?.category,
           petName: task.pet?.name,
+          petPhoto: task.pet?.photo,
           assignedUser: task.user
             ? {
                 id: task.user.id,
@@ -1116,7 +1116,7 @@ class TaskService implements ITaskService {
               where: { id: recurringTaskIds },
               include: [
                 { model: TaskTemplate, attributes: ["task_name", "category"] },
-                { model: Pet, attributes: ["name"], required: false },
+                { model: Pet, attributes: ["name", "photo"], required: false },
               ],
             })
           : [];
@@ -1154,6 +1154,7 @@ class TaskService implements ITaskService {
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
             petName: enriched?.pet?.name,
+            petPhoto: enriched?.pet?.photo,
             assignedUser: assignedUserRow
               ? {
                   id: assignedUserRow.id,
@@ -1184,46 +1185,6 @@ class TaskService implements ITaskService {
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
-    transaction?: Transaction,
-  ): Promise<void> {
-    try {
-      const normalizedDate = resetDateToUTCMidnight(date);
-      const idConditions: unknown[] = [
-        {
-          [Op.notIn]: Sequelize.literal(
-            "(SELECT task_id FROM recurrence_tasks)",
-          ),
-        },
-      ];
-
-      if (excludeTaskId) {
-        idConditions.push({ [Op.ne]: excludeTaskId });
-      }
-
-      await PgTask.destroy({
-        where: {
-          task_template_id: taskTemplateId,
-          pet_id: petId,
-          scheduled_start_time: {
-            [Op.gte]: normalizedDate,
-          },
-          id: { [Op.and]: idConditions },
-        },
-        transaction,
-      });
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to delete future tasks. Reason = ${getErrorMessage(error)}`,
       );
       throw error;
     }

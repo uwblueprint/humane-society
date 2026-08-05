@@ -90,6 +90,16 @@ export interface IPetService {
   getPet(id: string): Promise<PetRawDTO>;
 
   /**
+   * Get the raw stored profile photo path for a batch of pets
+   * @param petIds ids of the pets to look up
+   * @returns a map of petId to their stored profile photo path (null if unset)
+   * @throws Error if retrieval fails
+   */
+  getProfilePhotosByIds(
+    petIds: number[],
+  ): Promise<Record<number, string | null>>;
+
+  /**
    * create a Pet with the fields given in the DTO, return created Pet
    * @param pet new Pet
    * @returns the created Pet

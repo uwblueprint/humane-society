@@ -23,6 +23,7 @@ interface MultiSelectProps<T> {
   icons?: React.FC<React.SVGProps<SVGSVGElement>>[];
   required?: boolean;
   maxHeight?: string;
+  disabled?: boolean;
 }
 
 const MultiSelect = <T extends string | number>({
@@ -36,6 +37,7 @@ const MultiSelect = <T extends string | number>({
   icons,
   required = false,
   maxHeight = "200px",
+  disabled = false,
 }: MultiSelectProps<T>): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,10 +72,12 @@ const MultiSelect = <T extends string | number>({
   }, [isOpen]);
 
   const handleToggle = () => {
+    if (disabled) return;
     setIsOpen(!isOpen);
   };
 
   const handleSelect = (value: T) => {
+    if (disabled) return;
     const isSelected = selected.includes(value);
     if (isSelected) {
       onSelect(selected.filter((item) => item !== value));
@@ -83,6 +87,7 @@ const MultiSelect = <T extends string | number>({
   };
 
   const handleRemoveTag = (value: T) => {
+    if (disabled) return;
     onSelect(selected.filter((item) => item !== value));
   };
 
@@ -112,16 +117,20 @@ const MultiSelect = <T extends string | number>({
         as="button"
         type="button"
         width="100%"
-        bg="white"
+        bg={disabled ? "gray.100" : "white"}
         border="1px solid"
         borderColor={error ? "red.500" : "gray.400"}
         borderRadius="8px"
-        cursor="pointer"
+        cursor={disabled ? "not-allowed" : "pointer"}
         onClick={handleToggle}
         position="relative"
-        _hover={{
-          borderColor: "gray.400",
-        }}
+        _hover={
+          disabled
+            ? undefined
+            : {
+                borderColor: "gray.400",
+              }
+        }
         _focus={{
           outline: "none",
           borderColor: "blue.400",
@@ -171,12 +180,14 @@ const MultiSelect = <T extends string | number>({
                       flexShrink={0}
                     >
                       <Icon as={IconComponent} height="2rem" width="auto" />
-                      <TagCloseButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveTag(value);
-                        }}
-                      />
+                      {!disabled && (
+                        <TagCloseButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveTag(value);
+                          }}
+                        />
+                      )}
                     </Flex>
                   ) : (
                     <Tag
@@ -192,21 +203,23 @@ const MultiSelect = <T extends string | number>({
                       <TagLabel textStyle="button" m={0}>
                         {String(value)}
                       </TagLabel>
-                      <TagCloseButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveTag(value);
-                        }}
-                        _hover={{
-                          bg: "whiteAlpha.300",
-                        }}
-                        sx={{
-                          color: { color },
-                          "& svg": {
+                      {!disabled && (
+                        <TagCloseButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveTag(value);
+                          }}
+                          _hover={{
+                            bg: "whiteAlpha.300",
+                          }}
+                          sx={{
                             color: { color },
-                          },
-                        }}
-                      />
+                            "& svg": {
+                              color: { color },
+                            },
+                          }}
+                        />
+                      )}
                     </Tag>
                   );
                 })}

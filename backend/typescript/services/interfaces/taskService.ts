@@ -41,6 +41,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
   taskName?: string;
   category?: TaskCategory;
   petName?: string;
+  petPhoto?: string;
   assignedUser?: {
     id: number;
     firstName: string;
@@ -228,22 +229,4 @@ export interface ITaskService {
     date: string,
     filters?: { userId?: number; petId?: number },
   ): Promise<TaskResponseDTOForDate[]>;
-
-  /**
-   * deletes future PgTask records where task_template_id matches, pet_id matches,
-   * scheduled_start_time >= the given date, and id != excludeTaskId
-   * @param taskTemplateId task template id
-   * @param petId pet id
-   * @param date date to delete from
-   * @param excludeTaskId optional task id to exclude from deletion
-   * @returns void
-   * @throws Error if deletion fails
-   */
-  deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
-    transaction?: Transaction,
-  ): Promise<void>;
 }

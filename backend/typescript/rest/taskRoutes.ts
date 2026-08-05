@@ -706,13 +706,6 @@ taskRouter.delete(
             { endDate: newEndDate },
             transaction,
           );
-          await taskService.deleteFutureTasks(
-            task.taskTemplateId,
-            task.petId,
-            date,
-            task.id,
-            transaction,
-          );
           ({ deletedCount } = await taskService.reconcileShadows(
             taskId,
             resetDateToUTCMidnight(task.scheduledStartTime),
