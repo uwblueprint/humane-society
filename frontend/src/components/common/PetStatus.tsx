@@ -5,7 +5,7 @@ import { PetStatus as PetStatusEnum } from "../../types/PetTypes";
 const statusColor: Record<PetStatusEnum, string> = {
   [PetStatusEnum.NEEDS_CARE]: "red.400",
   [PetStatusEnum.DOES_NOT_NEED_CARE]: "gray.500",
-  [PetStatusEnum.OCCUPIED]: "blue.500",
+  [PetStatusEnum.OCCUPIED]: "yellow.500",
 };
 
 export interface PetStatusProps {

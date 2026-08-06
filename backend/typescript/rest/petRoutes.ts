@@ -256,6 +256,45 @@ petRouter.get("/:id/profile-photo", async (req, res) => {
   }
 });
 
+/* Batched profile-photo URL lookup */
+petRouter.post("/profile-photos", async (req, res) => {
+  const { petIds } = req.body;
+
+  if (!Array.isArray(petIds) || petIds.some((id) => typeof id !== "number")) {
+    res.status(400).json({ error: "petIds must be an array of numbers" });
+    return;
+  }
+
+  try {
+    const photosById = await petService.getProfilePhotosByIds(petIds);
+
+    const urlEntries = await Promise.all(
+      Object.entries(photosById)
+        .filter(([, photo]) => !!photo)
+        .map(async ([id, photo]) => {
+          try {
+            const url = await fileStorageService.getFile(photo as string);
+            return [id, url] as const;
+          } catch {
+            return null;
+          }
+        }),
+    );
+
+    const urls: Record<string, string> = {};
+    urlEntries.forEach((entry) => {
+      if (entry) {
+        const [id, url] = entry;
+        urls[id] = url;
+      }
+    });
+
+    res.status(200).json({ urls });
+  } catch (error: unknown) {
+    res.status(500).send(getErrorMessage(error));
+  }
+});
+
 /* Get Pet by id */
 petRouter.get("/:id", async (req, res) => {
   const { id } = req.params;

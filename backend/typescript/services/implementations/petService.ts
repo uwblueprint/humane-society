@@ -75,6 +75,21 @@ class PetService implements IPetService {
     return PetStatus.DOES_NOT_NEED_CARE;
   }
 
+  async getProfilePhotosByIds(
+    petIds: number[],
+  ): Promise<Record<number, string | null>> {
+    const pets = await PgPet.findAll({
+      where: { id: petIds },
+      attributes: ["id", "photo"],
+    });
+
+    const photosById: Record<number, string | null> = {};
+    pets.forEach((pet) => {
+      photosById[pet.id] = pet.photo ?? null;
+    });
+    return photosById;
+  }
+
   async getPet(id: string): Promise<PetRawDTO> {
     let pet: PgPet | null;
     try {
@@ -425,6 +440,12 @@ class PetService implements IPetService {
 
     allPets
       .filter((pet) => {
+        // A pet assigned to me (e.g. an override assignment) always shows,
+        // regardless of colour/tag eligibility - otherwise the volunteer has
+        // assigned work they can never discover. isAssignedToMe is only set
+        // for an incomplete task today, so allTasksAssigned is already non-null.
+        if (pet.isAssignedToMe) return true;
+
         const canCare = this.canVolunteerCareToday(
           user,
           petAnimalTagMap[pet.id],

@@ -644,6 +644,45 @@ userRouter.get("/me/profile-photo", async (req, res) => {
   }
 });
 
+/* Batched profile-photo URL lookup */
+userRouter.post("/profile-photos", async (req, res) => {
+  const { userIds } = req.body;
+
+  if (!Array.isArray(userIds) || userIds.some((id) => typeof id !== "number")) {
+    res.status(400).json({ error: "userIds must be an array of numbers" });
+    return;
+  }
+
+  try {
+    const photosById = await userService.getProfilePhotosByIds(userIds);
+
+    const urlEntries = await Promise.all(
+      Object.entries(photosById)
+        .filter(([, photo]) => !!photo)
+        .map(async ([id, photo]) => {
+          try {
+            const url = await fileStorageService.getFile(photo as string);
+            return [id, url] as const;
+          } catch {
+            return null;
+          }
+        }),
+    );
+
+    const urls: Record<string, string> = {};
+    urlEntries.forEach((entry) => {
+      if (entry) {
+        const [id, url] = entry;
+        urls[id] = url;
+      }
+    });
+
+    res.status(200).json({ urls });
+  } catch (error: unknown) {
+    res.status(500).send(getErrorMessage(error));
+  }
+});
+
 /* Change user name by id */
 userRouter.patch("/:id/name", async (req, res) => {
   const idNum = Number(req.params.id);

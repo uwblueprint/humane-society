@@ -21,7 +21,7 @@ import PetListTable from "../components/PetListTable";
 
 const PetListPage = (): React.ReactElement => {
   const [petsSections, setPetsSections] = useState<PetListSections>({});
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
@@ -61,10 +61,38 @@ const PetListPage = (): React.ReactElement => {
       const fetchedPetsSections = await PetAPIClient.getPetList(userId);
 
       if (fetchedPetsSections != null) {
-        setPetsSections(fetchedPetsSections);
+        const petIdsWithPhotos = Array.from(
+          new Set(
+            Object.values(fetchedPetsSections)
+              .flat()
+              .filter((pet) => pet.photo)
+              .map((pet) => pet.id),
+          ),
+        );
+        let photoUrlsByPetId: Record<number, string> = {};
+        if (petIdsWithPhotos.length > 0) {
+          try {
+            photoUrlsByPetId = await PetAPIClient.getProfilePhotoUrls(
+              petIdsWithPhotos,
+            );
+          } catch {
+            // Leave unresolved; ProfilePhoto falls back to the default avatar.
+          }
+        }
+
+        const sectionsWithPhotoUrls: PetListSections = {};
+        Object.entries(fetchedPetsSections).forEach(([sectionName, pets]) => {
+          sectionsWithPhotoUrls[sectionName] = pets.map((pet) => ({
+            ...pet,
+            photo: photoUrlsByPetId[pet.id] ?? undefined,
+          }));
+        });
+        setPetsSections(sectionsWithPhotoUrls);
       }
     } catch (error) {
       setErrorMessage(`${error}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -140,6 +168,10 @@ const PetListPage = (): React.ReactElement => {
     return result;
   }, [petsSections, filters, search]);
 
+  const hasNoPets = Object.values(petsSections).every(
+    (pets) => pets.length === 0,
+  );
+
   return (
     <TableWrapper
       filterBarProps={{
@@ -164,6 +196,9 @@ const PetListPage = (): React.ReactElement => {
       <PetListTable
         petsRecord={filteredPets}
         clearFilters={handleClearFilters}
+        hasError={errorMessage != null}
+        hasNoPets={hasNoPets}
+        isLoading={isLoading}
       />
     </TableWrapper>
   );
