@@ -25,7 +25,9 @@ import logger from "../../utilities/logger";
 import { Cadence, Days } from "../../types";
 import {
   buildStartDates,
+  buildShelterInstant,
   matchesRecurrenceRule,
+  resetDateToShelterMidnight,
   resetDateToUTCMidnight,
 } from "../../utilities/dateUtils";
 import { requirePetAndTemplateIds } from "../../utilities/common";
@@ -363,22 +365,14 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (!matchesRecurrenceRule(actualStart, date, recurrence)) {
+      const anchorDayLabel = resetDateToShelterMidnight(actualStart);
+      if (!matchesRecurrenceRule(anchorDayLabel, date, recurrence)) {
         throw new Error(
           "Given date does not match the recurrence rule (before the start date, after the end date, excluded, or off-pattern).",
         );
       }
 
-      const occurrenceDate = new Date(
-        Date.UTC(
-          date.getUTCFullYear(),
-          date.getUTCMonth(),
-          date.getUTCDate(),
-          actualStart.getUTCHours(),
-          actualStart.getUTCMinutes(),
-          actualStart.getUTCSeconds(),
-        ),
-      );
+      const occurrenceDate = buildShelterInstant(date, actualStart);
       const occurrenceEndDate = task.scheduled_end_time
         ? new Date(
             occurrenceDate.getTime() +
