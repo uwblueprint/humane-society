@@ -60,7 +60,7 @@ class TaskService implements ITaskService {
         endDate &&
         task.scheduled_start_time &&
         resetDateToUTCMidnight(endDate).getTime() <
-          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
+          resetDateToShelterMidnight(task.scheduled_start_time).getTime()
       )
         throw new BadRequestError("End date cannot be before task start date.");
       if (endDate && !task.scheduled_start_time)
@@ -143,7 +143,7 @@ class TaskService implements ITaskService {
         updates.endDate &&
         task.scheduled_start_time &&
         resetDateToUTCMidnight(updates.endDate).getTime() <
-          resetDateToUTCMidnight(task.scheduled_start_time).getTime()
+          resetDateToShelterMidnight(task.scheduled_start_time).getTime()
       )
         throw new BadRequestError("End date cannot be before task start date.");
       if (updates.endDate && !task.scheduled_start_time)
@@ -181,7 +181,9 @@ class TaskService implements ITaskService {
       let newDays = updates.days ? updates.days : undefined;
       // check if endDate comes before the first occurrence of any of the start days calculated from days array
       if (newEndDate && task.scheduled_start_time) {
-        const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
+        const actualStart = resetDateToShelterMidnight(
+          task.scheduled_start_time,
+        );
 
         // use updated days if provided, otherwise existing
         const sourceDays = updates.days ?? recurrenceTask.days;
@@ -294,8 +296,8 @@ class TaskService implements ITaskService {
           "Exclusion date already exists for this recurrence.",
         );
 
-      const actualStart = resetDateToUTCMidnight(task.scheduled_start_time);
-      if (date < actualStart) {
+      const actualStart = resetDateToShelterMidnight(task.scheduled_start_time);
+      if (exclusion < actualStart) {
         // throw error because these checks should be done on frontend too
         throw new BadRequestError(
           "Exclusion date is before recurrence start date.",
@@ -322,8 +324,8 @@ class TaskService implements ITaskService {
       }
 
       const updatedExclusions = recurrenceTask.exclusions
-        ? [...recurrenceTask.exclusions, date]
-        : [date];
+        ? [...recurrenceTask.exclusions, exclusion]
+        : [exclusion];
       const updatedRecurrenceTask = await PgRecurrenceTask.update(
         {
           exclusions: updatedExclusions,
@@ -417,7 +419,7 @@ class TaskService implements ITaskService {
       if (recurrence) {
         return this.generateRecurringInstanceForData(
           id,
-          resetDateToUTCMidnight(date),
+          resetDateToShelterMidnight(date),
         );
       }
     }
@@ -548,7 +550,7 @@ class TaskService implements ITaskService {
     }
 
     const newRecurrenceEndDate = new Date(
-      resetDateToUTCMidnight(splitDate).getTime() - 24 * 60 * 60 * 1000,
+      resetDateToShelterMidnight(splitDate).getTime() - 24 * 60 * 60 * 1000,
     );
     await this.updateRecurrence(
       taskId,
@@ -558,13 +560,15 @@ class TaskService implements ITaskService {
 
     let newScheduledEndTime: Date | undefined;
     if (task.scheduled_end_time) {
-      const seedEnd = new Date(task.scheduled_end_time);
-      newScheduledEndTime = new Date(splitDate);
-      newScheduledEndTime.setUTCHours(
-        seedEnd.getUTCHours(),
-        seedEnd.getUTCMinutes(),
-        seedEnd.getUTCSeconds(),
-        seedEnd.getUTCMilliseconds(),
+      newScheduledEndTime = new Date(
+        splitDate.getTime() +
+          (new Date(task.scheduled_end_time).getTime() -
+            new Date(task.scheduled_start_time).getTime()),
+      );
+    }
+    if (newScheduledEndTime !== undefined && newScheduledEndTime <= splitDate) {
+      throw new BadRequestError(
+        "scheduledEndTime must be after scheduledStartTime",
       );
     }
 
@@ -582,7 +586,7 @@ class TaskService implements ITaskService {
     const carriedExclusions = (recurrence.exclusions ?? []).filter(
       (ex) =>
         resetDateToUTCMidnight(new Date(ex)).getTime() >
-        resetDateToUTCMidnight(splitDate).getTime(),
+        resetDateToShelterMidnight(splitDate).getTime(),
     );
 
     const newRecurrenceDTO = await this.createRecurrence(
@@ -596,7 +600,7 @@ class TaskService implements ITaskService {
 
     await this.reconcileShadows(
       taskId,
-      resetDateToUTCMidnight(task.scheduled_start_time),
+      resetDateToShelterMidnight(task.scheduled_start_time),
       {
         days: recurrence.days,
         cadence: recurrence.cadence,
@@ -604,7 +608,7 @@ class TaskService implements ITaskService {
         exclusions: recurrence.exclusions,
       },
       newTaskDTO.id.toString(),
-      splitDate,
+      resetDateToShelterMidnight(splitDate),
       {
         days: newRecurrenceDTO.days,
         cadence: newRecurrenceDTO.cadence,
@@ -643,12 +647,12 @@ class TaskService implements ITaskService {
         }
 
         const isSeedDate =
-          resetDateToUTCMidnight(task.scheduled_start_time).getTime() ===
-          resetDateToUTCMidnight(occurrenceDate).getTime();
+          resetDateToShelterMidnight(task.scheduled_start_time).getTime() ===
+          resetDateToShelterMidnight(occurrenceDate).getTime();
 
         if (
-          resetDateToUTCMidnight(occurrenceDate).getTime() <
-          resetDateToUTCMidnight(new Date()).getTime()
+          resetDateToShelterMidnight(occurrenceDate).getTime() <
+          resetDateToShelterMidnight(new Date()).getTime()
         ) {
           throw new BadRequestError(
             "Cannot apply 'this and following' to a past occurrence.",
@@ -764,7 +768,7 @@ class TaskService implements ITaskService {
       );
     }
 
-    const normalizedDate = resetDateToUTCMidnight(occurrenceDate);
+    const normalizedDate = resetDateToShelterMidnight(occurrenceDate);
     const existingShadow = await PgTask.findOne({
       where: { origin_task_id: taskId, occurrence_date: normalizedDate },
     });
