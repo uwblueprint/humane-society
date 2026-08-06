@@ -1,21 +1,33 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { useParams, useHistory } from "react-router-dom";
 import { PROFILE_PAGE, USER_MANAGEMENT_PAGE } from "../../../constants/Routes";
 import Input from "../../../components/common/Input";
+import PasswordInput from "../../../components/common/PasswordInput";
 import SingleSelect from "../../../components/common/SingleSelect";
 import MultiSelect from "../../../components/common/MultiSelect";
 import Button from "../../../components/common/Button";
 import UserAPIClient from "../../../APIClients/UserAPIClient";
+import AuthAPIClient from "../../../APIClients/AuthAPIClient";
+import AuthContext from "../../../contexts/AuthContext";
 import UserRoles from "../../../constants/UserConstants";
 import { AnimalTag } from "../../../types/TaskTypes";
+import { User } from "../../../types/UserTypes";
 import ColourStarIcon from "../../../components/common/ColourStarIcon";
 import NavBar from "../../../components/common/navbar/NavBar";
 import DeleteUserModal from "../components/DeleteUserModal";
 import QuitEditingModal from "../../pet-profile/pages/QuitEditingModal";
+import ProfilePhotoEditor from "../components/ProfilePhotoEditor";
+import ChangePasswordRow from "../components/ChangePasswordRow";
+import {
+  canEditField,
+  canEditProfile,
+  canDeleteUser,
+  canChangePassword,
+} from "../../../utils/permissions";
 
 interface FormData {
   firstName: string;
@@ -34,11 +46,24 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isDeleteSelected, setIsDeleteSelected] = useState(false);
+  const { authenticatedUser } = useContext(AuthContext);
+  const originalValues = useRef<FormData | null>(null);
+  const [userName, setUserName] = useState("");
+  const [viewedUser, setViewedUser] = useState<User | null>(null);
+  const [localProfilePhoto, setLocalProfilePhoto] = useState<
+    string | undefined
+  >(undefined);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const {
     isOpen: isQuitEditingModalOpen,
     onOpen: openQuitEditingModal,
     onClose: closeQuitEditingModal,
   } = useDisclosure();
+
+  // "Is this my profile?" detection logic
+  const targetId = parseInt(userId, 10);
+  const isOwnProfile = authenticatedUser?.id === targetId;
+  const actorRole = (authenticatedUser?.role as UserRoles) ?? null;
 
   const colourLevelMap = useMemo<Record<number, string>>(
     () => ({
@@ -74,7 +99,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         const userData = await UserAPIClient.get(parseInt(userId, 10));
 
         // Prepopulate form with user data
-        reset({
+        const formValues = {
           firstName: userData.firstName,
           lastName: userData.lastName,
           phoneNumber: userData.phoneNumber || "",
@@ -82,7 +107,18 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
           role: userData.role,
           colourLevel: colourLevelMap[userData.colorLevel],
           animalTag: userData.animalTags,
-        });
+        };
+        reset(formValues);
+        originalValues.current = formValues;
+        setUserName(`${userData.firstName} ${userData.lastName}`);
+        setViewedUser(userData);
+
+        if (userData.profilePhoto) {
+          const url = await UserAPIClient.getProfilePhotoUrl(userData.id);
+          setLocalProfilePhoto(url);
+        } else {
+          setLocalProfilePhoto(undefined);
+        }
       } catch (error) {
         const is403 =
           axios.isAxiosError(error) && error.response?.status === 403;
@@ -103,25 +139,110 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
     fetchUser();
   }, [userId, reset, toast, colourLevelMap]);
 
+  const handleProfilePhotoChange = (file: File | null) => {
+    if (!file) {
+      setLocalProfilePhoto(undefined);
+      setProfilePhotoFile(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLocalProfilePhoto(reader.result as string);
+    };
+    setProfilePhotoFile(file);
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);
-    const formattedData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phoneNumber: data.phoneNumber,
-      email: data.email,
-      role: data.role,
-      colorLevel: colourLevelReverseMap[data.colourLevel],
-      animalTags: Array.isArray(data.animalTag)
-        ? data.animalTag
-        : [data.animalTag],
-    };
+    const orig = originalValues.current;
+    const actorId = authenticatedUser!.id;
 
-    // eslint-disable-next-line no-console
     try {
-      await UserAPIClient.update(parseInt(userId, 10), formattedData);
-      const updatedUser = await UserAPIClient.get(parseInt(userId, 10));
-      reset({
+      const patches: Promise<unknown>[] = [];
+
+      if (
+        canEditField(actorRole, isOwnProfile, "firstName") &&
+        orig &&
+        (data.firstName !== orig.firstName || data.lastName !== orig.lastName)
+      ) {
+        patches.push(
+          UserAPIClient.updateName(targetId, {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            actorId,
+            targetId,
+            oldUserName: `${orig.firstName} ${orig.lastName}`,
+            newUserName: `${data.firstName} ${data.lastName}`,
+          }),
+        );
+      }
+
+      if (
+        canEditField(actorRole, isOwnProfile, "colorLevel") &&
+        orig &&
+        data.colourLevel !== orig.colourLevel
+      ) {
+        patches.push(
+          UserAPIClient.updateColorLevel(targetId, {
+            colorLevel: colourLevelReverseMap[data.colourLevel],
+            actorId,
+            targetId,
+            targetName: `${orig.firstName} ${orig.lastName}`,
+            oldColorLevel: orig.colourLevel,
+            newColorLevel: data.colourLevel,
+          }),
+        );
+      }
+
+      if (
+        canEditField(actorRole, isOwnProfile, "role") &&
+        orig &&
+        data.role !== orig.role
+      ) {
+        patches.push(
+          UserAPIClient.updateRole(targetId, {
+            role: data.role,
+            actorId,
+            targetId,
+            targetName: `${orig.firstName} ${orig.lastName}`,
+            oldRole: orig.role,
+            newRole: data.role,
+          }),
+        );
+      }
+
+      // phoneNumber and animalTags have no PATCH routes — use PUT, restricted to
+      // whichever of those fields the current viewer is actually allowed to edit.
+      const putFields: { phoneNumber?: string; animalTags?: AnimalTag[] } = {};
+      if (canEditField(actorRole, isOwnProfile, "phoneNumber")) {
+        putFields.phoneNumber = data.phoneNumber;
+      }
+      if (canEditField(actorRole, isOwnProfile, "animalTags")) {
+        putFields.animalTags = Array.isArray(data.animalTag)
+          ? data.animalTag
+          : [data.animalTag];
+      }
+      if (Object.keys(putFields).length > 0) {
+        patches.push(UserAPIClient.update(targetId, putFields));
+      }
+
+      await Promise.all(patches);
+
+      if (canEditField(actorRole, isOwnProfile, "profilePhoto")) {
+        if (profilePhotoFile) {
+          await UserAPIClient.uploadProfilePhoto(
+            profilePhotoFile,
+            targetId,
+            viewedUser?.profilePhoto,
+          );
+        } else if (localProfilePhoto === undefined) {
+          await UserAPIClient.setDefaultProfilePhoto(targetId);
+        }
+      }
+
+      const updatedUser = await UserAPIClient.get(targetId);
+      const formValues = {
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         phoneNumber: updatedUser.phoneNumber || "",
@@ -129,7 +250,10 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         role: updatedUser.role,
         colourLevel: colourLevelMap[updatedUser.colorLevel],
         animalTag: updatedUser.animalTags,
-      });
+      };
+      reset(formValues);
+      originalValues.current = formValues;
+      setViewedUser(updatedUser);
       toast({
         title: "Success",
         description: "User profile updated",
@@ -137,6 +261,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         duration: 3000,
         isClosable: true,
       });
+    history.push(`${PROFILE_PAGE}/${targetId}`);
     } catch (err) {
       toast({
         title: "Fail",
@@ -158,6 +283,21 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
     setIsDeleteSelected(false);
   };
 
+  const handleSendPasswordReset = async () => {
+    const success = await AuthAPIClient.sendPasswordResetEmail(
+      viewedUser?.email,
+    );
+    toast({
+      title: success ? "Email sent" : "Failed to send",
+      description: success
+        ? `A password reset link has been sent to ${viewedUser?.email}.`
+        : "Could not send the password reset email. Please try again.",
+      status: success ? "success" : "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
   const roleOptions = Object.values(UserRoles);
   const colourLevelOptions = ["Green", "Yellow", "Orange", "Red", "Blue"]; // Assuming 1-5 levels
   const colorLevelIcons = [
@@ -173,6 +313,16 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
   if (loading) {
     return <></>;
   }
+
+  const canEditAnything = canEditProfile(actorRole, isOwnProfile);
+  const canEditFirstLast = canEditField(actorRole, isOwnProfile, "firstName");
+  const canEditPhone = canEditField(actorRole, isOwnProfile, "phoneNumber");
+  const canEditRole = canEditField(actorRole, isOwnProfile, "role");
+  const canEditColour = canEditField(actorRole, isOwnProfile, "colorLevel");
+  const canEditTags = canEditField(actorRole, isOwnProfile, "animalTags");
+  const canEditPhoto = canEditField(actorRole, isOwnProfile, "profilePhoto");
+  const showPasswordSection = canChangePassword(actorRole, isOwnProfile);
+  const showDelete = canDeleteUser(actorRole, isOwnProfile);
 
   return (
     <>
@@ -212,6 +362,13 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
             Edit Profile
           </Text>
 
+          {canEditPhoto && (
+            <ProfilePhotoEditor
+              photoUrl={localProfilePhoto}
+              onChange={handleProfilePhotoChange}
+            />
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap="1.5rem">
@@ -228,6 +385,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                       value={field.value}
                       onChange={field.onChange}
                       error={errors.firstName?.message}
+                      disabled={!canEditFirstLast}
                       required
                     />
                   )}
@@ -243,6 +401,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                       value={field.value}
                       onChange={field.onChange}
                       error={errors.lastName?.message}
+                      disabled={!canEditFirstLast}
                       required
                     />
                   )}
@@ -253,6 +412,13 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
               <Controller
                 name="phoneNumber"
                 control={control}
+                rules={{
+                  validate: (value) =>
+                    !value ||
+                    /^\d{3}-\d{3}-\d{4}$/.test(value) ||
+                    /^\d{10}$/.test(value) ||
+                    "Invalid number (must be in xxx-xxx-xxxx or xxxxxxxxxx format)",
+                }}
                 render={({ field }) => (
                   <Input
                     label="Phone Number"
@@ -260,6 +426,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     value={field.value}
                     onChange={field.onChange}
                     error={errors.phoneNumber?.message}
+                    disabled={!canEditPhone}
                   />
                 )}
               />
@@ -281,6 +448,33 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                 )}
               />
 
+              {showPasswordSection &&
+                (isOwnProfile ? (
+                  <ChangePasswordRow />
+                ) : (
+                  <Flex width="100%" gap="1.5rem" alignItems="end">
+                    <Flex flex={1}>
+                      <PasswordInput
+                        label="Password"
+                        value=""
+                        disabled
+                        showToggle={false}
+                      />
+                    </Flex>
+                    <Flex flex={1} align="center">
+                      <Button
+                        variant="dark-blue"
+                        size="large"
+                        width="100%"
+                        type="button"
+                        onClick={handleSendPasswordReset}
+                      >
+                        Send Password Reset Email
+                      </Button>
+                    </Flex>
+                  </Flex>
+                ))}
+
               {/* Role - Full width */}
               <Controller
                 name="role"
@@ -294,6 +488,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     onSelect={field.onChange}
                     placeholder="Select a role"
                     error={!!errors.role}
+                    disabled={!canEditRole}
                     required
                   />
                 )}
@@ -314,6 +509,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     placeholder="Select colour level"
                     maxHeight="none"
                     error={!!errors.colourLevel}
+                    disabled={!canEditColour}
                     required
                   />
                 )}
@@ -334,30 +530,35 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
                     colours={animalTagColors}
                     maxHeight="none"
                     error={!!errors.animalTag}
+                    disabled={!canEditTags}
                     required
                   />
                 )}
               />
 
               {/* Buttons - Right aligned, side by side */}
-              <Flex justify="flex-end" gap="1.5rem" mt="1.5rem">
-                <Button
-                  variant="red"
-                  size="medium"
-                  onClick={handleDeleteUser}
-                  type="button"
-                >
-                  Delete User
-                </Button>
-                <Button
-                  variant="green"
-                  size="medium"
-                  type="submit"
-                  disabled={submitting}
-                >
-                  {submitting ? "Saving..." : "Save"}
-                </Button>
-              </Flex>
+              {canEditAnything && (
+                <Flex justify="flex-end" gap="1.5rem" mt="1.5rem">
+                  {showDelete && (
+                    <Button
+                      variant="red"
+                      size="medium"
+                      onClick={handleDeleteUser}
+                      type="button"
+                    >
+                      Delete User
+                    </Button>
+                  )}
+                  <Button
+                    variant="green"
+                    size="medium"
+                    type="submit"
+                    disabled={submitting}
+                  >
+                    {submitting ? "Saving..." : "Save"}
+                  </Button>
+                </Flex>
+              )}
             </Flex>
           </form>
         </Flex>
@@ -370,6 +571,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
       <DeleteUserModal
         isOpen={isDeleteSelected}
         userId={userId}
+        userName={userName}
         handleSecondaryButtonClick={handleCancelDeleteUser}
         onDeleteSuccess={() => history.push(USER_MANAGEMENT_PAGE)}
       />

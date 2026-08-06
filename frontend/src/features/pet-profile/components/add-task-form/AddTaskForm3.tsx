@@ -3,6 +3,7 @@ import { Flex, useToast } from "@chakra-ui/react";
 import UserSelection from "../UserSelection";
 import UserAPIClient from "../../../../APIClients/UserAPIClient";
 import { User } from "../../../../types/UserTypes";
+import UserRoles from "../../../../constants/UserConstants";
 
 interface AddTaskForm3Props {
   petColorLevel: number;
@@ -29,7 +30,36 @@ const AddTaskForm3 = ({
       setLoading(true);
       try {
         const fetchedUsers = await UserAPIClient.get();
-        if (fetchedUsers != null) setUsers(fetchedUsers);
+        if (fetchedUsers != null) {
+          const nonAdminUsers = fetchedUsers.filter(
+            (user) => user.role !== UserRoles.ADMIN,
+          );
+
+          const userIdsWithPhotos = Array.from(
+            new Set(
+              nonAdminUsers
+                .filter((user) => user.profilePhoto)
+                .map((user) => user.id),
+            ),
+          );
+          let photoUrlsByUserId: Record<number, string> = {};
+          if (userIdsWithPhotos.length > 0) {
+            try {
+              photoUrlsByUserId = await UserAPIClient.getProfilePhotoUrls(
+                userIdsWithPhotos,
+              );
+            } catch {
+              // Leave unresolved; ProfilePhoto falls back to the default avatar.
+            }
+          }
+
+          setUsers(
+            nonAdminUsers.map((user) => ({
+              ...user,
+              profilePhoto: photoUrlsByUserId[user.id],
+            })),
+          );
+        }
       } catch (error) {
         setErrorMessage(`${error}`);
         toast({

@@ -1,7 +1,7 @@
 import { Column, Model, Table, DataType, HasOne } from "sequelize-typescript";
 import PetCareInfo from "./petCareInfo.model";
 
-import { Sex, PetStatus, AnimalTag, petStatusEnum } from "../types";
+import { Sex, AnimalTag } from "../types";
 
 @Table({
   tableName: "pets",
@@ -18,11 +18,6 @@ export default class Pet extends Model {
 
   @Column({})
   name!: string;
-
-  @Column({
-    type: DataType.ENUM(...petStatusEnum),
-  })
-  status!: PetStatus;
 
   @Column({})
   breed?: string;
@@ -43,7 +38,7 @@ export default class Pet extends Model {
   neutered?: boolean;
 
   @Column({ type: DataType.ENUM("M", "F") })
-  sex?: Sex;
+  sex?: Sex | null;
 
   @Column({})
   photo?: string;

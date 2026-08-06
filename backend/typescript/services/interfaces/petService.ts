@@ -10,12 +10,11 @@ export interface PetRequestDTO {
   animalTag: AnimalTag;
   name: string;
   colorLevel: number;
-  status: PetStatus;
   breed?: string;
   neutered?: boolean;
   birthday?: string;
   weight?: number;
-  sex?: Sex;
+  sex?: Sex | null;
   photo?: string | null;
   careInfo?: {
     safetyInfo?: string;
@@ -34,7 +33,7 @@ export interface PetResponseDTO {
   neutered?: boolean;
   age?: number;
   weight?: number;
-  sex?: Sex;
+  sex?: Sex | null;
   photo?: string;
   careInfo?: {
     id: number;
@@ -80,7 +79,6 @@ export interface PetQuery {
 export interface PetTask {
   pet_id: number;
   name: string;
-  status: PetStatus;
   photo?: string;
   color_level: number;
   animal_tag?: AnimalTag;
@@ -106,12 +104,14 @@ export interface IPetService {
   getPet(id: string): Promise<PetRawDTO>;
 
   /**
-   * retrieve all Pets
-   * @param
-   * @returns returns array of Pets
+   * Get the raw stored profile photo path for a batch of pets
+   * @param petIds ids of the pets to look up
+   * @returns a map of petId to their stored profile photo path (null if unset)
    * @throws Error if retrieval fails
    */
-  getPets(): Promise<PetResponseDTO[]>;
+  getProfilePhotosByIds(
+    petIds: number[],
+  ): Promise<Record<number, string | null>>;
 
   /**
    * create a Pet with the fields given in the DTO, return created Pet
