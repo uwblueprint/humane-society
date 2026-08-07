@@ -261,6 +261,26 @@ const getProfilePhotoUrl = async (userId: number): Promise<string> => {
   }
 };
 
+const getProfilePhotoUrls = async (
+  userIds: number[],
+): Promise<Record<number, string>> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    const { data } = await baseAPIClient.post(
+      "/users/profile-photos",
+      { userIds },
+      { headers: { Authorization: bearerToken } },
+    );
+    return data.urls;
+  } catch (error) {
+    throw new Error(`Failed to get profile photo URLs: ${error}`);
+  }
+};
+
 export default {
   get,
   create,
@@ -272,5 +292,6 @@ export default {
   deleteUser,
   uploadProfilePhoto,
   getProfilePhotoUrl,
+  getProfilePhotoUrls,
   setDefaultProfilePhoto,
 };

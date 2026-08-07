@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { Pet } from "../../../types/PetTypes";
 import { colorLevelMap, ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserRoles from "../../../constants/UserConstants";
@@ -91,7 +92,36 @@ const PetProfilePage = (): React.ReactElement => {
         petId,
         dateString,
       );
-      const sortedTasks = [...fetchedTasks].sort(
+
+      const assigneeIdsWithPhotos = Array.from(
+        new Set(
+          fetchedTasks
+            .filter((task) => task.assignedUser?.profilePhoto)
+            .map((task) => task.assignedUser!.id),
+        ),
+      );
+      let photoUrlsByAssigneeId: Record<number, string> = {};
+      if (assigneeIdsWithPhotos.length > 0) {
+        try {
+          photoUrlsByAssigneeId = await UserAPIClient.getProfilePhotoUrls(
+            assigneeIdsWithPhotos,
+          );
+        } catch {
+          // Leave unresolved; ProfilePhoto falls back to the default avatar.
+        }
+      }
+
+      const tasksWithPhotoUrls = fetchedTasks.map((task) => {
+        if (!task.assignedUser) return task;
+        return {
+          ...task,
+          assignedUser: {
+            ...task.assignedUser,
+            profilePhoto: photoUrlsByAssigneeId[task.assignedUser.id],
+          },
+        };
+      });
+      const sortedTasks = [...tasksWithPhotoUrls].sort(
         (a, b) => sortTask(a) - sortTask(b),
       );
       setTasks(sortedTasks);
@@ -106,27 +136,28 @@ const PetProfilePage = (): React.ReactElement => {
     setLoading(false);
   }, [fetchTasks, location.key]);
 
-  useEffect(() => {
-    const fetchPet = async () => {
-      if (!petId) {
-        history.push("/not-found");
-        return;
+  const fetchPet = useCallback(async () => {
+    if (!petId) {
+      history.push("/not-found");
+      return;
+    }
+    try {
+      const data = await PetAPIClient.getPet(petId);
+      setPetData(data);
+      if (data.photo) {
+        const photo = await PetAPIClient.getProfilePhotoUrl(petId);
+        setProfilePhoto(photo);
       }
-      try {
-        const data = await PetAPIClient.getPet(petId);
-        setPetData(data);
-        if (data.photo) {
-          const photo = await PetAPIClient.getProfilePhotoUrl(petId);
-          setProfilePhoto(photo);
-        }
-      } catch (error) {
-        history.push("/not-found");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPet();
+    } catch (error) {
+      history.push("/not-found");
+    } finally {
+      setLoading(false);
+    }
   }, [petId, history]);
+
+  useEffect(() => {
+    fetchPet();
+  }, [fetchPet, location.key]);
 
   if (loading || !petData) {
     return (
@@ -148,15 +179,24 @@ const PetProfilePage = (): React.ReactElement => {
     colorLevel: colorLevelMap[petData.colorLevel],
   };
 
+  // If the viewer isn't cleared for this pet's color level, they should only
+  // see tasks they've been overridden onto (i.e. assigned despite the mismatch).
+  const visibleTasks =
+    authenticatedUser &&
+    authenticatedUser.colorLevel < petData.colorLevel &&
+    authenticatedUser?.role === UserRoles.VOLUNTEER
+      ? tasks.filter((task) => task.userId === authenticatedUser.id)
+      : tasks;
+
   let content;
   if (loading) {
     content = <Spinner />;
-  } else if (tasks.length === 0) {
+  } else if (visibleTasks.length === 0) {
     content = <Text>No tasks currently.</Text>;
   } else {
     content = (
       <PetProfileTaskTableSection
-        tasks={tasks}
+        tasks={visibleTasks}
         gridTemplateColumns={gridTemplateColumns}
         authenticatedUser={authenticatedUser}
         onTaskClick={(taskId, instanceDate) => {
@@ -270,12 +310,14 @@ const PetProfilePage = (): React.ReactElement => {
           onClose={() => setIsModalOpen(false)}
           instanceDate={selectedInstanceDate}
           onTaskCompleted={async () => {
-            await fetchTasks();
+            await Promise.all([fetchTasks(), fetchPet()]);
             setSelectedTaskId(null);
             setIsModalOpen(false);
             setShowSurvey(true);
           }}
-          onTaskUpdated={fetchTasks}
+          onTaskUpdated={async () => {
+            await Promise.all([fetchTasks(), fetchPet()]);
+          }}
         />
       )}
       {showSurvey && (

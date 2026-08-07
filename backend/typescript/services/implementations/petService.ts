@@ -1,15 +1,14 @@
 import { DateTime } from "luxon";
 import { QueryTypes, Transaction } from "sequelize";
 import PgPet from "../../models/pet.model";
-// import PgTask from "../../models/task.model";
-// import PgTaskTemplate from "../../models/taskTemplate.model";
 import { sequelize } from "../../models";
 import PgPetCareInfo from "../../models/petCareInfo.model";
-import TaskTemplate from "../../models/taskTemplate.model";
 import PgUser from "../../models/user.model";
 import { colorLevelToEnum, dateToISOString } from "../../utilities/common";
 import { getErrorMessage, NotFoundError } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
+import TaskService from "./taskService";
+import { ITaskService } from "../interfaces/taskService";
 import {
   IPetService,
   PetListItemDTO,
@@ -18,9 +17,7 @@ import {
   // PetQuery,
   PetRequestDTO,
   PetResponseDTO,
-  PetTask,
 } from "../interfaces/petService";
-// import TaskTemplate from "../../models/taskTemplate.model";
 import {
   AnimalTag,
   LastCaredFor,
@@ -33,6 +30,8 @@ const Logger = logger(__filename);
 
 const TIME_ZONE = "America/New_York";
 
+const taskService: ITaskService = new TaskService();
+
 class PetService implements IPetService {
   /* eslint-disable class-methods-use-this */
   getAgeFromBirthday(birthday: string): number {
@@ -42,6 +41,48 @@ class PetService implements IPetService {
     const msInYear = 1000 * 60 * 60 * 24 * 365.25;
     const age = Math.floor(ageInMs / msInYear);
     return age;
+  }
+
+  // Derive a pet's status from its tasks scheduled for today
+  private async computePetStatus(petId: number): Promise<PetStatus> {
+    const todayLocal = DateTime.now().setZone(TIME_ZONE);
+    const today = [
+      todayLocal.year,
+      String(todayLocal.month).padStart(2, "0"),
+      String(todayLocal.day).padStart(2, "0"),
+    ].join("-");
+
+    const tasksToday = await taskService.getTasksForDate(today, { petId });
+
+    let hasIncompleteTask = false;
+    let hasInProgressTask = false;
+    tasksToday.forEach((task) => {
+      if (!task.endTime) {
+        hasIncompleteTask = true;
+        if (task.startTime) {
+          hasInProgressTask = true;
+        }
+      }
+    });
+
+    if (hasInProgressTask) return PetStatus.OCCUPIED;
+    if (hasIncompleteTask) return PetStatus.NEEDS_CARE;
+    return PetStatus.DOES_NOT_NEED_CARE;
+  }
+
+  async getProfilePhotosByIds(
+    petIds: number[],
+  ): Promise<Record<number, string | null>> {
+    const pets = await PgPet.findAll({
+      where: { id: petIds },
+      attributes: ["id", "photo"],
+    });
+
+    const photosById: Record<number, string | null> = {};
+    pets.forEach((pet) => {
+      photosById[pet.id] = pet.photo ?? null;
+    });
+    return photosById;
   }
 
   async getPet(id: string): Promise<PetRawDTO> {
@@ -56,12 +97,14 @@ class PetService implements IPetService {
       throw error;
     }
 
+    const status = await this.computePetStatus(pet.id);
+
     return {
       id: pet.id,
       animalTag: pet.animal_tag,
       name: pet.name,
       colorLevel: pet.color_level,
-      status: pet.status,
+      status,
       breed: pet.breed,
       neutered: pet.neutered,
       birthday: pet.birthday,
@@ -77,41 +120,6 @@ class PetService implements IPetService {
     };
   }
 
-  async getPets(): Promise<PetResponseDTO[]> {
-    let pets: Array<PgPet>;
-    try {
-      pets = await PgPet.findAll({
-        include: [
-          {
-            model: PgPetCareInfo,
-          },
-        ],
-      });
-    } catch (error: unknown) {
-      Logger.error(`Failed to get pets. Reason = ${getErrorMessage(error)}`);
-      throw error;
-    }
-
-    return pets.map((pet) => ({
-      id: pet.id,
-      name: pet.name,
-      animalTag: pet.animal_tag,
-      colorLevel: pet.color_level,
-      status: pet.status,
-      breed: pet.breed,
-      age: pet.birthday ? this.getAgeFromBirthday(pet.birthday) : undefined,
-      weight: pet.weight,
-      sex: pet.sex,
-      photo: pet.photo,
-      careInfo: {
-        id: pet.petCareInfo?.id,
-        safetyInfo: pet.petCareInfo?.safety_info,
-        medicalInfo: pet.petCareInfo?.medical_info,
-        managementInfo: pet.petCareInfo?.management_info,
-      },
-    }));
-  }
-
   async createPet(pet: PetRequestDTO): Promise<PetResponseDTO> {
     let newPet: PgPet | undefined;
     let newPetCareInfo: PgPetCareInfo | undefined;
@@ -122,7 +130,6 @@ class PetService implements IPetService {
         {
           animal_tag: pet.animalTag,
           name: pet.name,
-          status: pet.status,
           color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,
@@ -159,7 +166,8 @@ class PetService implements IPetService {
       name: newPet.name,
       animalTag: newPet.animal_tag,
       colorLevel: newPet.color_level,
-      status: newPet.status,
+      // a newly created pet has no tasks yet
+      status: PetStatus.DOES_NOT_NEED_CARE,
       breed: newPet.breed,
       neutered: newPet.neutered,
       age: newPet.birthday
@@ -252,7 +260,6 @@ class PetService implements IPetService {
         {
           animal_tag: pet.animalTag,
           name: pet.name,
-          status: pet.status,
           color_level: pet.colorLevel,
           breed: pet.breed,
           neutered: pet.neutered,
@@ -309,12 +316,14 @@ class PetService implements IPetService {
       throw error;
     }
 
+    const status = await this.computePetStatus(Number(id));
+
     return {
       id: resultingPet.id,
       animalTag: resultingPet.animal_tag,
       name: resultingPet.name,
       colorLevel: resultingPet.color_level,
-      status: resultingPet.status,
+      status,
       breed: resultingPet.breed,
       neutered: resultingPet.neutered,
       age: resultingPet.birthday
@@ -348,35 +357,22 @@ class PetService implements IPetService {
     return id;
   }
 
-  sortPetListByStatus(petList: PetListItemDTO[]): PetListItemDTO[] {
-    const statusToPriority: Record<PetStatus, number> = {
-      [PetStatus.NEEDS_CARE]: 0,
-      [PetStatus.OCCUPIED]: 1,
-      [PetStatus.DOES_NOT_NEED_CARE]: 2,
-    };
-    // put pets with 'needs care' status first, then occupied, then does not need care
-    const statusSortFunction = (a: PetListItemDTO, b: PetListItemDTO) => {
-      return statusToPriority[a.status] - statusToPriority[b.status];
-    };
-    return petList.sort(statusSortFunction);
-  }
-
   // Within section order by care urgency
   private sortPetListByCareUrgency(
     pets: PetListItemDTO[],
     beginningOfTodayISO: string,
   ): PetListItemDTO[] {
     pets.sort((a, b) => {
-      // Never Cared For - highest priority
+      // Occupied pets are lowest priority (already being cared for)
+      if (a.status === PetStatus.OCCUPIED) return 1;
+      if (b.status === PetStatus.OCCUPIED) return -1;
+
+      // Never cared for pets are highest priority
       if (a.lastCaredFor === null) return -1;
       if (b.lastCaredFor === null) return 1;
 
-      // Occupied - lowest priority
-      if (a.lastCaredFor === LastCaredFor.OCCUPIED) return 1;
-      if (b.lastCaredFor === LastCaredFor.OCCUPIED) return -1;
-
-      // Both are non-null, non-occupied strings
-      // Compare directly (older - higher priority)
+      // Both are non-null strings
+      // Compare directly; older dates are higher priority
       if (a.lastCaredFor && b.lastCaredFor) {
         return a.lastCaredFor.localeCompare(b.lastCaredFor);
       }
@@ -388,7 +384,6 @@ class PetService implements IPetService {
     return pets.map((pet) => {
       if (
         pet.lastCaredFor &&
-        pet.lastCaredFor !== LastCaredFor.OCCUPIED &&
         pet.lastCaredFor !== LastCaredFor.ONE_OR_MORE_DAYS_AGO &&
         pet.lastCaredFor < beginningOfTodayISO
       ) {
@@ -418,7 +413,6 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
-    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     const sections: PetListSections = {
       "Assigned to You": [],
@@ -441,6 +435,12 @@ class PetService implements IPetService {
 
     allPets
       .filter((pet) => {
+        // A pet assigned to me (e.g. an override assignment) always shows,
+        // regardless of colour/tag eligibility - otherwise the volunteer has
+        // assigned work they can never discover. isAssignedToMe is only set
+        // for an incomplete task today, so allTasksAssigned is already non-null.
+        if (pet.isAssignedToMe) return true;
+
         const canCare = this.canVolunteerCareToday(
           user,
           petAnimalTagMap[pet.id],
@@ -448,24 +448,19 @@ class PetService implements IPetService {
         );
         if (!canCare) return false;
 
-        // Only show pets with tasks scheduled for today
-        if (!petsWithTasksScheduledToday.has(pet.id)) return false;
-
-        // If assigned to me, always include (even if occupied)
-        if (pet.isAssignedToMe) return true;
-
-        // Include if pet needs care or is occupied but has tasks that still need to be assigned
-        return (
-          pet.status === PetStatus.NEEDS_CARE ||
-          (pet.status === PetStatus.OCCUPIED && pet.allTasksAssigned === false)
-        );
+        // Only show pets with >=1 incomplete task scheduled today
+        // (allTasksAssigned is null when a pet has no incomplete tasks today)
+        return pet.allTasksAssigned !== null;
       })
       .forEach((pet) => {
         if (pet.isAssignedToMe) {
+          // Has an incomplete task today assigned to me
           pushOnce("Assigned to You", pet, added);
-        } else {
+        } else if (pet.allTasksAssigned === false) {
+          // Has an incomplete, unassigned task today, so it's self-assignable
           pushOnce("Other Pets", pet, added);
         }
+        // Otherwise every incomplete task today is assigned to someone else, so it's excluded
       });
 
     // Sort each section by care urgency
@@ -511,8 +506,8 @@ class PetService implements IPetService {
     if (isStaff || isAB) {
       sections["Assigned to You"] = [];
     }
-    sections["Has Unassigned Tasks"] = [];
-    sections["All Tasks Assigned"] = [];
+    sections["Unassigned Tasks"] = [];
+    sections["Assigned Tasks"] = [];
     sections["No Tasks"] = [];
 
     allPets.forEach((pet) => {
@@ -522,15 +517,15 @@ class PetService implements IPetService {
         return;
       }
 
-      // Next priority: Has Unassigned Tasks
+      // Next priority: Unassigned Tasks
       if (pet.allTasksAssigned === false) {
-        pushOnce("Has Unassigned Tasks", pet, added);
+        pushOnce("Unassigned Tasks", pet, added);
         return;
       }
 
-      // Then: All Tasks Assigned (TODAY)
+      // Then: Assigned Tasks (TODAY)
       if (pet.allTasksAssigned === true) {
-        pushOnce("All Tasks Assigned", pet, added);
+        pushOnce("Assigned Tasks", pet, added);
         return;
       }
 
@@ -558,7 +553,6 @@ class PetService implements IPetService {
     user: PgUser,
     petColorLevelMap: Record<number, number>,
     petAnimalTagMap: Record<number, AnimalTag>,
-    petsWithTasksScheduledToday: Set<number>,
   ): PetListSections {
     if (user.role === Role.VOLUNTEER) {
       return this.buildSectionsVolunteer(
@@ -566,7 +560,6 @@ class PetService implements IPetService {
         user,
         petColorLevelMap,
         petAnimalTagMap,
-        petsWithTasksScheduledToday,
       );
     }
 
@@ -575,169 +568,107 @@ class PetService implements IPetService {
   }
 
   async getPetList(userId: number): Promise<PetListSections> {
-    const PET_TABLE_NAME = "pets";
-    const TASK_TABLE_NAME = "tasks";
-
-    // "today" window
-    const currentTime = DateTime.now().setZone(TIME_ZONE);
-    const beginningOfToday = currentTime.startOf("day");
-    const endOfToday = beginningOfToday.plus({ days: 1 });
+    const todayLocal = DateTime.now().setZone(TIME_ZONE);
+    const today = [
+      todayLocal.year,
+      String(todayLocal.month).padStart(2, "0"),
+      String(todayLocal.day).padStart(2, "0"),
+    ].join("-");
 
     try {
       // Fetch user
       const user = await PgUser.findByPk(userId);
       if (!user) return {};
 
-      // Include animal_tag for volunteer gating
-      const petTasks = await sequelize.query<PetTask>(
-        `SELECT 
-          ${PET_TABLE_NAME}.id AS pet_id,
-          ${PET_TABLE_NAME}.name AS name,
-          ${PET_TABLE_NAME}.status AS status,
-          ${PET_TABLE_NAME}.photo AS photo,
-          ${PET_TABLE_NAME}.color_level AS color_level,
-          ${PET_TABLE_NAME}.animal_tag AS animal_tag,
-          ${TASK_TABLE_NAME}.user_id AS user_id,
-          ${TASK_TABLE_NAME}.task_template_id AS task_template_id,
-          ${TASK_TABLE_NAME}.scheduled_start_time AS scheduled_start_time,
-          ${TASK_TABLE_NAME}.start_time AS start_time,
-          ${TASK_TABLE_NAME}.end_time AS end_time
-        FROM ${PET_TABLE_NAME}
-        LEFT JOIN ${TASK_TABLE_NAME} ON ${PET_TABLE_NAME}.id=${TASK_TABLE_NAME}.pet_id`,
+      const pets = await PgPet.findAll({ raw: true });
+
+      const completions = await sequelize.query<{
+        pet_id: number | null;
+        end_time: Date;
+      }>(
+        `SELECT COALESCE(t.pet_id, anchor.pet_id) AS pet_id, t.end_time AS end_time
+         FROM tasks t
+         LEFT JOIN tasks anchor ON t.origin_task_id = anchor.id
+         WHERE t.end_time IS NOT NULL`,
         { type: QueryTypes.SELECT },
       );
+      const petIdToLastCaredFor: Record<number, string> = {};
+      completions.forEach(({ pet_id: petId, end_time: endTime }) => {
+        if (petId == null) return;
+        const endTimeISO = dateToISOString(
+          DateTime.fromJSDate(endTime).setZone(TIME_ZONE),
+        );
+        if (
+          !petIdToLastCaredFor[petId] ||
+          endTimeISO > petIdToLastCaredFor[petId]
+        ) {
+          petIdToLastCaredFor[petId] = endTimeISO;
+        }
+      });
 
-      const petIdToPetListItem: Record<string, PetListItemDTO> = {};
-      // Keep raw maps for volunteer gating
+      const tasksToday = await taskService.getTasksForDate(today);
+
       const petIdToColorLevel: Record<number, number> = {};
       const petIdToAnimalTag: Record<number, AnimalTag> = {};
-      // Track pets with tasks scheduled for today (for volunteer filtering)
-      const petsWithTasksScheduledToday = new Set<number>();
+      const petIdToTaskCategories: Record<number, TaskCategory[]> = {};
+      const petIdToAllTasksAssigned: Record<number, boolean> = {};
+      const petIdToIsAssignedToMe: Record<number, boolean> = {};
+      const petIdToHasIncompleteTaskToday: Record<number, boolean> = {};
+      const petIdToHasInProgressTaskToday: Record<number, boolean> = {};
 
-      // Preload all task templates to avoid multiple queries
-      const uniqueTaskTemplateIds = [
-        ...new Set(
-          petTasks
-            .map((pt) => pt.task_template_id)
-            .filter((id): id is number => id != null),
-        ),
-      ];
-      const taskTemplates = await TaskTemplate.findAll({
-        where: { id: uniqueTaskTemplateIds },
-        attributes: ["id", "category"],
-      });
-      const taskTemplateIdToCategory = new Map<number, TaskCategory>();
-      taskTemplates.forEach((tt) => {
-        taskTemplateIdToCategory.set(tt.id, tt.category);
+      pets.forEach((pet) => {
+        petIdToColorLevel[pet.id] = pet.color_level;
+        petIdToAnimalTag[pet.id] = pet.animal_tag as AnimalTag;
       });
 
-      // Build a map of pets and their associated task data.
-      petTasks.forEach((petTask) => {
-        // Store pet color level and animal tag for volunteer eligibility checks
-        petIdToColorLevel[petTask.pet_id] = petTask.color_level;
-        petIdToAnimalTag[petTask.pet_id] = petTask.animal_tag as AnimalTag;
+      tasksToday
+        .filter((task) => !task.endTime)
+        .forEach((task) => {
+          const { petId } = task;
+          petIdToHasIncompleteTaskToday[petId] = true;
+          if (task.startTime) {
+            petIdToHasInProgressTaskToday[petId] = true;
+          }
+          if (task.category) {
+            if (!petIdToTaskCategories[petId]) {
+              petIdToTaskCategories[petId] = [];
+            }
+            petIdToTaskCategories[petId].push(task.category);
+          }
+          if (petIdToAllTasksAssigned[petId] === undefined) {
+            petIdToAllTasksAssigned[petId] = true;
+          }
+          if (!task.userId) {
+            petIdToAllTasksAssigned[petId] = false;
+          }
+          if (task.userId === user.id) {
+            petIdToIsAssignedToMe[petId] = true;
+          }
+        });
 
-        // Check if task is scheduled for today or started today
-        const scheduledTime = petTask.scheduled_start_time
-          ? DateTime.fromJSDate(petTask.scheduled_start_time).setZone(TIME_ZONE)
-          : null;
+      const allPets: PetListItemDTO[] = pets.map((pet) => {
+        const hasActiveTasksToday = !!petIdToTaskCategories[pet.id]?.length;
 
-        const isToday =
-          !!scheduledTime &&
-          scheduledTime >= beginningOfToday &&
-          scheduledTime < endOfToday;
-
-        // Track pets with tasks scheduled for today
-        if (isToday) {
-          petsWithTasksScheduledToday.add(petTask.pet_id);
+        let status = PetStatus.DOES_NOT_NEED_CARE;
+        if (petIdToHasInProgressTaskToday[pet.id]) {
+          status = PetStatus.OCCUPIED;
+        } else if (petIdToHasIncompleteTaskToday[pet.id]) {
+          status = PetStatus.NEEDS_CARE;
         }
 
-        // Get or create pet data
-        let petData = petIdToPetListItem[petTask.pet_id];
-        if (!petData) {
-          petData = {
-            id: petTask.pet_id,
-            name: petTask.name,
-            photo: petTask.photo,
-            color: colorLevelToEnum(petTask.color_level),
-            taskCategories: [],
-            status: petTask.status,
-            lastCaredFor: null,
-            allTasksAssigned: null,
-            isAssignedToMe: false,
-            animalTag: petTask.animal_tag as AnimalTag,
-          };
-          petIdToPetListItem[petTask.pet_id] = petData;
-        }
-
-        // Update lastCaredFor
-        // If task is ongoing / pet is occupied
-        if (
-          petData.status === PetStatus.OCCUPIED ||
-          (petTask.start_time && !petTask.end_time)
-        ) {
-          petData.lastCaredFor = LastCaredFor.OCCUPIED;
-
-          // If task has not started
-        } else if (!petTask.end_time && !petTask.start_time) {
-          // lastCaredFor stays the same
-          // If task has ended
-        } else if (petTask.end_time) {
-          const endTime = DateTime.fromJSDate(petTask.end_time).setZone(
-            TIME_ZONE,
-          );
-
-          const endTimeISO = dateToISOString(endTime);
-          if (
-            !petData.lastCaredFor ||
-            petData.lastCaredFor === LastCaredFor.ONE_OR_MORE_DAYS_AGO ||
-            endTimeISO > petData.lastCaredFor
-          ) {
-            petData.lastCaredFor = endTimeISO;
-          }
-        }
-
-        // Update task information, ONLY for TODAY's incomplete tasks
-        if (isToday && !petTask.end_time && petTask.task_template_id) {
-          // Get task category from map
-          const taskCategory = taskTemplateIdToCategory.get(
-            petTask.task_template_id,
-          );
-          if (!taskCategory) {
-            Logger.error(
-              `Task template with ID ${petTask.task_template_id} not found.`,
-            );
-            return;
-          }
-          // Add task category
-          petData.taskCategories.push(taskCategory);
-
-          // Update allTasksAssigned for today's tasks
-          // Initialize to true when we first see a task, then set to false if any task is unassigned
-          if (petData.allTasksAssigned === null) {
-            petData.allTasksAssigned = true;
-          }
-          if (!petTask.user_id) {
-            // If ANY today task is unassigned -> overall false
-            petData.allTasksAssigned = false;
-          }
-
-          // Update isAssignedToMe for today's tasks
-          if (petTask.user_id === user.id) {
-            petData.isAssignedToMe = true;
-          }
-        }
-      });
-
-      // Set allTasksAssigned to null for pets with no tasks today
-      // NOTE: While technically "all tasks are assigned" when there are no tasks,
-      // we use null to distinguish pets with no tasks from pets with tasks for the
-      // buildSectionsByRole function. null = No Tasks section, true/false = task-based sections.
-      const allPets = Object.values(petIdToPetListItem).map((pet) => {
-        const hasActiveTasks = pet.taskCategories.length > 0;
         return {
-          ...pet,
-          allTasksAssigned: hasActiveTasks ? pet.allTasksAssigned : null,
+          id: pet.id,
+          name: pet.name,
+          photo: pet.photo,
+          color: colorLevelToEnum(pet.color_level),
+          taskCategories: petIdToTaskCategories[pet.id] ?? [],
+          status,
+          lastCaredFor: petIdToLastCaredFor[pet.id] ?? null,
+          allTasksAssigned: hasActiveTasksToday
+            ? petIdToAllTasksAssigned[pet.id] ?? null
+            : null,
+          isAssignedToMe: petIdToIsAssignedToMe[pet.id] ?? false,
+          animalTag: pet.animal_tag as AnimalTag,
         };
       });
 
@@ -747,7 +678,6 @@ class PetService implements IPetService {
         user,
         petIdToColorLevel,
         petIdToAnimalTag,
-        petsWithTasksScheduledToday,
       );
     } catch (error: unknown) {
       Logger.error(getErrorMessage(error));

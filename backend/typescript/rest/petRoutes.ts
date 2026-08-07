@@ -6,17 +6,12 @@ import {
   /* // petFilterValidators, */
 } from "../middlewares/validators/petValidators";
 import PetService from "../services/implementations/petService";
-import {
-  PetResponseDTO,
-  IPetService,
-  PetRequestDTO,
-} from "../services/interfaces/petService";
+import { IPetService, PetRequestDTO } from "../services/interfaces/petService";
 import {
   getErrorMessage,
   INTERNAL_SERVER_ERROR_MESSAGE,
   NotFoundError,
 } from "../utilities/errorUtils";
-import { sendResponseByMimeType } from "../utilities/responseUtil";
 import logInteraction from "../middlewares/logInteraction";
 import {
   ACCEPTED_TYPES,
@@ -43,7 +38,6 @@ petRouter.put("/:id", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
-      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       weight: body.weight,
@@ -109,7 +103,6 @@ petRouter.post("/", petRequestDtoValidators, async (req, res) => {
       animalTag: body.animalTag,
       name: body.name,
       colorLevel: body.colorLevel,
-      status: body.status,
       breed: body.breed,
       birthday: body.birthday,
       neutered: body.neutered,
@@ -227,21 +220,6 @@ petRouter.post("/:id/profile-photo/default", async (req, res) => {
   }
 });
 
-/* Get all Pets */
-petRouter.get("/", async (req, res) => {
-  const contentType = req.headers["content-type"];
-  try {
-    const pets = await petService.getPets();
-    await sendResponseByMimeType<PetResponseDTO>(res, 200, contentType, pets);
-  } catch (e: unknown) {
-    await sendResponseByMimeType(res, 500, contentType, [
-      {
-        error: INTERNAL_SERVER_ERROR_MESSAGE,
-      },
-    ]);
-  }
-});
-
 /* Get PetList by userId */
 petRouter.get("/list/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -273,6 +251,45 @@ petRouter.get("/:id/profile-photo", async (req, res) => {
     } else {
       res.status(404).json({ error: "Profile photo not found" });
     }
+  } catch (error: unknown) {
+    res.status(500).send(getErrorMessage(error));
+  }
+});
+
+/* Batched profile-photo URL lookup */
+petRouter.post("/profile-photos", async (req, res) => {
+  const { petIds } = req.body;
+
+  if (!Array.isArray(petIds) || petIds.some((id) => typeof id !== "number")) {
+    res.status(400).json({ error: "petIds must be an array of numbers" });
+    return;
+  }
+
+  try {
+    const photosById = await petService.getProfilePhotosByIds(petIds);
+
+    const urlEntries = await Promise.all(
+      Object.entries(photosById)
+        .filter(([, photo]) => !!photo)
+        .map(async ([id, photo]) => {
+          try {
+            const url = await fileStorageService.getFile(photo as string);
+            return [id, url] as const;
+          } catch {
+            return null;
+          }
+        }),
+    );
+
+    const urls: Record<string, string> = {};
+    urlEntries.forEach((entry) => {
+      if (entry) {
+        const [id, url] = entry;
+        urls[id] = url;
+      }
+    });
+
+    res.status(200).json({ urls });
   } catch (error: unknown) {
     res.status(500).send(getErrorMessage(error));
   }

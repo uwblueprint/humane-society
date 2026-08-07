@@ -7,6 +7,7 @@ import {
   TableColumn,
 } from "../../../components/common/table";
 import InteractionAPIClient from "../../../APIClients/InteractionAPIClient";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { InteractionDTO } from "../../../types/InteractionTypes";
 import InteractionDetailsModal from "../components/InteractionDetailsModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
@@ -44,7 +45,34 @@ const InteractionLogPage = (): React.ReactElement => {
   const fetchInteractions = useCallback(async () => {
     try {
       const data = await InteractionAPIClient.getInteractions();
-      setInteractions(data);
+
+      const actorIdsWithPhotos = Array.from(
+        new Set(
+          data
+            .filter((log) => log.actor.profilePhoto)
+            .map((log) => log.actor.id),
+        ),
+      );
+      let photoUrlsByActorId: Record<number, string> = {};
+      if (actorIdsWithPhotos.length > 0) {
+        try {
+          photoUrlsByActorId = await UserAPIClient.getProfilePhotoUrls(
+            actorIdsWithPhotos,
+          );
+        } catch {
+          // Leave unresolved; ProfilePhoto falls back to the default avatar.
+        }
+      }
+
+      setInteractions(
+        data.map((log) => ({
+          ...log,
+          actor: {
+            ...log.actor,
+            profilePhoto: photoUrlsByActorId[log.actor.id] ?? null,
+          },
+        })),
+      );
       setHasError(false);
     } catch (error) {
       setHasError(true);
@@ -71,6 +99,32 @@ const InteractionLogPage = (): React.ReactElement => {
   const filteredLogs = useMemo(() => {
     let result = interactions;
 
+    const hasActiveFilters = Object.values(filters).some(
+      (vals) => vals && vals.length > 0,
+    );
+    if (hasActiveFilters) {
+      result = result.filter((log) =>
+        Object.keys(filters).every((key) => {
+          const vals = filters[key];
+          if (!vals || vals.length === 0) return true;
+          if (key === "interactionType")
+            return vals.includes(log.interactionType);
+          if (key === "animalTag")
+            return log.animalTag ? vals.includes(log.animalTag) : false;
+          if (key === "role") return vals.includes(log.actor.role);
+          if (key === "date") {
+            const d = new Date(log.createdAt);
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+              2,
+              "0",
+            )}-${String(d.getDate()).padStart(2, "0")}`;
+            return vals.includes(iso);
+          }
+          return true;
+        }),
+      );
+    }
+
     if (search) {
       const lowerSearch = search.toLowerCase();
       result = result.filter(
@@ -84,7 +138,7 @@ const InteractionLogPage = (): React.ReactElement => {
     }
 
     return result;
-  }, [interactions, search]);
+  }, [interactions, filters, search]);
 
   // Distinguish a genuinely empty list from a search that filtered everything
   // out: when the raw list has items but the filtered result is empty, an

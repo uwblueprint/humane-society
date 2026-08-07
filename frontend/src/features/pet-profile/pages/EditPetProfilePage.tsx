@@ -27,12 +27,7 @@ import PopupModal from "../../../components/common/PopupModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import SingleSelect from "../../../components/common/SingleSelect";
 import TextArea from "../../../components/common/TextArea";
-import {
-  PetRequestDTO,
-  PetStatus,
-  SexEnum,
-  Pet,
-} from "../../../types/PetTypes";
+import { PetRequestDTO, SexEnum, Pet } from "../../../types/PetTypes";
 import { AnimalTag, colorLevelMap } from "../../../types/TaskTypes";
 import {
   getDaysInMonth,
@@ -322,23 +317,19 @@ const EditPetProfilePage = (): React.ReactElement => {
 
     setSubmitting(true);
     try {
-      // Fetch current pet to preserve its status
+      // Fetch current pet to preserve its photo if unchanged
       const currentPet = await PetAPIClient.getPet(petId);
 
       const formattedData: PetRequestDTO = {
         name: data.name,
         colorLevel: colorLevelToNumber[data.colourLevel],
         animalTag: data.animalTag as AnimalTag,
-        status: currentPet.status as PetStatus,
         breed: data.breed || null,
         weight: data.weight ? parseFloat(data.weight) : null,
         birthday,
         sex,
         neutered,
-        photo:
-          localProfilePhoto && !localProfilePhoto.startsWith("data:")
-            ? localProfilePhoto
-            : currentPet.photo || null,
+        photo: currentPet.photo || null,
         careInfo,
       };
       await PetAPIClient.update(petId, formattedData);

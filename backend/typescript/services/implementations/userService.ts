@@ -96,6 +96,21 @@ class UserService implements IUserService {
     };
   }
 
+  async getProfilePhotosByIds(
+    userIds: number[],
+  ): Promise<Record<number, string | null>> {
+    const users = await PgUser.findAll({
+      where: { id: userIds },
+      attributes: ["id", "profile_photo"],
+    });
+
+    const photosById: Record<number, string | null> = {};
+    users.forEach((user) => {
+      photosById[user.id] = user.profile_photo ?? null;
+    });
+    return photosById;
+  }
+
   async getUserByEmail(email: string): Promise<UserDTO> {
     let user: PgUser | null;
     let firebaseUser: firebaseAdmin.auth.UserRecord;

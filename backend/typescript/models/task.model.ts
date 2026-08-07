@@ -32,14 +32,14 @@ export default class Task extends Model {
   pet_id?: number;
 
   @BelongsTo(() => Pet)
-  pet!: Pet;
+  pet?: Pet;
 
   @ForeignKey(() => TaskTemplate)
   @Column({})
   task_template_id?: number;
 
   @BelongsTo(() => TaskTemplate)
-  task_template!: TaskTemplate;
+  task_template?: TaskTemplate;
 
   @HasOne(() => RecurrenceTask)
   recurrence?: RecurrenceTask;

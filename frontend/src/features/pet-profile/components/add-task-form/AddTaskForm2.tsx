@@ -1,4 +1,5 @@
 import { Text, Checkbox, Flex, FormControl, FormLabel } from "@chakra-ui/react";
+import { WarningTwoIcon } from "@chakra-ui/icons";
 import React from "react";
 import {
   Control,
@@ -7,6 +8,7 @@ import {
   UseFormGetValues,
   useFormState,
   UseFormTrigger,
+  UseFormSetValue,
 } from "react-hook-form";
 import Input from "../../../../components/common/Input";
 import TaskCategoryBadge from "../../../../components/common/TaskCategoryBadge";
@@ -24,7 +26,30 @@ interface AddTaskForm2Props {
   watch: UseFormWatch<AddTaskFormData>;
   getValues: UseFormGetValues<AddTaskFormData>;
   trigger: UseFormTrigger<AddTaskFormData>;
+  setValue: UseFormSetValue<AddTaskFormData>;
+  isEditMode?: boolean;
+
+  recurrenceWarnings?: {
+    startDate: boolean;
+    days: boolean;
+    cadence: boolean;
+    endDate: boolean;
+  };
+  originalStartDateKey?: string | null;
 }
+
+const RecurrenceWarning = ({
+  message,
+}: {
+  message: string;
+}): React.ReactElement => (
+  <Flex gap="0.375rem" align="center">
+    <WarningTwoIcon color="red.600" boxSize="1rem" />
+    <Text color="red.600" fontSize="1rem" m={0}>
+      {message}
+    </Text>
+  </Flex>
+);
 
 const MONTHS = [
   "January",
@@ -90,12 +115,17 @@ const AddTaskForm2 = ({
   watch,
   getValues,
   trigger,
+  setValue,
+  isEditMode,
+  recurrenceWarnings,
+  originalStartDateKey,
 }: AddTaskForm2Props): React.ReactElement => {
   const { errors } = useFormState({ control });
   const isRepeating = watch("isRepeating");
   const startMonth = watch("startMonth");
   const startYear = watch("startYear");
   const endMonth = watch("endMonth");
+  const watchedEndDay = watch("endDay");
   const endYear = watch("endYear");
 
   const startDays = Array.from(
@@ -250,6 +280,8 @@ const AddTaskForm2 = ({
                       const { startMonth: month, startYear: year } =
                         getValues();
                       if (!month || !year) return false;
+                      const selectedKey = [month, day, year].join("|");
+                      if (selectedKey === originalStartDateKey) return true;
                       const selected = toDate(month, day, year);
                       return (
                         selected >= today ||
@@ -306,6 +338,9 @@ const AddTaskForm2 = ({
               errors.startDay?.message ||
               errors.startYear?.message}
           </Text>
+        )}
+        {recurrenceWarnings?.startDate && (
+          <RecurrenceWarning message="If you apply this to following tasks, they'll start repeating from this date instead. The days in between won't be scheduled, and anyone individually assigned to one of those days will lose that task." />
         )}
       </Flex>
 
@@ -477,6 +512,7 @@ const AddTaskForm2 = ({
           <Checkbox
             isChecked={field.value}
             onChange={field.onChange}
+            isDisabled={isEditMode}
             size="lg"
             _checked={{
               "& .chakra-checkbox__control": {
@@ -554,6 +590,9 @@ const AddTaskForm2 = ({
                       {error.message}
                     </Text>
                   )}
+                  {recurrenceWarnings?.days && (
+                    <RecurrenceWarning message="This changes the recurring days for all future tasks. Anyone individually assigned to a day you remove will lose that task." />
+                  )}
                 </Flex>
               )}
             />
@@ -591,6 +630,9 @@ const AddTaskForm2 = ({
                         {error.message}
                       </Text>
                     )}
+                    {recurrenceWarnings?.cadence && (
+                      <RecurrenceWarning message="This changes the recurring cadence for all future tasks. Anyone individually assigned to a day that is no longer scheduled will lose that task." />
+                    )}
                   </Flex>
                 )}
               />
@@ -599,14 +641,33 @@ const AddTaskForm2 = ({
 
           {/* End Date */}
           <Flex flexDirection="column" gap="0.375rem">
-            <FormLabel
-              color="gray.600"
-              marginBottom="0.38rem"
-              fontWeight="normal"
-              m={0}
-            >
-              End Date:
-            </FormLabel>
+            <Flex justify="space-between" align="center">
+              <FormLabel
+                color="gray.600"
+                marginBottom="0.38rem"
+                fontWeight="normal"
+                m={0}
+              >
+                End Date:
+              </FormLabel>
+              {(endMonth || watchedEndDay || endYear) && (
+                <Text
+                  as="button"
+                  type="button"
+                  color="blue.700"
+                  fontSize="1rem"
+                  m={0}
+                  onClick={() => {
+                    setValue("endMonth", "");
+                    setValue("endDay", "");
+                    setValue("endYear", "");
+                    trigger(["endMonth", "endDay", "endYear"]);
+                  }}
+                >
+                  Clear
+                </Text>
+              )}
+            </Flex>
             <Flex gap="0.75rem">
               {/* Month */}
               <Flex flex="2">
@@ -634,11 +695,32 @@ const AddTaskForm2 = ({
                   name="endDay"
                   rules={{
                     validate: {
+                      isComplete: (endDay) => {
+                        // read from getValues, not the watched closure vars:
+                        // trigger("endDay") fires synchronously from the
+                        // month/year onSelect, before this rule re-renders
+                        const { endMonth: month, endYear: year } = getValues();
+                        const anySet = !!month || !!endDay || !!year;
+                        const allSet = !!month && !!endDay && !!year;
+                        return (
+                          !anySet ||
+                          allSet ||
+                          "Enter a full end date, or press Clear to remove it."
+                        );
+                      },
                       isValid: (endDay) => {
-                        const { startDay } = getValues();
-                        if (!endDay || !endMonth || !endYear) return true;
-                        const end = toDate(endMonth, endDay, endYear);
-                        const start = toDate(startMonth, startDay, startYear);
+                        // same reason as isComplete: read live form state, not
+                        // the watched closure vars, which lag one render behind
+                        const {
+                          startMonth: sMonth,
+                          startDay: sDay,
+                          startYear: sYear,
+                          endMonth: month,
+                          endYear: year,
+                        } = getValues();
+                        if (!endDay || !month || !year) return true;
+                        const end = toDate(month, endDay, year);
+                        const start = toDate(sMonth, sDay, sYear);
                         return (
                           end > start || "End date cannot precede start date."
                         );

@@ -4,7 +4,10 @@ import { getLocalStorageObjProperty } from "../utils/LocalStorageUtils";
 import { ScheduledTaskDTO, PetTask, RecurrenceTask } from "../types/TaskTypes";
 import { InteractionType } from "../types/InteractionTypes";
 
-const getTask = async (taskId: number): Promise<PetTask> => {
+const getTask = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<PetTask> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -12,6 +15,7 @@ const getTask = async (taskId: number): Promise<PetTask> => {
   try {
     const { data } = await baseAPIClient.get(`/tasks/${taskId}`, {
       headers: { Authorization: bearerToken },
+      params: { date: occurrenceDate },
     });
     return data;
   } catch (error) {
@@ -36,21 +40,6 @@ const getRecurrence = async (
   }
 };
 
-const getAllTasks = async (): Promise<PetTask[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get("/tasks", {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to fetch tasks: ${error}`);
-  }
-};
-
 const getPetTasksByDate = async (
   petId: number,
   date: string,
@@ -69,21 +58,6 @@ const getPetTasksByDate = async (
     throw new Error(`Failed to fetch tasks: ${error}`);
   }
 };
-const getUserTasks = async (userId: number): Promise<PetTask[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get(`/tasks/user/${userId}`, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to fetch user tasks: ${error}`);
-  }
-};
-
 const getTasksByDate = async (
   date: string,
   userId?: number,
@@ -100,21 +74,6 @@ const getTasksByDate = async (
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch tasks: ${error}`);
-  }
-};
-
-const getPetTasks = async (petId: number): Promise<PetTask[]> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    const { data } = await baseAPIClient.get(`/tasks/pet/${petId}`, {
-      headers: { Authorization: bearerToken },
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Failed to fetch pet tasks: ${error}`);
   }
 };
 
@@ -149,6 +108,8 @@ const assignUser = async (
     newUserName?: string;
     actorName?: string;
   },
+  occurrenceDate?: string,
+  single?: boolean,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -166,6 +127,7 @@ const assignUser = async (
     }
     await baseAPIClient.patch(`/tasks/${taskId}/assign-user`, payload, {
       headers: { Authorization: bearerToken },
+      params: { date: occurrenceDate, single },
     });
   } catch (error) {
     throw new Error(`Failed to assign user: ${error}`);
@@ -209,6 +171,7 @@ const endTask = async (
     petName: string;
     actorName: string;
   },
+  occurrenceDate?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -218,7 +181,10 @@ const endTask = async (
     await baseAPIClient.patch(
       `/tasks/${taskId}/end`,
       { ...body, interactionType: InteractionType.COMPLETED_TASK },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to end task: ${error}`);
@@ -275,7 +241,10 @@ const deleteTask = async (
   }
 };
 
-const selfAssign = async (taskId: number): Promise<void> => {
+const selfAssign = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -288,7 +257,11 @@ const selfAssign = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/assign-user`,
       { userId: Number(userId) },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        // self-assign is always single-day only, never "this and following"
+        params: { date: occurrenceDate, single: true },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to self-assign task: ${error}`);
@@ -306,6 +279,7 @@ const startTask = async (
     actorName: string;
     isRestart?: boolean;
   },
+  occurrenceDate?: string,
 ): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -321,7 +295,10 @@ const startTask = async (
           ? InteractionType.RESTARTED_TASK
           : InteractionType.STARTED_TASK,
       },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to start task: ${error}`);
@@ -386,22 +363,29 @@ const deleteRecurringTask = async (
   taskId: number,
   date: string,
   single: boolean,
-): Promise<void> => {
+): Promise<{ deletedShadowCount?: number }> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
   )}`;
   try {
-    await baseAPIClient.delete(`/tasks/recurrences/${taskId}`, {
-      headers: { Authorization: bearerToken },
-      params: { date, single },
-    });
+    const { data } = await baseAPIClient.delete(
+      `/tasks/recurrences/${taskId}`,
+      {
+        headers: { Authorization: bearerToken },
+        params: { date, single },
+      },
+    );
+    return data;
   } catch (error) {
     throw new Error(`Failed to delete recurring task: ${error}`);
   }
 };
 
-const completeTask = async (taskId: number): Promise<void> => {
+const completeTask = async (
+  taskId: number,
+  occurrenceDate?: string,
+): Promise<void> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
     "accessToken",
@@ -410,10 +394,48 @@ const completeTask = async (taskId: number): Promise<void> => {
     await baseAPIClient.patch(
       `/tasks/${taskId}/end`,
       { endTime: new Date().toISOString() },
-      { headers: { Authorization: bearerToken } },
+      {
+        headers: { Authorization: bearerToken },
+        params: { date: occurrenceDate },
+      },
     );
   } catch (error) {
     throw new Error(`Failed to complete task: ${error}`);
+  }
+};
+
+const editRecurringTask = async (
+  taskId: number,
+  date: string,
+  single: boolean,
+  payload: {
+    userId?: number;
+    taskTemplateId?: number;
+    notes?: string;
+    scheduledStartTime?: string;
+    scheduledEndTime?: string;
+    days?: string[];
+    cadence?: string;
+    endDate?: string | null;
+  },
+): Promise<{ deletedShadowCount?: number }> => {
+  const bearerToken = `Bearer ${getLocalStorageObjProperty(
+    AUTHENTICATED_USER_KEY,
+    "accessToken",
+  )}`;
+
+  try {
+    const { data } = await baseAPIClient.post(
+      `/tasks/recurrences/${taskId}/edit`,
+      payload,
+      {
+        headers: { Authorization: bearerToken },
+        params: { date, single },
+      },
+    );
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to edit recurring task: ${error}`);
   }
 };
 
@@ -424,6 +446,7 @@ const updateTask = async (
     petId: number;
     taskTemplateId: number;
     scheduledStartTime: string;
+    scheduledEndTime: string;
     notes: string;
   },
 ): Promise<void> => {
@@ -444,10 +467,7 @@ export default {
   getTask,
   getTasksByDate,
   getRecurrence,
-  getAllTasks,
-  getUserTasks,
   getPetTasksByDate,
-  getPetTasks,
   assignUser,
   scheduleTask,
   startTask,
@@ -457,6 +477,7 @@ export default {
   selfAssign,
   createTask,
   createRecurringTask,
+  editRecurringTask,
   deleteRecurringTask,
   completeTask,
   updateTask,

@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { TaskCategory, Days, Cadence } from "../../types";
 
 export interface TaskRequestDTO {
@@ -40,6 +41,7 @@ export type TaskResponseDTOForDate = TaskResponseDTO & {
   taskName?: string;
   category?: TaskCategory;
   petName?: string;
+  petPhoto?: string;
   assignedUser?: {
     id: number;
     firstName: string;
@@ -51,7 +53,7 @@ export interface RecurrenceTaskDTO {
   id: number;
   cadence: Cadence;
   days?: Days[];
-  endDate?: Date;
+  endDate?: Date | null;
   exclusions?: Date[];
 }
 
@@ -61,6 +63,8 @@ export interface ITaskService {
     cadence: Cadence,
     days?: Days[],
     endDate?: Date,
+    exclusions?: Date[],
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
   getRecurrence(taskId: string): Promise<RecurrenceTaskDTO>;
@@ -68,11 +72,42 @@ export interface ITaskService {
   updateRecurrence(
     recurrenceId: string,
     updates: Partial<RecurrenceTaskDTO>,
+    transaction?: Transaction,
   ): Promise<RecurrenceTaskDTO>;
 
   deleteRecurrence(recurrenceId: string): Promise<string>;
 
-  excludeDate(recurrenceId: string, date: Date): Promise<RecurrenceTaskDTO>;
+  excludeDate(
+    recurrenceId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<RecurrenceTaskDTO>;
+
+  consumeShadowForOccurrence(
+    taskId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null>;
+
+  reconcileShadows(
+    oldAnchorId: string,
+    oldAnchorStart: Date,
+    oldRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    },
+    newAnchorId: string | null,
+    newAnchorStart: Date | null,
+    newRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    } | null,
+    transaction: Transaction,
+  ): Promise<{ deletedCount: number }>;
 
   generateRecurringInstanceForData(
     taskId: string,
@@ -85,31 +120,7 @@ export interface ITaskService {
    * @returns requested Task
    * @throws Error if retrieval fails
    */
-  getTask(id: string): Promise<TaskResponseDTO>;
-
-  /**
-   * retrieve all Tasks
-   * @param
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getTasks(): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific pet
-   * @param pet_id pet id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>>;
-
-  /**
-   * retrieve all Tasks for a specific user
-   * @param user_id user id
-   * @returns returns array of Tasks
-   * @throws Error if retrieval fails
-   */
-  getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>>;
+  getTask(id: string, date?: Date): Promise<TaskResponseDTO>;
 
   /**
    * create a Task with the fields given in the DTO, return created Task
@@ -117,7 +128,10 @@ export interface ITaskService {
    * @returns the created Task
    * @throws Error if creation fails
    */
-  createTask(Task: TaskRequestDTO): Promise<TaskResponseDTO>;
+  createTask(
+    Task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO>;
 
   /**
    * update the Task with the given id with fields in the DTO, return updated Task
@@ -126,7 +140,11 @@ export interface ITaskService {
    * @returns the updated Task
    * @throws Error if update fails
    */
-  updateTask(id: string, Task: TaskRequestDTO): Promise<TaskResponseDTO | null>;
+  updateTask(
+    id: string,
+    Task: TaskRequestDTO,
+    transaction?: Transaction,
+  ): Promise<TaskResponseDTO | null>;
 
   /**
    * assign a user to an task, or update the user assigned to an task, return updated Task
@@ -138,6 +156,8 @@ export interface ITaskService {
   assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    occurrenceDate?: Date,
+    single?: boolean,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -162,6 +182,7 @@ export interface ITaskService {
   startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -174,6 +195,7 @@ export interface ITaskService {
   endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null>;
 
   /**
@@ -207,21 +229,4 @@ export interface ITaskService {
     date: string,
     filters?: { userId?: number; petId?: number },
   ): Promise<TaskResponseDTOForDate[]>;
-
-  /**
-   * deletes future PgTask records where task_template_id matches, pet_id matches,
-   * scheduled_start_time >= the given date, and id != excludeTaskId
-   * @param taskTemplateId task template id
-   * @param petId pet id
-   * @param date date to delete from
-   * @param excludeTaskId optional task id to exclude from deletion
-   * @returns void
-   * @throws Error if deletion fails
-   */
-  deleteFutureTasks(
-    taskTemplateId: number,
-    petId: number,
-    date: Date,
-    excludeTaskId?: number,
-  ): Promise<void>;
 }

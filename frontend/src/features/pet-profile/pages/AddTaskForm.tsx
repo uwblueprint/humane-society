@@ -1,5 +1,12 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Spacer,
+  Text,
+  useToast,
+  UseToastOptions,
+} from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory, useParams, useLocation } from "react-router-dom";
@@ -11,8 +18,15 @@ import AddTaskForm3 from "../components/add-task-form/AddTaskForm3";
 import { AddTaskFormData } from "../components/add-task-form/AddTaskFormTypes";
 import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
+import EditTaskScopeModal from "../components/EditTaskScopeModal";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
+import {
+  isPastDay,
+  isSameDay,
+  isToday,
+  startOfLocalDay,
+} from "../../../utils/taskStatusUtils";
 import { RecurrenceTask } from "../../../types/TaskTypes";
 
 interface AddTaskFormProps {
@@ -21,6 +35,35 @@ interface AddTaskFormProps {
   petColorLevel: number;
   isEditMode?: boolean;
 }
+
+// A schedule change that drops days also deletes any one-off assignments on
+// them. That leaves shifts uncovered, so it is reported as a warning rather
+// than folded into a plain green success toast.
+const buildScheduleChangeToast = (
+  baseTitle: string,
+  deletedShadowCount: number,
+  todayHasProgress: boolean,
+): Pick<UseToastOptions, "title" | "description" | "status" | "duration"> => {
+  if (deletedShadowCount <= 0) {
+    return { title: baseTitle, status: "success", duration: 3000 };
+  }
+
+  const isSingle = deletedShadowCount === 1;
+  const todayNote = todayHasProgress
+    ? " This may include today's task and the work already logged on it."
+    : "";
+
+  return {
+    title: `${baseTitle.replace(/!$/, "")} — ${deletedShadowCount} assignment${
+      isSingle ? "" : "s"
+    } removed`,
+    description: isSingle
+      ? `1 task that was individually assigned is no longer on the schedule. ${todayNote}`
+      : `${deletedShadowCount} tasks that were individually assigned are no longer on the schedule. ${todayNote}`,
+    status: "warning",
+    duration: 8000,
+  };
+};
 
 const AddTaskForm = ({
   petId,
@@ -32,12 +75,19 @@ const AddTaskForm = ({
   const toast = useToast();
   const { taskId } = useParams<{ taskId: string }>();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const instanceDate = queryParams.get("date");
+  const occurrenceDate =
+    new URLSearchParams(location.search).get("date") ?? undefined;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUser, onSelectUser] = useState<User | null>(null);
   const [existingUserId, setExistingUserId] = useState<number | null>(null);
+  const [showEditScopeModal, setShowEditScopeModal] = useState(false);
+  const [initialRecurrence, setInitialRecurrence] = useState<{
+    days: string[];
+    cadence: string;
+    startKey: string;
+    endKey: string;
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRecurringDeleteModal, setShowRecurringDeleteModal] =
     useState(false);
@@ -48,6 +98,15 @@ const AddTaskForm = ({
   const [recurrenceData, setRecurrenceData] = useState<RecurrenceTask | null>(
     null,
   );
+  const [originalStartDateKey, setOriginalStartDateKey] = useState<
+    string | null
+  >(null);
+  const [anchorScheduledStartTime, setAnchorScheduledStartTime] = useState<
+    string | null
+  >(null);
+  // Today's occurrence has already been started or completed, so a schedule
+  // change that drops today would destroy that record along with it.
+  const [todayHasProgress, setTodayHasProgress] = useState(false);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -86,6 +145,7 @@ const AddTaskForm = ({
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
         setExistingUserId(task.userId ?? null);
         setRecurrenceData(recurrence);
+        setAnchorScheduledStartTime(task.scheduledStartTime ?? null);
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -94,8 +154,9 @@ const AddTaskForm = ({
         setValue("taskName", template.name);
         setValue("taskCategory", template.category);
 
-        if (task.scheduledStartTime) {
-          const date = new Date(task.scheduledStartTime);
+        const startSource = occurrenceDate ?? task.scheduledStartTime;
+        if (startSource) {
+          const date = new Date(startSource);
           setValue(
             "startMonth",
             date.toLocaleString("default", { month: "long" }),
@@ -104,6 +165,19 @@ const AddTaskForm = ({
           setValue("startYear", String(date.getFullYear()));
           setValue("startHour", String(date.getHours()).padStart(2, "0"));
           setValue("startMinute", String(date.getMinutes()).padStart(2, "0"));
+          setOriginalStartDateKey(
+            [
+              date.toLocaleString("default", { month: "long" }),
+              String(date.getDate()),
+              String(date.getFullYear()),
+            ].join("|"),
+          );
+        }
+
+        if (task.scheduledEndTime) {
+          const endDate = new Date(task.scheduledEndTime);
+          setValue("endHour", String(endDate.getHours()).padStart(2, "0"));
+          setValue("endMinute", String(endDate.getMinutes()).padStart(2, "0"));
         }
 
         if (task.notes) {
@@ -114,15 +188,40 @@ const AddTaskForm = ({
           setValue("isRepeating", true);
           setValue("recurringDays", recurrence.days ?? []);
           setValue("recurringCadences", recurrence.cadence);
+          const start = startSource ? new Date(startSource) : null;
+          let endKey = "||";
           if (recurrence.endDate) {
             const end = new Date(recurrence.endDate);
             setValue(
               "endMonth",
-              end.toLocaleString("default", { month: "long" }),
+              end.toLocaleString("default", {
+                month: "long",
+                timeZone: "UTC",
+              }),
             );
-            setValue("endDay", String(end.getDate()));
-            setValue("endYear", String(end.getFullYear()));
+            setValue("endDay", String(end.getUTCDate()));
+            setValue("endYear", String(end.getUTCFullYear()));
+            endKey = [
+              end.toLocaleString("default", {
+                month: "long",
+                timeZone: "UTC",
+              }),
+              String(end.getUTCDate()),
+              String(end.getUTCFullYear()),
+            ].join("|");
           }
+          setInitialRecurrence({
+            days: recurrence.days ?? [],
+            cadence: recurrence.cadence,
+            startKey: start
+              ? [
+                  start.toLocaleString("default", { month: "long" }),
+                  String(start.getDate()),
+                  String(start.getFullYear()),
+                ].join("|")
+              : "",
+            endKey,
+          });
         }
       } catch (error) {
         toast({
@@ -135,12 +234,82 @@ const AddTaskForm = ({
       }
     };
     fetchTaskData();
-  }, [isEditMode, setValue, taskId, toast]);
+  }, [isEditMode, occurrenceDate, setValue, taskId, toast]);
+
+  // Fetched separately from the prefill above, which deliberately reads the
+  // anchor: this needs the occurrence, where start/end times actually live.
+  useEffect(() => {
+    if (!isEditMode || !taskId || !occurrenceDate || !isToday(occurrenceDate)) {
+      setTodayHasProgress(false);
+      return;
+    }
+
+    const fetchOccurrenceProgress = async () => {
+      try {
+        const occurrence = await TaskAPIClient.getTask(
+          Number(taskId),
+          occurrenceDate,
+        );
+        setTodayHasProgress(!!occurrence.startTime || !!occurrence.endTime);
+      } catch (error) {
+        // Only drives an extra warning; the edit itself is unaffected.
+        setTodayHasProgress(false);
+      }
+    };
+    fetchOccurrenceProgress();
+  }, [isEditMode, occurrenceDate, taskId]);
 
   const selectedTemplate = watch("selectedTemplate");
   const isRepeating = watch("isRepeating");
   const hasColorLevelMismatch =
     selectedUser !== null && selectedUser.colorLevel < petColorLevel;
+
+  const watchedStartKey = [
+    watch("startMonth"),
+    watch("startDay"),
+    watch("startYear"),
+  ].join("|");
+  const watchedEndKey = [
+    watch("endMonth"),
+    watch("endDay"),
+    watch("endYear"),
+  ].join("|");
+  const watchedDays = watch("recurringDays");
+  const watchedCadence = watch("recurringCadences");
+
+  const isSeedDateEdit =
+    !!occurrenceDate &&
+    !!anchorScheduledStartTime &&
+    isSameDay(occurrenceDate, anchorScheduledStartTime);
+
+  const watchedStartMonth = watch("startMonth");
+  const watchedStartDay = watch("startDay");
+  const watchedStartYear = watch("startYear");
+  const watchedStartDate =
+    watchedStartMonth && watchedStartDay && watchedStartYear
+      ? new Date(
+          Number(watchedStartYear),
+          MONTH_NAME_TO_NUMBER[watchedStartMonth] - 1,
+          Number(watchedStartDay),
+        )
+      : null;
+  const startDateBeforeOccurrence =
+    !isSeedDateEdit &&
+    !!occurrenceDate &&
+    !!watchedStartDate &&
+    watchedStartDate < startOfLocalDay(occurrenceDate);
+
+  const recurrenceWarnings =
+    isEditMode && initialRecurrence
+      ? {
+          startDate: watchedStartKey !== initialRecurrence.startKey,
+          days:
+            [...watchedDays].sort().join(",") !==
+            [...initialRecurrence.days].sort().join(","),
+          cadence: watchedCadence !== initialRecurrence.cadence,
+          endDate: watchedEndKey !== initialRecurrence.endKey,
+        }
+      : undefined;
 
   const validateStep2Fields = async (): Promise<boolean> => {
     const validateFields: (keyof AddTaskFormData)[] = [
@@ -155,7 +324,8 @@ const AddTaskForm = ({
       ...(isRepeating
         ? (["recurringDays", "recurringCadences"] as (keyof AddTaskFormData)[])
         : []),
-      ...(isRepeating && getValues("endMonth")
+      ...(isRepeating &&
+      (getValues("endMonth") || getValues("endDay") || getValues("endYear"))
         ? (["endMonth", "endDay", "endYear"] as (keyof AddTaskFormData)[])
         : []),
     ];
@@ -221,7 +391,7 @@ const AddTaskForm = ({
     setIsDeleting(true);
     try {
       const scheduledStartTime =
-        instanceDate ||
+        occurrenceDate ||
         (getValues("startYear") &&
           new Date(
             Number(getValues("startYear")),
@@ -229,15 +399,18 @@ const AddTaskForm = ({
             Number(getValues("startDay")),
           ).toISOString()) ||
         new Date().toISOString();
-      await TaskAPIClient.deleteRecurringTask(
+      const result = await TaskAPIClient.deleteRecurringTask(
         Number(taskId),
         scheduledStartTime,
         deleteRecurringOption === "single",
       );
+      const deletedShadowCount = result.deletedShadowCount ?? 0;
       toast({
-        title: "Task deleted!",
-        status: "success",
-        duration: 3000,
+        ...buildScheduleChangeToast(
+          "Task deleted!",
+          deletedShadowCount,
+          todayHasProgress,
+        ),
         isClosable: true,
       });
       history.push(`/pet-profile/${petId}`);
@@ -255,7 +428,7 @@ const AddTaskForm = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (single?: boolean) => {
     if (isEditMode) {
       const isValid = await validateStep2Fields();
       if (!isValid) return;
@@ -301,14 +474,45 @@ const AddTaskForm = ({
     const scheduledEndTime = scheduledEndDate.toISOString();
 
     try {
+      let deletedShadowCount = 0;
       if (isEditMode) {
-        await TaskAPIClient.updateTask(Number(taskId), {
-          userId,
-          petId,
-          taskTemplateId: template.id,
-          scheduledStartTime,
-          notes: instructions,
-        });
+        if (recurrenceData && occurrenceDate) {
+          const endDate =
+            endMonth && endDay && endYear
+              ? new Date(
+                  Date.UTC(
+                    Number(endYear),
+                    MONTH_NAME_TO_NUMBER[endMonth] - 1,
+                    Number(endDay),
+                  ),
+                ).toISOString()
+              : null;
+          const result = await TaskAPIClient.editRecurringTask(
+            Number(taskId),
+            occurrenceDate,
+            single ?? true,
+            {
+              userId: userId ?? undefined,
+              taskTemplateId: template.id,
+              scheduledStartTime,
+              scheduledEndTime,
+              notes: instructions,
+              days: recurringDays,
+              cadence: recurringCadences,
+              endDate,
+            },
+          );
+          deletedShadowCount = result.deletedShadowCount ?? 0;
+        } else {
+          await TaskAPIClient.updateTask(Number(taskId), {
+            userId,
+            petId,
+            taskTemplateId: template.id,
+            scheduledStartTime,
+            scheduledEndTime,
+            notes: instructions,
+          });
+        }
       } else if (!isRepeating) {
         await TaskAPIClient.createTask({
           userId,
@@ -322,9 +526,11 @@ const AddTaskForm = ({
         let endDate: string | null = null;
         if (endMonth && endDay && endYear) {
           endDate = new Date(
-            Number(endYear),
-            MONTH_NAME_TO_NUMBER[endMonth] - 1,
-            Number(endDay),
+            Date.UTC(
+              Number(endYear),
+              MONTH_NAME_TO_NUMBER[endMonth] - 1,
+              Number(endDay),
+            ),
           ).toISOString();
         }
         await TaskAPIClient.createRecurringTask({
@@ -346,9 +552,11 @@ const AddTaskForm = ({
       }
 
       toast({
-        title: isEditMode ? "Task updated!" : "Task added!",
-        status: "success",
-        duration: 3000,
+        ...buildScheduleChangeToast(
+          isEditMode ? "Task updated!" : "Task added!",
+          deletedShadowCount,
+          todayHasProgress,
+        ),
         isClosable: true,
       });
       history.push(`/pet-profile/${petId}`);
@@ -367,142 +575,189 @@ const AddTaskForm = ({
     setCurrentStep(currentStep - 1);
   };
 
+  const handleSaveClick = async () => {
+    const isValid = await validateStep2Fields();
+    if (!isValid) return;
+    if (recurrenceData && occurrenceDate) {
+      setShowEditScopeModal(true);
+    } else {
+      handleSave();
+    }
+  };
+
   return (
-    <Flex flexDirection="column" width="100%" gap="1.5rem" paddingBottom="1rem">
-      {/* Back Button */}
+    <>
       <Flex
-        align="center"
-        gap="0.5rem"
-        cursor="pointer"
-        onClick={() => history.push(`/pet-profile/${petId}`)}
-        _hover={{ opacity: 0.7 }}
+        flexDirection="column"
+        width="100%"
+        gap="1.5rem"
+        paddingBottom="1rem"
       >
-        <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
-        <Text textStyle="body" color="gray.600" m={0}>
-          Back to Pet Profile
-        </Text>
-      </Flex>
-
-      <Text textStyle="h2" m={0}>
-        {isEditMode ? "Edit a Task" : "Add Task"}
-      </Text>
-
-      <Box>
-        {currentStep === 1 && (
-          <AddTaskTemplateSelection
-            petName={petName}
-            control={control}
-            setValue={setValue}
-          />
-        )}
-
-        {currentStep === 2 && (
-          <AddTaskForm2
-            control={control}
-            watch={watch}
-            getValues={getValues}
-            trigger={trigger}
-          />
-        )}
-
-        {currentStep === 3 && !isEditMode && (
-          <AddTaskForm3
-            petColorLevel={petColorLevel}
-            selectedUser={selectedUser}
-            onSelectUser={onSelectUser}
-          />
-        )}
-
-        <Flex align="stretch" mt="2rem" gap="1rem">
-          <Text margin="0" alignSelf="center">
-            {currentStep}/{isEditMode ? "2" : "3"}
+        {/* Back Button */}
+        <Flex
+          align="center"
+          gap="0.5rem"
+          cursor="pointer"
+          onClick={() => history.push(`/pet-profile/${petId}`)}
+          _hover={{ opacity: 0.7 }}
+        >
+          <ChevronLeftIcon color="gray.600" boxSize="1.25rem" />
+          <Text textStyle="body" color="gray.600" m={0}>
+            Back to Pet Profile
           </Text>
-          <Spacer />
-          {currentStep === 1 && isEditMode && (
-            <Button
-              as="button"
-              variant="red"
-              size="medium"
-              type="button"
-              onClick={handleDeleteClick}
-            >
-              Delete Task
-            </Button>
-          )}
-          {currentStep === 1 && (
-            <Button
-              as="button"
-              variant="gray"
-              size="medium"
-              rightIcon={<ChevronRightIcon />}
-              onClick={handleNextPage1}
-              type="button"
-              isDisabled={!selectedTemplate}
-            >
-              Next
-            </Button>
-          )}
-          {currentStep === 2 && (
-            <Button
-              as="button"
-              variant="gray"
-              size="medium"
-              leftIcon={<ChevronLeftIcon />}
-              onClick={handlePreviousPage}
-              type="button"
-            >
-              Previous
-            </Button>
-          )}
-          {currentStep === 2 && !isEditMode && (
-            <Button
-              as="button"
-              variant="gray"
-              size="medium"
-              rightIcon={<ChevronRightIcon />}
-              onClick={handleNextPage2}
-              type="button"
-            >
-              Next
-            </Button>
-          )}
-          {currentStep === 2 && isEditMode && (
-            <Button
-              as="button"
-              variant="green"
-              size="medium"
-              onClick={handleSave}
-              type="button"
-            >
-              Save
-            </Button>
-          )}
-          {currentStep === 3 && (
-            <Button
-              as="button"
-              variant="gray"
-              size="medium"
-              leftIcon={<ChevronLeftIcon />}
-              onClick={handlePreviousPage}
-              type="button"
-            >
-              Previous
-            </Button>
-          )}
-          {currentStep === 3 && (
-            <Button
-              as="button"
-              variant="green"
-              size="medium"
-              onClick={handleSave}
-              type="button"
-            >
-              {hasColorLevelMismatch ? "Override" : "Save"}
-            </Button>
-          )}
         </Flex>
-      </Box>
 
+        <Text textStyle="h2" m={0}>
+          {isEditMode ? "Edit a Task" : "Add Task"}
+        </Text>
+
+        <Box>
+          {currentStep === 1 && (
+            <AddTaskTemplateSelection
+              petName={petName}
+              control={control}
+              setValue={setValue}
+            />
+          )}
+
+          {currentStep === 2 && (
+            <AddTaskForm2
+              control={control}
+              watch={watch}
+              getValues={getValues}
+              trigger={trigger}
+              setValue={setValue}
+              isEditMode={isEditMode}
+              recurrenceWarnings={recurrenceWarnings}
+              originalStartDateKey={originalStartDateKey}
+            />
+          )}
+
+          {currentStep === 3 && !isEditMode && (
+            <AddTaskForm3
+              petColorLevel={petColorLevel}
+              selectedUser={selectedUser}
+              onSelectUser={onSelectUser}
+            />
+          )}
+
+          <Flex align="stretch" mt="2rem" gap="1rem">
+            <Text margin="0" alignSelf="center">
+              {currentStep}/{isEditMode ? "2" : "3"}
+            </Text>
+            <Spacer />
+            {currentStep === 1 && isEditMode && (
+              <Button
+                as="button"
+                variant="red"
+                size="medium"
+                type="button"
+                onClick={handleDeleteClick}
+              >
+                Delete Task
+              </Button>
+            )}
+            {currentStep === 1 && (
+              <Button
+                as="button"
+                variant="gray"
+                size="medium"
+                rightIcon={<ChevronRightIcon />}
+                onClick={handleNextPage1}
+                type="button"
+                isDisabled={!selectedTemplate}
+              >
+                Next
+              </Button>
+            )}
+            {currentStep === 2 && (
+              <Button
+                as="button"
+                variant="gray"
+                size="medium"
+                leftIcon={<ChevronLeftIcon />}
+                onClick={handlePreviousPage}
+                type="button"
+              >
+                Previous
+              </Button>
+            )}
+            {currentStep === 2 && !isEditMode && (
+              <Button
+                as="button"
+                variant="gray"
+                size="medium"
+                rightIcon={<ChevronRightIcon />}
+                onClick={handleNextPage2}
+                type="button"
+              >
+                Next
+              </Button>
+            )}
+            {currentStep === 2 && isEditMode && (
+              <Button
+                as="button"
+                variant="green"
+                size="medium"
+                onClick={handleSaveClick}
+                type="button"
+              >
+                Save
+              </Button>
+            )}
+            {currentStep === 3 && (
+              <Button
+                as="button"
+                variant="gray"
+                size="medium"
+                leftIcon={<ChevronLeftIcon />}
+                onClick={handlePreviousPage}
+                type="button"
+              >
+                Previous
+              </Button>
+            )}
+            {currentStep === 3 && (
+              <Button
+                as="button"
+                variant="green"
+                size="medium"
+                onClick={() => handleSave()}
+                type="button"
+              >
+                {hasColorLevelMismatch ? "Override" : "Save"}
+              </Button>
+            )}
+          </Flex>
+        </Box>
+      </Flex>
+      <EditTaskScopeModal
+        open={showEditScopeModal}
+        onCancel={() => setShowEditScopeModal(false)}
+        onConfirm={(single) => {
+          setShowEditScopeModal(false);
+          handleSave(single);
+        }}
+        disableSingle={
+          !!(
+            recurrenceWarnings?.days ||
+            recurrenceWarnings?.cadence ||
+            recurrenceWarnings?.endDate
+          )
+        }
+        disableSeries={!!occurrenceDate && isPastDay(occurrenceDate)}
+        startDateBeforeOccurrence={startDateBeforeOccurrence}
+        startDateChanged={recurrenceWarnings?.startDate}
+        occurrenceDate={occurrenceDate}
+        recurrenceChanged={
+          !!(
+            recurrenceWarnings?.days ||
+            recurrenceWarnings?.cadence ||
+            recurrenceWarnings?.endDate
+          )
+        }
+        todayHasProgress={todayHasProgress}
+      />
       <PopupModal
         open={showDeleteConfirm}
         title="Delete Task?"
@@ -587,7 +842,7 @@ const AddTaskForm = ({
           </Flex>
         </Flex>
       </PopupModal>
-    </Flex>
+    </>
   );
 };
 

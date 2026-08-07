@@ -55,11 +55,8 @@ export enum PetStatus {
 }
 
 export enum LastCaredFor {
-  OCCUPIED = "Occupied",
   ONE_OR_MORE_DAYS_AGO = "One or more days ago",
 }
-
-export const petStatusEnum: PetStatus[] = [...Object.values(PetStatus)];
 
 // Skill level is in descending order, where Blue is the most skilled level of a volunteer
 export enum ColorLevel {
@@ -139,7 +136,6 @@ export enum InteractionTypeEnum {
   CHANGED_TASK_START_DATE = "Changed Task Start Date",
   CHANGED_TASK_END_DATE = "Changed Task End Date",
   DELETED_RECURRING_TASK = "Deleted Recurring Task",
-  CHANGED_RECURRING_TASK_NAME = "Changed Recurring Task Name",
   CHANGED_RECURRING_TASK_DAYS = "Changed Recurring Task Days",
   CHANGED_RECURRING_TASK_CADENCE = "Changed Recurring Task Cadence",
 

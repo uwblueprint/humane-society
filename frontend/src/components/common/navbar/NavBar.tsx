@@ -11,6 +11,7 @@ import {
 } from "../../../constants/Routes";
 import NavLink from "./NavLink";
 import { getCurrentUserRole } from "../../../utils/CommonUtils";
+import UserRoles from "../../../constants/UserConstants";
 import {
   LogIcon,
   ProfileIcon,
@@ -24,9 +25,10 @@ import AUTHENTICATED_USER_KEY, {
 
 const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
   const role = getCurrentUserRole();
-  const isAdmin = role === "Administrator";
+  const isAdmin = role === UserRoles.ADMIN;
   const isStaffOrBehaviourist =
-    role === "Staff" || role === "Animal Behaviourist";
+    role === UserRoles.STAFF || role === UserRoles.BEHAVIOURIST;
+  const canSeeUserManagement = role !== null && role !== UserRoles.VOLUNTEER;
   const canViewLogs = STAFF_BEHAVIOURISTS_ADMIN.has(role ?? "");
   const history = useHistory();
 
@@ -64,7 +66,7 @@ const NavBar = ({ pageName }: { pageName: string }): React.ReactElement => {
       </Text>
       <Spacer />
       <Flex gap="1.25rem">
-        {isAdmin && (
+        {canSeeUserManagement && (
           <NavLink
             text="Users"
             icon={UserManagementIcon}
