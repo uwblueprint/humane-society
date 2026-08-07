@@ -1,6 +1,5 @@
 import { Op, Sequelize, Transaction } from "sequelize";
 import { DateTime } from "luxon";
-import { sequelize } from "../../models";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
 import {
@@ -22,14 +21,18 @@ import {
   NotFoundError,
 } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { Days, InteractionTypeEnum } from "../../types";
+import { Days } from "../../types";
 import {
   buildStartDates,
   isDateInRecurrence,
   resetDateToUTCMidnight,
 } from "../../utilities/dateUtils";
-import { getSystemUserId } from "../../utilities/systemUser";
-import InteractionService from "./interactionService";
+import { requirePetAndTemplateIds } from "../../utilities/common";
+import {
+  isTaskIncomplete,
+  isTaskStaleAssignment,
+  reconcileLazyTaskStates,
+} from "./taskStaleStateReconciler";
 
 const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
@@ -383,8 +386,7 @@ class TaskService implements ITaskService {
           return {
             id: task.id,
             userId: task.user_id,
-            petId: task.pet_id,
-            taskTemplateId: task.task_template_id,
+            ...requirePetAndTemplateIds(task),
             scheduledStartTime: instanceDate,
             scheduledEndTime: task.scheduled_end_time,
             startTime: task.start_time,
@@ -404,82 +406,39 @@ class TaskService implements ITaskService {
     }
   }
 
-  private async materializeOccurrence(
-    anchorId: string,
-    date: Date,
+  private async resolveShadowTask(
+    taskId: string,
+    occurrenceDate?: Date,
   ): Promise<PgTask> {
-    const anchor = await PgTask.findByPk(anchorId, { raw: true });
-    if (!anchor) throw new NotFoundError(`Task id ${anchorId} not found`);
-
-    const occurrenceDay = resetDateToUTCMidnight(date);
-    const nextDay = new Date(occurrenceDay.getTime() + 24 * 60 * 60 * 1000);
-
-    const existing = await PgTask.findOne({
-      raw: true,
-      where: {
-        pet_id: anchor.pet_id,
-        task_template_id: anchor.task_template_id,
-        scheduled_start_time: { [Op.gte]: occurrenceDay, [Op.lt]: nextDay },
-        "$recurrence.task_id$": { [Op.is]: null },
-      },
-      include: [{ model: PgRecurrenceTask, required: false }],
+    const recurrence = await PgRecurrenceTask.findOne({
+      where: { task_id: taskId },
     });
-    if (existing) return existing;
+    if (!recurrence) {
+      const task = await PgTask.findByPk(taskId);
+      if (!task) throw new NotFoundError(`Task id ${taskId} not found`);
+      return task;
+    }
 
-    const durationMs =
-      anchor.scheduled_start_time && anchor.scheduled_end_time
-        ? anchor.scheduled_end_time.getTime() -
-          anchor.scheduled_start_time.getTime()
-        : undefined;
-
-    // preserve the anchor's original time-of-day on the occurrence's date,
-    // same as generateRecurringInstanceForData does for the virtual instance
-    const instanceStartTime = new Date(occurrenceDay);
-    if (anchor.scheduled_start_time) {
-      instanceStartTime.setUTCHours(anchor.scheduled_start_time.getUTCHours());
-      instanceStartTime.setUTCMinutes(
-        anchor.scheduled_start_time.getUTCMinutes(),
-      );
-      instanceStartTime.setUTCSeconds(
-        anchor.scheduled_start_time.getUTCSeconds(),
-      );
-      instanceStartTime.setUTCMilliseconds(
-        anchor.scheduled_start_time.getUTCMilliseconds(),
+    if (!occurrenceDate) {
+      throw new BadRequestError(
+        "Occurrence date is required for a recurring task action",
       );
     }
 
-    const transaction = await sequelize.transaction();
-    try {
-      await this.excludeDate(anchorId, date, transaction);
+    const normalizedDate = resetDateToUTCMidnight(occurrenceDate);
+    const existingShadow = await PgTask.findOne({
+      where: { origin_task_id: taskId, occurrence_date: normalizedDate },
+    });
+    if (existingShadow) return existingShadow;
 
-      const newTask = await this.createTask(
-        {
-          userId: anchor.user_id,
-          petId: anchor.pet_id,
-          taskTemplateId: anchor.task_template_id,
-          scheduledStartTime: instanceStartTime,
-          scheduledEndTime:
-            durationMs !== undefined
-              ? new Date(instanceStartTime.getTime() + durationMs)
-              : undefined,
-          notes: anchor.notes,
-        },
-        transaction,
-      );
+    const anchor = await PgTask.findByPk(taskId);
+    if (!anchor) throw new NotFoundError(`Task id ${taskId} not found`);
 
-      await transaction.commit();
-
-      const materializedTask = await PgTask.findByPk(newTask.id, {
-        raw: true,
-      });
-      if (!materializedTask) {
-        throw new NotFoundError(`Task id ${newTask.id} not found`);
-      }
-      return materializedTask;
-    } catch (error: unknown) {
-      await transaction.rollback();
-      throw error;
-    }
+    return PgTask.create({
+      origin_task_id: Number(taskId),
+      occurrence_date: normalizedDate,
+      user_id: anchor.user_id,
+    });
   }
 
   /* eslint-disable class-methods-use-this */
@@ -498,8 +457,7 @@ class TaskService implements ITaskService {
     return {
       id: task.id,
       userId: task.user_id,
-      petId: task.pet_id,
-      taskTemplateId: task.task_template_id,
+      ...requirePetAndTemplateIds(task),
       scheduledStartTime: task.scheduled_start_time,
       scheduledEndTime: task.scheduled_end_time,
       startTime: task.start_time,
@@ -508,189 +466,9 @@ class TaskService implements ITaskService {
     };
   }
 
-  /**
-   * Lazily reconciles standalone (non-recurring, or already-materialized)
-   * task rows on read: unassigns tasks whose scheduled window has passed
-   * with nobody having started/completed them, and logs a task as
-   * incomplete once its scheduled start day has passed with no end time.
-   * Both are self-guarded conditional updates, so a row can only ever
-   * fire once each - safe to call on every read.
-   */
-  /* eslint-disable class-methods-use-this */
-  private isTaskIncomplete(
-    task: Pick<
-      PgTask,
-      "end_time" | "incomplete_logged_at" | "scheduled_start_time"
-    >,
-    today: DateTime,
-  ): boolean {
-    return (
-      !task.end_time &&
-      !task.incomplete_logged_at &&
-      !!task.scheduled_start_time &&
-      DateTime.fromJSDate(task.scheduled_start_time)
-        .setZone(TIME_ZONE)
-        .startOf("day") < today
-    );
-  }
-
-  /* eslint-disable class-methods-use-this */
-  private isTaskStaleAssignment(
-    task: Pick<
-      PgTask,
-      "start_time" | "end_time" | "user_id" | "scheduled_end_time"
-    >,
-    now: Date,
-  ): boolean {
-    return (
-      !task.start_time &&
-      !task.end_time &&
-      task.user_id != null &&
-      !!task.scheduled_end_time &&
-      task.scheduled_end_time.getTime() < now.getTime()
-    );
-  }
-
-  private async reconcileLazyTaskStates(tasks: PgTask[]): Promise<PgTask[]> {
-    const now = new Date();
-    const today = DateTime.now().setZone(TIME_ZONE).startOf("day");
-
-    const isIncomplete = (task: PgTask): boolean =>
-      this.isTaskIncomplete(task, today);
-
-    const isStaleAssignment = (task: PgTask): boolean =>
-      this.isTaskStaleAssignment(task, now);
-
-    const staleTasks = tasks.filter(
-      (task) => isIncomplete(task) || isStaleAssignment(task),
-    );
-
-    if (staleTasks.length === 0) return tasks;
-
-    const taskTemplateIds = [
-      ...new Set(staleTasks.map((task) => task.task_template_id)),
-    ];
-    const petIds = [...new Set(staleTasks.map((task) => task.pet_id))];
-    const userIds = [
-      ...new Set(
-        staleTasks
-          .map((task) => task.user_id)
-          .filter((id): id is number => id != null),
-      ),
-    ];
-
-    const [taskTemplates, pets, users] = await Promise.all([
-      TaskTemplate.findAll({
-        where: { id: { [Op.in]: taskTemplateIds } },
-        raw: true,
-      }),
-      Pet.findAll({ where: { id: { [Op.in]: petIds } }, raw: true }),
-      userIds.length > 0
-        ? User.findAll({ where: { id: { [Op.in]: userIds } }, raw: true })
-        : Promise.resolve([]),
-    ]);
-
-    const taskTemplateNameById = new Map(
-      taskTemplates.map((taskTemplate) => [
-        taskTemplate.id,
-        taskTemplate.task_name,
-      ]),
-    );
-    const petNameById = new Map(pets.map((pet) => [pet.id, pet.name]));
-    const userNameById = new Map(
-      users.map((user) => [user.id, `${user.first_name} ${user.last_name}`]),
-    );
-
-    const systemUserId = await getSystemUserId();
-    const updatedById = new Map<number, PgTask>();
-
-    await Promise.all(
-      staleTasks.map(async (task) => {
-        const taskTemplateName = taskTemplateNameById.get(
-          task.task_template_id,
-        );
-        const petName = petNameById.get(task.pet_id);
-        const oldUserName =
-          task.user_id != null ? userNameById.get(task.user_id) : undefined;
-
-        let current = task;
-
-        if (isIncomplete(current)) {
-          const [affected] = await PgTask.update(
-            { incomplete_logged_at: now },
-            {
-              where: {
-                id: current.id,
-                incomplete_logged_at: { [Op.is]: null },
-              },
-            },
-          );
-          if (affected > 0) {
-            current = { ...current, incomplete_logged_at: now } as PgTask;
-            const interactionTypeId =
-              await InteractionService.getInteractionTypeId(
-                InteractionTypeEnum.MARKED_TASK_INCOMPLETE,
-              );
-            await InteractionService.log({
-              actorId: systemUserId,
-              targetUserId: null,
-              targetPetId: null,
-              targetTaskId: current.id,
-              targetTaskTemplateId: null,
-              interactionTypeId,
-              metadata: [],
-              short_description: `${taskTemplateName} is an incomplete task with ${petName}`,
-              long_description: oldUserName
-                ? `${taskTemplateName} is an incomplete task. It was last assigned to ${oldUserName}.`
-                : `${taskTemplateName} is an incomplete task. Nobody was assigned this task.`,
-            });
-          }
-        }
-
-        if (isStaleAssignment(current)) {
-          const [affected] = await PgTask.update(
-            { user_id: null },
-            {
-              where: {
-                id: current.id,
-                user_id: { [Op.ne]: null },
-                start_time: { [Op.is]: null },
-                end_time: { [Op.is]: null },
-              },
-            },
-          );
-          if (affected > 0) {
-            current = { ...current, user_id: undefined } as PgTask;
-            const interactionTypeId =
-              await InteractionService.getInteractionTypeId(
-                InteractionTypeEnum.MARKED_TASK_INACTIVE,
-              );
-            await InteractionService.log({
-              actorId: systemUserId,
-              targetUserId: null,
-              targetPetId: null,
-              targetTaskId: current.id,
-              targetTaskTemplateId: null,
-              interactionTypeId,
-              metadata: [],
-              short_description: `${taskTemplateName} is an inactive task with ${petName}`,
-              long_description: `${taskTemplateName} is an inactive task. It was last assigned to ${
-                oldUserName ?? "N/A"
-              }`,
-            });
-          }
-        }
-
-        updatedById.set(task.id, current);
-      }),
-    );
-
-    return tasks.map((task) => updatedById.get(task.id) ?? task);
-  }
-
   async getTasks(): Promise<TaskResponseDTO[]> {
     try {
-      const tasks: Array<PgTask> = await this.reconcileLazyTaskStates(
+      const tasks: Array<PgTask> = await reconcileLazyTaskStates(
         await PgTask.findAll({
           where: { "$recurrence.task_id$": { [Op.is]: null } },
           include: [{ model: PgRecurrenceTask, required: false }],
@@ -700,8 +478,7 @@ class TaskService implements ITaskService {
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
+        ...requirePetAndTemplateIds(task),
         scheduledStartTime: task.scheduled_start_time,
         scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
@@ -729,12 +506,11 @@ class TaskService implements ITaskService {
       if (!fetchedTasks[0]) {
         throw new NotFoundError(`No tasks for pet id ${pet_id}`);
       }
-      const tasks = await this.reconcileLazyTaskStates(fetchedTasks);
+      const tasks = await reconcileLazyTaskStates(fetchedTasks);
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
+        ...requirePetAndTemplateIds(task),
         scheduledStartTime: task.scheduled_start_time,
         scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
@@ -762,7 +538,7 @@ class TaskService implements ITaskService {
       if (!fetchedTasks[0]) {
         throw new NotFoundError(`No tasks for user id ${user_id}`);
       }
-      const reconciledTasks = await this.reconcileLazyTaskStates(fetchedTasks);
+      const reconciledTasks = await reconcileLazyTaskStates(fetchedTasks);
       // a task reconciled into unassigned no longer belongs to this user
       const tasks = reconciledTasks.filter(
         (task) => String(task.user_id) === user_id,
@@ -770,8 +546,7 @@ class TaskService implements ITaskService {
       return tasks.map((task) => ({
         id: task.id,
         userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
+        ...requirePetAndTemplateIds(task),
         scheduledStartTime: task.scheduled_start_time,
         scheduledEndTime: task.scheduled_end_time,
         startTime: task.start_time,
@@ -812,8 +587,7 @@ class TaskService implements ITaskService {
     return {
       id: newTask.id,
       userId: newTask.user_id,
-      petId: newTask.pet_id,
-      taskTemplateId: newTask.task_template_id,
+      ...requirePetAndTemplateIds(newTask),
       scheduledStartTime: newTask.scheduled_start_time,
       scheduledEndTime: newTask.scheduled_end_time,
       startTime: newTask.start_time,
@@ -858,8 +632,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -893,8 +666,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -930,8 +702,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -965,8 +736,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -1000,8 +770,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -1035,8 +804,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -1105,7 +873,7 @@ class TaskService implements ITaskService {
         ],
       });
 
-      const reconciledOneTimeTasks = await this.reconcileLazyTaskStates(
+      const reconciledOneTimeTasks = await reconcileLazyTaskStates(
         oneTimeTasks,
       );
       const reconciledUserIdById = new Map(
@@ -1119,8 +887,7 @@ class TaskService implements ITaskService {
           return {
             id: task.id,
             userId: isStillAssigned ? task.user_id : undefined,
-            petId: task.pet_id,
-            taskTemplateId: task.task_template_id,
+            ...requirePetAndTemplateIds(task),
             scheduledStartTime: task.scheduled_start_time,
             scheduledEndTime: task.scheduled_end_time,
             startTime: task.start_time,
@@ -1177,7 +944,7 @@ class TaskService implements ITaskService {
                   : instance.scheduledEndTime;
 
               const isStale =
-                this.isTaskIncomplete(
+                isTaskIncomplete(
                   {
                     end_time: instance.endTime,
                     incomplete_logged_at: undefined,
@@ -1185,7 +952,7 @@ class TaskService implements ITaskService {
                   },
                   today,
                 ) ||
-                this.isTaskStaleAssignment(
+                isTaskStaleAssignment(
                   {
                     start_time: instance.startTime,
                     end_time: instance.endTime,
@@ -1199,23 +966,20 @@ class TaskService implements ITaskService {
                 return { ...instance, isRecurring: true };
               }
 
-              const materialized = await this.materializeOccurrence(
+              const shadow = await this.resolveShadowTask(
                 task.id.toString(),
                 selectedDateObj,
               );
-              const [reconciled] = await this.reconcileLazyTaskStates([
-                materialized,
-              ]);
+              const [reconciled] = await reconcileLazyTaskStates([shadow]);
               return {
-                id: reconciled.id,
+                id: task.id,
                 userId: reconciled.user_id,
-                petId: reconciled.pet_id,
-                taskTemplateId: reconciled.task_template_id,
-                scheduledStartTime: reconciled.scheduled_start_time,
-                scheduledEndTime: reconciled.scheduled_end_time,
+                ...requirePetAndTemplateIds(task),
+                scheduledStartTime: instance.scheduledStartTime,
+                scheduledEndTime: occurrenceEndTime,
                 startTime: reconciled.start_time,
                 endTime: reconciled.end_time,
-                notes: reconciled.notes,
+                notes: task.notes,
                 isRecurring: true,
               };
             })
@@ -1227,7 +991,6 @@ class TaskService implements ITaskService {
         (r): r is TaskResponseDTOForDate => r !== null,
       );
 
-      // Enrich recurring instances with task name, category, assigned user, profile photo
       const recurringTaskIds = recurringInstances.map((r) => r.id);
       const enrichedRecurringTasks =
         recurringTaskIds.length > 0
@@ -1235,16 +998,6 @@ class TaskService implements ITaskService {
               where: { id: recurringTaskIds },
               include: [
                 { model: TaskTemplate, attributes: ["task_name", "category"] },
-                {
-                  model: User,
-                  attributes: [
-                    "id",
-                    "first_name",
-                    "last_name",
-                    "profile_photo",
-                  ],
-                  required: false,
-                },
                 { model: Pet, attributes: ["name"], required: false },
               ],
             })
@@ -1254,20 +1007,43 @@ class TaskService implements ITaskService {
         enrichedRecurringTasks.map((t) => [t.id, t]),
       );
 
+      const assignedUserIds = [
+        ...new Set(
+          recurringInstances
+            .map((instance) => instance.userId)
+            .filter((id): id is number => id != null),
+        ),
+      ];
+      const assignedUsers =
+        assignedUserIds.length > 0
+          ? await User.findAll({
+              where: { id: assignedUserIds },
+              attributes: ["id", "first_name", "last_name", "profile_photo"],
+              raw: true,
+            })
+          : [];
+      const assignedUserById = new Map(
+        assignedUsers.map((user) => [user.id, user]),
+      );
+
       const enrichedRecurringInstances: TaskResponseDTOForDate[] =
         recurringInstances.map((instance) => {
           const enriched = enrichmentMap.get(instance.id);
+          const assignedUserRow =
+            instance.userId != null
+              ? assignedUserById.get(instance.userId)
+              : undefined;
           return {
             ...instance,
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
             petName: enriched?.pet?.name,
-            assignedUser: enriched?.user
+            assignedUser: assignedUserRow
               ? {
-                  id: enriched.user.id,
-                  firstName: enriched.user.first_name,
-                  lastName: enriched.user.last_name,
-                  profilePhoto: enriched.user.profile_photo,
+                  id: assignedUserRow.id,
+                  firstName: assignedUserRow.first_name,
+                  lastName: assignedUserRow.last_name,
+                  profilePhoto: assignedUserRow.profile_photo,
                 }
               : null,
           };

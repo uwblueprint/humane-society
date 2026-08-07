@@ -12,6 +12,7 @@ import {
   ConflictError,
 } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
+import { requirePetAndTemplateIds } from "../../utilities/common";
 
 const Logger = logger(__filename);
 
@@ -52,8 +53,7 @@ class RecurrenceService implements IRecurrenceService {
     return {
       id: newTask.id,
       userId: newTask.user_id,
-      petId: newTask.pet_id,
-      taskTemplateId: newTask.task_template_id,
+      ...requirePetAndTemplateIds(newTask),
       scheduledStartTime: newTask.scheduled_start_time,
       scheduledEndTime: newTask.scheduled_end_time,
       startTime: newTask.start_time,
@@ -121,8 +121,7 @@ class RecurrenceService implements IRecurrenceService {
     return {
       id: task.id,
       userId: task.user_id,
-      petId: task.pet_id,
-      taskTemplateId: task.task_template_id,
+      ...requirePetAndTemplateIds(task),
       scheduledStartTime: task.scheduled_start_time,
       scheduledEndTime: task.scheduled_end_time,
       startTime: task.start_time,
