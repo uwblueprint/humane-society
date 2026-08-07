@@ -29,17 +29,17 @@ export default class Task extends Model {
 
   @ForeignKey(() => Pet)
   @Column({})
-  pet_id!: number;
+  pet_id?: number;
 
   @BelongsTo(() => Pet)
-  pet!: Pet;
+  pet?: Pet;
 
   @ForeignKey(() => TaskTemplate)
   @Column({})
-  task_template_id!: number;
+  task_template_id?: number;
 
   @BelongsTo(() => TaskTemplate)
-  task_template!: TaskTemplate;
+  task_template?: TaskTemplate;
 
   @HasOne(() => RecurrenceTask)
   recurrence?: RecurrenceTask;
@@ -55,6 +55,19 @@ export default class Task extends Model {
 
   @Column({})
   end_time?: Date;
+
+  @Column({})
+  incomplete_logged_at?: Date;
+
+  @ForeignKey(() => Task)
+  @Column({})
+  origin_task_id?: number;
+
+  @BelongsTo(() => Task, "origin_task_id")
+  originTask?: Task;
+
+  @Column({})
+  occurrence_date?: Date;
 
   @Column({ type: DataType.TEXT })
   notes?: string;

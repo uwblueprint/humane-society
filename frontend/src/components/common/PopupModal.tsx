@@ -15,6 +15,7 @@ interface PopupModalProps {
   onPrimaryClick?: () => void; // Function to call when the primary button is clicked
   primaryButtonColor?: "blue" | "red"; // Optional: sets primary button color; defaults to "blue"
   isPrimaryLoading?: boolean; // Optional: disables primary button while loading
+  isPrimaryDisabled?: boolean; // Optional: disables primary button (e.g. no valid option selected)
   // Secondary button props
   secondaryButtonText?: string; // Optional: text for the secondary button (if shown)
   onSecondaryClick?: () => void; // Optional: function to call when the secondary button is clicked
@@ -32,6 +33,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
   secondaryButtonText,
   onSecondaryClick,
   isPrimaryLoading = false,
+  isPrimaryDisabled = false,
   zIndex = 1000,
 }) => {
   const hasPrimaryButton = primaryButtonText && onPrimaryClick;
@@ -131,7 +133,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
                 }
                 onClick={onPrimaryClick}
                 isLoading={isPrimaryLoading}
-                isDisabled={isPrimaryLoading}
+                isDisabled={isPrimaryLoading || isPrimaryDisabled}
                 flex={hasSecondaryButton ? "1" : "unset"}
                 textStyle={{ base: "caption", md: "button" }}
                 m={0}
