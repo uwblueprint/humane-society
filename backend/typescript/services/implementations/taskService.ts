@@ -897,6 +897,24 @@ class TaskService implements ITaskService {
     return result;
   }
 
+  async peekShadowForOccurrence(
+    taskId: string,
+    date: Date,
+  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null> {
+    const normalizedDate = resetDateToUTCMidnight(date);
+    const shadow = await PgTask.findOne({
+      where: { origin_task_id: taskId, occurrence_date: normalizedDate },
+      raw: true,
+    });
+    if (!shadow) return null;
+
+    return {
+      userId: shadow.user_id,
+      startTime: shadow.start_time,
+      endTime: shadow.end_time,
+    };
+  }
+
   /**
    * After a recurrence rule changes (edited in place, or forked into a new
    * series), sorts every existing shadow of the old anchor into one of
@@ -1169,8 +1187,7 @@ class TaskService implements ITaskService {
 
       const oneTimeTasksWithFlag: TaskResponseDTOForDate[] =
         visibleOneTimeTasks.map((task) => {
-          const isStillAssigned =
-            (reconciledUserIdById.get(task.id) ?? task.user_id) != null;
+          const isStillAssigned = reconciledUserIdById.get(task.id) != null;
           return {
             id: task.id,
             userId: isStillAssigned ? task.user_id : undefined,

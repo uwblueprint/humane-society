@@ -393,15 +393,26 @@ taskRouter.post(
             { endDate: newEndDate },
             transaction,
           );
+          const currentOccurrenceState =
+            await taskService.peekShadowForOccurrence(taskId, date);
+          const fallbackUserId = currentOccurrenceState
+            ? currentOccurrenceState.userId
+            : task.userId;
+          const fallbackStartTime = currentOccurrenceState
+            ? currentOccurrenceState.startTime
+            : task.startTime;
+          const fallbackEndTime = currentOccurrenceState
+            ? currentOccurrenceState.endTime
+            : task.endTime;
           newTask = await taskService.createTask(
             {
-              userId: userId ?? task.userId,
+              userId: userId !== undefined ? userId : fallbackUserId,
               petId: task.petId,
               taskTemplateId: taskTemplateId ?? task.taskTemplateId,
               scheduledStartTime: newScheduledStartTime,
               scheduledEndTime: newScheduledEndTime,
-              startTime: task.startTime,
-              endTime: task.endTime,
+              startTime: fallbackStartTime,
+              endTime: fallbackEndTime,
               notes: notes ?? task.notes,
             },
             transaction,
