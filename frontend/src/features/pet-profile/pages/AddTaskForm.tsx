@@ -1,5 +1,12 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { Box, Flex, Spacer, Text, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Spacer,
+  Text,
+  useToast,
+  UseToastOptions,
+} from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory, useParams, useLocation } from "react-router-dom";
@@ -14,6 +21,12 @@ import TaskTemplateAPIClient from "../../../APIClients/TaskTemplateAPIClient";
 import EditTaskScopeModal from "../components/EditTaskScopeModal";
 import { User } from "../../../types/UserTypes";
 import { MONTH_NAME_TO_NUMBER } from "../../../utils/CommonUtils";
+import {
+  isPastDay,
+  isSameDay,
+  isToday,
+  startOfLocalDay,
+} from "../../../utils/taskStatusUtils";
 import { RecurrenceTask } from "../../../types/TaskTypes";
 
 interface AddTaskFormProps {
@@ -22,6 +35,35 @@ interface AddTaskFormProps {
   petColorLevel: number;
   isEditMode?: boolean;
 }
+
+// A schedule change that drops days also deletes any one-off assignments on
+// them. That leaves shifts uncovered, so it is reported as a warning rather
+// than folded into a plain green success toast.
+const buildScheduleChangeToast = (
+  baseTitle: string,
+  deletedShadowCount: number,
+  todayHasProgress: boolean,
+): Pick<UseToastOptions, "title" | "description" | "status" | "duration"> => {
+  if (deletedShadowCount <= 0) {
+    return { title: baseTitle, status: "success", duration: 3000 };
+  }
+
+  const isSingle = deletedShadowCount === 1;
+  const todayNote = todayHasProgress
+    ? " This may include today's task and the work already logged on it."
+    : "";
+
+  return {
+    title: `${baseTitle.replace(/!$/, "")} — ${deletedShadowCount} assignment${
+      isSingle ? "" : "s"
+    } removed`,
+    description: isSingle
+      ? `1 task that was individually assigned is no longer on the schedule. ${todayNote}`
+      : `${deletedShadowCount} tasks that were individually assigned are no longer on the schedule. ${todayNote}`,
+    status: "warning",
+    duration: 8000,
+  };
+};
 
 const AddTaskForm = ({
   petId,
@@ -44,6 +86,7 @@ const AddTaskForm = ({
     days: string[];
     cadence: string;
     startKey: string;
+    endKey: string;
   } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRecurringDeleteModal, setShowRecurringDeleteModal] =
@@ -58,6 +101,12 @@ const AddTaskForm = ({
   const [originalStartDateKey, setOriginalStartDateKey] = useState<
     string | null
   >(null);
+  const [anchorScheduledStartTime, setAnchorScheduledStartTime] = useState<
+    string | null
+  >(null);
+  // Today's occurrence has already been started or completed, so a schedule
+  // change that drops today would destroy that record along with it.
+  const [todayHasProgress, setTodayHasProgress] = useState(false);
 
   const today = new Date();
   const { control, setValue, watch, trigger, getValues } =
@@ -96,6 +145,7 @@ const AddTaskForm = ({
         const recurrence = await TaskAPIClient.getRecurrence(Number(taskId));
         setExistingUserId(task.userId ?? null);
         setRecurrenceData(recurrence);
+        setAnchorScheduledStartTime(task.scheduledStartTime ?? null);
         const template = await TaskTemplateAPIClient.getTaskTemplate(
           task.taskTemplateId,
         );
@@ -139,17 +189,7 @@ const AddTaskForm = ({
           setValue("recurringDays", recurrence.days ?? []);
           setValue("recurringCadences", recurrence.cadence);
           const start = startSource ? new Date(startSource) : null;
-          setInitialRecurrence({
-            days: recurrence.days ?? [],
-            cadence: recurrence.cadence,
-            startKey: start
-              ? [
-                  start.toLocaleString("default", { month: "long" }),
-                  String(start.getDate()),
-                  String(start.getFullYear()),
-                ].join("|")
-              : "",
-          });
+          let endKey = "||";
           if (recurrence.endDate) {
             const end = new Date(recurrence.endDate);
             setValue(
@@ -161,7 +201,27 @@ const AddTaskForm = ({
             );
             setValue("endDay", String(end.getUTCDate()));
             setValue("endYear", String(end.getUTCFullYear()));
+            endKey = [
+              end.toLocaleString("default", {
+                month: "long",
+                timeZone: "UTC",
+              }),
+              String(end.getUTCDate()),
+              String(end.getUTCFullYear()),
+            ].join("|");
           }
+          setInitialRecurrence({
+            days: recurrence.days ?? [],
+            cadence: recurrence.cadence,
+            startKey: start
+              ? [
+                  start.toLocaleString("default", { month: "long" }),
+                  String(start.getDate()),
+                  String(start.getFullYear()),
+                ].join("|")
+              : "",
+            endKey,
+          });
         }
       } catch (error) {
         toast({
@@ -176,6 +236,29 @@ const AddTaskForm = ({
     fetchTaskData();
   }, [isEditMode, occurrenceDate, setValue, taskId, toast]);
 
+  // Fetched separately from the prefill above, which deliberately reads the
+  // anchor: this needs the occurrence, where start/end times actually live.
+  useEffect(() => {
+    if (!isEditMode || !taskId || !occurrenceDate || !isToday(occurrenceDate)) {
+      setTodayHasProgress(false);
+      return;
+    }
+
+    const fetchOccurrenceProgress = async () => {
+      try {
+        const occurrence = await TaskAPIClient.getTask(
+          Number(taskId),
+          occurrenceDate,
+        );
+        setTodayHasProgress(!!occurrence.startTime || !!occurrence.endTime);
+      } catch (error) {
+        // Only drives an extra warning; the edit itself is unaffected.
+        setTodayHasProgress(false);
+      }
+    };
+    fetchOccurrenceProgress();
+  }, [isEditMode, occurrenceDate, taskId]);
+
   const selectedTemplate = watch("selectedTemplate");
   const isRepeating = watch("isRepeating");
   const hasColorLevelMismatch =
@@ -186,8 +269,36 @@ const AddTaskForm = ({
     watch("startDay"),
     watch("startYear"),
   ].join("|");
+  const watchedEndKey = [
+    watch("endMonth"),
+    watch("endDay"),
+    watch("endYear"),
+  ].join("|");
   const watchedDays = watch("recurringDays");
   const watchedCadence = watch("recurringCadences");
+
+  const isSeedDateEdit =
+    !!occurrenceDate &&
+    !!anchorScheduledStartTime &&
+    isSameDay(occurrenceDate, anchorScheduledStartTime);
+
+  const watchedStartMonth = watch("startMonth");
+  const watchedStartDay = watch("startDay");
+  const watchedStartYear = watch("startYear");
+  const watchedStartDate =
+    watchedStartMonth && watchedStartDay && watchedStartYear
+      ? new Date(
+          Number(watchedStartYear),
+          MONTH_NAME_TO_NUMBER[watchedStartMonth] - 1,
+          Number(watchedStartDay),
+        )
+      : null;
+  const startDateBeforeOccurrence =
+    !isSeedDateEdit &&
+    !!occurrenceDate &&
+    !!watchedStartDate &&
+    watchedStartDate < startOfLocalDay(occurrenceDate);
+
   const recurrenceWarnings =
     isEditMode && initialRecurrence
       ? {
@@ -196,6 +307,7 @@ const AddTaskForm = ({
             [...watchedDays].sort().join(",") !==
             [...initialRecurrence.days].sort().join(","),
           cadence: watchedCadence !== initialRecurrence.cadence,
+          endDate: watchedEndKey !== initialRecurrence.endKey,
         }
       : undefined;
 
@@ -287,15 +399,18 @@ const AddTaskForm = ({
             Number(getValues("startDay")),
           ).toISOString()) ||
         new Date().toISOString();
-      await TaskAPIClient.deleteRecurringTask(
+      const result = await TaskAPIClient.deleteRecurringTask(
         Number(taskId),
         scheduledStartTime,
         deleteRecurringOption === "single",
       );
+      const deletedShadowCount = result.deletedShadowCount ?? 0;
       toast({
-        title: "Task deleted!",
-        status: "success",
-        duration: 3000,
+        ...buildScheduleChangeToast(
+          "Task deleted!",
+          deletedShadowCount,
+          todayHasProgress,
+        ),
         isClosable: true,
       });
       history.push(`/pet-profile/${petId}`);
@@ -359,6 +474,7 @@ const AddTaskForm = ({
     const scheduledEndTime = scheduledEndDate.toISOString();
 
     try {
+      let deletedShadowCount = 0;
       if (isEditMode) {
         if (recurrenceData && occurrenceDate) {
           const endDate =
@@ -371,7 +487,7 @@ const AddTaskForm = ({
                   ),
                 ).toISOString()
               : null;
-          await TaskAPIClient.editRecurringTask(
+          const result = await TaskAPIClient.editRecurringTask(
             Number(taskId),
             occurrenceDate,
             single ?? true,
@@ -386,6 +502,7 @@ const AddTaskForm = ({
               endDate,
             },
           );
+          deletedShadowCount = result.deletedShadowCount ?? 0;
         } else {
           await TaskAPIClient.updateTask(Number(taskId), {
             userId,
@@ -435,9 +552,11 @@ const AddTaskForm = ({
       }
 
       toast({
-        title: isEditMode ? "Task updated!" : "Task added!",
-        status: "success",
-        duration: 3000,
+        ...buildScheduleChangeToast(
+          isEditMode ? "Task updated!" : "Task added!",
+          deletedShadowCount,
+          todayHasProgress,
+        ),
         isClosable: true,
       });
       history.push(`/pet-profile/${petId}`);
@@ -619,6 +738,25 @@ const AddTaskForm = ({
           setShowEditScopeModal(false);
           handleSave(single);
         }}
+        disableSingle={
+          !!(
+            recurrenceWarnings?.days ||
+            recurrenceWarnings?.cadence ||
+            recurrenceWarnings?.endDate
+          )
+        }
+        disableSeries={!!occurrenceDate && isPastDay(occurrenceDate)}
+        startDateBeforeOccurrence={startDateBeforeOccurrence}
+        startDateChanged={recurrenceWarnings?.startDate}
+        occurrenceDate={occurrenceDate}
+        recurrenceChanged={
+          !!(
+            recurrenceWarnings?.days ||
+            recurrenceWarnings?.cadence ||
+            recurrenceWarnings?.endDate
+          )
+        }
+        todayHasProgress={todayHasProgress}
       />
       <PopupModal
         open={showDeleteConfirm}

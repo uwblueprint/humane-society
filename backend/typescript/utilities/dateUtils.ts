@@ -1,4 +1,7 @@
+import { DateTime } from "luxon";
 import { Cadence, Days } from "../types";
+
+const SHELTER_TIME_ZONE = "America/New_York";
 
 export const dayNameToIndex = {
   [Days.SUN]: 0,
@@ -24,6 +27,29 @@ export const resetDateToUTCMidnight = (date: Date) => {
   return new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
+};
+
+export const resetDateToShelterMidnight = (moment: Date): Date => {
+  const zoned = DateTime.fromJSDate(moment, { zone: SHELTER_TIME_ZONE });
+  return new Date(Date.UTC(zoned.year, zoned.month - 1, zoned.day));
+};
+
+export const buildShelterInstant = (day: Date, timeSource: Date): Date => {
+  const timeZoned = DateTime.fromJSDate(timeSource, {
+    zone: SHELTER_TIME_ZONE,
+  });
+  return DateTime.fromObject(
+    {
+      year: day.getUTCFullYear(),
+      month: day.getUTCMonth() + 1,
+      day: day.getUTCDate(),
+      hour: timeZoned.hour,
+      minute: timeZoned.minute,
+      second: timeZoned.second,
+      millisecond: timeZoned.millisecond,
+    },
+    { zone: SHELTER_TIME_ZONE },
+  ).toJSDate();
 };
 
 export const isDateInRecurrence = (
@@ -81,4 +107,45 @@ export function buildStartDates(actualStart: Date, days: Days[]): Date[] {
 
   dates.sort((a, b) => a.getTime() - b.getTime());
   return dates;
+}
+
+export function matchesRecurrenceRule(
+  actualStart: Date,
+  targetDate: Date,
+  recurrence: {
+    days?: Days[] | null;
+    cadence: Cadence;
+    end_date?: Date | null;
+    exclusions?: Date[] | null;
+  },
+): boolean {
+  const start = resetDateToUTCMidnight(actualStart);
+  const target = resetDateToUTCMidnight(targetDate);
+
+  if (target < start) return false;
+
+  if (
+    recurrence.end_date &&
+    target > resetDateToUTCMidnight(new Date(recurrence.end_date))
+  ) {
+    return false;
+  }
+
+  if (
+    recurrence.exclusions?.some(
+      (ex) =>
+        resetDateToUTCMidnight(new Date(ex)).getTime() === target.getTime(),
+    )
+  ) {
+    return false;
+  }
+
+  const startDates =
+    recurrence.days && recurrence.days.length > 0
+      ? buildStartDates(start, recurrence.days)
+      : [start];
+
+  return startDates.some((sd) =>
+    isDateInRecurrence(sd, target, recurrence.cadence),
+  );
 }

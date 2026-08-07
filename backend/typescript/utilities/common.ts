@@ -53,3 +53,13 @@ export function colorLevelToEnum(colorLevel: number): ColorLevel {
   // values in descending order
   return Object.values(ColorLevel)[5 - colorLevel];
 }
+
+export function requirePetAndTemplateIds(task: {
+  pet_id?: number | null;
+  task_template_id?: number | null;
+}): { petId: number; taskTemplateId: number } {
+  if (task.pet_id == null || task.task_template_id == null) {
+    throw new Error("Task is missing pet_id or task_template_id");
+  }
+  return { petId: task.pet_id, taskTemplateId: task.task_template_id };
+}

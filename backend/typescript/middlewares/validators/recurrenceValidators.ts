@@ -7,6 +7,10 @@ import {
   validateEnumArray,
 } from "./util";
 import { Days, Cadence } from "../../types";
+import {
+  resetDateToShelterMidnight,
+  resetDateToUTCMidnight,
+} from "../../utilities/dateUtils";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const createRecurringTaskValidator = async (
@@ -124,6 +128,15 @@ export const createRecurringTaskValidator = async (
     return res
       .status(400)
       .send(getApiValidationError("recurrence.endDate", "Date"));
+  }
+
+  if (
+    body.recurrence.endDate !== undefined &&
+    body.recurrence.endDate !== null &&
+    resetDateToUTCMidnight(new Date(body.recurrence.endDate)).getTime() <
+      resetDateToShelterMidnight(new Date()).getTime()
+  ) {
+    return res.status(400).send("Recurrence end date cannot be before today.");
   }
 
   if (
@@ -276,6 +289,15 @@ export const addRecurrenceToTaskValidator = async (
     return res
       .status(400)
       .send(getApiValidationError("recurrence.endDate", "Date"));
+  }
+
+  if (
+    body.recurrence.endDate !== undefined &&
+    body.recurrence.endDate !== null &&
+    resetDateToUTCMidnight(new Date(body.recurrence.endDate)).getTime() <
+      resetDateToShelterMidnight(new Date()).getTime()
+  ) {
+    return res.status(400).send("Recurrence end date cannot be before today.");
   }
 
   if (

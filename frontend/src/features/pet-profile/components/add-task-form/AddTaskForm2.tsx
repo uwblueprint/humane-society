@@ -33,6 +33,7 @@ interface AddTaskForm2Props {
     startDate: boolean;
     days: boolean;
     cadence: boolean;
+    endDate: boolean;
   };
   originalStartDateKey?: string | null;
 }
@@ -339,7 +340,7 @@ const AddTaskForm2 = ({
           </Text>
         )}
         {recurrenceWarnings?.startDate && (
-          <RecurrenceWarning message="If editing 'This and following tasks', will affect recurrence occurences between the old and new start date." />
+          <RecurrenceWarning message="If you apply this to following tasks, they'll start repeating from this date instead. The days in between won't be scheduled, and anyone individually assigned to one of those days will lose that task." />
         )}
       </Flex>
 
@@ -590,7 +591,7 @@ const AddTaskForm2 = ({
                     </Text>
                   )}
                   {recurrenceWarnings?.days && (
-                    <RecurrenceWarning message="This will update the recurring days for all future tasks." />
+                    <RecurrenceWarning message="This changes the recurring days for all future tasks. Anyone individually assigned to a day you remove will lose that task." />
                   )}
                 </Flex>
               )}
@@ -630,7 +631,7 @@ const AddTaskForm2 = ({
                       </Text>
                     )}
                     {recurrenceWarnings?.cadence && (
-                      <RecurrenceWarning message="This will update the recurring cadence for all future tasks." />
+                      <RecurrenceWarning message="This changes the recurring cadence for all future tasks. Anyone individually assigned to a day that is no longer scheduled will lose that task." />
                     )}
                   </Flex>
                 )}
