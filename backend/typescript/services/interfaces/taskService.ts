@@ -89,11 +89,6 @@ export interface ITaskService {
     transaction?: Transaction,
   ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null>;
 
-  peekShadowForOccurrence(
-    taskId: string,
-    date: Date,
-  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null>;
-
   reconcileShadows(
     oldAnchorId: string,
     oldAnchorStart: Date,

@@ -451,101 +451,6 @@ class TaskService implements ITaskService {
     };
   }
 
-  async getTasks(): Promise<TaskResponseDTO[]> {
-    try {
-      const tasks: Array<PgTask> = await reconcileLazyTaskStates(
-        await PgTask.findAll({
-          where: { "$recurrence.task_id$": { [Op.is]: null } },
-          include: [{ model: PgRecurrenceTask, required: false }],
-          raw: true,
-        }),
-      );
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        ...requirePetAndTemplateIds(task),
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>> {
-    try {
-      const fetchedTasks: Array<PgTask> = await PgTask.findAll({
-        where: {
-          pet_id,
-          "$recurrence.task_id$": { [Op.is]: null },
-        },
-        include: [{ model: PgRecurrenceTask, required: false }],
-        raw: true,
-      });
-      if (!fetchedTasks[0]) {
-        throw new NotFoundError(`No tasks for pet id ${pet_id}`);
-      }
-      const tasks = await reconcileLazyTaskStates(fetchedTasks);
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        ...requirePetAndTemplateIds(task),
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>> {
-    try {
-      const fetchedTasks: Array<PgTask> = await PgTask.findAll({
-        where: {
-          user_id,
-          "$recurrence.task_id$": { [Op.is]: null },
-        },
-        include: [{ model: PgRecurrenceTask, required: false }],
-        raw: true,
-      });
-      if (!fetchedTasks[0]) {
-        throw new NotFoundError(`No tasks for user id ${user_id}`);
-      }
-      const reconciledTasks = await reconcileLazyTaskStates(fetchedTasks);
-      // a task reconciled into unassigned no longer belongs to this user
-      const tasks = reconciledTasks.filter(
-        (task) => String(task.user_id) === user_id,
-      );
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        ...requirePetAndTemplateIds(task),
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
   async createTask(
     task: TaskRequestDTO,
     transaction?: Transaction,
@@ -589,9 +494,11 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
-      const isFutureStart =
+      const isStartDayNotPast =
         !!task.scheduledStartTime &&
-        new Date(task.scheduledStartTime).getTime() > Date.now();
+        DateTime.fromJSDate(new Date(task.scheduledStartTime))
+          .setZone(TIME_ZONE)
+          .startOf("day") >= DateTime.now().setZone(TIME_ZONE).startOf("day");
       updateResult = await PgTask.update(
         {
           user_id: task.userId,
@@ -602,7 +509,7 @@ class TaskService implements ITaskService {
           start_time: task.startTime,
           end_time: task.endTime,
           notes: task.notes,
-          ...(isFutureStart ? { incomplete_logged_at: null } : {}),
+          ...(isStartDayNotPast ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true, transaction },
       );
@@ -812,11 +719,14 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
-      const isFutureStart = new Date(schedule.time).getTime() > Date.now();
+      const isStartDayNotPast =
+        DateTime.fromJSDate(new Date(schedule.time))
+          .setZone(TIME_ZONE)
+          .startOf("day") >= DateTime.now().setZone(TIME_ZONE).startOf("day");
       updateResult = await PgTask.update(
         {
           scheduled_start_time: schedule.time,
-          ...(isFutureStart ? { incomplete_logged_at: null } : {}),
+          ...(isStartDayNotPast ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true },
       );
@@ -895,24 +805,6 @@ class TaskService implements ITaskService {
     };
     await shadow.destroy({ transaction });
     return result;
-  }
-
-  async peekShadowForOccurrence(
-    taskId: string,
-    date: Date,
-  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null> {
-    const normalizedDate = resetDateToUTCMidnight(date);
-    const shadow = await PgTask.findOne({
-      where: { origin_task_id: taskId, occurrence_date: normalizedDate },
-      raw: true,
-    });
-    if (!shadow) return null;
-
-    return {
-      userId: shadow.user_id,
-      startTime: shadow.start_time,
-      endTime: shadow.end_time,
-    };
   }
 
   /**
@@ -1006,12 +898,35 @@ class TaskService implements ITaskService {
       );
     }
 
+    let occurrenceStartTime = anchor.scheduled_start_time;
+    let occurrenceEndTime = anchor.scheduled_end_time;
+    if (anchor.scheduled_start_time && target.occurrence_date) {
+      const actualStart = new Date(anchor.scheduled_start_time);
+      occurrenceStartTime = new Date(
+        Date.UTC(
+          target.occurrence_date.getUTCFullYear(),
+          target.occurrence_date.getUTCMonth(),
+          target.occurrence_date.getUTCDate(),
+          actualStart.getUTCHours(),
+          actualStart.getUTCMinutes(),
+          actualStart.getUTCSeconds(),
+        ),
+      );
+      occurrenceEndTime = anchor.scheduled_end_time
+        ? new Date(
+            occurrenceStartTime.getTime() +
+              (new Date(anchor.scheduled_end_time).getTime() -
+                actualStart.getTime()),
+          )
+        : anchor.scheduled_end_time;
+    }
+
     return {
       id: target.id,
       userId: target.user_id,
       ...requirePetAndTemplateIds(anchor),
-      scheduledStartTime: anchor.scheduled_start_time,
-      scheduledEndTime: anchor.scheduled_end_time,
+      scheduledStartTime: occurrenceStartTime,
+      scheduledEndTime: occurrenceEndTime,
       startTime: target.start_time,
       endTime: target.end_time,
       notes: anchor.notes,
