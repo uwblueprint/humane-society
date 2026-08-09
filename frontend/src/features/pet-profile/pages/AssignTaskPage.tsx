@@ -8,6 +8,7 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserRoles from "../../../constants/UserConstants";
 import UserSelection from "../components/UserSelection";
+import PetAPIClient from "../../../APIClients/PetAPIClient";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
@@ -25,53 +26,69 @@ const AssignTaskPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [petColorLevel, setPetColorLevel] = useState<number | null>(null);
+  const hasColorLevelMismatch =
+    selectedUser !== null &&
+    petColorLevel !== null &&
+    selectedUser.colorLevel < petColorLevel;
 
   const usersPerPage = 10;
 
   // fetch users
-  const getUsers = async () => {
-    try {
-      const fetchedUsers = await UserAPIClient.get();
-      if (fetchedUsers != null) {
-        const nonAdminUsers = fetchedUsers.filter(
-          (user) => user.role !== UserRoles.ADMIN,
-        );
-
-        const userIdsWithPhotos = Array.from(
-          new Set(
-            nonAdminUsers
-              .filter((user) => user.profilePhoto)
-              .map((user) => user.id),
-          ),
-        );
-        let photoUrlsByUserId: Record<number, string> = {};
-        if (userIdsWithPhotos.length > 0) {
-          try {
-            photoUrlsByUserId = await UserAPIClient.getProfilePhotoUrls(
-              userIdsWithPhotos,
-            );
-          } catch {
-            // Leave unresolved; ProfilePhoto falls back to the default avatar.
-          }
-        }
-
-        setUsers(
-          nonAdminUsers.map((user) => ({
-            ...user,
-            profilePhoto: photoUrlsByUserId[user.id],
-          })),
-        );
-      }
-    } catch (error) {
-      setErrorMessage(`${error}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const getUsers = async () => {
+      try {
+        const fetchedUsers = await UserAPIClient.get();
+        if (fetchedUsers != null) {
+          const nonAdminUsers = fetchedUsers.filter(
+            (user) => user.role !== UserRoles.ADMIN,
+          );
+
+          const userIdsWithPhotos = Array.from(
+            new Set(
+              nonAdminUsers
+                .filter((user) => user.profilePhoto)
+                .map((user) => user.id),
+            ),
+          );
+          let photoUrlsByUserId: Record<number, string> = {};
+          if (userIdsWithPhotos.length > 0) {
+            try {
+              photoUrlsByUserId = await UserAPIClient.getProfilePhotoUrls(
+                userIdsWithPhotos,
+              );
+            } catch {
+              // Leave unresolved; ProfilePhoto falls back to the default avatar.
+            }
+          }
+
+          setUsers(
+            nonAdminUsers.map((user) => ({
+              ...user,
+              profilePhoto: photoUrlsByUserId[user.id],
+            })),
+          );
+        }
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // fetch pet's color level
+    const getPetColorLevel = async () => {
+      try {
+        const pet = await PetAPIClient.getPet(petId);
+        if (pet != null) setPetColorLevel(pet.colorLevel);
+      } catch (error) {
+        setErrorMessage(`${error}`);
+      }
+    };
+
     getUsers();
-  }, []);
+    getPetColorLevel();
+  }, [petId]);
 
   // filters users based on search
   const filteredUsers = useMemo(() => {
@@ -163,7 +180,7 @@ const AssignTaskPage = (): React.ReactElement => {
         onRowClick={handleRowClick}
         onPageChange={setPage}
         onClearSelection={handleClearSelection}
-        hasColorLevelMismatch={false}
+        hasColorLevelMismatch={hasColorLevelMismatch}
       />
 
       {/* save button */}
@@ -175,7 +192,7 @@ const AssignTaskPage = (): React.ReactElement => {
           onClick={handleSaveClick}
           disabled={!selectedUser}
         >
-          Save
+          {hasColorLevelMismatch ? "Override" : "Save"}
         </Button>
       </Flex>
     </Flex>
