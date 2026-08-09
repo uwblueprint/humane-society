@@ -11,12 +11,12 @@ import { ReactComponent as WalkIcon } from "../../../assets/icons/walk.svg";
 import PetStatus from "../../../components/common/PetStatus";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
 import useOpenController from "../../../components/common/useOpenController";
-import { PetInfo } from "../../../types/PetTypes";
+import { PetListItemDTO } from "../../../types/PetTypes";
 import { TaskCategory } from "../../../types/TaskTypes";
 import formatTimeFromISO from "../../../utils/dateTimeUtils";
 
 interface PetListTableSectionProps {
-  pets: PetInfo[];
+  pets: PetListItemDTO[];
   sectionTitle?: string;
 }
 
