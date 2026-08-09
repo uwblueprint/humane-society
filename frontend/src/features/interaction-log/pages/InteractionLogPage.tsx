@@ -7,6 +7,7 @@ import {
   TableColumn,
 } from "../../../components/common/table";
 import InteractionAPIClient from "../../../APIClients/InteractionAPIClient";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { InteractionDTO } from "../../../types/InteractionTypes";
 import InteractionDetailsModal from "../components/InteractionDetailsModal";
 import ProfilePhoto from "../../../components/common/ProfilePhoto";
@@ -44,7 +45,34 @@ const InteractionLogPage = (): React.ReactElement => {
   const fetchInteractions = useCallback(async () => {
     try {
       const data = await InteractionAPIClient.getInteractions();
-      setInteractions(data);
+
+      const actorIdsWithPhotos = Array.from(
+        new Set(
+          data
+            .filter((log) => log.actor.profilePhoto)
+            .map((log) => log.actor.id),
+        ),
+      );
+      let photoUrlsByActorId: Record<number, string> = {};
+      if (actorIdsWithPhotos.length > 0) {
+        try {
+          photoUrlsByActorId = await UserAPIClient.getProfilePhotoUrls(
+            actorIdsWithPhotos,
+          );
+        } catch {
+          // Leave unresolved; ProfilePhoto falls back to the default avatar.
+        }
+      }
+
+      setInteractions(
+        data.map((log) => ({
+          ...log,
+          actor: {
+            ...log.actor,
+            profilePhoto: photoUrlsByActorId[log.actor.id] ?? null,
+          },
+        })),
+      );
       setHasError(false);
     } catch (error) {
       setHasError(true);

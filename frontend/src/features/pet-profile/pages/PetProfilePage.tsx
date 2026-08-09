@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import NavBar from "../../../components/common/navbar/NavBar";
 import PetAPIClient from "../../../APIClients/PetAPIClient";
+import UserAPIClient from "../../../APIClients/UserAPIClient";
 import { Pet } from "../../../types/PetTypes";
 import { colorLevelMap, ScheduledTaskDTO } from "../../../types/TaskTypes";
 import UserRoles from "../../../constants/UserConstants";
@@ -80,11 +81,40 @@ const PetProfilePage = (): React.ReactElement => {
         petId,
         dateString,
       );
+      const assigneeIdsWithPhotos = Array.from(
+        new Set(
+          fetchedTasks
+            .filter((task) => task.assignedUser?.profilePhoto)
+            .map((task) => task.assignedUser!.id),
+        ),
+      );
+      let photoUrlsByAssigneeId: Record<number, string> = {};
+      if (assigneeIdsWithPhotos.length > 0) {
+        try {
+          photoUrlsByAssigneeId = await UserAPIClient.getProfilePhotoUrls(
+            assigneeIdsWithPhotos,
+          );
+        } catch {
+          // Leave unresolved; ProfilePhoto falls back to the default avatar.
+        }
+      }
+
+      const tasksWithPhotoUrls = fetchedTasks.map((task) => {
+        if (!task.assignedUser) return task;
+        return {
+          ...task,
+          assignedUser: {
+            ...task.assignedUser,
+            profilePhoto: photoUrlsByAssigneeId[task.assignedUser.id],
+          },
+        };
+      });
+
       const getStartTimeValue = (task: ScheduledTaskDTO): number =>
         task.scheduledStartTime
           ? new Date(task.scheduledStartTime).getTime()
           : Infinity;
-      const sortedTasks = [...fetchedTasks].sort((a, b) => {
+      const sortedTasks = [...tasksWithPhotoUrls].sort((a, b) => {
         const rankDiff =
           getTaskSortRank(a, authenticatedUser) -
           getTaskSortRank(b, authenticatedUser);
