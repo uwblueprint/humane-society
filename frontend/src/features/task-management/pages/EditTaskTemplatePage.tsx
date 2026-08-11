@@ -141,32 +141,38 @@ const EditTaskTemplatePage = (): React.ReactElement => {
       const patches: Promise<unknown>[] = [];
 
       if (orig && data.taskName !== orig.taskName) {
-        patches.push(TaskTemplateAPIClient.updateName(taskTemplateId, {
-          name: data.taskName,
-          actorId,
-          targetId: taskTemplateId,
-          oldTaskTemplateName: orig.taskName,
-          newTaskTemplateName: data.taskName,
-        }));
+        patches.push(
+          TaskTemplateAPIClient.updateName(taskTemplateId, {
+            name: data.taskName,
+            actorId,
+            targetId: taskTemplateId,
+            oldTaskTemplateName: orig.taskName,
+            newTaskTemplateName: data.taskName,
+          }),
+        );
       }
 
       if (orig && data.taskInstructions !== orig.taskInstructions) {
-        patches.push(TaskTemplateAPIClient.updateInstructions(taskTemplateId, {
-          instructions: data.taskInstructions,
-          actorId,
-          targetId: taskTemplateId,
-          taskTemplateName: orig.taskName,
-          oldInstructions: orig.taskInstructions,
-          newInstructions: data.taskInstructions,
-        }));
+        patches.push(
+          TaskTemplateAPIClient.updateInstructions(taskTemplateId, {
+            instructions: data.taskInstructions,
+            actorId,
+            targetId: taskTemplateId,
+            taskTemplateName: orig.taskName,
+            oldInstructions: orig.taskInstructions,
+            newInstructions: data.taskInstructions,
+          }),
+        );
       }
 
       if (orig && data.taskCategory !== orig.taskCategory) {
-        patches.push(TaskTemplateAPIClient.editTaskTemplate(taskTemplateId, {
-          taskName: data.taskName,
-          category: data.taskCategory as TaskCategory,
-          instructions: data.taskInstructions,
-        }));
+        patches.push(
+          TaskTemplateAPIClient.editTaskTemplate(taskTemplateId, {
+            taskName: data.taskName,
+            category: data.taskCategory as TaskCategory,
+            instructions: data.taskInstructions,
+          }),
+        );
       }
 
       await Promise.all(patches);

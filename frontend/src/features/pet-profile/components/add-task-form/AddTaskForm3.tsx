@@ -31,7 +31,9 @@ const AddTaskForm3 = ({
       try {
         const fetchedUsers = await UserAPIClient.get();
         if (fetchedUsers != null) {
-          setUsers(fetchedUsers.filter((user) => user.role !== UserRoles.ADMIN));
+          setUsers(
+            fetchedUsers.filter((user) => user.role !== UserRoles.ADMIN),
+          );
         }
       } catch (error) {
         setErrorMessage(`${error}`);

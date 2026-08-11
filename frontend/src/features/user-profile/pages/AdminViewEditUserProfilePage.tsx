@@ -261,7 +261,7 @@ const AdminViewEditUserProfilePage = (): React.ReactElement => {
         duration: 3000,
         isClosable: true,
       });
-    history.push(`${PROFILE_PAGE}/${targetId}`);
+      history.push(`${PROFILE_PAGE}/${targetId}`);
     } catch (err) {
       toast({
         title: "Fail",

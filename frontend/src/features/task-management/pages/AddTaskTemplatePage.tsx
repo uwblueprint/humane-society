@@ -118,7 +118,8 @@ const AddTaskTemplatePage = (): React.ReactElement => {
     if (formData.instructions?.trim()) {
       const wordCount = formData.instructions.trim().split(/\s+/).length;
       if (wordCount > 10000) {
-        newErrors.taskInstructions = "Information must not exceed 10,000 words.";
+        newErrors.taskInstructions =
+          "Information must not exceed 10,000 words.";
       }
     }
 
