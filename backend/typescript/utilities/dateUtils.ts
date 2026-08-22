@@ -1,4 +1,7 @@
+import { DateTime } from "luxon";
 import { Cadence, Days } from "../types";
+
+const SHELTER_TIME_ZONE = "America/New_York";
 
 export const dayNameToIndex = {
   [Days.SUN]: 0,
@@ -24,6 +27,29 @@ export const resetDateToUTCMidnight = (date: Date) => {
   return new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
+};
+
+export const resetDateToShelterMidnight = (moment: Date): Date => {
+  const zoned = DateTime.fromJSDate(moment, { zone: SHELTER_TIME_ZONE });
+  return new Date(Date.UTC(zoned.year, zoned.month - 1, zoned.day));
+};
+
+export const buildShelterInstant = (day: Date, timeSource: Date): Date => {
+  const timeZoned = DateTime.fromJSDate(timeSource, {
+    zone: SHELTER_TIME_ZONE,
+  });
+  return DateTime.fromObject(
+    {
+      year: day.getUTCFullYear(),
+      month: day.getUTCMonth() + 1,
+      day: day.getUTCDate(),
+      hour: timeZoned.hour,
+      minute: timeZoned.minute,
+      second: timeZoned.second,
+      millisecond: timeZoned.millisecond,
+    },
+    { zone: SHELTER_TIME_ZONE },
+  ).toJSDate();
 };
 
 export const isDateInRecurrence = (
