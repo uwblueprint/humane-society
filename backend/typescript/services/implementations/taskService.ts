@@ -29,6 +29,11 @@ import {
   resetDateToUTCMidnight,
 } from "../../utilities/dateUtils";
 import { requirePetAndTemplateIds } from "../../utilities/common";
+import {
+  isTaskIncomplete,
+  isTaskStaleAssignment,
+  reconcileLazyTaskStates,
+} from "./taskStaleStateReconciler";
 
 const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
@@ -489,6 +494,11 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const isStartDayNotPast =
+        !!task.scheduledStartTime &&
+        DateTime.fromJSDate(new Date(task.scheduledStartTime))
+          .setZone(TIME_ZONE)
+          .startOf("day") >= DateTime.now().setZone(TIME_ZONE).startOf("day");
       updateResult = await PgTask.update(
         {
           user_id: task.userId,
@@ -499,6 +509,7 @@ class TaskService implements ITaskService {
           start_time: task.startTime,
           end_time: task.endTime,
           notes: task.notes,
+          ...(isStartDayNotPast ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true, transaction },
       );
@@ -708,9 +719,14 @@ class TaskService implements ITaskService {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const isStartDayNotPast =
+        DateTime.fromJSDate(new Date(schedule.time))
+          .setZone(TIME_ZONE)
+          .startOf("day") >= DateTime.now().setZone(TIME_ZONE).startOf("day");
       updateResult = await PgTask.update(
         {
           scheduled_start_time: schedule.time,
+          ...(isStartDayNotPast ? { incomplete_logged_at: null } : {}),
         },
         { where: { id }, returning: true },
       );
@@ -882,12 +898,35 @@ class TaskService implements ITaskService {
       );
     }
 
+    let occurrenceStartTime = anchor.scheduled_start_time;
+    let occurrenceEndTime = anchor.scheduled_end_time;
+    if (anchor.scheduled_start_time && target.occurrence_date) {
+      const actualStart = new Date(anchor.scheduled_start_time);
+      occurrenceStartTime = new Date(
+        Date.UTC(
+          target.occurrence_date.getUTCFullYear(),
+          target.occurrence_date.getUTCMonth(),
+          target.occurrence_date.getUTCDate(),
+          actualStart.getUTCHours(),
+          actualStart.getUTCMinutes(),
+          actualStart.getUTCSeconds(),
+        ),
+      );
+      occurrenceEndTime = anchor.scheduled_end_time
+        ? new Date(
+            occurrenceStartTime.getTime() +
+              (new Date(anchor.scheduled_end_time).getTime() -
+                actualStart.getTime()),
+          )
+        : anchor.scheduled_end_time;
+    }
+
     return {
       id: target.id,
       userId: target.user_id,
       ...requirePetAndTemplateIds(anchor),
-      scheduledStartTime: anchor.scheduled_start_time,
-      scheduledEndTime: anchor.scheduled_end_time,
+      scheduledStartTime: occurrenceStartTime,
+      scheduledEndTime: occurrenceEndTime,
       startTime: target.start_time,
       endTime: target.end_time,
       notes: anchor.notes,
@@ -1043,6 +1082,13 @@ class TaskService implements ITaskService {
         ],
       });
 
+      const reconciledOneTimeTasks = await reconcileLazyTaskStates(
+        oneTimeTasks,
+      );
+      const reconciledUserIdById = new Map(
+        reconciledOneTimeTasks.map((task) => [task.id, task.user_id]),
+      );
+
       // A recurrence seed row must respect its recurrence's exclusions
       // ("this task" edits/deletes exclude the date and create a replacement)
       const visibleOneTimeTasks = oneTimeTasks.filter(
@@ -1055,29 +1101,33 @@ class TaskService implements ITaskService {
       );
 
       const oneTimeTasksWithFlag: TaskResponseDTOForDate[] =
-        visibleOneTimeTasks.map((task) => ({
-          id: task.id,
-          userId: task.user_id,
-          ...requirePetAndTemplateIds(task),
-          scheduledStartTime: task.scheduled_start_time,
-          scheduledEndTime: task.scheduled_end_time,
-          startTime: task.start_time,
-          endTime: task.end_time,
-          notes: task.notes,
-          isRecurring: false,
-          taskName: task.task_template?.task_name,
-          category: task.task_template?.category,
-          petName: task.pet?.name,
-          petPhoto: task.pet?.photo,
-          assignedUser: task.user
-            ? {
-                id: task.user.id,
-                firstName: task.user.first_name,
-                lastName: task.user.last_name,
-                profilePhoto: task.user.profile_photo,
-              }
-            : null,
-        }));
+        visibleOneTimeTasks.map((task) => {
+          const isStillAssigned = reconciledUserIdById.get(task.id) != null;
+          return {
+            id: task.id,
+            userId: isStillAssigned ? task.user_id : undefined,
+            ...requirePetAndTemplateIds(task),
+            scheduledStartTime: task.scheduled_start_time,
+            scheduledEndTime: task.scheduled_end_time,
+            startTime: task.start_time,
+            endTime: task.end_time,
+            notes: task.notes,
+            isRecurring: false,
+            taskName: task.task_template?.task_name,
+            category: task.task_template?.category,
+            petName: task.pet?.name,
+            petPhoto: task.pet?.photo,
+            assignedUser:
+              isStillAssigned && task.user
+                ? {
+                    id: task.user.id,
+                    firstName: task.user.first_name,
+                    lastName: task.user.last_name,
+                    profilePhoto: task.user.profile_photo,
+                  }
+                : null,
+          };
+        });
 
       const recurringWhereClause: Record<string, unknown> = {};
       if (filters?.petId !== undefined) {
@@ -1090,16 +1140,65 @@ class TaskService implements ITaskService {
       });
 
       const selectedDateObj = resetDateToUTCMidnight(beginningOfDay);
+      const now = new Date();
+      const today = DateTime.now().setZone(TIME_ZONE).startOf("day");
 
       const results = await Promise.all(
         recurringTasks.map((task) =>
           this.generateRecurringInstanceForData(task.id, selectedDateObj)
-            .then(
-              (instance): TaskResponseDTOForDate => ({
-                ...instance,
+            .then(async (instance): Promise<TaskResponseDTOForDate> => {
+              const anchorDurationMs =
+                task.scheduled_start_time && task.scheduled_end_time
+                  ? task.scheduled_end_time.getTime() -
+                    task.scheduled_start_time.getTime()
+                  : undefined;
+              const occurrenceEndTime =
+                anchorDurationMs !== undefined && instance.scheduledStartTime
+                  ? new Date(
+                      instance.scheduledStartTime.getTime() + anchorDurationMs,
+                    )
+                  : instance.scheduledEndTime;
+
+              const isStale =
+                isTaskIncomplete(
+                  {
+                    end_time: instance.endTime,
+                    incomplete_logged_at: undefined,
+                    scheduled_start_time: instance.scheduledStartTime,
+                  },
+                  today,
+                ) ||
+                isTaskStaleAssignment(
+                  {
+                    start_time: instance.startTime,
+                    end_time: instance.endTime,
+                    user_id: instance.userId,
+                    scheduled_end_time: occurrenceEndTime,
+                  },
+                  now,
+                );
+
+              if (!isStale) {
+                return { ...instance, isRecurring: true };
+              }
+
+              const shadow = await this.resolveShadowTask(
+                task.id.toString(),
+                selectedDateObj,
+              );
+              const [reconciled] = await reconcileLazyTaskStates([shadow]);
+              return {
+                id: task.id,
+                userId: reconciled.user_id,
+                ...requirePetAndTemplateIds(task),
+                scheduledStartTime: instance.scheduledStartTime,
+                scheduledEndTime: occurrenceEndTime,
+                startTime: reconciled.start_time,
+                endTime: reconciled.end_time,
+                notes: task.notes,
                 isRecurring: true,
-              }),
-            )
+              };
+            })
             .catch(() => null),
         ),
       );
@@ -1108,7 +1207,6 @@ class TaskService implements ITaskService {
         (r): r is TaskResponseDTOForDate => r !== null,
       );
 
-      // Enrich recurring instances with task name, category, assigned user, profile photo
       const recurringTaskIds = recurringInstances.map((r) => r.id);
       const enrichedRecurringTasks =
         recurringTaskIds.length > 0
@@ -1125,29 +1223,31 @@ class TaskService implements ITaskService {
         enrichedRecurringTasks.map((t) => [t.id, t]),
       );
 
-      const recurringUserIds = [
+      const assignedUserIds = [
         ...new Set(
           recurringInstances
-            .map((r) => r.userId)
-            .filter((id): id is number => id !== undefined),
+            .map((instance) => instance.userId)
+            .filter((id): id is number => id != null),
         ),
       ];
-      const recurringUsers =
-        recurringUserIds.length > 0
+      const assignedUsers =
+        assignedUserIds.length > 0
           ? await User.findAll({
-              where: { id: recurringUserIds },
+              where: { id: assignedUserIds },
               attributes: ["id", "first_name", "last_name", "profile_photo"],
               raw: true,
             })
           : [];
-      const userMap = new Map(recurringUsers.map((u) => [u.id, u]));
+      const assignedUserById = new Map(
+        assignedUsers.map((user) => [user.id, user]),
+      );
 
       const enrichedRecurringInstances: TaskResponseDTOForDate[] =
         recurringInstances.map((instance) => {
           const enriched = enrichmentMap.get(instance.id);
           const assignedUserRow =
-            instance.userId !== undefined
-              ? userMap.get(instance.userId)
+            instance.userId != null
+              ? assignedUserById.get(instance.userId)
               : undefined;
           return {
             ...instance,

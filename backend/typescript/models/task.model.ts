@@ -56,6 +56,9 @@ export default class Task extends Model {
   @Column({})
   end_time?: Date;
 
+  @Column({})
+  incomplete_logged_at?: Date;
+
   @ForeignKey(() => Task)
   @Column({})
   origin_task_id?: number;
