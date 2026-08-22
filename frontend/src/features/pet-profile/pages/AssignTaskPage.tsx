@@ -8,6 +8,8 @@ import TaskAPIClient from "../../../APIClients/TaskAPIClient";
 import { User } from "../../../types/UserTypes";
 import UserRoles from "../../../constants/UserConstants";
 import UserSelection from "../components/UserSelection";
+import AssignTaskScopeModal from "../components/AssignTaskScopeModal";
+import { isPastDay } from "../../../utils/taskStatusUtils";
 
 const AssignTaskPage = (): React.ReactElement => {
   const history = useHistory();
@@ -16,6 +18,8 @@ const AssignTaskPage = (): React.ReactElement => {
   const petId = Number(params.id);
   const taskId = Number(params.taskId);
   const toast = useToast();
+  const occurrenceDate =
+    new URLSearchParams(location.search).get("date") ?? undefined;
 
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(
@@ -25,6 +29,8 @@ const AssignTaskPage = (): React.ReactElement => {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [showScopeModal, setShowScopeModal] = useState<boolean>(false);
 
   const usersPerPage = 10;
 
@@ -73,6 +79,14 @@ const AssignTaskPage = (): React.ReactElement => {
     getUsers();
   }, []);
 
+  useEffect(() => {
+    const checkRecurring = async () => {
+      const recurrence = await TaskAPIClient.getRecurrence(taskId);
+      setIsRecurring(recurrence !== null);
+    };
+    checkRecurring();
+  }, [taskId]);
+
   // filters users based on search
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
@@ -106,13 +120,20 @@ const AssignTaskPage = (): React.ReactElement => {
     history.push(`/pet-profile/${petId}`);
   };
 
-  const handleSaveClick = async () => {
-    if (!selectedUser) return;
+  const performAssign = async (single?: boolean) => {
     try {
-      await TaskAPIClient.assignUser(taskId, selectedUser.id);
+      await TaskAPIClient.assignUser(
+        taskId,
+        selectedUser?.id ?? null,
+        undefined,
+        occurrenceDate,
+        single,
+      );
       toast({
         title: "Success",
-        description: "Task assigned successfully.",
+        description: selectedUser
+          ? "Task assigned successfully."
+          : "Task unassigned successfully.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -127,6 +148,19 @@ const AssignTaskPage = (): React.ReactElement => {
         isClosable: true,
       });
     }
+  };
+
+  const handleSaveClick = async () => {
+    if (isRecurring) {
+      setShowScopeModal(true);
+      return;
+    }
+    await performAssign();
+  };
+
+  const handleScopeConfirm = async (single: boolean) => {
+    setShowScopeModal(false);
+    await performAssign(single);
   };
 
   return (
@@ -173,11 +207,17 @@ const AssignTaskPage = (): React.ReactElement => {
           type="button"
           variant="green"
           onClick={handleSaveClick}
-          disabled={!selectedUser}
         >
           Save
         </Button>
       </Flex>
+
+      <AssignTaskScopeModal
+        open={showScopeModal}
+        onCancel={() => setShowScopeModal(false)}
+        onConfirm={handleScopeConfirm}
+        disableSeries={!!occurrenceDate && isPastDay(occurrenceDate)}
+      />
     </Flex>
   );
 };

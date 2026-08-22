@@ -2,6 +2,7 @@ import { Op, Transaction } from "sequelize";
 import { DateTime } from "luxon";
 import PgTask from "../../models/task.model";
 import PgRecurrenceTask from "../../models/recurrence_task.model";
+import { sequelize } from "../../models";
 import {
   ITaskService,
   TaskRequestDTO,
@@ -21,12 +22,13 @@ import {
   NotFoundError,
 } from "../../utilities/errorUtils";
 import logger from "../../utilities/logger";
-import { Days } from "../../types";
+import { Cadence, Days } from "../../types";
 import {
   buildStartDates,
-  isDateInRecurrence,
+  matchesRecurrenceRule,
   resetDateToUTCMidnight,
 } from "../../utilities/dateUtils";
+import { requirePetAndTemplateIds } from "../../utilities/common";
 
 const Logger = logger(__filename);
 const TIME_ZONE = "America/New_York";
@@ -302,23 +304,11 @@ class TaskService implements ITaskService {
         }
       }
 
-      let startDates = [actualStart];
-      if (recurrenceTask.days && recurrenceTask.days.length > 0) {
-        startDates = buildStartDates(actualStart, recurrenceTask.days);
-      }
-
-      let validExclusion = exclusion.getTime() === actualStart.getTime();
-      if (!validExclusion) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const startDate of startDates) {
-          if (
-            isDateInRecurrence(startDate, exclusion, recurrenceTask.cadence)
-          ) {
-            validExclusion = true;
-            break;
-          }
-        }
-      }
+      const validExclusion = matchesRecurrenceRule(
+        actualStart,
+        exclusion,
+        recurrenceTask,
+      );
 
       if (!validExclusion) {
         throw new BadRequestError("An invalid exclusion date was given");
@@ -368,59 +358,48 @@ class TaskService implements ITaskService {
         throw new NotFoundError("Recurrence task has no start time");
 
       const actualStart = new Date(task.scheduled_start_time);
-      if (date < resetDateToUTCMidnight(actualStart))
-        throw new Error("Date is before recurrence start date.");
-      if (recurrence.end_date && date > new Date(recurrence.end_date))
-        throw new Error("Date is after recurrence end date.");
-      if (
-        recurrence.exclusions?.some(
-          (ex: Date) =>
-            resetDateToUTCMidnight(new Date(ex)).getTime() ===
-            resetDateToUTCMidnight(date).getTime(),
-        )
-      ) {
-        throw new Error("Date is excluded from recurrence.");
+      if (!matchesRecurrenceRule(actualStart, date, recurrence)) {
+        throw new Error(
+          "Given date does not match the recurrence rule (before the start date, after the end date, excluded, or off-pattern).",
+        );
       }
 
-      let startDates = [actualStart];
-      if (recurrence.days && recurrence.days.length > 0) {
-        startDates = buildStartDates(actualStart, recurrence.days);
-      }
+      const occurrenceDate = new Date(
+        Date.UTC(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate(),
+          actualStart.getUTCHours(),
+          actualStart.getUTCMinutes(),
+          actualStart.getUTCSeconds(),
+        ),
+      );
+      const occurrenceEndDate = task.scheduled_end_time
+        ? new Date(
+            occurrenceDate.getTime() +
+              (new Date(task.scheduled_end_time).getTime() -
+                actualStart.getTime()),
+          )
+        : task.scheduled_end_time;
 
-      // eslint-disable-next-line no-restricted-syntax
-      for (const startDate of startDates) {
-        if (isDateInRecurrence(startDate, date, recurrence.cadence)) {
-          const occurrenceDate = new Date(
-            Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate(),
-              actualStart.getUTCHours(),
-              actualStart.getUTCMinutes(),
-              actualStart.getUTCSeconds(),
-            ),
-          );
-          const occurrenceEndDate = task.scheduled_end_time
-            ? new Date(
-                occurrenceDate.getTime() +
-                  (new Date(task.scheduled_end_time).getTime() -
-                    actualStart.getTime()),
-              )
-            : task.scheduled_end_time;
-          return {
-            id: task.id,
-            userId: task.user_id,
-            petId: task.pet_id,
-            taskTemplateId: task.task_template_id,
-            scheduledStartTime: occurrenceDate,
-            scheduledEndTime: occurrenceEndDate,
-            startTime: task.start_time,
-            endTime: task.end_time,
-            notes: task.notes,
-          };
-        }
-      }
-      throw new Error("No recurrence instance matches the given date.");
+      const shadow = await PgTask.findOne({
+        where: {
+          origin_task_id: task.id,
+          occurrence_date: resetDateToUTCMidnight(date),
+        },
+        raw: true,
+      });
+
+      return {
+        id: task.id,
+        userId: (shadow ? shadow.user_id : task.user_id) ?? undefined,
+        ...requirePetAndTemplateIds(task),
+        scheduledStartTime: occurrenceDate,
+        scheduledEndTime: occurrenceEndDate,
+        startTime: (shadow ? shadow.start_time : task.start_time) ?? undefined,
+        endTime: (shadow ? shadow.end_time : task.end_time) ?? undefined,
+        notes: task.notes,
+      };
     } catch (error) {
       Logger.error(
         `Failed to generate recurring instance. Reason = ${getErrorMessage(
@@ -431,8 +410,19 @@ class TaskService implements ITaskService {
     }
   }
 
-  /* eslint-disable class-methods-use-this */
-  async getTask(id: string): Promise<TaskResponseDTO> {
+  async getTask(id: string, date?: Date): Promise<TaskResponseDTO> {
+    if (date) {
+      const recurrence = await PgRecurrenceTask.findOne({
+        where: { task_id: id },
+      });
+      if (recurrence) {
+        return this.generateRecurringInstanceForData(
+          id,
+          resetDateToUTCMidnight(date),
+        );
+      }
+    }
+
     let task: PgTask | null;
     try {
       task = await PgTask.findByPk(id, { raw: true });
@@ -447,98 +437,13 @@ class TaskService implements ITaskService {
     return {
       id: task.id,
       userId: task.user_id,
-      petId: task.pet_id,
-      taskTemplateId: task.task_template_id,
+      ...requirePetAndTemplateIds(task),
       scheduledStartTime: task.scheduled_start_time,
       scheduledEndTime: task.scheduled_end_time,
       startTime: task.start_time,
       endTime: task.end_time,
       notes: task.notes,
     };
-  }
-
-  async getTasks(): Promise<TaskResponseDTO[]> {
-    try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
-        raw: true,
-      });
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async getPetTasks(pet_id: string): Promise<Array<TaskResponseDTO>> {
-    try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
-        where: {
-          pet_id,
-        },
-        raw: true,
-      });
-      if (!tasks[0]) {
-        throw new NotFoundError(`No tasks for pet id ${pet_id}`);
-      }
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
-  }
-
-  async getUserTasks(user_id: string): Promise<Array<TaskResponseDTO>> {
-    try {
-      const tasks: Array<PgTask> = await PgTask.findAll({
-        where: {
-          user_id,
-        },
-        raw: true,
-      });
-      if (!tasks[0]) {
-        throw new NotFoundError(`No tasks for user id ${user_id}`);
-      }
-      return tasks.map((task) => ({
-        id: task.id,
-        userId: task.user_id,
-        petId: task.pet_id,
-        taskTemplateId: task.task_template_id,
-        scheduledStartTime: task.scheduled_start_time,
-        scheduledEndTime: task.scheduled_end_time,
-        startTime: task.start_time,
-        endTime: task.end_time,
-        notes: task.notes,
-      }));
-    } catch (error: unknown) {
-      Logger.error(
-        `Failed to get activites. Reason = ${getErrorMessage(error)}`,
-      );
-      throw error;
-    }
   }
 
   async createTask(
@@ -567,8 +472,7 @@ class TaskService implements ITaskService {
     return {
       id: newTask.id,
       userId: newTask.user_id,
-      petId: newTask.pet_id,
-      taskTemplateId: newTask.task_template_id,
+      ...requirePetAndTemplateIds(newTask),
       scheduledStartTime: newTask.scheduled_start_time,
       scheduledEndTime: newTask.scheduled_end_time,
       startTime: newTask.start_time,
@@ -610,8 +514,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -620,39 +523,182 @@ class TaskService implements ITaskService {
     };
   }
 
+  private async forkRecurrenceWithNewAssignee(
+    taskId: string,
+    splitDate: Date,
+    newUserId: number | null,
+    transaction: Transaction,
+  ): Promise<PgTask> {
+    const task = await PgTask.findByPk(taskId, { transaction });
+    if (!task) throw new NotFoundError(`Task id ${taskId} not found`);
+    if (!task.scheduled_start_time) {
+      throw new NotFoundError("Given task has no start date");
+    }
+    const recurrence = await PgRecurrenceTask.findOne({
+      where: { task_id: taskId },
+      transaction,
+    });
+    if (!recurrence) {
+      throw new NotFoundError(`Recurrence for task id ${taskId} not found`);
+    }
+
+    const newRecurrenceEndDate = new Date(
+      resetDateToUTCMidnight(splitDate).getTime() - 24 * 60 * 60 * 1000,
+    );
+    await this.updateRecurrence(
+      taskId,
+      { endDate: newRecurrenceEndDate },
+      transaction,
+    );
+
+    let newScheduledEndTime: Date | undefined;
+    if (task.scheduled_end_time) {
+      const seedEnd = new Date(task.scheduled_end_time);
+      newScheduledEndTime = new Date(splitDate);
+      newScheduledEndTime.setUTCHours(
+        seedEnd.getUTCHours(),
+        seedEnd.getUTCMinutes(),
+        seedEnd.getUTCSeconds(),
+        seedEnd.getUTCMilliseconds(),
+      );
+    }
+
+    const newTaskDTO = await this.createTask(
+      {
+        userId: newUserId ?? undefined,
+        ...requirePetAndTemplateIds(task),
+        scheduledStartTime: splitDate,
+        scheduledEndTime: newScheduledEndTime,
+        notes: task.notes,
+      },
+      transaction,
+    );
+
+    const carriedExclusions = (recurrence.exclusions ?? []).filter(
+      (ex) =>
+        resetDateToUTCMidnight(new Date(ex)).getTime() >
+        resetDateToUTCMidnight(splitDate).getTime(),
+    );
+
+    const newRecurrenceDTO = await this.createRecurrence(
+      newTaskDTO.id.toString(),
+      recurrence.cadence,
+      recurrence.days,
+      recurrence.end_date ?? undefined,
+      carriedExclusions,
+      transaction,
+    );
+
+    await this.reconcileShadows(
+      taskId,
+      resetDateToUTCMidnight(task.scheduled_start_time),
+      {
+        days: recurrence.days,
+        cadence: recurrence.cadence,
+        end_date: newRecurrenceEndDate,
+        exclusions: recurrence.exclusions,
+      },
+      newTaskDTO.id.toString(),
+      splitDate,
+      {
+        days: newRecurrenceDTO.days,
+        cadence: newRecurrenceDTO.cadence,
+        end_date: newRecurrenceDTO.endDate,
+        exclusions: newRecurrenceDTO.exclusions,
+      },
+      transaction,
+    );
+
+    const newTask = await PgTask.findByPk(newTaskDTO.id, { transaction });
+    if (!newTask) {
+      throw new NotFoundError(`Task id ${newTaskDTO.id} not found`);
+    }
+    return newTask;
+  }
+
   async assignUser(
     id: string,
     user: TaskUserPatchDTO,
+    occurrenceDate?: Date,
+    single = true,
   ): Promise<TaskResponseDTO | null> {
+    if (!single) {
+      const transaction: Transaction = await sequelize.transaction();
+      try {
+        if (!occurrenceDate) {
+          throw new BadRequestError(
+            "Occurrence date is required to reassign this and following",
+          );
+        }
+
+        const task = await PgTask.findByPk(id, { transaction });
+        if (!task) throw new NotFoundError(`Task id ${id} not found`);
+        if (!task.scheduled_start_time) {
+          throw new NotFoundError("Given task has no start date");
+        }
+
+        const isSeedDate =
+          resetDateToUTCMidnight(task.scheduled_start_time).getTime() ===
+          resetDateToUTCMidnight(occurrenceDate).getTime();
+
+        if (
+          resetDateToUTCMidnight(occurrenceDate).getTime() <
+          resetDateToUTCMidnight(new Date()).getTime()
+        ) {
+          throw new BadRequestError(
+            "Cannot apply 'this and following' to a past occurrence.",
+          );
+        }
+
+        let resultTask: PgTask;
+        if (isSeedDate) {
+          const updateResult = await PgTask.update(
+            { user_id: user.userId },
+            { where: { id }, returning: true, transaction },
+          );
+          [, [resultTask]] = updateResult;
+        } else {
+          resultTask = await this.forkRecurrenceWithNewAssignee(
+            id,
+            occurrenceDate,
+            user.userId,
+            transaction,
+          );
+        }
+
+        await transaction.commit();
+        return await this.buildTaskResponseDTO(resultTask);
+      } catch (error) {
+        await transaction.rollback();
+        Logger.error(
+          `Failed to reassign this and following. Reason = ${getErrorMessage(
+            error,
+          )}`,
+        );
+        throw error;
+      }
+    }
+
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const target = await this.resolveShadowTask(id, occurrenceDate);
       updateResult = await PgTask.update(
         {
           user_id: user.userId,
         },
-        { where: { id }, returning: true },
+        { where: { id: target.id }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${target.id} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {
       Logger.error(`Failed to update task. Reason = ${getErrorMessage(error)}`);
       throw error;
     }
-    return {
-      id: resultingTask.id,
-      userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
-      scheduledStartTime: resultingTask.scheduled_start_time,
-      scheduledEndTime: resultingTask.scheduled_end_time,
-      startTime: resultingTask.start_time,
-      endTime: resultingTask.end_time,
-      notes: resultingTask.notes,
-    };
+    return this.buildTaskResponseDTO(resultingTask);
   }
 
   async scheduleTask(
@@ -680,84 +726,226 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
       endTime: resultingTask.end_time,
       notes: resultingTask.notes,
+    };
+  }
+
+  private async resolveShadowTask(
+    taskId: string,
+    occurrenceDate?: Date,
+  ): Promise<PgTask> {
+    const recurrence = await PgRecurrenceTask.findOne({
+      where: { task_id: taskId },
+    });
+    if (!recurrence) {
+      const task = await PgTask.findByPk(taskId);
+      if (!task) throw new NotFoundError(`Task id ${taskId} not found`);
+      return task;
+    }
+
+    if (!occurrenceDate) {
+      throw new BadRequestError(
+        "Occurrence date is required for a recurring task action",
+      );
+    }
+
+    const normalizedDate = resetDateToUTCMidnight(occurrenceDate);
+    const existingShadow = await PgTask.findOne({
+      where: { origin_task_id: taskId, occurrence_date: normalizedDate },
+    });
+    if (existingShadow) return existingShadow;
+
+    const anchor = await PgTask.findByPk(taskId);
+    if (!anchor) throw new NotFoundError(`Task id ${taskId} not found`);
+
+    return PgTask.create({
+      origin_task_id: Number(taskId),
+      occurrence_date: normalizedDate,
+      user_id: anchor.user_id,
+    });
+  }
+
+  async consumeShadowForOccurrence(
+    taskId: string,
+    date: Date,
+    transaction?: Transaction,
+  ): Promise<{ userId?: number; startTime?: Date; endTime?: Date } | null> {
+    const normalizedDate = resetDateToUTCMidnight(date);
+    const shadow = await PgTask.findOne({
+      where: { origin_task_id: taskId, occurrence_date: normalizedDate },
+      transaction,
+    });
+    if (!shadow) return null;
+
+    const result = {
+      userId: shadow.user_id,
+      startTime: shadow.start_time,
+      endTime: shadow.end_time,
+    };
+    await shadow.destroy({ transaction });
+    return result;
+  }
+
+  /**
+   * After a recurrence rule changes (edited in place, or forked into a new
+   * series), sorts every existing shadow of the old anchor into one of
+   * three outcomes: still covered by the (possibly now-truncated) old rule
+   * → left alone; no longer covered by the old rule but covered by the new
+   * one → re-pointed to the new anchor; covered by neither → deleted. Pass
+   * `newAnchorId`/`newAnchorStart`/`newRecurrence` as null for an in-place
+   * edit (same anchor, no fork) — that collapses to a 2-way leave/delete
+   * choice, since there's no second series to re-point into.
+   */
+  async reconcileShadows(
+    oldAnchorId: string,
+    oldAnchorStart: Date,
+    oldRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    },
+    newAnchorId: string | null,
+    newAnchorStart: Date | null,
+    newRecurrence: {
+      days?: Days[] | null;
+      cadence: Cadence;
+      end_date?: Date | null;
+      exclusions?: Date[] | null;
+    } | null,
+    transaction: Transaction,
+  ): Promise<{ deletedCount: number }> {
+    const shadows = await PgTask.findAll({
+      where: { origin_task_id: oldAnchorId },
+      transaction,
+    });
+
+    const outcomes = await Promise.all(
+      shadows.map(async (shadow) => {
+        if (!shadow.occurrence_date) return false;
+
+        const stillCoveredByOld = matchesRecurrenceRule(
+          oldAnchorStart,
+          shadow.occurrence_date,
+          oldRecurrence,
+        );
+        if (stillCoveredByOld) return false;
+
+        const coveredByNew =
+          newAnchorId && newAnchorStart && newRecurrence
+            ? matchesRecurrenceRule(
+                newAnchorStart,
+                shadow.occurrence_date,
+                newRecurrence,
+              )
+            : false;
+
+        if (coveredByNew && newAnchorId) {
+          await PgTask.update(
+            { origin_task_id: Number(newAnchorId) },
+            { where: { id: shadow.id }, transaction },
+          );
+          return false;
+        }
+
+        await shadow.destroy({ transaction });
+        return true;
+      }),
+    );
+
+    return { deletedCount: outcomes.filter(Boolean).length };
+  }
+
+  private async buildTaskResponseDTO(target: PgTask): Promise<TaskResponseDTO> {
+    if (!target.origin_task_id) {
+      return {
+        id: target.id,
+        userId: target.user_id,
+        ...requirePetAndTemplateIds(target),
+        scheduledStartTime: target.scheduled_start_time,
+        scheduledEndTime: target.scheduled_end_time,
+        startTime: target.start_time,
+        endTime: target.end_time,
+        notes: target.notes,
+      };
+    }
+
+    const anchor = await PgTask.findByPk(target.origin_task_id);
+    if (!anchor) {
+      throw new NotFoundError(
+        `Anchor task id ${target.origin_task_id} not found`,
+      );
+    }
+
+    return {
+      id: target.id,
+      userId: target.user_id,
+      ...requirePetAndTemplateIds(anchor),
+      scheduledStartTime: anchor.scheduled_start_time,
+      scheduledEndTime: anchor.scheduled_end_time,
+      startTime: target.start_time,
+      endTime: target.end_time,
+      notes: anchor.notes,
     };
   }
 
   async startTask(
     id: string,
     startTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const target = await this.resolveShadowTask(id, occurrenceDate);
       updateResult = await PgTask.update(
         {
           start_time: startTime.time,
         },
-        { where: { id }, returning: true },
+        { where: { id: target.id }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${target.id} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {
       Logger.error(`Failed to update task. Reason = ${getErrorMessage(error)}`);
       throw error;
     }
-    return {
-      id: resultingTask.id,
-      userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
-      scheduledStartTime: resultingTask.scheduled_start_time,
-      scheduledEndTime: resultingTask.scheduled_end_time,
-      startTime: resultingTask.start_time,
-      endTime: resultingTask.end_time,
-      notes: resultingTask.notes,
-    };
+    return this.buildTaskResponseDTO(resultingTask);
   }
 
   async endTask(
     id: string,
     endTime: TaskTimePatchDTO,
+    occurrenceDate?: Date,
   ): Promise<TaskResponseDTO | null> {
     let resultingTask: PgTask | null;
     let updateResult: [number, PgTask[]] | null;
     try {
+      const target = await this.resolveShadowTask(id, occurrenceDate);
       updateResult = await PgTask.update(
         {
           end_time: endTime.time,
         },
-        { where: { id }, returning: true },
+        { where: { id: target.id }, returning: true },
       );
 
       if (!updateResult[0]) {
-        throw new NotFoundError(`Task id ${id} not found`);
+        throw new NotFoundError(`Task id ${target.id} not found`);
       }
       [, [resultingTask]] = updateResult;
     } catch (error: unknown) {
       Logger.error(`Failed to update task. Reason = ${getErrorMessage(error)}`);
       throw error;
     }
-    return {
-      id: resultingTask.id,
-      userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
-      scheduledStartTime: resultingTask.scheduled_start_time,
-      scheduledEndTime: resultingTask.scheduled_end_time,
-      startTime: resultingTask.start_time,
-      endTime: resultingTask.end_time,
-      notes: resultingTask.notes,
-    };
+    return this.buildTaskResponseDTO(resultingTask);
   }
 
   async updateTaskNotes(
@@ -785,8 +973,7 @@ class TaskService implements ITaskService {
     return {
       id: resultingTask.id,
       userId: resultingTask.user_id,
-      petId: resultingTask.pet_id,
-      taskTemplateId: resultingTask.task_template_id,
+      ...requirePetAndTemplateIds(resultingTask),
       scheduledStartTime: resultingTask.scheduled_start_time,
       scheduledEndTime: resultingTask.scheduled_end_time,
       startTime: resultingTask.start_time,
@@ -842,6 +1029,7 @@ class TaskService implements ITaskService {
         where: {
           ...whereClause,
           "$recurrence.task_id$": { [Op.is]: null },
+          origin_task_id: { [Op.is]: null },
         },
         include: [
           { model: PgRecurrenceTask, required: false },
@@ -870,8 +1058,7 @@ class TaskService implements ITaskService {
         visibleOneTimeTasks.map((task) => ({
           id: task.id,
           userId: task.user_id,
-          petId: task.pet_id,
-          taskTemplateId: task.task_template_id,
+          ...requirePetAndTemplateIds(task),
           scheduledStartTime: task.scheduled_start_time,
           scheduledEndTime: task.scheduled_end_time,
           startTime: task.start_time,
@@ -893,9 +1080,6 @@ class TaskService implements ITaskService {
         }));
 
       const recurringWhereClause: Record<string, unknown> = {};
-      if (filters?.userId !== undefined) {
-        recurringWhereClause.user_id = filters.userId;
-      }
       if (filters?.petId !== undefined) {
         recurringWhereClause.pet_id = filters.petId;
       }
@@ -932,16 +1116,6 @@ class TaskService implements ITaskService {
               where: { id: recurringTaskIds },
               include: [
                 { model: TaskTemplate, attributes: ["task_name", "category"] },
-                {
-                  model: User,
-                  attributes: [
-                    "id",
-                    "first_name",
-                    "last_name",
-                    "profile_photo",
-                  ],
-                  required: false,
-                },
                 { model: Pet, attributes: ["name", "photo"], required: false },
               ],
             })
@@ -951,21 +1125,42 @@ class TaskService implements ITaskService {
         enrichedRecurringTasks.map((t) => [t.id, t]),
       );
 
+      const recurringUserIds = [
+        ...new Set(
+          recurringInstances
+            .map((r) => r.userId)
+            .filter((id): id is number => id !== undefined),
+        ),
+      ];
+      const recurringUsers =
+        recurringUserIds.length > 0
+          ? await User.findAll({
+              where: { id: recurringUserIds },
+              attributes: ["id", "first_name", "last_name", "profile_photo"],
+              raw: true,
+            })
+          : [];
+      const userMap = new Map(recurringUsers.map((u) => [u.id, u]));
+
       const enrichedRecurringInstances: TaskResponseDTOForDate[] =
         recurringInstances.map((instance) => {
           const enriched = enrichmentMap.get(instance.id);
+          const assignedUserRow =
+            instance.userId !== undefined
+              ? userMap.get(instance.userId)
+              : undefined;
           return {
             ...instance,
             taskName: enriched?.task_template?.task_name,
             category: enriched?.task_template?.category,
             petName: enriched?.pet?.name,
             petPhoto: enriched?.pet?.photo,
-            assignedUser: enriched?.user
+            assignedUser: assignedUserRow
               ? {
-                  id: enriched.user.id,
-                  firstName: enriched.user.first_name,
-                  lastName: enriched.user.last_name,
-                  profilePhoto: enriched.user.profile_photo,
+                  id: assignedUserRow.id,
+                  firstName: assignedUserRow.first_name,
+                  lastName: assignedUserRow.last_name,
+                  profilePhoto: assignedUserRow.profile_photo,
                 }
               : null,
           };
@@ -979,7 +1174,14 @@ class TaskService implements ITaskService {
         (task) => !recurringInstanceIds.has(task.id),
       );
 
-      return [...filteredOneTimeTasks, ...enrichedRecurringInstances];
+      const userFilteredRecurringInstances =
+        filters?.userId !== undefined
+          ? enrichedRecurringInstances.filter(
+              (instance) => instance.userId === filters.userId,
+            )
+          : enrichedRecurringInstances;
+
+      return [...filteredOneTimeTasks, ...userFilteredRecurringInstances];
     } catch (error: unknown) {
       Logger.error(
         `Failed to get tasks for date. Reason = ${getErrorMessage(error)}`,
