@@ -28,6 +28,7 @@ import CalendarDateSelector from "../../user-profile/components/CalendarDateSele
 import Button from "../../../components/common/Button";
 import AssignTaskPage from "./AssignTaskPage";
 import SurveyModal from "../components/surveyModal";
+import { getTaskSortRank } from "../../../utils/taskStatusUtils";
 
 const PetProfilePage = (): React.ReactElement => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -47,18 +48,6 @@ const PetProfilePage = (): React.ReactElement => {
   ];
   const gridTemplateColumns = "2.5fr 2fr 2fr 3fr 2.5fr";
   const [tasks, setTasks] = useState<ScheduledTaskDTO[]>([]);
-  const sortTask = (task: ScheduledTaskDTO): number => {
-    const isCompleted = !!task.endTime;
-    const isAssigned = !!task.userId;
-    const isPastStartTime = task.scheduledStartTime
-      ? new Date(task.scheduledStartTime) < new Date()
-      : false;
-
-    if (isCompleted) return 3;
-    if (!isAssigned && isPastStartTime && !task.endTime) return 0;
-    if (isAssigned && !task.endTime) return 1;
-    return 2;
-  };
 
   const canAddTask =
     authenticatedUser?.role === UserRoles.ADMIN ||
@@ -92,7 +81,6 @@ const PetProfilePage = (): React.ReactElement => {
         petId,
         dateString,
       );
-
       const assigneeIdsWithPhotos = Array.from(
         new Set(
           fetchedTasks
@@ -121,15 +109,24 @@ const PetProfilePage = (): React.ReactElement => {
           },
         };
       });
-      const sortedTasks = [...tasksWithPhotoUrls].sort(
-        (a, b) => sortTask(a) - sortTask(b),
-      );
+
+      const getStartTimeValue = (task: ScheduledTaskDTO): number =>
+        task.scheduledStartTime
+          ? new Date(task.scheduledStartTime).getTime()
+          : Infinity;
+      const sortedTasks = [...tasksWithPhotoUrls].sort((a, b) => {
+        const rankDiff =
+          getTaskSortRank(a, authenticatedUser) -
+          getTaskSortRank(b, authenticatedUser);
+        if (rankDiff !== 0) return rankDiff;
+        return getStartTimeValue(a) - getStartTimeValue(b);
+      });
       setTasks(sortedTasks);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-  }, [petId, selectedDate, history]);
+  }, [petId, selectedDate, history, authenticatedUser]);
 
   useEffect(() => {
     fetchTasks();
