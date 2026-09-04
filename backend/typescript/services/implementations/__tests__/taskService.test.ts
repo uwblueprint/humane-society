@@ -2,7 +2,7 @@ import PgTask from "../../../models/task.model";
 import PgRecurrenceTask from "../../../models/recurrence_task.model";
 import { BadRequestError, NotFoundError } from "../../../utilities/errorUtils";
 import { Cadence, Days } from "../../../types";
-import { resetDateToUTCMidnight } from "../../../utilities/dateUtils";
+import { getUTCDayLabel } from "../../../utilities/dateUtils";
 import TaskService from "../taskService";
 
 jest.mock("../../../models/task.model", () => ({
@@ -317,7 +317,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
             task_id: "107",
             cadence: Cadence.WEEKLY,
             days: [Days.THU, Days.MON],
-            end_date: resetDateToUTCMidnight(newEndDate),
+            end_date: getUTCDayLabel(newEndDate),
             exclusions: [
               new Date("2026-01-05T00:00:00Z"),
               new Date("2026-01-12T00:00:00Z"),
@@ -377,7 +377,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
             task_id: "123",
             cadence: Cadence.BIWEEKLY,
             days: [Days.TUE],
-            end_date: resetDateToUTCMidnight(newEndDate),
+            end_date: getUTCDayLabel(newEndDate),
             exclusions: [],
           },
         ],
@@ -388,8 +388,8 @@ describe("TaskService using dates shaped like delete route inputs", () => {
       });
 
       const payload = mockPgRecurrenceTask.update.mock.calls[0][0];
-      expect(payload.end_date).toEqual(resetDateToUTCMidnight(newEndDate));
-      expect(result.endDate).toEqual(resetDateToUTCMidnight(newEndDate));
+      expect(payload.end_date).toEqual(getUTCDayLabel(newEndDate));
+      expect(result.endDate).toEqual(getUTCDayLabel(newEndDate));
     });
 
     it("reduces recurrence to just one day when all other days are pruned", async () => {
@@ -420,7 +420,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
             task_id: "108",
             cadence: Cadence.WEEKLY,
             days: [Days.TUE],
-            end_date: resetDateToUTCMidnight(newEndDate),
+            end_date: getUTCDayLabel(newEndDate),
             exclusions: [],
           },
         ],
@@ -491,7 +491,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
             task_id: "123",
             cadence: Cadence.BIWEEKLY,
             days: [Days.TUE],
-            end_date: resetDateToUTCMidnight(newEndDate),
+            end_date: getUTCDayLabel(newEndDate),
             exclusions: [],
           },
         ],
@@ -501,7 +501,7 @@ describe("TaskService using dates shaped like delete route inputs", () => {
         endDate: newEndDate,
       });
 
-      expect(result.endDate).toEqual(resetDateToUTCMidnight(newEndDate));
+      expect(result.endDate).toEqual(getUTCDayLabel(newEndDate));
     });
   });
 
@@ -512,8 +512,8 @@ describe("TaskService using dates shaped like delete route inputs", () => {
 
       const scheduledStart = new Date("2026-03-10T15:00:00Z");
       /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      expect(resetDateToUTCMidnight(selectedDate!).getTime()).toBe(
-        resetDateToUTCMidnight(scheduledStart).getTime(),
+      expect(getUTCDayLabel(selectedDate!).getTime()).toBe(
+        getUTCDayLabel(scheduledStart).getTime(),
       );
 
       mockPgRecurrenceTask.destroy.mockResolvedValue(1);

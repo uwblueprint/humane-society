@@ -1,4 +1,7 @@
+import { DateTime } from "luxon";
 import { Cadence, Days } from "../types";
+
+const SHELTER_TIME_ZONE = "America/New_York";
 
 export const dayNameToIndex = {
   [Days.SUN]: 0,
@@ -20,10 +23,38 @@ export const dayIndexToName = {
   6: Days.SAT,
 };
 
-export const resetDateToUTCMidnight = (date: Date) => {
+export const getUTCDayLabel = (date: Date) => {
   return new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
+};
+
+export const getShelterDayLabelInUTC = (moment: Date): Date => {
+  const zoned = DateTime.fromJSDate(moment, { zone: SHELTER_TIME_ZONE });
+  return new Date(Date.UTC(zoned.year, zoned.month - 1, zoned.day));
+};
+
+// shelterDayLabelUTC: shelter calendar day, represented at UTC midnight
+// timeSource: instant from which the shelter-local time is extracted
+export const buildShelterInstant = (
+  shelterDayLabelUTC: Date,
+  timeSource: Date,
+): Date => {
+  const timeZoned = DateTime.fromJSDate(timeSource, {
+    zone: SHELTER_TIME_ZONE,
+  });
+  return DateTime.fromObject(
+    {
+      year: shelterDayLabelUTC.getUTCFullYear(),
+      month: shelterDayLabelUTC.getUTCMonth() + 1,
+      day: shelterDayLabelUTC.getUTCDate(),
+      hour: timeZoned.hour,
+      minute: timeZoned.minute,
+      second: timeZoned.second,
+      millisecond: timeZoned.millisecond,
+    },
+    { zone: SHELTER_TIME_ZONE },
+  ).toJSDate();
 };
 
 export const isDateInRecurrence = (
@@ -32,8 +63,8 @@ export const isDateInRecurrence = (
   cadence: Cadence,
 ): boolean => {
   // Reset the date to start at midnight to avoid off by one day errors
-  const start = resetDateToUTCMidnight(startDate);
-  const end = resetDateToUTCMidnight(endDate);
+  const start = getUTCDayLabel(startDate);
+  const end = getUTCDayLabel(endDate);
 
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
   const millisecondsInBetween = end.getTime() - start.getTime();
@@ -68,7 +99,7 @@ export const isDateInRecurrence = (
 };
 
 export function buildStartDates(actualStart: Date, days: Days[]): Date[] {
-  const start = resetDateToUTCMidnight(actualStart);
+  const start = getUTCDayLabel(actualStart);
   const startDay = start.getUTCDay(); // 0..6
 
   const uniqueDays = Array.from(new Set(days)); // avoid duplicates
@@ -84,8 +115,8 @@ export function buildStartDates(actualStart: Date, days: Days[]): Date[] {
 }
 
 export function matchesRecurrenceRule(
-  actualStart: Date,
-  targetDate: Date,
+  actualStartShelterDayLabelUTC: Date,
+  targetShelterDayLabelUTC: Date,
   recurrence: {
     days?: Days[] | null;
     cadence: Cadence;
@@ -93,22 +124,21 @@ export function matchesRecurrenceRule(
     exclusions?: Date[] | null;
   },
 ): boolean {
-  const start = resetDateToUTCMidnight(actualStart);
-  const target = resetDateToUTCMidnight(targetDate);
+  const start = getUTCDayLabel(actualStartShelterDayLabelUTC);
+  const target = getUTCDayLabel(targetShelterDayLabelUTC);
 
   if (target < start) return false;
 
   if (
     recurrence.end_date &&
-    target > resetDateToUTCMidnight(new Date(recurrence.end_date))
+    target > getUTCDayLabel(new Date(recurrence.end_date))
   ) {
     return false;
   }
 
   if (
     recurrence.exclusions?.some(
-      (ex) =>
-        resetDateToUTCMidnight(new Date(ex)).getTime() === target.getTime(),
+      (ex) => getUTCDayLabel(new Date(ex)).getTime() === target.getTime(),
     )
   ) {
     return false;
