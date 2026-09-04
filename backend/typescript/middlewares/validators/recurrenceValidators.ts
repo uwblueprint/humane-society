@@ -8,8 +8,8 @@ import {
 } from "./util";
 import { Days, Cadence } from "../../types";
 import {
-  resetDateToShelterMidnight,
-  resetDateToUTCMidnight,
+  getShelterDayLabelInUTC,
+  getUTCDayLabel,
 } from "../../utilities/dateUtils";
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
@@ -133,8 +133,8 @@ export const createRecurringTaskValidator = async (
   if (
     body.recurrence.endDate !== undefined &&
     body.recurrence.endDate !== null &&
-    resetDateToUTCMidnight(new Date(body.recurrence.endDate)).getTime() <
-      resetDateToShelterMidnight(new Date()).getTime()
+    getUTCDayLabel(new Date(body.recurrence.endDate)).getTime() <
+      getShelterDayLabelInUTC(new Date()).getTime()
   ) {
     return res.status(400).send("Recurrence end date cannot be before today.");
   }
@@ -294,8 +294,8 @@ export const addRecurrenceToTaskValidator = async (
   if (
     body.recurrence.endDate !== undefined &&
     body.recurrence.endDate !== null &&
-    resetDateToUTCMidnight(new Date(body.recurrence.endDate)).getTime() <
-      resetDateToShelterMidnight(new Date()).getTime()
+    getUTCDayLabel(new Date(body.recurrence.endDate)).getTime() <
+      getShelterDayLabelInUTC(new Date()).getTime()
   ) {
     return res.status(400).send("Recurrence end date cannot be before today.");
   }

@@ -30,8 +30,8 @@ import { Role, Days, Cadence } from "../types";
 import logInteraction from "../middlewares/logInteraction";
 import {
   matchesRecurrenceRule,
-  resetDateToShelterMidnight,
-  resetDateToUTCMidnight,
+  getShelterDayLabelInUTC,
+  getUTCDayLabel,
 } from "../utilities/dateUtils";
 
 const taskRouter: Router = Router();
@@ -149,7 +149,7 @@ taskRouter.post(
       return;
     }
 
-    const occurrenceDayLabel = resetDateToShelterMidnight(date);
+    const occurrenceDayLabel = getShelterDayLabelInUTC(date);
 
     const {
       notes,
@@ -201,8 +201,8 @@ taskRouter.post(
 
     if (
       parsedRecurrenceEndDate &&
-      resetDateToUTCMidnight(parsedRecurrenceEndDate).getTime() <
-        resetDateToShelterMidnight(new Date()).getTime()
+      getUTCDayLabel(parsedRecurrenceEndDate).getTime() <
+        getShelterDayLabelInUTC(new Date()).getTime()
     ) {
       res.status(400).send("Recurrence end date cannot be before today.");
       return;
@@ -217,10 +217,10 @@ taskRouter.post(
       }
 
       const isSeedDate =
-        resetDateToShelterMidnight(task.scheduledStartTime).getTime() ===
+        getShelterDayLabelInUTC(task.scheduledStartTime).getTime() ===
         occurrenceDayLabel.getTime();
 
-      const actualStart = resetDateToShelterMidnight(task.scheduledStartTime);
+      const actualStart = getShelterDayLabelInUTC(task.scheduledStartTime);
       const matchesPattern = matchesRecurrenceRule(
         actualStart,
         occurrenceDayLabel,
@@ -240,7 +240,7 @@ taskRouter.post(
       if (
         recurrence.endDate &&
         occurrenceDayLabel.getTime() >
-          resetDateToUTCMidnight(recurrence.endDate).getTime()
+          getUTCDayLabel(recurrence.endDate).getTime()
       ) {
         throw new BadRequestError(
           "Given date is after the recurrence's end date",
@@ -250,7 +250,7 @@ taskRouter.post(
       if (
         !single &&
         occurrenceDayLabel.getTime() <
-          resetDateToShelterMidnight(new Date()).getTime()
+          getShelterDayLabelInUTC(new Date()).getTime()
       ) {
         throw new BadRequestError(
           "Cannot apply 'this and following' to a past occurrence.",
@@ -265,7 +265,7 @@ taskRouter.post(
       if (
         !single &&
         !isSeedDate &&
-        resetDateToShelterMidnight(newScheduledStartTime).getTime() <
+        getShelterDayLabelInUTC(newScheduledStartTime).getTime() <
           occurrenceDayLabel.getTime()
       ) {
         throw new BadRequestError(
@@ -367,7 +367,7 @@ taskRouter.post(
           );
           ({ deletedCount } = await taskService.reconcileShadows(
             taskId,
-            resetDateToShelterMidnight(newScheduledStartTime),
+            getShelterDayLabelInUTC(newScheduledStartTime),
             {
               days: updatedRecurrence.days,
               cadence: updatedRecurrence.cadence,
@@ -435,8 +435,8 @@ taskRouter.post(
 
           const carriedExclusions = (recurrence.exclusions ?? []).filter(
             (ex) =>
-              resetDateToUTCMidnight(new Date(ex)).getTime() >
-              resetDateToShelterMidnight(newScheduledStartTime).getTime(),
+              getUTCDayLabel(new Date(ex)).getTime() >
+              getShelterDayLabelInUTC(newScheduledStartTime).getTime(),
           );
           const resolvedNewRecurrenceEndDate =
             parsedRecurrenceEndDate !== undefined
@@ -460,7 +460,7 @@ taskRouter.post(
               exclusions: recurrence.exclusions,
             },
             newTask.id.toString(),
-            resetDateToShelterMidnight(newScheduledStartTime),
+            getShelterDayLabelInUTC(newScheduledStartTime),
             {
               days: newRecurrence.days,
               cadence: newRecurrence.cadence,
@@ -671,7 +671,7 @@ taskRouter.delete(
     const date =
       typeof req.query.date === "string" &&
       !Number.isNaN(new Date(req.query.date).getTime())
-        ? resetDateToShelterMidnight(new Date(req.query.date))
+        ? getShelterDayLabelInUTC(new Date(req.query.date))
         : undefined;
     const single =
       req.query.single === "true" || req.query.single === "false"
@@ -712,7 +712,7 @@ taskRouter.delete(
           recurrenceTask: updatedRecurrence,
         });
       } else if (
-        resetDateToShelterMidnight(task.scheduledStartTime).getTime() ===
+        getShelterDayLabelInUTC(task.scheduledStartTime).getTime() ===
         date.getTime()
       ) {
         await taskService.deleteRecurrence(taskId);
@@ -734,7 +734,7 @@ taskRouter.delete(
           );
           ({ deletedCount } = await taskService.reconcileShadows(
             taskId,
-            resetDateToShelterMidnight(task.scheduledStartTime),
+            getShelterDayLabelInUTC(task.scheduledStartTime),
             {
               days: updatedRecurrence.days,
               cadence: updatedRecurrence.cadence,
