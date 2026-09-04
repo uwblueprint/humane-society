@@ -407,7 +407,7 @@ taskRouter.post(
           const currentOccurrenceState =
             await taskService.consumeShadowForOccurrence(
               taskId,
-              date,
+              occurrenceDayLabel,
               transaction,
             );
           const fallbackUserId = currentOccurrenceState
