@@ -121,7 +121,8 @@ const PetListPage = (): React.ReactElement => {
               );
               const statusValues = Object.keys(rest);
               return (
-                (assignedToYouSelected && pet.isAssignedToMe) ||
+                (!assignedToYouSelected ||
+                pet.isAssignedToMe) &&
                 statusValues.includes(pet.status)
               );
             }
