@@ -3,7 +3,7 @@ import INTERACTION_TYPES, {
   INTERACTION_TYPE_GROUPS,
 } from "../constants/InteractionConstants";
 import { FilterSection } from "../types/FilterTypes";
-import { PetStatus } from "../types/PetTypes";
+import { ASSIGNED_TO_YOU_FILTER_VALUE, PetStatus } from "../types/PetTypes";
 import { AnimalTag, ColorLevel, TaskCategory } from "../types/TaskTypes";
 
 const filterConfig: Record<string, FilterSection[]> = {
@@ -43,8 +43,7 @@ const filterConfig: Record<string, FilterSection[]> = {
     {
       name: "Status",
       value: "status",
-      // TODO: how to handle dynamically
-      options: ["Needs Care", "Assigned to You"],
+      options: [PetStatus.NEEDS_CARE, ASSIGNED_TO_YOU_FILTER_VALUE],
     },
     {
       name: "Task Category",
