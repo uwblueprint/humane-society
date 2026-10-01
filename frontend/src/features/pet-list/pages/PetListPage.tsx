@@ -100,46 +100,6 @@ const PetListPage = (): React.ReactElement => {
     getPets();
   }, []);
 
-  // Convert PetListSections from backend to PetListRecord format for role-based view
-  const convertToPetListRecord = (sections: PetListSections): PetListRecord => {
-    const result: PetListRecord = {};
-
-    // Helper to convert PetListItemDTO to PetInfo
-    const convertToPetInfo = (pet: PetListItemDTO): PetInfo => {
-      return {
-        id: pet.id,
-        name: pet.name,
-        color: pet.color,
-        photo: pet.photo || "/images/cat.png", // TODO: will replace placeholder image in the future
-        taskCategories: pet.taskCategories,
-        status: pet.status,
-        lastCaredFor: pet.lastCaredFor,
-        allTasksAssigned: pet.allTasksAssigned,
-        animalTag: pet.animalTag,
-      };
-    };
-
-    // Map backend section names to frontend section keys
-    Object.entries(sections).forEach(([sectionName, pets]) => {
-      const petInfos = pets.map(convertToPetInfo);
-
-      // Map section names to PetListSectionKey
-      if (sectionName === "Assigned to You") {
-        result["Assigned to You"] = petInfos;
-      } else if (sectionName === "Unassigned Tasks") {
-        result["Unassigned Tasks"] = petInfos;
-      } else if (sectionName === "Assigned Tasks") {
-        result["Assigned Tasks"] = petInfos;
-      } else if (sectionName === "No Tasks") {
-        result["No Tasks"] = petInfos;
-      } else if (sectionName === "Other Pets") {
-        result["Other Pets"] = petInfos;
-      }
-    });
-
-    return result;
-  };
-
   const filteredPets = useMemo(() => {
     const petListRecord = petsSections as PetListRecord;
 
