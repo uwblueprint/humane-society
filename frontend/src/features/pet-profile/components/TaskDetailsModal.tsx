@@ -412,6 +412,42 @@ const TaskDetailsModal = ({
     }
   };
 
+  const handleRestart = async () => {
+    try {
+      await TaskAPIClient.startTask(
+        taskId,
+        {
+          startTime: new Date().toISOString(),
+          actorId: authenticatedUser?.id ?? 0,
+          targetId: taskId,
+          taskTemplateName: templateData?.name ?? "",
+          petName: petData?.name ?? "",
+          actorName: `${authenticatedUser?.firstName ?? ""} ${
+            authenticatedUser?.lastName ?? ""
+          }`,
+          isRestart: true,
+        },
+        instanceDate,
+      );
+      await fetchData(false);
+      onTaskUpdated?.();
+      toast({
+        title: "Task restarted",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to restart task",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const renderActions = () => {
     if (isAdminOrBehaviourist) {
       return (
@@ -512,7 +548,12 @@ const TaskDetailsModal = ({
           )}
           {status === "In-Progress" && (
             <Flex gap="1rem">
-              <Button variant="blue-outline" size="medium" width="100%">
+              <Button
+                variant="blue-outline"
+                size="medium"
+                width="100%"
+                onClick={handleRestart}
+              >
                 Restart
               </Button>
               <Button
