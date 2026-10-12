@@ -18,7 +18,6 @@ const ForgotPasswordPage = (): React.ReactElement => {
   const [userEmailId, setUserEmaild] = useState("");
 
   const handleUserAuth = async (userEmail: string) => {
-    const emailPattern = /^[^\s@]+@(humanesociety\.org|uwblueprint\.org)$/;
     const expiryTime = 60 * 1000; // 60 seconds
     const now = new Date().getTime();
 
@@ -29,12 +28,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
     sentEmails = sentEmails.filter((item) => now - item.timestamp < expiryTime);
     localStorage.setItem("sentEmails", JSON.stringify(sentEmails)); // Save cleaned list
 
-    if (!emailPattern.test(userEmail)) {
-      setValidUser(false);
-    } else if (
-      sentEmails.some((item) => item.email === userEmail) ||
-      sentEmail
-    ) {
+    if (sentEmails.some((item) => item.email === userEmail) || sentEmail) {
       // already sent to this user in the last 60s
       setValidUser(true);
       setSentEmail(false);
@@ -139,6 +133,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
               Email:
             </FormLabel>
             <Input
+              type="email"
               placeholder="username@humanesociety.org"
               value={userEmailId}
               onChange={handleInputChange}
@@ -146,7 +141,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
           </Flex>
           {!validUser && (
             <Text textStyle="bodyMobile" color="red.500" m={0} mt="0.25rem">
-              Must be a valid humanesociety.org email
+              Must be a valid email
             </Text>
           )}
         </FormControl>
