@@ -28,10 +28,7 @@ const ForgotPasswordPage = (): React.ReactElement => {
     sentEmails = sentEmails.filter((item) => now - item.timestamp < expiryTime);
     localStorage.setItem("sentEmails", JSON.stringify(sentEmails)); // Save cleaned list
 
-    if (
-      sentEmails.some((item) => item.email === userEmail) ||
-      sentEmail
-    ) {
+    if (sentEmails.some((item) => item.email === userEmail) || sentEmail) {
       // already sent to this user in the last 60s
       setValidUser(true);
       setSentEmail(false);
