@@ -35,7 +35,11 @@ const TableFilterBar = ({
         maxWidth={{ base: "10rem", md: "none" }}
         minWidth={{ base: "0", md: "auto" }}
       >
-        <Filter type={filterType} onChange={onFilterChange} selected={filters} />
+        <Filter
+          type={filterType}
+          onChange={onFilterChange}
+          selected={filters}
+        />
       </Flex>
       <Flex
         gap={{ base: "0.5rem", md: "1rem" }}

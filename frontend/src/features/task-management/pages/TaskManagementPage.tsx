@@ -18,7 +18,10 @@ const TaskManagementPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const addButtonLabel = useBreakpointValue({ base: "Add", md: "Add Task Template" });
+  const addButtonLabel = useBreakpointValue({
+    base: "Add",
+    md: "Add Task Template",
+  });
   const searchPlaceholder = useBreakpointValue({
     base: "Search",
     md: "Search for a task...",
