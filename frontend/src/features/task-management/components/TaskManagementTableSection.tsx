@@ -1,4 +1,4 @@
-import { Box, Tbody, Td, Text, Tr } from "@chakra-ui/react";
+import { Flex, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
 import TaskCategoryBadge from "../../../components/common/TaskCategoryBadge";
 import { Task } from "../../../types/TaskTypes";
@@ -26,15 +26,21 @@ const TaskManagementTableSection = ({
               {task.name}
             </Text>
           </Td>
-          <Td width="20%" py="1rem" px="0">
+          <Td width="20%" py="1rem" pl={{ base: "1.5rem", md: "0" }} pr="0">
             <TaskCategoryBadge taskCategory={task.category} />
           </Td>
-          <Td width="60%" py="1rem" pr="2.5rem" pl="4rem">
-            <Box>
+          <Td
+            display={{ base: "none", md: "table-cell" }}
+            width="60%"
+            py="1rem"
+            pr="2.5rem"
+            pl="4rem"
+          >
+            <Flex>
               <Text textStyle="body" m={0} noOfLines={2}>
                 {task.instructions}
               </Text>
-            </Box>
+            </Flex>
           </Td>
         </Tr>
       ))}
