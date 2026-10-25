@@ -1,4 +1,4 @@
-import { useDisclosure } from "@chakra-ui/react";
+import { useDisclosure, useBreakpointValue } from "@chakra-ui/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import TaskManagementTable from "../components/TaskManagementTable";
@@ -18,6 +18,14 @@ const TaskManagementPage = (): React.ReactElement => {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const addButtonLabel = useBreakpointValue({
+    base: "Add",
+    md: "Add Task Template",
+  });
+  const searchPlaceholder = useBreakpointValue({
+    base: "Search",
+    md: "Search for a task...",
+  });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [page, setPage] = useState<number>(1);
   const [hasError, setHasError] = useState<boolean>(false);
@@ -107,14 +115,14 @@ const TaskManagementPage = (): React.ReactElement => {
         onFilterChange: handleFilterChange,
         search,
         onSearchChange: handleSearchChange,
-        searchPlaceholder: "Search for a task...",
+        searchPlaceholder,
         actionButton: isAdmin ? (
           <Button
             variant="dark-blue"
             size="medium"
             onClick={handleAddTaskTemplate}
           >
-            Add Task Template
+            {addButtonLabel}
           </Button>
         ) : undefined,
       }}
