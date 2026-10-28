@@ -185,7 +185,7 @@ const logRecurrenceEditChanges = async (
   taskTemplateId: number | undefined,
   notes: string | undefined,
   parsedScheduledStartTime: Date | undefined,
-  parsedRecurrenceEndDate: Date | undefined,
+  parsedRecurrenceEndDate: Date | null | undefined,
   days: Days[] | undefined,
   cadence: Cadence | undefined,
 ): Promise<void> => {
@@ -234,6 +234,7 @@ const logRecurrenceEditChanges = async (
 
     if (
       parsedRecurrenceEndDate !== undefined &&
+      parsedRecurrenceEndDate !== null &&
       (!recurrence.endDate ||
         new Date(recurrence.endDate).getTime() !==
           parsedRecurrenceEndDate.getTime())
