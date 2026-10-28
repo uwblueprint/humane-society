@@ -241,33 +241,6 @@ const deleteTask = async (
   }
 };
 
-const selfAssign = async (
-  taskId: number,
-  occurrenceDate?: string,
-): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  const userId = getLocalStorageObjProperty(AUTHENTICATED_USER_KEY, "id");
-  if (userId == null) {
-    throw new Error("User ID not found in local storage");
-  }
-  try {
-    await baseAPIClient.patch(
-      `/tasks/${taskId}/assign-user`,
-      { userId: Number(userId) },
-      {
-        headers: { Authorization: bearerToken },
-        // self-assign is always single-day only, never "this and following"
-        params: { date: occurrenceDate, single: true },
-      },
-    );
-  } catch (error) {
-    throw new Error(`Failed to self-assign task: ${error}`);
-  }
-};
-
 const startTask = async (
   taskId: number,
   body: {
@@ -363,6 +336,12 @@ const deleteRecurringTask = async (
   taskId: number,
   date: string,
   single: boolean,
+  body?: {
+    actorId: number;
+    targetId: number;
+    taskTemplateName: string;
+    petName: string;
+  },
 ): Promise<{ deletedShadowCount?: number }> => {
   const bearerToken = `Bearer ${getLocalStorageObjProperty(
     AUTHENTICATED_USER_KEY,
@@ -374,33 +353,15 @@ const deleteRecurringTask = async (
       {
         headers: { Authorization: bearerToken },
         params: { date, single },
+        data: {
+        ...body,
+        interactionType: InteractionType.DELETED_RECURRING_TASK,
       },
+    },
     );
     return data;
   } catch (error) {
     throw new Error(`Failed to delete recurring task: ${error}`);
-  }
-};
-
-const completeTask = async (
-  taskId: number,
-  occurrenceDate?: string,
-): Promise<void> => {
-  const bearerToken = `Bearer ${getLocalStorageObjProperty(
-    AUTHENTICATED_USER_KEY,
-    "accessToken",
-  )}`;
-  try {
-    await baseAPIClient.patch(
-      `/tasks/${taskId}/end`,
-      { endTime: new Date().toISOString() },
-      {
-        headers: { Authorization: bearerToken },
-        params: { date: occurrenceDate },
-      },
-    );
-  } catch (error) {
-    throw new Error(`Failed to complete task: ${error}`);
   }
 };
 
@@ -474,11 +435,9 @@ export default {
   endTask,
   updateNotes,
   deleteTask,
-  selfAssign,
   createTask,
   createRecurringTask,
   editRecurringTask,
   deleteRecurringTask,
-  completeTask,
   updateTask,
 };
